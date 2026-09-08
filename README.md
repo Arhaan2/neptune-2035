@@ -2,9 +2,13 @@
 
 **Design the AI Data Center of 2035** — an interactive 3D offshore AI infrastructure concept by **Arhaan Aggarwal**.
 
+[Open NEPTUNE](https://arhaan2.github.io/neptune-2035/) · [Source repository](https://github.com/Arhaan2/neptune-2035) · [Release record](docs/RELEASE.md)
+
 What would AI infrastructure look like if we designed it around energy, cooling, and modularity from the beginning?
 
 Explore a procedural sunset campus, open X-ray, trace separate cooling circuits and external power, explode six system groups, enter a representative rack aisle, and compare three scenario generations. Controls and geometry share a deterministic TypeScript engineering model. Links reconstruct all scenario inputs. A 30-second real-app storyboard supports presentation and recording.
+
+![NEPTUNE running on the public release URL](docs/images/hero.png)
 
 **Concept simulator · Not an engineering design.** No live telemetry, future GPU product claims, naval certification, or implied free electricity. Read [the model](docs/MODEL.md) for assumptions and omissions.
 

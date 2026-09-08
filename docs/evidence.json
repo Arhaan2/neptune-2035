@@ -1,0 +1,282 @@
+{
+  "date": "2026-09-08",
+  "url": "https://arhaan2.github.io/neptune-2035/",
+  "sourceCommit": "127a2fade93112d58f8edd9f6fc6e9e02b12b57c",
+  "deploymentCommit": "672805a984feadaab375061817c919fd6849b311",
+  "deploymentId": 6338812039,
+  "unitTestsPassed": 53,
+  "hostedBrowserStats": {
+    "startTime": "2026-09-08T22:58:41.915Z",
+    "duration": 196501.962,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "hostedTests": [
+    {
+      "title": "rendered modes, connected exploded paths, interior and bounded resources",
+      "browser": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 6963
+        }
+      ]
+    },
+    {
+      "title": "presets, engineering controls, validation and fresh-context sharing",
+      "browser": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5302
+        }
+      ]
+    },
+    {
+      "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "browser": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7806
+        }
+      ]
+    },
+    {
+      "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "browser": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 38922
+        }
+      ]
+    },
+    {
+      "title": "rendered modes, connected exploded paths, interior and bounded resources",
+      "browser": "firefox",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5992
+        }
+      ]
+    },
+    {
+      "title": "presets, engineering controls, validation and fresh-context sharing",
+      "browser": "firefox",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5136
+        }
+      ]
+    },
+    {
+      "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "browser": "firefox",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7676
+        }
+      ]
+    },
+    {
+      "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "browser": "firefox",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 38825
+        }
+      ]
+    },
+    {
+      "title": "rendered modes, connected exploded paths, interior and bounded resources",
+      "browser": "webkit",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7678
+        }
+      ]
+    },
+    {
+      "title": "presets, engineering controls, validation and fresh-context sharing",
+      "browser": "webkit",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 5978
+        }
+      ]
+    },
+    {
+      "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "browser": "webkit",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 7997
+        }
+      ]
+    },
+    {
+      "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "browser": "webkit",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 38836
+        }
+      ]
+    },
+    {
+      "title": "capture the first coherent 3D slice",
+      "browser": "chromium",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 6240
+        }
+      ]
+    },
+    {
+      "title": "capture the first coherent 3D slice",
+      "browser": "firefox",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 4912
+        }
+      ]
+    },
+    {
+      "title": "capture the first coherent 3D slice",
+      "browser": "webkit",
+      "status": "expected",
+      "runs": [
+        {
+          "status": "passed",
+          "durationMs": 6313
+        }
+      ]
+    }
+  ],
+  "localMachineHostedSamples": {
+    "chromium": {
+      "medianFrameMs": 16.699999999999818,
+      "p95FrameMs": 16.700000000000728,
+      "samples": 119,
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+      "scene": {
+        "camera": [
+          76.60784158239292,
+          44.19683168214973,
+          89.86689108703776
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "calls": 37,
+        "geometries": 24,
+        "textures": 3,
+        "objects": 7
+      }
+    },
+    "firefox": {
+      "medianFrameMs": 8.33999999999969,
+      "p95FrameMs": 9.159999999999854,
+      "samples": 119,
+      "renderer": "Apple M1, or similar",
+      "scene": {
+        "camera": [
+          76.6074574881981,
+          44.196610089345036,
+          89.86644051500149
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "calls": 37,
+        "geometries": 24,
+        "textures": 3,
+        "objects": 7
+      }
+    },
+    "webkit": {
+      "medianFrameMs": 17,
+      "p95FrameMs": 28,
+      "samples": 119,
+      "renderer": "Apple GPU",
+      "scene": {
+        "camera": [
+          76.60745748819815,
+          44.19661008934511,
+          89.86644051500167
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "calls": 37,
+        "geometries": 24,
+        "textures": 3,
+        "objects": 7
+      }
+    }
+  },
+  "video": {
+    "duration": 30,
+    "width": 1280,
+    "height": 720,
+    "error": null,
+    "codecSupport": "probably",
+    "bytes": 10622379,
+    "browser": "153.0.8010.12",
+    "playbackAdvanced": true,
+    "inspectedSeekSeconds": [
+      2,
+      7,
+      12,
+      17,
+      23,
+      28
+    ],
+    "capture": {
+      "url": "https://arhaan2.github.io/neptune-2035/",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "demoOffsetSeconds": 3.272,
+      "durationSeconds": 30,
+      "capturedAt": "2026-09-08T23:03:03.380Z"
+    },
+    "sha256": "eb91819cf708e0f7f6dfbe1389ff453394e1890141d66854584903a034bc9405",
+    "fullDecodePassed": true,
+    "inspectedFramesPassed": true
+  }
+}

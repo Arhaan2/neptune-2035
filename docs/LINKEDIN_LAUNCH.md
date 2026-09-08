@@ -1,6 +1,6 @@
 # LinkedIn launch package
 
-Drafts only. Nothing has been posted. Confirm the live links in the release record before publishing.
+Drafts only. Nothing has been posted. The site and repository links below are live and verified; the accepted version is recorded in [RELEASE.md](RELEASE.md).
 
 ## Draft 1
 
@@ -40,8 +40,8 @@ NEPTUNE — Design the AI Data Center of 2035. Sunset → X-ray → two cooling 
 
 ## Assets and publishing notes
 
-- Preferred upload: the verified `assets/demo/neptune-demo.mp4` once the release record marks encoding/playback complete.
+- Preferred upload: the verified `assets/demo/neptune-demo.mp4` (30 seconds, 1280×720, silent H.264). Also available in the [v0.1.0 release assets](https://github.com/Arhaan2/neptune-2035/releases/tag/v0.1.0).
 - Hero/social card: `public/social-preview.png`, captured from the application.
-- Six inspection screenshots: `docs/images/` after hosted acceptance; full browser captures stay in `assets/screenshots/` locally.
+- Six inspected screenshots: `docs/images/`, captured from the accepted release URL; full browser captures stay in `assets/screenshots/` locally. `assets/demo/neptune-screenshots.zip` also includes the social card, decoded storyboard and portrait capture.
 - Portrait composition: `assets/screenshots/presentation-4x5.png` is a real 800×1000 app capture; no separate portrait video is claimed.
 - The brief and guardrails were human inputs. Do not imply a specific model identity, elapsed build time, percentage of autonomy, or user intervention during fixes that the user did not actually make.

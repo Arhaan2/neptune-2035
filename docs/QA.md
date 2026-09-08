@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-09-08. Release identifiers and hosted acceptance are recorded in [RELEASE.md](RELEASE.md) when complete. This file records executed checks; pending work is explicitly marked.
+Date: 2026-09-08. Tested source commit: `127a2fade93112d58f8edd9f6fc6e9e02b12b57c`. Deployed artifact commit: `672805a984feadaab375061817c919fd6849b311`. Release identifiers are recorded in [RELEASE.md](RELEASE.md). Later documentation/evidence commits do not change the deployed application.
 
 ## Environment and commands
 
@@ -19,7 +19,8 @@ npm run test:browser
 - Dependency audit: zero reported vulnerabilities after removing unused server tooling and applying compatible updates. This is an audit result, not a security guarantee.
 - Local browser acceptance: all 15 cases passed in Chromium, Firefox and WebKit. After the portrait spacing correction, all three mobile/fallback/portrait cases passed again, including bounds checks that the entire toolbar sits above the footer. An earlier keyboard assertion read telemetry before the next animation frame; it now waits for the observable camera change.
 - Local real-demo recording: passed in Chromium; actual 30-second storyboard captured to WebM.
-- Hosted acceptance and MP4 verification: pending deployment.
+- Hosted acceptance: **15/15 passed**, five cases each in Chromium, Firefox and WebKit, against https://arhaan2.github.io/neptune-2035/. Includes the corrected portrait bounds and canvas resize check. No skipped or flaky cases in the accepted run. The served source manifest matched the tested commit.
+- Hosted recording: passed in Chromium. Final MP4 is 30.00 seconds, 1280×720, 25 fps H.264, yuv420p, silent, 10,622,379 bytes. Chromium 153.0.8010.12 loaded it with no media error, advanced playback, and successfully sought to 2, 7, 12, 17, 23 and 28 seconds. Those real decoded frames were inspected, including the live closing URL. FFmpeg decoded the complete MP4 with exit 0 and no error output. Hash and metadata are in `docs/evidence.json`.
 
 ## What the browser suite observes
 
@@ -31,13 +32,23 @@ The explicit `?fallback=1` path is exercised; the implementation also handles We
 
 ## Visual inspection
 
-Actual screenshots are generated under `assets/screenshots/` with browser prefixes: `hero`, `xray`, `cooling`, `exploded`, `power`, `interior`, `mobile`, and `fallback`. Hero framing, X-ray visibility, the separate circuit traces, named exploded groups, rack aisle, and mobile layout were visually inspected. The inspection caught and corrected an interior camera limit that kept the viewpoint outside and an inspector resize that moved the reset frame. Selected final images will be copied into `docs/images/` after hosted acceptance.
+Actual screenshots are generated under `assets/screenshots/` with browser prefixes: `hero`, `xray`, `cooling`, `exploded`, `power`, `interior`, `mobile`, and `fallback`. Hero framing, X-ray visibility, the separate circuit traces, named exploded groups, rack aisle, and mobile layout were visually inspected. The inspection caught and corrected an interior camera limit that kept the viewpoint outside and an inspector resize that moved the reset frame. Selected final images are committed in `docs/images/`.
+
+All six final Chromium screenshots in `docs/images/` were captured from the release URL and visually inspected: hero, X-ray, cooling, exploded, interior and mobile. Browser-specific screenshots, portrait, fallback, resource JSON and performance JSON remain under `assets/screenshots/`. Full local/hosted reports are in `artifacts/local-acceptance.json`, `artifacts/local-portrait-acceptance.json` and `artifacts/hosted-acceptance.json`; these machine-local reports are excluded from Git. A sanitized evidence summary is committed in `docs/evidence.json`.
 
 The mobile metric rail scrolls below the canvas; the concept qualifier stays at the viewport bottom. Full-page captures include this sticky footer within the document. Rack glyphs, module occupancy and grouped platforms are representative geometry, explicitly disclosed in the app; exact totals remain model-derived.
 
 ## Performance scope
 
-The capture harness records 119 `requestAnimationFrame` intervals after warm-up in the default campus X-ray view. It also records the WebGL renderer and Three.js counters. This small local sample is not an ordinary-laptop benchmark, a measured input-latency result, or a deployment performance guarantee. Browser refresh scheduling and automation affect results. Final hosted samples are added after that run.
+The capture harness records 119 `requestAnimationFrame` intervals after warm-up in the default campus X-ray view. These are the samples from the hosted run, on the local test machine:
+
+| Browser | Median interval | p95 interval | Reported renderer |
+| --- | ---: | ---: | --- |
+| Chromium | 16.70 ms | 16.70 ms | ANGLE Metal, Apple M4 Pro |
+| Firefox | 8.34 ms | 9.16 ms | “Apple M1, or similar” (browser-masked string) |
+| WebKit | 17 ms | 28 ms | Apple GPU |
+
+All three reported 37 render calls, 24 geometries and 3 textures in this X-ray sample. The repeated mode sequence retained 24 geometries and 3 textures after warm-up in each browser, with no captured console/page errors. This small sample is not an ordinary-laptop benchmark, a measured input-latency result, or a deployment performance guarantee. Browser refresh scheduling and automation affect results; Firefox's masked renderer string is not a hardware identification.
 
 ## Known conceptual limits
 
