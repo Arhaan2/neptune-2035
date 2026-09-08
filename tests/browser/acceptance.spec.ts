@@ -269,6 +269,10 @@ test('mobile controls, contextual inspection and explicit WebGL fallback', async
   const footer = (await page.locator('footer').boundingBox())!;
   expect(toolbar.y + toolbar.height).toBeLessThanOrEqual(footer.y);
   expect(footer.y + footer.height).toBeLessThanOrEqual(1000);
+  await expect
+    .poll(async () => (await page.locator('canvas').boundingBox())!.height)
+    .toBeGreaterThan(900);
+  await page.waitForTimeout(1500);
   await capture(page, `${info.project.name}-portrait`);
 });
 
