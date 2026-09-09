@@ -2,6 +2,8 @@
 
 ## v2 release candidate
 
+[Open the v2 preview](https://arhaan2.github.io/neptune-2035/v2-preview/) · [Preserved v0.1 production](https://arhaan2.github.io/neptune-2035/)
+
 **Design-stage digital twin · Simulated operation.** The v2 branch implements a dimensioned, asset-linked offshore reference design, a pure TypeScript worker simulation, deterministic pump/feeder failures and recovery, finite UPS behavior, distinct power/network domains, observation import/replay/read-only streaming, bounded calibration, comparison/sizing and traceable exports.
 
 The preserved v0.1.0 production release below is unchanged. In a v2 build, open `?legacy=1` for its original model; existing `#s=` scenarios also select Legacy mode without reinterpreting their assumed PUE.

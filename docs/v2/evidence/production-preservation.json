@@ -1,0 +1,40 @@
+{
+  "preservedDeployment": "672805a984feadaab375061817c919fd6849b311",
+  "existingFileCount": 8,
+  "allExistingFilesUnchanged": true,
+  "newPrefix": "v2-preview/",
+  "files": [
+    {
+      "path": ".nojekyll",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "assets/Scene-BAFd9tL0.js",
+      "sha256": "d3abcc3b8b57387af6e5f94d6fe47661ffeebe29167314b478724f56d032d30b"
+    },
+    {
+      "path": "assets/index-DqnoSxnt.js",
+      "sha256": "20d0bac34ea2b3d97a41e461e8ef2d57a15a6b8d353665b196a794ca95eff7d8"
+    },
+    {
+      "path": "assets/index-RvALXpPL.css",
+      "sha256": "322956854f02e5541b6263378c6e23feebf02a98e5ba79617ca0954d2bd97923"
+    },
+    {
+      "path": "favicon.svg",
+      "sha256": "8563208d639c29cfd6f973c7f74b0cf11140afa0a4897a97ecb0073bd7a7a820"
+    },
+    {
+      "path": "index.html",
+      "sha256": "e133a64d3b6a046c9ddf212db5a082821538374173fa0447f715e50b74291a8b"
+    },
+    {
+      "path": "release.json",
+      "sha256": "27401a4d6bf63f08a9e24e6f4e19b5fc56e30ffe65d1979d2d60be5cc2b7dfad"
+    },
+    {
+      "path": "social-preview.png",
+      "sha256": "f6042062db40e39ac02b264d6738b28befe93fe94bedbae94a80c764050dedca"
+    }
+  ]
+}

@@ -1,0 +1,689 @@
+{
+  "url": "https://arhaan2.github.io/neptune-2035/v2-preview/",
+  "applicationSourceCommit": "dcb9effd698bf10bbe0f98eba165213d2b0e5c16",
+  "pagesCommit": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+  "command": "NEPTUNE_BASE_URL=https://arhaan2.github.io/neptune-2035/v2-preview/ npm run test:browser",
+  "stats": {
+    "startTime": "2026-09-09T01:37:49.834Z",
+    "duration": 285871.48099999997,
+    "expected": 48,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "errors": [],
+  "cases": [
+    {
+      "title": "rendered modes, connected exploded paths, interior and bounded resources",
+      "file": "acceptance.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7115,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "presets, engineering controls, validation and fresh-context sharing",
+      "file": "acceptance.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5237,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "file": "acceptance.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7832,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "file": "acceptance.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 39076,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "rendered modes, connected exploded paths, interior and bounded resources",
+      "file": "acceptance.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6660,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "presets, engineering controls, validation and fresh-context sharing",
+      "file": "acceptance.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5568,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "file": "acceptance.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7863,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "file": "acceptance.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 38735,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "rendered modes, connected exploded paths, interior and bounded resources",
+      "file": "acceptance.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7714,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "presets, engineering controls, validation and fresh-context sharing",
+      "file": "acceptance.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6024,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "file": "acceptance.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7940,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "file": "acceptance.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 38789,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1649,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "standby transfer is an actual selected-component state transition",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1115,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "clock pause and speed are independent of design resets and validated controls",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3597,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "seek backward and forward restores exact event-boundary numerical results",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1480,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "cancel run retains completed state and superseding work rejects stale updates",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2215,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1059,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "project exports and imports replay numerical state, with invalid mappings rejected visibly",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 890,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 763,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 9973,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "legacy saved scenario links retain the explicit aggregate model",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1220,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1504,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "standby transfer is an actual selected-component state transition",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1292,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "clock pause and speed are independent of design resets and validated controls",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3750,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "seek backward and forward restores exact event-boundary numerical results",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1556,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "cancel run retains completed state and superseding work rejects stale updates",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2903,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1669,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "project exports and imports replay numerical state, with invalid mappings rejected visibly",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1174,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 988,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 9828,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "legacy saved scenario links retain the explicit aggregate model",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1341,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1712,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "standby transfer is an actual selected-component state transition",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1340,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "clock pause and speed are independent of design resets and validated controls",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3966,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "seek backward and forward restores exact event-boundary numerical results",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1873,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "cancel run retains completed state and superseding work rejects stale updates",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2702,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1511,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "project exports and imports replay numerical state, with invalid mappings rejected visibly",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1337,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1073,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 11561,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "legacy saved scenario links retain the explicit aggregate model",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1436,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+      "file": "twin.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3174,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+      "file": "twin.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2708,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+      "file": "twin.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3358,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "capture the first coherent 3D slice",
+      "file": "visual.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6059,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "capture the first coherent 3D slice",
+      "file": "visual.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4968,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    },
+    {
+      "title": "capture the first coherent 3D slice",
+      "file": "visual.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6346,
+          "retry": 0,
+          "errors": 0
+        }
+      ]
+    }
+  ]
+}

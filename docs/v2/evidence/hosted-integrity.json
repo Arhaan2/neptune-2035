@@ -1,0 +1,274 @@
+{
+  "checkedAt": "2026-09-09T01:38:19.556325+00:00",
+  "previewURL": "https://arhaan2.github.io/neptune-2035/v2-preview/",
+  "release": {
+    "product": "NEPTUNE",
+    "version": "2.0.0-rc.1",
+    "channel": "separate-preview",
+    "sourceSha": "dcb9effd698bf10bbe0f98eba165213d2b0e5c16",
+    "sourceBranch": "codex/neptune-digital-twin-v2",
+    "builtAt": "2026-09-09T01:26:57.773Z",
+    "artifactSha256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1",
+    "artifactIdentity": "SHA-256 of build-manifest.json; its file entries hash all compiled/static files except the two identity manifests.",
+    "qualifier": "Design-stage digital twin \u00b7 Simulated operation",
+    "physicalValidation": "pending",
+    "productionPromotion": "not performed"
+  },
+  "manifestSHA256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1",
+  "allMatched": true,
+  "checkedFiles": [
+    {
+      "path": "v2-preview/assets/index-BNuczDvm.js",
+      "sha256": "ba2043f2788094eeb9c2aa7facfa4372c9435bbd458d1a3ad0075bdb6bf7d058",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/assets/index-zRwpoDQf.css",
+      "sha256": "00060995001105ae73f18fbdee70016ab74f7fec80a7296fd194eaa38bbda566",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/assets/OrbitControls-D_T1L2sw.js",
+      "sha256": "4b115191cd14e369446aba8c744d51a729b163bda5d75000504247fe2290a9f2",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/assets/Scene-CxMryYGw.js",
+      "sha256": "dd101a4c01e0ba63fc7d177dfe75dc187c235907c7919bc9f59b10861a05c6b2",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/assets/TwinScene-DkCf7rj3.css",
+      "sha256": "180c5e2ef9f5324679a23caded3b2515234ccca40c72aa1ac1ec8ff82da823d4",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/assets/TwinScene-vlgzKFzz.js",
+      "sha256": "2938a39b23ce40172489285e2096681063461f54cca67cc3edf0c35c08895341",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/assets/worker-D4wfZN5Y.js",
+      "sha256": "3d78535afaea5277e48066db72bbb34fe016b73291037bda053eefd1d514e9af",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/cluster-link-loss-trace.json",
+      "sha256": "4dde69fd0360f81a210c254989a84930a9326fe5db2353db43c2eb4d51fd75cd",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/cluster-link-loss.json",
+      "sha256": "254cf5b5757e170c9fcb20f0909e58c249187ebc61a56690b943eb83ee1a7d53",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/exchanger-fouling-trace.json",
+      "sha256": "df3f6fdd6e259a21367aa4e04eed53d605b2f2056074c2e7967b03a44141628b",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/exchanger-fouling.json",
+      "sha256": "4f06fd531a1e2defc9b9f70f5df8cd0d1fae908e8d272a6b4747c5f6bf21dae9",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/family-1-feeder-recovery-trace.json",
+      "sha256": "be59f93a07d629ccb589bfdf8a94c57e4121e1648b18f8f368c54da0afc6cd13",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/family-1-feeder-recovery.json",
+      "sha256": "56051521fc8386190e6aa5c722ea2ce2062325235ed9ac83ee9b3d92ecb7898c",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/family-2-feeder-recovery-trace.json",
+      "sha256": "53fb7c4eb3e556927c1b42d8a5ac996a297cc9ce966235f30350784639e299b3",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/family-2-feeder-recovery.json",
+      "sha256": "c2c7da331abbfaefe11ed095f29ac5c96c8f6ee156848ad53a0e730fcda84185",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/family-3-feeder-recovery-trace.json",
+      "sha256": "921f799197e277292725f6f5928e98de62a4516e45e35cf369b412a6a3383792",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/family-3-feeder-recovery.json",
+      "sha256": "23ec0a438578340812158f8f9f67c372f918704036d43f9736af328fe615deb1",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/index.json",
+      "sha256": "21e4d1654137aa4f0d395b0d2b9f4836d6ffd21a3a6fb1dc8474d97018a34449",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-maintenance-trace.json",
+      "sha256": "f01b202ab9d91c1dd2ca2a487a21540f21bc20624ba92d40ccfdffd3553c4e20",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-maintenance.json",
+      "sha256": "114ec409a4aa64cc665c5f7ca04bc95d26c2650de2202a9bb6c61e47737db54f",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-pump-0-standby-results.csv",
+      "sha256": "9fb99ac3448016baef20574ce1c83f875d4deec21afde462f2c645afdb93d8f7",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-pump-0-standby-trace.json",
+      "sha256": "47a5934c73a9164ef94f957a81c37b936cbed3801a3fb6e7e6862c1c834d96b8",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-pump-0-standby.json",
+      "sha256": "da5df8faed0dd931e9d3331e2bbfe030b651f0aacc43d397e6dbb5ad7b952465",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-pump-1-standby-results.csv",
+      "sha256": "61c872421fd315a560edeaf0ad0dd5d8933c68fe48f7d7ed479738b70563f313",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-pump-1-standby-trace.json",
+      "sha256": "60818f1a9e8b043df2fd1a02bc4c7bca1978ce1ab433d1640d88c3430cce5a84",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/module-pump-1-standby.json",
+      "sha256": "cac2e532f2a081b1ab11fc24e3abcf60487fe59ae30b37324e0964142869186a",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/pilot-engineering.md",
+      "sha256": "8d01bcadcbde799dc53e9f9e728f3df5c9c4d7d3c45f0fda22272ed393aa6411",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/pilot-inventory.csv",
+      "sha256": "909088859953bd9db76a8f5eae466c5108e8550d7957653d6cd6bf82a21fe18f",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/pilot-project.json",
+      "sha256": "06c9dd10fb0346542cff7da4a870731a4e5bd23c1e861bb8803ae3948a2ca0fb",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/required-external-loss-trace.json",
+      "sha256": "8fd7a94076574c4d3e0b926201fedf49e07f296be1d6a9de9577675c2c976d3b",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/required-external-loss.json",
+      "sha256": "88c6534c0ecb86ae3da1f04a5fc91d883b2ca7e5ae06e8966b65109446d32342",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/warm-seawater-trace.json",
+      "sha256": "8cce5a0a9aa5c8e4d714bc9921ee7d23d706757e2219a7acf901ef278c66135e",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/warm-seawater.json",
+      "sha256": "da6e0290584346f4719921f11745347dceabd97bce86441fe2a6df2617dc70f6",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/workload-ramp-trace.json",
+      "sha256": "cddee74c5387ddfd04d7b3f3b825ddbc81df8cc4a76743b12e2b42edeff214c2",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/experiments/workload-ramp.json",
+      "sha256": "c331641767fc8c50f3bff637609d785b07c19cd6734d5a98d216475ce5ed729e",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/favicon.svg",
+      "sha256": "8563208d639c29cfd6f973c7f74b0cf11140afa0a4897a97ecb0073bd7a7a820",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/index.html",
+      "sha256": "9006299f84664cfe6e857c34a8a74760b5e27a084e161003fae2faf24b2d4058",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/samples/calibration-generated.json",
+      "sha256": "1fbc72414721cc6fa08b2ceee97541b9d66caf3cf3ed3c53e6560e8bd0e3750b",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/samples/telemetry-generated.csv",
+      "sha256": "e42f65200019967fe17f6a746fe6f8da2856626dc7109df36da238759f11f556",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/samples/telemetry-generated.json",
+      "sha256": "59479b5d09cb9776bf3255e4a3186864e7a67d053c75a2f35c292ade0b41f57d",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/social-preview.png",
+      "sha256": "f6042062db40e39ac02b264d6738b28befe93fe94bedbae94a80c764050dedca",
+      "matches": true
+    },
+    {
+      "path": "v2-preview/THIRD-PARTY-NOTICES.txt",
+      "sha256": "78bab8dcfab7c8f84a3a41829b16dfb5b88692d914424b0895774273c8a80176",
+      "matches": true
+    },
+    {
+      "path": "assets/Scene-BAFd9tL0.js",
+      "sha256": "d3abcc3b8b57387af6e5f94d6fe47661ffeebe29167314b478724f56d032d30b",
+      "matches": true
+    },
+    {
+      "path": "assets/index-DqnoSxnt.js",
+      "sha256": "20d0bac34ea2b3d97a41e461e8ef2d57a15a6b8d353665b196a794ca95eff7d8",
+      "matches": true
+    },
+    {
+      "path": "assets/index-RvALXpPL.css",
+      "sha256": "322956854f02e5541b6263378c6e23feebf02a98e5ba79617ca0954d2bd97923",
+      "matches": true
+    },
+    {
+      "path": "favicon.svg",
+      "sha256": "8563208d639c29cfd6f973c7f74b0cf11140afa0a4897a97ecb0073bd7a7a820",
+      "matches": true
+    },
+    {
+      "path": "index.html",
+      "sha256": "e133a64d3b6a046c9ddf212db5a082821538374173fa0447f715e50b74291a8b",
+      "matches": true
+    },
+    {
+      "path": "release.json",
+      "sha256": "27401a4d6bf63f08a9e24e6f4e19b5fc56e30ffe65d1979d2d60be5cc2b7dfad",
+      "matches": true
+    },
+    {
+      "path": "social-preview.png",
+      "sha256": "f6042062db40e39ac02b264d6738b28befe93fe94bedbae94a80c764050dedca",
+      "matches": true
+    }
+  ],
+  "productionRelease": {
+    "name": "NEPTUNE",
+    "sourceCommit": "127a2fade93112d58f8edd9f6fc6e9e02b12b57c",
+    "sourceRepository": "https://github.com/Arhaan2/neptune-2035",
+    "builtAt": "2026-09-08",
+    "kind": "static concept simulator"
+  },
+  "dotfileNote": ".nojekyll is a Git-only empty build marker, not a public HTTP asset."
+}

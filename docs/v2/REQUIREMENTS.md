@@ -26,7 +26,7 @@ Status records delivered scope, not a global feasible badge. Browser/hosted acce
 | F-05 | Interior / cameras / cinematic | same canonical selected module, bounded aisle, state-timed cameras | scene tests +actual screenshot inspection; full obstacle path planner unimplemented |
 | G-01 | Independent numerical benchmarks | reference/benchmarks.py/json | independent RK4 vs analytic thermal and four analytic/rational fixtures |
 | G-02 | Browser, mobile, fallback, performance | running-product acceptance + resource samples | RELEASE-CANDIDATE.md lists actual outcomes and hardware limits |
-| G-03 | Separate hosted candidate | release branch / preview artifact | release record names actual target or precise deployment blocker; production promotion requires approval |
+| G-03 | Separate hosted candidate | existing-repository `v2-preview/` path | verified served manifest and file hashes; hosted browser acceptance in release record; production root unchanged |
 
 ## Explicit limits
 
