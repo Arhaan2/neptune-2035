@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "review": "Independent bounded diagnostic and CI integration review",
+  "outcome": "approved",
+  "reviewedSources": [
+    {
+      "path": "scripts/phase-1/diagnose-firefox.mjs",
+      "sha256": "a9d8c6cce2a6b494af8ed56365cb9936ccdf4df1b508f0d8ce9374a6a9ff22a0"
+    },
+    {
+      "path": ".github/workflows/phase-1.yml",
+      "sha256": "bf897ceec0a7dc235a87ba0e33f2e0c0dc62b71ad40604120eed8c9acd3c6bde"
+    }
+  ],
+  "baseSourceSha": "66dc59dda41f42721b0818308e26571f1d5e665b",
+  "scope": "Diagnostic observation, process ownership, deadlines, cleanup, output minimization, and preservation of the separate unchanged acceptance command. No product or assertion changes are approved by this record.",
+  "unresolvedFindings": [],
+  "correctedFindings": [
+    {
+      "issue": "Playwright detaches Firefox into a separate Unix process group; killing only the diagnostic worker could leave it alive.",
+      "resolution": "Public launchServer process PID is registered before connection/page operations. Supervisor signals each registered group independently and checks absence.",
+      "sourceBasis": "Installed playwright-core/lib/coreBundle.js launchProcess lines 9312–9324."
+    },
+    {
+      "issue": "Concurrent supervisor reads could see a truncated PID-registration JSON file.",
+      "resolution": "All worker and final supervisor writes use a same-directory temporary file followed by atomic rename."
+    },
+    {
+      "issue": "The cleanup probe deadline could expire within the bounded startup window.",
+      "resolution": "Probe deadline increased to 20s, beyond 8s Vite startup plus 7.5s launch/connect stage."
+    },
+    {
+      "issue": "Signal callbacks did not preserve the interruption name.",
+      "resolution": "Named SIGINT/SIGTERM wrappers preserve the signal in the diagnostic result and enter cleanup."
+    },
+    {
+      "issue": "A failed observational diagnostic could skip full acceptance by default workflow semantics.",
+      "resolution": "The diagnostic step has a 2-minute timeout; verify uses if: !cancelled(). Diagnostic failure remains a job failure while full verification still runs unless cancelled."
+    }
+  ],
+  "verifiedBoundaries": {
+    "server": {
+      "host": "127.0.0.1",
+      "ownedPort": 5183,
+      "strictPort": true,
+      "suppliedURL": "Only plain credential-free local HTTP URLs are accepted."
+    },
+    "browserServer": "Bound to 127.0.0.1; websocket endpoint is not retained.",
+    "isolation": "Three sequential fresh headless Firefox variants, each with fresh contexts for blank, legacy, and twin pages.",
+    "observations": "Native requestAnimationFrame and 100ms timer counters, selected numeric scene diagnostics, canvas/WebGL metadata, document readiness/visibility/focus, and ordinary view clicks.",
+    "preferences": [
+      {
+        "layout.frame_rate": 60
+      },
+      {
+        "layout.frame_rate": 60,
+        "gfx.webrender.software": true
+      },
+      {}
+    ],
+    "productionChanges": false,
+    "acceptanceAssertionChanges": false,
+    "forceClicks": false,
+    "clockMocking": false,
+    "sandboxBypass": false,
+    "simulationSteps": false,
+    "externalDataImports": false,
+    "userProfilesReused": false,
+    "output": "Bounded diagnostic JSON only: no screenshots, traces, recordings, page text, cookies, request headers, credentials, or websocket endpoint.",
+    "interpretation": "COLLECTED means observations were collected, including any recorded errors; it is not PASS or proof of a Firefox CI root cause. WebGL renderer strings do not prove the selected compositor."
+  },
+  "limitsMs": {
+    "workerActive": 82000,
+    "normalWatchdog": 88000,
+    "normalNominalTotal": 89000,
+    "cleanupProbeWatchdog": 20000,
+    "cleanupProbeNominalTotal": 21000,
+    "termToKillWait": 200,
+    "killToAbsenceCheckWait": 200,
+    "workflowDiagnosticStep": 120000,
+    "nativeObservation": 3000,
+    "normalClick": 3500,
+    "firefoxLaunch": 5000,
+    "firefoxConnect": 2000,
+    "contextClose": 1500,
+    "browserClose": 2000
+  },
+  "actualResults": {
+    "normal": {
+      "path": "artifacts/phase-1/firefox-diagnostic-reviewed-local/diagnostic.json",
+      "sha256": "e4fba5ba9a7f6139782efdf5706edfd1b328fba369486bfb857d64d3b83966a9",
+      "status": "COLLECTED",
+      "workerElapsedMs": 34699.243333000006,
+      "supervisorElapsedMs": 35151.102291999996,
+      "supervisorExitCode": 0,
+      "variants": 3,
+      "pages": 9,
+      "stageErrors": 0,
+      "normalClicks": 6,
+      "clickElapsedMs": {
+        "min": 83.84570900000108,
+        "max": 130.06741599999896
+      },
+      "evaluateElapsedMs": {
+        "min": 1.5335000000013679,
+        "max": 17.87866700000086
+      },
+      "registeredGroupsAbsent": true
+    },
+    "forcedTimeout": {
+      "path": "artifacts/phase-1/firefox-diagnostic-reviewed-cleanup/diagnostic.json",
+      "sha256": "77df826b5c386f9998adedd395418b66f0d42e5e63f616c165d076cf34e89149",
+      "status": "INCOMPLETE",
+      "expectedIncomplete": true,
+      "expectedProcessExitCode": 1,
+      "probe": "A real launched Firefox is left open until the supervisor deadline.",
+      "supervisorElapsedMs": 20407.462708,
+      "budgetExpired": true,
+      "registeredGroupsAbsent": true,
+      "registeredGroups": 2,
+      "independentReadOnlyAbsenceCheck": [
+        {
+          "pid": 78168,
+          "absent": true
+        },
+        {
+          "pid": 78176,
+          "absent": true
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "command": "node --check scripts/phase-1/diagnose-firefox.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "workflow": {
+    "permissions": "contents:read",
+    "diagnosticArtifactUploadedBeforeAcceptance": true,
+    "diagnosticRetentionDays": 14,
+    "fullVerificationCommand": "node scripts/phase-1/verify.mjs --out=artifacts/phase-1-ci",
+    "verificationCommandUnchanged": true,
+    "verificationRunsAfterDiagnosticFailureUnlessCancelled": true,
+    "fullVerificationOrCIClaim": false
+  },
+  "primarySources": [
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396"
+  ],
+  "reviewerActions": {
+    "sourceEdits": false,
+    "browserOrServerLaunches": false,
+    "commitOrPush": false,
+    "rawRecordingsCopiedToGit": false
+  }
+}

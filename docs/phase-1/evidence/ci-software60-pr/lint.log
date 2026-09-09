@@ -1,0 +1,6 @@
+
+> neptune@2.0.0-rc.1 lint
+> oxlint src tests vite.config.ts playwright.config.ts
+
+Found 0 warnings and 0 errors.
+Finished in 1.7s on 59 files with 187 rules using 3 threads.
