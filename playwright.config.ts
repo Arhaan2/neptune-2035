@@ -37,8 +37,8 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        // Exercise a foreground window on macOS rather than a hidden compositor.
-        headless: false,
+        // Use a 60 Hz software display clock instead of host-display vsync.
+        launchOptions: { firefoxUserPrefs: { 'layout.frame_rate': 60 } },
         viewport: { width: 1600, height: 1050 },
       },
     },

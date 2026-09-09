@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Controlled real-worker Pause reproduction and focused verification; not a diagnosis of every prior Firefox CI failure.",
+  "baseCommit": "77592c4f18fc85d09d2b6ac96cad48ed8477b770",
+  "sourceState": "Working-tree repair on the base commit; parent independently changed browser launch settings. This is focused local evidence, not a completed full CI gate.",
+  "testedRepairSources": {
+    "src/ui/useTwin.ts": "af1dc65ae996c54cb08ffe8cf6e047c4cad93707eaa416b5c23499a68e336593",
+    "src/ui/TwinApp.tsx": "6213e04ddde6999bb234e3c0a2d7a7406a9d3541fa2ba19966851eaa059d1c66",
+    "tests/browser/phase1.spec.ts": "af6b563899215e612bf4a385a5f33b1df4819bab87cdbda87b4dc247c7d5d35e"
+  },
+  "before": {
+    "productionSource": "Base commit useTwin.ts and TwinApp.tsx, before the repair.",
+    "command": "NEPTUNE_BASE_URL=http://127.0.0.1:5173 npx playwright test tests/browser/phase1.spec.ts --project=chromium --grep 'Pause remains available' --output=artifacts/phase-1/pause-before",
+    "exitCode": 1,
+    "expectedFailure": true,
+    "tests": {
+      "failed": 1,
+      "passed": 0
+    },
+    "failure": "Error: expect(locator).toBeEnabled() failed\n\nLocator:  getByRole('button', { name: 'Pause', exact: true })\nExpected: enabled\nReceived: disabled\nTimeout:  12000ms\n\nCall log:\n  - Expect \"toBeEnabled\" getByRole('button', { name: 'Pause', exact: true }) with timeout 12000ms\n  - waiting for getByRole('button', { name: 'Pause', exact: true })\n    28 × locator resolved to <button disabled class=\"primary\">…</button>\n       - unexpected value \"disabled\"\n",
+    "checkpointTimeS": 10,
+    "withheldActualCompleteTimeS": 30,
+    "testSourceNote": "The baseline new regression predates the additional manual-Step Start-disabled assertion in the final test. Its original source is retained inside the ignored trace archive.",
+    "originalTestSource": {
+      "archiveEntry": "src/da9d7738e22947ac668c03cc13563382968250d3.ts",
+      "sha256": "d13051e1c35b6ec724d4e496202df792ea19f603ee1356cfc76f8a24d7f0bc11"
+    },
+    "artifacts": [
+      {
+        "path": "artifacts/phase-1/pause-before/.last-run.json",
+        "sha256": "0d7fadf6b72183175130c4f124c7c01e9a4d4e388da7862be5e6b3fd777c5e6d",
+        "bytes": 96,
+        "retainedInGit": false
+      },
+      {
+        "path": "artifacts/phase-1/pause-before/phase1-PH1-REP-02-Pause-re-464be--cannot-move-its-checkpoint-chromium/error-context.md",
+        "sha256": "5f1bd4de5caf74003528f8fe2e99c2ef5075d1b793a7b9a180f88cbed977e2b0",
+        "bytes": 10414,
+        "retainedInGit": false
+      },
+      {
+        "path": "artifacts/phase-1/pause-before/phase1-PH1-REP-02-Pause-re-464be--cannot-move-its-checkpoint-chromium/trace.zip",
+        "sha256": "74f23269921716ef9a9de4f53234a7ef26f810a4121a6db5f3e114bb0affd687",
+        "bytes": 1314468,
+        "retainedInGit": false
+      }
+    ]
+  },
+  "firstAfter": {
+    "command": "NEPTUNE_BASE_URL=http://127.0.0.1:5173 npx playwright test tests/browser/phase1.spec.ts --grep 'Pause remains available' --output=artifacts/phase-1/pause-after",
+    "exitCode": 0,
+    "passed": 3,
+    "durationReportedSeconds": 17.2,
+    "countAndDurationSource": "Observed command stdout in the task tool result; original JSON reporter file was later overwritten by the final focused run.",
+    "artifact": {
+      "path": "artifacts/phase-1/pause-after/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "bytes": 45,
+      "retainedInGit": false
+    }
+  },
+  "focused": {
+    "command": "NEPTUNE_BASE_URL=http://127.0.0.1:5173 npx playwright test tests/browser/phase1.spec.ts tests/browser/twin.spec.ts:99 --output=artifacts/phase-1/pause-focused",
+    "exitCode": 0,
+    "startedAt": "2026-09-09T20:44:15.610Z",
+    "durationMs": 78251.66500000001,
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "byBrowser": {
+      "chromium": {
+        "passed": 11,
+        "failed": 0
+      },
+      "firefox": {
+        "passed": 11,
+        "failed": 0
+      },
+      "webkit": {
+        "passed": 11,
+        "failed": 0
+      }
+    },
+    "newPauseRegression": [
+      {
+        "browser": "chromium",
+        "status": "passed",
+        "durationMs": 4791
+      },
+      {
+        "browser": "firefox",
+        "status": "passed",
+        "durationMs": 4554
+      },
+      {
+        "browser": "webkit",
+        "status": "passed",
+        "durationMs": 4558
+      }
+    ],
+    "coverage": "All 10 Phase1 cases plus the unchanged existing clock test, across all three browsers.",
+    "artifacts": [
+      {
+        "path": "artifacts/phase-1/pause-focused/browser-results.json",
+        "sha256": "f1cffc21a3f4a3df36c94a49bcf64330d3c1932722b2ac47ead81c6b1f5a06e2",
+        "bytes": 39293,
+        "retainedInGit": false
+      },
+      {
+        "path": "artifacts/phase-1/pause-focused/.last-run.json",
+        "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+        "bytes": 45,
+        "retainedInGit": false
+      }
+    ],
+    "copiedFrom": "artifacts/browser-results.json",
+    "originalReporterSha256": "f1cffc21a3f4a3df36c94a49bcf64330d3c1932722b2ac47ead81c6b1f5a06e2"
+  },
+  "semantics": {
+    "solver": "The native module Worker performs the real calculations. A browser-only wrapper records requests and withholds its actual structured-cloned MessageEvents before the UI listener, then dispatches those same responses unchanged.",
+    "assertions": [
+      "Start remains disabled while a manual Step 10s response is withheld.",
+      "Pause remains enabled while a clock advance is pending.",
+      "Pause makes Start available immediately and emits cancellation.",
+      "Releasing held progress, completion and cancellation acknowledgements cannot move the committed checkpoint.",
+      "After a real 1250ms interval, no additional worker requests have been sent.",
+      "Exported checkpoint equals the checkpoint before the held advance.",
+      "Explicit resume reaches 30s and exports the completed 30s checkpoint."
+    ],
+    "syntheticSolverResults": false,
+    "solverOrModelEdits": false,
+    "clockMocking": false,
+    "forceClicks": false,
+    "assertionWeakening": false,
+    "existingTestTimeoutMs": 60000,
+    "expectTimeoutMs": 12000,
+    "timeoutChanges": false,
+    "retries": 0,
+    "workers": 1,
+    "rendering": "New regression intentionally uses the existing fallback fixture to isolate worker/UI control behavior; the unchanged existing clock test exercises the ordinary scene path."
+  },
+  "toolchain": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "playwright": "1.63.0",
+    "os": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "installedBrowsers": [
+      {
+        "name": "chromium",
+        "revision": "1243",
+        "browserVersion": "153.0.8010.12"
+      },
+      {
+        "name": "chromium-headless-shell",
+        "revision": "1243",
+        "browserVersion": "153.0.8010.12"
+      },
+      {
+        "name": "firefox",
+        "revision": "1543",
+        "browserVersion": "155.0"
+      },
+      {
+        "name": "webkit",
+        "revision": "2359",
+        "browserVersion": "26.6"
+      }
+    ],
+    "browserVersionSource": "Installed Playwright browsers.json manifest. The focused run did not separately record browser.version(); no new browser was launched for this evidence.",
+    "browsersManifestSha256": "545d52f8382c391e605562c330e9c1c534a16045898203037a49bb8bd769a946",
+    "settingsDuringFocusedRun": {
+      "chromium": {
+        "headless": true,
+        "deviceScaleFactor": 1,
+        "launchArgs": [
+          "--use-angle=metal"
+        ]
+      },
+      "firefox": {
+        "headless": false,
+        "deviceScaleFactor": 1
+      },
+      "webkit": {
+        "headless": true,
+        "deviceScaleFactor": 1
+      },
+      "viewport": {
+        "width": 1600,
+        "height": 1050
+      }
+    }
+  },
+  "finalChecks": {
+    "source": "Observed tool command completion after the final regression edit and focused run; these commands produced no retained standalone log files.",
+    "commands": [
+      {
+        "command": "npm run typecheck",
+        "exitCode": 0
+      },
+      {
+        "command": "npm run lint",
+        "exitCode": 0
+      },
+      {
+        "command": "git diff --check",
+        "exitCode": 0
+      }
+    ]
+  },
+  "boundaries": {
+    "fullCIClaim": false,
+    "gitCommitOrPushPerformed": false,
+    "repairSourceChangesAfterFocusedRun": false,
+    "screenshotsOrTracesCopiedToGit": false,
+    "localServer": "Stopped, exit 130; port 5173 released before parent verification."
+  }
+}

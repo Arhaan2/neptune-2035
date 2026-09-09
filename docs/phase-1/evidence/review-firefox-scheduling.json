@@ -1,0 +1,400 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "7e344e7cf09c68a3a86af4672466260f382e5132",
+  "scope": "Bounded local diagnosis against the exact source archive after the full gate failed 75/78; no full-suite or CI pass claim.",
+  "originalFailureEvidence": {
+    "path": "docs/phase-1/evidence/committed-pause",
+    "browserLogSha256": "5f6e4115e88c1e03ff0ee68105833a742dbc3b418a0b7a2ae13afaa842e00b8a",
+    "findings": [
+      "Original headed Firefox Seek 20 click spent 27868.228ms in actionability before succeeding; subsequent DOM checks and exports took~20–130ms; Seek 30 then stalled in visible/enabled/stable before test timeout.",
+      "Original legacy reset test expected camera x 81.86859002510815 but received 76.62242322113698 after Reset. This is the initial reset/drag check, not the later interior-exit assertion.",
+      "Original headed legacy mobile test received document.scrollWidth 391 at requested viewport 390."
+    ]
+  },
+  "nativeProbe": {
+    "artifact": {
+      "path": "artifacts/phase-1/firefox-scheduling/native-probe.json",
+      "sha256": "b25293e69a88c2d18a643f3b16fda8a92f1772739c5325db53153f400b1e7a8a",
+      "retainedInGit": false
+    },
+    "script": {
+      "path": "artifacts/phase-1/firefox-scheduling/probe.mjs",
+      "sha256": "2e585bf5623c4e1120f18805232a542be307bd2c213e592d34642e60d399be2d",
+      "retainedInGit": false
+    },
+    "version": "155.0",
+    "observations": [
+      {
+        "name": "headless-default",
+        "launch": {
+          "headless": true
+        },
+        "elapsedMs": 4956,
+        "desktop": {
+          "frames": 364,
+          "ticks": 31,
+          "maxGapMs": 50,
+          "inner": [
+            1600,
+            1050
+          ],
+          "outer": [
+            1600,
+            1135
+          ],
+          "hidden": false,
+          "focus": true,
+          "dpr": 1
+        },
+        "mobile": {
+          "frames": 558,
+          "ticks": 47,
+          "scrollWidth": 390,
+          "inner": [
+            390,
+            844
+          ],
+          "outer": [
+            500,
+            929
+          ],
+          "dpr": 1,
+          "overflowRightPx": 390.3500061035156,
+          "visibilityChanges": 0
+        }
+      },
+      {
+        "name": "headed-default",
+        "launch": {
+          "headless": false
+        },
+        "elapsedMs": 4908,
+        "desktop": {
+          "frames": 361,
+          "ticks": 31,
+          "maxGapMs": 57.60000000000002,
+          "inner": [
+            1600,
+            1050
+          ],
+          "outer": [
+            1600,
+            1012
+          ],
+          "hidden": false,
+          "focus": true,
+          "dpr": 1
+        },
+        "mobile": {
+          "frames": 556,
+          "ticks": 47,
+          "scrollWidth": 391,
+          "inner": [
+            390,
+            844
+          ],
+          "outer": [
+            500,
+            929
+          ],
+          "dpr": 1,
+          "overflowRightPx": 390.3500061035156,
+          "visibilityChanges": 0
+        }
+      },
+      {
+        "name": "headed-software60",
+        "launch": {
+          "headless": false,
+          "firefoxUserPrefs": {
+            "layout.frame_rate": 60
+          }
+        },
+        "elapsedMs": 4857,
+        "desktop": {
+          "frames": 180,
+          "ticks": 31,
+          "maxGapMs": 50,
+          "inner": [
+            1600,
+            1050
+          ],
+          "outer": [
+            1600,
+            1012
+          ],
+          "hidden": false,
+          "focus": true,
+          "dpr": 1
+        },
+        "mobile": {
+          "frames": 277,
+          "ticks": 46,
+          "scrollWidth": 391,
+          "inner": [
+            390,
+            844
+          ],
+          "outer": [
+            500,
+            929
+          ],
+          "dpr": 1,
+          "overflowRightPx": 390.3500061035156,
+          "visibilityChanges": 0
+        }
+      },
+      {
+        "name": "headless-software60",
+        "launch": {
+          "headless": true,
+          "firefoxUserPrefs": {
+            "layout.frame_rate": 60
+          }
+        },
+        "elapsedMs": 4893,
+        "desktop": {
+          "frames": 184,
+          "ticks": 30,
+          "maxGapMs": 50,
+          "inner": [
+            1600,
+            1050
+          ],
+          "outer": [
+            1600,
+            1135
+          ],
+          "hidden": false,
+          "focus": true,
+          "dpr": 1
+        },
+        "mobile": {
+          "frames": 283,
+          "ticks": 46,
+          "scrollWidth": 390,
+          "inner": [
+            390,
+            844
+          ],
+          "outer": [
+            500,
+            929
+          ],
+          "dpr": 1,
+          "overflowRightPx": 390.3500061035156,
+          "visibilityChanges": 0
+        }
+      }
+    ],
+    "interpretation": "Default callback cadence was approximately 120Hz on this host; positive 60 preference produced approximately 60Hz with ordinary timers unchanged. Both headed variants reproduced 391px scrollWidth; both headless variants returned 390px despite identical measured element right edge 390.3500061035156, DPR 1, camera and document visibility. This demonstrates a launch-mode-dependent width difference, not a general CSS fix."
+  },
+  "seekMatrix": {
+    "stats": {
+      "startTime": "2026-09-09T21:09:04.036Z",
+      "duration": 15251.715,
+      "expected": 4,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "file": "tests/browser/twin.spec.ts",
+        "name": "seek backward and forward restores exact event-boundary numerical results",
+        "project": "headless-default",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2330
+          }
+        ]
+      },
+      {
+        "file": "tests/browser/twin.spec.ts",
+        "name": "seek backward and forward restores exact event-boundary numerical results",
+        "project": "headed-default",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2759
+          }
+        ]
+      },
+      {
+        "file": "tests/browser/twin.spec.ts",
+        "name": "seek backward and forward restores exact event-boundary numerical results",
+        "project": "headed-software60",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4267
+          }
+        ]
+      },
+      {
+        "file": "tests/browser/twin.spec.ts",
+        "name": "seek backward and forward restores exact event-boundary numerical results",
+        "project": "headless-software60",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2526
+          }
+        ]
+      }
+    ],
+    "artifact": {
+      "path": "artifacts/phase-1/firefox-scheduling/seek-results.json",
+      "sha256": "13ad7debd4502e1956ded58fa28cc1d0d82d35b6c35996e4dfa233588fc1296c",
+      "retainedInGit": false
+    },
+    "testTimeoutMs": 60000,
+    "retries": 0,
+    "interpretation": "All four isolated runs passed. The original headed Seek stall did not reproduce; software 60 cannot be claimed to have fixed that intermittent stall."
+  },
+  "affectedHeadlessSoftware60": {
+    "stats": {
+      "startTime": "2026-09-09T21:09:48.191Z",
+      "duration": 22640.109999999997,
+      "expected": 4,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "file": "tests/browser/acceptance.spec.ts",
+        "name": "rendered modes, connected exploded paths, interior and bounded resources",
+        "project": "headless-software60",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 6720
+          }
+        ]
+      },
+      {
+        "file": "tests/browser/acceptance.spec.ts",
+        "name": "mobile controls, contextual inspection and explicit WebGL fallback",
+        "project": "headless-software60",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 7500
+          }
+        ]
+      },
+      {
+        "file": "tests/browser/twin.spec.ts",
+        "name": "seek backward and forward restores exact event-boundary numerical results",
+        "project": "headless-software60",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2064
+          }
+        ]
+      },
+      {
+        "file": "tests/browser/visual.spec.ts",
+        "name": "capture the first coherent 3D slice",
+        "project": "headless-software60",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 5577
+          }
+        ]
+      }
+    ],
+    "artifact": {
+      "path": "artifacts/phase-1/firefox-scheduling/affected-results.json",
+      "sha256": "40e2c5d7b0fe8de0ce21449ca1c4431824adf0cadf5fa67bfd9abc913bad97c1",
+      "retainedInGit": false
+    },
+    "testTimeoutMs": 60000,
+    "retries": 0,
+    "command": "NEPTUNE_BASE_URL=http://127.0.0.1:5173 npx playwright test --config=<temporary-affected-config> tests/browser/acceptance.spec.ts:28 tests/browser/acceptance.spec.ts:215 tests/browser/twin.spec.ts:115 tests/browser/visual.spec.ts",
+    "interpretation": "The three unchanged failed cases plus the existing native 120-frame visual probe all passed under headless software 60."
+  },
+  "controls": {
+    "productEdits": false,
+    "testSourceEdits": false,
+    "testSourceSha256": {
+      "tests/browser/acceptance.spec.ts": "5c1aa1b2ccfbd2687f15d31da1f59a187550f1faa420f321f0f697cbe082e2e0",
+      "tests/browser/twin.spec.ts": "cd171046755f4a08d0836e7d531d143c8dd647348ae9a80692136c7262f5855e",
+      "tests/browser/visual.spec.ts": "43874439f7cc2038425784f162ae26ffd6903df1822d374757365003d42c15cf"
+    },
+    "viewport": {
+      "width": 1600,
+      "height": 1050
+    },
+    "mobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 1,
+    "workers": 1,
+    "retries": 0,
+    "testTimeoutMs": 60000,
+    "expectTimeoutMs": 12000,
+    "deadlineChanges": false,
+    "assertionWeakening": false,
+    "forceClicks": false,
+    "clockMocking": false,
+    "browserPreference": {
+      "layout.frame_rate": 60
+    },
+    "softwareASAPMode": false
+  },
+  "sourceBasis": [
+    {
+      "url": "https://github.com/mozilla-firefox/firefox/blob/main/gfx/thebes/gfxPlatform.cpp",
+      "lines": "3350–3396 in the inspected current raw source",
+      "claim": "-1 selects hardware/auto, 0 is ASAP, and positive X selects software vsync X times per second; ForceSoftwareVsync tests preference>0."
+    },
+    {
+      "path": "node_modules/playwright-core/lib/coreBundle.js",
+      "line": 19837,
+      "claim": "Injected checkElementStates stable branch waits on native requestAnimationFrame until a subsequent equal bounding rectangle; it is not merely an enabled-property check."
+    },
+    {
+      "path": "node_modules/playwright-core/lib/coreBundle.js",
+      "line": 45465,
+      "claim": "Default Firefox Juggler delegate requires one equal subsequent frame."
+    },
+    {
+      "path": "node_modules/playwright-core/lib/coreBundle.js",
+      "line": 45942,
+      "claim": "Headless Firefox gets -headless; headed gets -wait-for-browser and -foreground."
+    },
+    {
+      "installedBrowserFile": "firefox-1543/firefox/Nightly.app/Contents/Resources/playwright.cfg",
+      "line": 88,
+      "claim": "Default Juggler build sets focusmanager.testmode=true. No layout.frame_rate or top-level-always-active setting was found in this file. The separately discovered top-level-always-active defaults in coreBundle belong to BiDi, not this launch."
+    }
+  ],
+  "recommendation": "Return Firefox to headless for viewport fidelity. Positive layout.frame_rate 60 is a source-supported bounded software-vsync candidate for display-independent scheduling. Validate with the unchanged clean full gate and CI before treating it as a stable environment correction.",
+  "limitations": [
+    "Local M4 results do not prove the root cause of prior M1 CI frame/input stalls.",
+    "No pending action frame-counter instrumentation was present in the original failed trace.",
+    "An isolated all-pass matrix does not establish software 60 necessity.",
+    "The native probe observes document focus/visibility, not macOS compositor occlusion."
+  ],
+  "shutdown": {
+    "serverStopped": true,
+    "exitCode": 130,
+    "port5173Released": true,
+    "commitOrPush": false,
+    "screenshotsOrTracesCopiedIntoGit": false
+  }
+}
