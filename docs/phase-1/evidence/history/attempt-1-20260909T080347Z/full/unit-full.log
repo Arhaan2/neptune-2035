@@ -1,0 +1,13 @@
+
+> neptune@2.0.0-rc.1 test
+> vitest run
+
+
+ RUN  v5.0.0 /private<clean-checkout>
+
+
+ Test Files  7 passed (7)
+      Tests  162 passed (162)
+   Start at  01:04:07
+   Duration  5.10s (tests 89%, transform 6%, import 4%)
+

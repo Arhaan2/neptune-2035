@@ -1,0 +1,399 @@
+{
+  "command": "npm run test:browser -- tests/browser/phase1.spec.ts",
+  "scope": "Seven Phase 1 browser regressions across Chromium, Firefox and WebKit; local app only.",
+  "stats": {
+    "startTime": "2026-09-09T18:04:24.998Z",
+    "duration": 43016.868,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2639,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1251,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1383,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6117,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1320,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1780,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+      "file": "phase1.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1144,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1626,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 865,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 864,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6102,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 749,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1151,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+      "file": "phase1.spec.ts",
+      "project": "firefox",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 645,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2124,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1053,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1132,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5811,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1018,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1482,
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+      "file": "phase1.spec.ts",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1020,
+          "retry": 0
+        }
+      ]
+    }
+  ],
+  "reviewFixVerification": {
+    "command": "NEPTUNE_BASE_URL=http://127.0.0.1:5188 npm run test:browser -- tests/browser/phase1.spec.ts -g \"fractional integration|numeric overflow\"",
+    "stats": {
+      "startTime": "2026-09-09T18:10:03.671Z",
+      "duration": 9777.294,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "title": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+        "file": "phase1.spec.ts",
+        "project": "chromium",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1864,
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "title": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+        "file": "phase1.spec.ts",
+        "project": "chromium",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1748,
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "title": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+        "file": "phase1.spec.ts",
+        "project": "firefox",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1179,
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "title": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+        "file": "phase1.spec.ts",
+        "project": "firefox",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 781,
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "title": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+        "file": "phase1.spec.ts",
+        "project": "webkit",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1352,
+            "retry": 0
+          }
+        ]
+      },
+      {
+        "title": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+        "file": "phase1.spec.ts",
+        "project": "webkit",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1233,
+            "retry": 0
+          }
+        ]
+      }
+    ]
+  }
+}

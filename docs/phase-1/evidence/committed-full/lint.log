@@ -1,0 +1,5 @@
+
+> neptune@2.0.0-rc.1 lint
+> oxlint src tests vite.config.ts playwright.config.ts
+
+tests/phase1-work-budget.test.ts:11:66: error typescript(no-useless-default-assignment): Default value is useless because the parameter has type `OperationEvent[]` (not nullish). This default assignment will never be used. help: Remove the default assignment

@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09T18:42:51.125Z",
+  "role": "Independent bounded functional review",
+  "scope": "Only precomputing a Set of design module IDs and replacing repeated Array.some membership checks in causal log affectedIds validation.",
+  "baselineCommit": "19b1082b5277b4771dde80b0e7b12f24cac892cf",
+  "headAtReview": "76cdbcc7c62762c3464b289f97e75bfb6baa6850",
+  "reviewedCommit": "76cdbcc7c62762c3464b289f97e75bfb6baa6850",
+  "reviewedArtifact": "Committed state.ts blob verified below",
+  "path": "src/twin/persistence/state.ts",
+  "priorSourceSha256": "75fc1e0dcaa9f10088197884358f5e9859f7c2ec953f298648ee5a25698d4312",
+  "currentSourceSha256": "887e1e2b72d04f881aa76e0e48d5f10b2a3f3cead2f6aebec2a40d854757916c",
+  "diffSha256": "c2e24b8e326684c62c346479ed3b3a57ac8ba80ce5611a7a36fbab174e13b8e0",
+  "diff": "diff --git a/src/twin/persistence/state.ts b/src/twin/persistence/state.ts\nindex 23398fd..f190539 100644\n--- a/src/twin/persistence/state.ts\n+++ b/src/twin/persistence/state.ts\n@@ -28,7 +28,7 @@ export function validateState(design: Design, value: unknown, options: { allowDi\n   array(value.appliedEventIds, 'state.appliedEventIds', CONTRACT.maxEvents);\n   const due = value.events.filter(e => e.timeS <= (value.timeS as number));\n   if (due.length !== value.appliedEventIds.length || due.some((e, i) => e.id !== (value.appliedEventIds as unknown[])[i])) failure('invalid-input', 'STATE_EVENT_CURSOR', 'Checkpoint applied-event cursor must contain exactly the events due at this boundary, in order.');\n-  const known = new Set(design.assets.map(a => a.id)), local = new Map<string, Set<string>>();\n+  const known = new Set(design.assets.map(a => a.id)), moduleIds = new Set(design.modules.map(m => m.id)), local = new Map<string, Set<string>>();\n   const assetKnown = (id: string) => {\n     if (known.has(id)) return true;\n     const m = design.modules.find(m => id.startsWith(`${m.id}/`)); if (!m) return false;\n@@ -97,6 +97,6 @@ export function validateState(design: Design, value: unknown, options: { allowDi\n     string(entry.assetId, 'log.assetId', CONTRACT.maxAssetIdLength); string(entry.message, 'log.message');\n     if (!assetKnown(entry.assetId) || !['command', 'controller', 'warning'].includes(String(entry.kind))) failure('invalid-input', 'STATE_LOG', 'Invalid causal trace asset or kind.');\n     array(entry.affectedIds, 'log.affectedIds', CONTRACT.maxModules);\n-    for (const id of entry.affectedIds) if (typeof id !== 'string' || !design.modules.some(m => m.id === id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');\n+    for (const id of entry.affectedIds) if (typeof id !== 'string' || !moduleIds.has(id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');\n   }\n }",
+  "reasoning": [
+    "For string module identifiers the Set.has membership predicate has the same equality result as the former strict-equality Array.some predicate. The preceding typeof id === string requirement is retained, as are the error kind, code and message.",
+    "The Set is created once per synchronous validation call from the same design.modules inventory. It does not persist across calls, change module order, modify the caller, or alter authoritative state. It replaces repeated linear membership scans with a per-call inventory construction and lookups. No measured speedup is claimed.",
+    "Existing affectedIds array/size and structural checks are unchanged. Empty and duplicate valid scopes retain prior admission; this optimization does not silently impose a new log contract."
+  ],
+  "commands": [
+    {
+      "command": "git diff 19b1082b5277b4771dde80b0e7b12f24cac892cf -- src/twin/persistence/state.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "node artifacts/phase-1-review/scope-optimization-probe.mjs",
+      "attempt": 1,
+      "exitCode": 1,
+      "result": "Review harness virtual TypeScript module was not transpiled by Vite; parse stopped before semantic probes ran. No product source or expectation changed.",
+      "sourceSha256": "e2d7768338ccfbf8e73148a3f89ae05fddd57a00b1b64fd45d46c0ea705e3728"
+    },
+    {
+      "command": "node artifacts/phase-1-review/scope-optimization-probe.mjs",
+      "attempt": 2,
+      "exitCode": 0,
+      "result": "12 of 12 comparative probes passed after explicitly transpiling the prior TypeScript validator in the review harness.",
+      "sourceSha256": "5f0120cdc2722ab60c6faa002861ba261ef6b8fbb691d893e1fb3b32d46c47a5",
+      "source": "import assert from 'node:assert/strict';\nimport fs from 'node:fs/promises';\nimport { execFileSync } from 'node:child_process';\nimport { createHash } from 'node:crypto';\nimport { createServer } from 'vite';\nimport ts from 'typescript';\nconst base = '19b1082b5277b4771dde80b0e7b12f24cac892cf';\nconst sourcePath = 'src/twin/persistence/state.ts';\nconst oldSource = execFileSync('git', ['show', `${base}:${sourcePath}`]).toString();\nconst hash = s => createHash('sha256').update(s).digest('hex');\nconst before = await fs.readFile(sourcePath, 'utf8');\nconst virtualOld = '\\0review-old-state';\n// Only module import paths are adapted to load the exact prior validator body.\nconst oldLoadable = oldSource.replaceAll(\"from '../assets/design'\", \"from '/src/twin/assets/design.ts'\").replaceAll(\"from '../safety'\", \"from '/src/twin/safety.ts'\").replaceAll(\"from '../types'\", \"from '/src/twin/types.ts'\").replaceAll(\"from './events'\", \"from '/src/twin/persistence/events.ts'\").replaceAll(\"from './limits'\", \"from '/src/twin/persistence/limits.ts'\").replaceAll(\"from './structure'\", \"from '/src/twin/persistence/structure.ts'\");\nconst oldJavaScript = ts.transpileModule(oldLoadable, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext }, fileName: 'review-old-state.ts' }).outputText;\nconst loader = await createServer({ configFile: false, optimizeDeps: { noDiscovery: true, entries: [] }, plugins: [{ name: 'prior-validator-review', resolveId: id => id === '/review-old-state.ts' ? virtualOld + '.ts' : undefined, load: id => id === virtualOld + '.ts' ? oldJavaScript : undefined }], server: { middlewareMode: true, watch: null, hmr: false, ws: false }, appType: 'custom' });\nconst cases = [];\ntry {\n  const { buildDesign, DEFAULT_CONFIG } = await loader.ssrLoadModule('/src/twin/assets/design.ts');\n  const { initialize, advance } = await loader.ssrLoadModule('/src/twin/engine/simulation.ts');\n  const { validateState: current } = await loader.ssrLoadModule('/src/twin/persistence/state.ts');\n  const { validateState: prior } = await loader.ssrLoadModule('/review-old-state.ts');\n  const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 2560 });\n  assert.equal(design.modules.length, 2);\n  const state = advance(design, initialize(design), 0, [{ id: 'scope-probe-trip', assetId: 'shore/grid', kind: 'trip', timeS: 0 }]);\n  assert.ok(state.log.length > 0);\n  const ids = design.modules.map(m => m.id);\n  const fixtures = [\n    ['all valid modules', ids, 'accepted'],\n    ['last valid module', [ids.at(-1)], 'accepted'],\n    ['empty scope', [], 'accepted'],\n    ['duplicate valid module preserves previous admission', [ids[0], ids[0]], 'accepted'],\n    ['unknown string', ['unknown-module'], 'STATE_LOG_SCOPE'],\n    ['known root asset is not a module', ['shore/grid'], 'STATE_LOG_SCOPE'],\n    ['case-different module ID', [ids[0].toUpperCase()], 'STATE_LOG_SCOPE'],\n    ['number', [42], 'STATE_LOG_SCOPE'],\n    ['null', [null], 'STATE_LOG_SCOPE'],\n    ['boolean', [true], 'STATE_LOG_SCOPE'],\n    ['plain object', [{}], 'STATE_LOG_SCOPE'],\n    ['nested array', [[]], 'STATE_LOG_SCOPE'],\n  ];\n  for (const [name, scope, expected] of fixtures) {\n    const candidate = structuredClone(state); candidate.log[0].affectedIds = scope;\n    const original = structuredClone(candidate);\n    const check = validator => { try { validator(design, candidate); return 'accepted'; } catch (error) { assert.equal(error.diagnostic?.kind, 'invalid-input'); return error.diagnostic.code; } };\n    const priorResult = check(prior), currentResult = check(current);\n    assert.equal(priorResult, expected); assert.equal(currentResult, priorResult); assert.deepEqual(candidate, original);\n    cases.push({ name, scope, expected, priorResult, currentResult, inputUnchanged: true, status: 'PASS' });\n  }\n} finally { await loader.close(); }\nconst after = await fs.readFile(sourcePath, 'utf8');\nassert.equal(hash(after), hash(before));\nconst result = { status: 'PASS', checkedAt: new Date().toISOString(), baselineCommit: base, sourcePath, priorSourceSha256: hash(oldSource), currentSourceSha256: hash(before), sourceUnchangedDuringProbe: true, cases };\nawait fs.writeFile('artifacts/phase-1-review/scope-optimization-probe.json', JSON.stringify(result, null, 2) + '\\n');\nconsole.log(JSON.stringify(result, null, 2));\n"
+    }
+  ],
+  "probe": {
+    "status": "PASS",
+    "checkedAt": "2026-09-09T18:42:06.137Z",
+    "baselineCommit": "19b1082b5277b4771dde80b0e7b12f24cac892cf",
+    "sourcePath": "src/twin/persistence/state.ts",
+    "priorSourceSha256": "75fc1e0dcaa9f10088197884358f5e9859f7c2ec953f298648ee5a25698d4312",
+    "currentSourceSha256": "887e1e2b72d04f881aa76e0e48d5f10b2a3f3cead2f6aebec2a40d854757916c",
+    "sourceUnchangedDuringProbe": true,
+    "cases": [
+      {
+        "name": "all valid modules",
+        "scope": [
+          "platform-001/module-01",
+          "platform-001/module-02"
+        ],
+        "expected": "accepted",
+        "priorResult": "accepted",
+        "currentResult": "accepted",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "last valid module",
+        "scope": [
+          "platform-001/module-02"
+        ],
+        "expected": "accepted",
+        "priorResult": "accepted",
+        "currentResult": "accepted",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "empty scope",
+        "scope": [],
+        "expected": "accepted",
+        "priorResult": "accepted",
+        "currentResult": "accepted",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "duplicate valid module preserves previous admission",
+        "scope": [
+          "platform-001/module-01",
+          "platform-001/module-01"
+        ],
+        "expected": "accepted",
+        "priorResult": "accepted",
+        "currentResult": "accepted",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "unknown string",
+        "scope": [
+          "unknown-module"
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "known root asset is not a module",
+        "scope": [
+          "shore/grid"
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "case-different module ID",
+        "scope": [
+          "PLATFORM-001/MODULE-01"
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "number",
+        "scope": [
+          42
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "null",
+        "scope": [
+          null
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "boolean",
+        "scope": [
+          true
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "plain object",
+        "scope": [
+          {}
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      },
+      {
+        "name": "nested array",
+        "scope": [
+          []
+        ],
+        "expected": "STATE_LOG_SCOPE",
+        "priorResult": "STATE_LOG_SCOPE",
+        "currentResult": "STATE_LOG_SCOPE",
+        "inputUnchanged": true,
+        "status": "PASS"
+      }
+    ]
+  },
+  "findings": [],
+  "openFindings": [],
+  "limitations": [
+    "Review covers this exact two-line optimization only. The lead owns lint, product test suites and the complete clean committed gate.",
+    "Comparative probes use an engine-generated two-module state. The original validator is read from the baseline Git blob, its relative module paths are adapted to the current unchanged dependencies, and TypeScript types are erased for an isolated module loader. There are no numerical mocks.",
+    "No browser/server port, remote operation, commit, production source edit or historical file edit was performed. No performance benchmark was run."
+  ],
+  "outcome": "PASS: the reviewed optimization preserves causal-scope admission and rejection semantics in source and all 12 executed comparative cases."
+}

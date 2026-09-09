@@ -1,0 +1,244 @@
+{
+  "reviewer": "numerical_safety independent agent",
+  "scope": "Bounded review and fix verification of persistence and engine changes authored by another agent; no production edits made by reviewer.",
+  "recordedAtUTC": "2026-09-09T18:08:30.248689+00:00",
+  "sourceHead": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "sourceIdentityNote": "Reviewed uncommitted working-tree files are identified by SHA-256 below. Original pre-fix hashes were not recorded; no retrospective hash claim is made.",
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "node": "v24.18.0"
+  },
+  "originalReview": {
+    "command": "npx vitest --config artifacts/phase-1-review/vitest.config.ts run",
+    "result": "Five original diagnostic cases passed by reproducing four findings (serialization finding included a separate accessor case).",
+    "observations": [
+      {
+        "faultCheckpointAdmitted": true,
+        "actualCoolantK": 303.0766367189894,
+        "expectedCoolantK": 303.15038699999997,
+        "actualEnergyWh": 15.942692268822963,
+        "expectedEnergyWh": 12.044159093654212
+      },
+      {
+        "admittedExportUnreadable": true,
+        "exportedAssetCount": 0
+      },
+      {
+        "arrayAccessorExecuted": 2
+      },
+      {
+        "admittedLegacyCannotRecalculate": true
+      },
+      {
+        "changedDesignAcceptedWithOldCheckpoint": true,
+        "oldConfigIdentity": "neptune-2131c580edd11bac",
+        "newConfigIdentity": "neptune-72b211e4e93e0128",
+        "timeS": 1
+      }
+    ],
+    "additionalReviewRound": {
+      "command": "npx vitest --config artifacts/phase-1-review/vitest.config.ts run",
+      "result": "Six diagnostics passed: five desired assertions verified initial fixes; one positive reproduction confirmed the duty restart deadline coherence gap.",
+      "observation": {
+        "checkpointTimeS": 0,
+        "recordedDutyRestoreTimeS": 0,
+        "expectedDeadlineS": 3,
+        "acceptedAlteredDeadlineS": 8,
+        "atTimeS": 4,
+        "expectedPumpState": "running",
+        "actualPumpState": "starting"
+      }
+    },
+    "intermediateRerun": {
+      "command": "python3 artifacts/phase-1-review/capture.py",
+      "exitCode": 1,
+      "passedTests": 5,
+      "failedTests": 1,
+      "explanation": "Lead fixed the additional deadline issue before its positive reproduction assertion was converted. The old reproduction then failed with STATE_DUTY_DEADLINE, confirming rejection. The final desired-behavior run below supersedes it."
+    },
+    "findings": [
+      {
+        "id": "PH1-REV-PER-001",
+        "severity": "P1",
+        "title": "Fault set and equipment state disagree",
+        "paths": [
+          "src/twin/persistence/state.ts"
+        ],
+        "reproduction": "Create a duty-pump trip at t=0, change only its equipment state from failed to running, then validate/export/import/restore/advance one second. Original code admitted the checkpoint and changed coolant and energy."
+      },
+      {
+        "id": "PH1-REV-PER-002",
+        "severity": "P1",
+        "title": "Standalone state is not bound to complete design",
+        "paths": [
+          "src/twin/persistence/state.ts",
+          "src/twin/engine/simulation.ts",
+          "src/twin/persistence/project.ts"
+        ],
+        "reproduction": "Change config.idleFraction while keeping design.revision. Original validateState and advance accepted the prior checkpoint under the new design."
+      },
+      {
+        "id": "PH1-REV-PER-003",
+        "severity": "P2",
+        "title": "Array serialization hooks/accessors bypass structural validation",
+        "paths": [
+          "src/twin/persistence/structure.ts"
+        ],
+        "reproduction": "An own assets.toJSON returning [] passes validation and emits an unreadable export; array numeric getters execute instead of rejection."
+      },
+      {
+        "id": "PH1-REV-PER-004",
+        "severity": "P2",
+        "title": "Legacy mixed sequences are admitted but cannot recalculate",
+        "paths": [
+          "src/twin/persistence/project.ts"
+        ],
+        "reproduction": "Admit two same-time legacy events with explicit sequence 1 and omitted sequence; old recalculation assigns duplicate sequence 1."
+      },
+      {
+        "id": "PH1-REV-PER-005",
+        "severity": "P1",
+        "title": "Duty startup deadline contradicts recorded restore",
+        "paths": [
+          "src/twin/persistence/state.ts"
+        ],
+        "reproduction": "Restore duty at t=0; alter its future deadline from 3 to 8. Original post-first-fix validation admitted this and retained starting state at t=4."
+      }
+    ]
+  },
+  "verification": {
+    "startedAtUTC": "2026-09-09T18:08:29.821521+00:00",
+    "command": [
+      "npx",
+      "vitest",
+      "--config",
+      "artifacts/phase-1-review/vitest.config.ts",
+      "run",
+      "--reporter=json",
+      "--outputFile",
+      "artifacts/phase-1-review/vitest-result.json"
+    ],
+    "exitCode": 0,
+    "stdout": "JSON report written to /Users/arhaan/Documents/ChatGPT/Neptune/artifacts/phase-1-review/vitest-result.json\n",
+    "stderr": "",
+    "testFiles": 1,
+    "passedTests": 6,
+    "failedTests": 0,
+    "assertions": [
+      {
+        "name": "rejects fault/equipment incoherence before restore and retains valid continuation",
+        "status": "passed"
+      },
+      {
+        "name": "rejects array serialization hooks without executing them",
+        "status": "passed"
+      },
+      {
+        "name": "rejects array accessors without reading them",
+        "status": "passed"
+      },
+      {
+        "name": "recalculates admitted legacy mixed sequences in stable file order and retains parent provenance",
+        "status": "passed"
+      },
+      {
+        "name": "rejects config and connection changes despite an unchanged revision string",
+        "status": "passed"
+      },
+      {
+        "name": "rejects a duty startup deadline inconsistent with its latest restore while preserving valid startup",
+        "status": "passed"
+      }
+    ],
+    "fileHashesBefore": {
+      "src/twin/persistence/design.ts": "5ab3a6670f9a00f1660d42161acde627f6b6f1403f6a748b5cd9832cd409f9b4",
+      "src/twin/persistence/events.ts": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af",
+      "src/twin/persistence/state.ts": "cdb2fb4114bf36e25cc8d9dd3bd7215c285de4bebc5f64e38141787f8eddd480",
+      "src/twin/persistence/structure.ts": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382",
+      "src/twin/persistence/project.ts": "1173a44edb065226c3b49fce85bfe96e2a442dbc1d9ceff93d14ea01a229fa24",
+      "src/twin/persistence/limits.ts": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9",
+      "src/twin/persistence/types.ts": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd",
+      "src/twin/engine/simulation.ts": "eb35c666ec63631298337219f160471caa9a6440c9749900adf451a18b510763",
+      "src/twin/types.ts": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7",
+      "artifacts/phase-1-review/adversarial.test.ts": "40980ffac2f295030ef5e5797deb4f4ca154423334387f45c6aae26c45b7f896",
+      "artifacts/phase-1-review/vitest.config.ts": "9f29f2a5d1f0bf92528897883527911f28ee3acaa666cb9670b65bb1800cb96b"
+    },
+    "fileHashesAfter": {
+      "src/twin/persistence/design.ts": "5ab3a6670f9a00f1660d42161acde627f6b6f1403f6a748b5cd9832cd409f9b4",
+      "src/twin/persistence/events.ts": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af",
+      "src/twin/persistence/state.ts": "cdb2fb4114bf36e25cc8d9dd3bd7215c285de4bebc5f64e38141787f8eddd480",
+      "src/twin/persistence/structure.ts": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382",
+      "src/twin/persistence/project.ts": "1173a44edb065226c3b49fce85bfe96e2a442dbc1d9ceff93d14ea01a229fa24",
+      "src/twin/persistence/limits.ts": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9",
+      "src/twin/persistence/types.ts": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd",
+      "src/twin/engine/simulation.ts": "eb35c666ec63631298337219f160471caa9a6440c9749900adf451a18b510763",
+      "src/twin/types.ts": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7",
+      "artifacts/phase-1-review/adversarial.test.ts": "40980ffac2f295030ef5e5797deb4f4ca154423334387f45c6aae26c45b7f896",
+      "artifacts/phase-1-review/vitest.config.ts": "9f29f2a5d1f0bf92528897883527911f28ee3acaa666cb9670b65bb1800cb96b"
+    },
+    "filesStableDuringRun": true,
+    "observations": [
+      {
+        "finding": "fault-state-coherence",
+        "result": "fixed",
+        "diagnostic": "STATE_EQUIPMENT_FAULT",
+        "validRestoredContinuation": "exactly equal"
+      },
+      {
+        "finding": "array-toJSON-roundtrip",
+        "result": "fixed",
+        "diagnostic": "UNSAFE_ARRAY",
+        "invocations": 0
+      },
+      {
+        "finding": "array-accessor-execution",
+        "result": "fixed",
+        "diagnostic": "UNSAFE_ARRAY",
+        "reads": 0
+      },
+      {
+        "finding": "legacy-sequence-recalculation",
+        "result": "fixed",
+        "eventOrder": [
+          "first",
+          "second"
+        ],
+        "eventSequence": [
+          0,
+          1
+        ],
+        "originalPreserved": true,
+        "parentPreserved": true
+      },
+      {
+        "finding": "complete-design-state-binding",
+        "result": "fixed",
+        "diagnostic": "STATE_DESIGN_BINDING",
+        "testedChanges": [
+          "idleFraction",
+          "connectionCapacity"
+        ],
+        "validDetachedContinuation": "exactly equal"
+      },
+      {
+        "finding": "duty-startup-deadline-history",
+        "result": "fixed",
+        "diagnostic": "STATE_DUTY_DEADLINE",
+        "checkpointTimeS": 0,
+        "appliedRestoreTimeS": 0,
+        "validDeadlineS": 3,
+        "rejectedForgedDeadlineS": 8,
+        "noRestoreRejected": true,
+        "validRestoredContinuation": "exactly equal"
+      }
+    ],
+    "interpretation": "All six final cases use desired behavior assertions: rejection of each malformed checkpoint or unsafe serialization object, successful legacy recalculation, and exact valid restored continuation. They verify five reproduced findings; array hooks and accessors have separate cases."
+  },
+  "remainingFindings": [],
+  "reviewStatus": "All reproduced review findings verified fixed",
+  "limitations": [
+    "Bounded adversarial review, not exhaustive proof of all state invariants.",
+    "No browser, remote, CI or deployment operations were part of this review.",
+    "Durable production regression tests are owned by the lead; temporary diagnostic sources remain in artifacts."
+  ]
+}

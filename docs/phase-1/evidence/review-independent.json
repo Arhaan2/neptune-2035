@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09T18:20:55.004Z",
+  "role": "Independent adversarial functional review",
+  "independence": "Reviewer authored only historical verification tooling/evidence and read-only remote preflight. Reviewer did not author the numerical solvers, persistence/engine contract, worker, UI, or product tests. Historical tooling authored by this reviewer is listed for identity but is not described as independently reviewed.",
+  "baselineSha": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "headAtReview": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "reviewedArtifact": "Current uncommitted Phase 1 working-tree delta, including added files; exact reviewed hashes below. Not a claim about a later commit or merged PR.",
+  "reviewedFileHashes": {
+    ".github/workflows/phase-1.yml": "24af8c3120278d2f5a7a2dbee7689d750d4579ca1a056fa82145fd094e0ed5f2",
+    "scripts/phase-1/history.mjs": "0b3cdb1fdfd122345d7f45a3a013e86b82f891ffd19da851ea3db82812c5eab2",
+    "scripts/phase-1/measure.mjs": "f6dfd09d4f52ce8e04393b1b8d5b030ca420f3ee9bf877b81dfa05d2ff8d2415",
+    "scripts/phase-1/verify.mjs": "c0c35d7a9080283a26264ef774fb367e37235ef9c684429d33b13d9a11ec17ac",
+    "src/twin/analysis/reports.ts": "47a1706b3a9875f2d5a935e2143fa5c69d9f2158e4adb283d711368c876c88cc",
+    "src/twin/assets/design.ts": "26246f28049cde4bae0010797e8986f17531fcd86079c0057e95bfb3793d4a95",
+    "src/twin/engine/simulation.ts": "33d297e5f722b627fab035988ad292e494ff8ddea8eb4456b36517890b5a20d4",
+    "src/twin/engine/worker.ts": "4c32b24def61a53309737783310504ad82073bbfe4e0e194c5bdbfe022bd8944",
+    "src/twin/persistence/design.ts": "1f96f4d035d2c828e399a6dc87cdd03eb633466710c7498f1af0e4c5ed0ad931",
+    "src/twin/persistence/events.ts": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af",
+    "src/twin/persistence/limits.ts": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9",
+    "src/twin/persistence/project.ts": "3642328a00f87325b3763aba111d5daee585033d6f925064dbbbc19635d3674d",
+    "src/twin/persistence/state.ts": "75fc1e0dcaa9f10088197884358f5e9859f7c2ec953f298648ee5a25698d4312",
+    "src/twin/persistence/storage.ts": "54d08ec4f6fb883e1c3902c93d9ec0474ae10de3efc6d5ab47ae88d35e91ff1f",
+    "src/twin/persistence/structure.ts": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382",
+    "src/twin/persistence/types.ts": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd",
+    "src/twin/safety.ts": "0235a70ab20f7ae5a93fb20c59c9faa4671022421cd96a476e5a48f34d52464b",
+    "src/twin/solvers/electrical.ts": "e50bb0fa53992ec4aa10c4f869ce555d00a520046dd166fbbdd9cf8d318653b3",
+    "src/twin/solvers/hydraulic.ts": "9bd60a39d19e157b089d1adf2c8bbf5173c2ba618a681dff1a7106c0e1b3818c",
+    "src/twin/solvers/network.ts": "30e959287d0798c39c39583e2ddb8d6255f9ec503da0ca80d52822f950ccaada",
+    "src/twin/solvers/thermal.ts": "91fc68d2f63ec71d48e3ea699432d239143c2666ddeb0dbb57a7967c541816df",
+    "src/twin/types.ts": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7",
+    "src/ui/TwinApp.tsx": "d68029792c495868a147a296510b162012aea31580bed03a98b2e86679fbf29d",
+    "src/ui/useTwin.ts": "be0b505f22fe106f6be4fed265d62782962195a806aec090aaf49c45c71fd9d5",
+    "tests/browser/phase1.spec.ts": "1690396ffd98197bb1528f8a71bb8741b851a7ab058854d0519aa79a99ac0538",
+    "tests/browser/twin.spec.ts": "45d3324e4a29ebe79d578ee83024def4a31c7267c788018350d28096b72ea851",
+    "tests/phase1-deferred.test.ts": "db0ebde668d5a2203e7dcf0f3278d2d033f594b0874aa0bd2a115b5f136e404a",
+    "tests/phase1-numerical.test.ts": "f5d8eba59d5ab8ad62499ea06a23c36e3f032580a2b2f7f04f3c2d6c3d86e4bd",
+    "tests/phase1-persistence.test.ts": "441547ebcfd1f34ca928f96a3c5ae52e20c46dbbf50040f1e85c3b814ef2c64c",
+    "tests/phase1-worker.test.ts": "830d53ddffd623cf918316af93a97ffac8d6981a85b2893a58d019e5327bb44c",
+    "tests/twin-physics.test.ts": "3e3e397b173e1e90d7237d0c390e3d0da862ca2921abfc8828f4db9b8da14ae1"
+  },
+  "hashesChangedDuringFinalUnitAndProbeWindow": [],
+  "scope": [
+    "All four numerical solvers and their direct boundary tests",
+    "Engine event ordering, fixed-step boundaries, state atomicity and continuation",
+    "Project/design/state/event/structure compatibility and byte/structural admission",
+    "Worker batching, stale request identities, cancellation, restore and resource outcomes",
+    "UI exact restoration/replay, saved shelf, incompatible inspection/recalculation, refresh recovery and export",
+    "Source CI and measurement tooling; immutable Phase 0/public/lockfile separation; deferred networking and equipment/architecture scope"
+  ],
+  "findings": [
+    {
+      "id": "PH1-REVIEW-01",
+      "priority": "P1",
+      "requirements": [
+        "PH1-CHK-01",
+        "PH1-REP-01"
+      ],
+      "title": "Compatible replay reset a saved fractional integration grid",
+      "files": [
+        "src/twin/engine/worker.ts",
+        "src/ui/useTwin.ts",
+        "src/ui/TwinApp.tsx"
+      ],
+      "originalObservation": {
+        "compatibility": {
+          "mode": "exact-checkpoint",
+          "canResume": true,
+          "canRecalculate": true,
+          "explanation": "Compatible model, algorithm and complete checkpoint. Resume preserves physical state, controllers, integration settings and event position."
+        },
+        "originalStepS": 0.125,
+        "replayStepS": 1,
+        "status": "complete",
+        "original": {
+          "batteryWh": 518.1570257782569,
+          "coolantK": 303.0651117957935,
+          "facilityEnergyWh": 3421.7166607964655
+        },
+        "replayed": {
+          "batteryWh": 519.9348717121543,
+          "coolantK": 303.05572783621784,
+          "facilityEnergyWh": 3419.9388148625712
+        }
+      },
+      "resolution": "Worker requests now carry validated integrationStepS; pristine replay initializes that grid, supplied checkpoints reject a mismatch, and UI replay/seek and saved comparisons propagate the saved setting.",
+      "verification": "Executed full-state deep equality for the same 0.125-second, battery-discharge event scenario; replay now matches exactly after normalizing solverMs. Read added unit and browser regressions.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-02",
+      "priority": "P2",
+      "requirements": [
+        "PH1-NUM-02",
+        "PH1-PER-02",
+        "PH1-UI-01"
+      ],
+      "title": "Saved-scenario restoration converted JSON numeric overflow into allowed null",
+      "files": [
+        "src/ui/TwinApp.tsx"
+      ],
+      "originalObservation": {
+        "overflowInserted": true,
+        "directRejected": "serialized number must be a finite number within limits.",
+        "collectionAdmitted": {
+          "timeS": 0,
+          "budget": null
+        }
+      },
+      "resolution": "Shelf reader now runs bounded JSON preflight and validates raw parsed structure before any JSON stringify can erase Infinity.",
+      "verification": "The same raw budgetUSD:1e309 shelf witness now throws INVALID_NUMBER. Added browser regression verifies stored bytes remain and the invalid scenario is unavailable.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-03",
+      "priority": "P1",
+      "requirements": [
+        "PH1-NUM-02",
+        "PH1-CHK-01",
+        "PH1-PER-02"
+      ],
+      "title": "Missing electrical source asset admitted a nominal powered checkpoint",
+      "files": [
+        "src/twin/persistence/design.ts"
+      ],
+      "originalObservation": {
+        "admitted": true,
+        "missingAsset": "shore/grid",
+        "danglingEdges": [
+          "shore/grid>shore/transformer:power"
+        ],
+        "summary": {
+          "timeS": 0,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.69216776267,
+          "gridW": 57393.69216776267,
+          "pumpPowerW": 26238.44377467519,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.15,
+          "batteryWh": 400000,
+          "instantaneousPUE": 5.561404279821965,
+          "energyPUE": null,
+          "electricalResidualW": 0,
+          "thermalResidualW": -2.3283064365386963e-10,
+          "warnings": []
+        },
+        "restoredAssets": 9
+      },
+      "resolution": "Design admission now requires shore/grid and validates asset-parent, module-domain and connection endpoint/port references.",
+      "verification": "The missing-source initialization/export witness now rejects with DESIGN_SOURCE. Existing capacity edits and documented network boundary controls remain supported.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-04",
+      "priority": "P2",
+      "requirements": [
+        "PH1-NUM-02",
+        "PH1-PER-02"
+      ],
+      "title": "Exact worker restore omitted full design validation",
+      "files": [
+        "src/twin/engine/worker.ts"
+      ],
+      "originalObservation": {
+        "kind": "complete",
+        "hasState": true,
+        "invalidDesignSupply": "Infinity",
+        "publishedGridW": 57393.69216776267
+      },
+      "resolution": "Every numerical worker operation validates the design before accepting state, including restore.",
+      "verification": "The Infinity-supply, rebound-identity restore request now returns invalid-input failure without publishing state; matching regression test passes.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-05",
+      "priority": "P2",
+      "requirements": [
+        "PH1-NUM-02",
+        "PH1-NUM-03"
+      ],
+      "title": "Sparse grid requests returned a nominal sparse result",
+      "files": [
+        "src/twin/solvers/electrical.ts"
+      ],
+      "originalObservation": {
+        "accepted": true,
+        "length": 1,
+        "hasIndex": false,
+        "serialized": "[null]"
+      },
+      "resolution": "Allocation validates every array entry including holes, and bounds actual request/domain collections with shared limits.",
+      "verification": "allocateGrid(Array(1),10,new Map()) now rejects as invalid input instead of serializing a successful [null] result; matching regression test passes.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-06",
+      "priority": "P2",
+      "requirements": [
+        "PH1-COMP-01",
+        "PH1-PER-01"
+      ],
+      "title": "Saved comparison export dropped existing parent provenance",
+      "files": [
+        "src/ui/TwinApp.tsx"
+      ],
+      "originalObservation": "compareSaved retained only design/events/state, and comparison export called projectFile without original provenance. A saved explicitly recalculated experiment therefore lost its parent identity through a compatible comparison replay.",
+      "resolution": "Saved comparison runs and Compared results carry source provenance, and comparison export passes it into projectFile before serializeProject.",
+      "verification": "Verified the full source propagation path and the added browser assertion comparing exported provenance to the saved derived project. Browser execution is owned by the integration/worker verification, not claimed as an independent run here.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-07",
+      "priority": "P2",
+      "requirements": [
+        "PH1-PER-02",
+        "PH1-UI-01"
+      ],
+      "title": "Shelf writer lacked the aggregate reader admission checks",
+      "files": [
+        "src/ui/TwinApp.tsx"
+      ],
+      "originalObservation": "The shelf reader enforced the shared total byte/structure ceiling, while the writer only validated each project. If a storage backend accepted the larger aggregate, successful writes could become unreadable. This was a source-level contract mismatch, not a reproduced quota-success claim on this browser.",
+      "resolution": "Shelf writer now checks aggregate serialized preflight and complete collection structure before setItem and before acknowledging the new shelf.",
+      "verification": "Source inspection confirms both aggregate checks precede storage mutation and setSaved. Individual valid projects remain independently exportable on collection/storage failure.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "PH1-REVIEW-08",
+      "priority": "P2",
+      "requirements": [
+        "PH1-NUM-02",
+        "PH1-CHK-01"
+      ],
+      "title": "Connected electrical port with bit/s units still produced nominal watts",
+      "files": [
+        "src/twin/persistence/design.ts"
+      ],
+      "originalObservation": {
+        "admitted": true,
+        "edge": "shore/grid>shore/transformer:power",
+        "original": {
+          "id": "power-out",
+          "medium": "power",
+          "direction": "out",
+          "capacity": 30000000,
+          "unit": "W"
+        },
+        "altered": {
+          "id": "power-out",
+          "medium": "power",
+          "direction": "out",
+          "capacity": 30000000,
+          "unit": "bit/s"
+        },
+        "gridW": 57393.69216776267,
+        "warnings": []
+      },
+      "resolution": "Shared design validation now checks the unit for every declared medium and compatible power input/output directions and media.",
+      "verification": "The connected shore/grid power-out unit witness now rejects with PORT_UNIT. The 32,000/32,008 accelerator shared-network controls remain exact.",
+      "status": "RESOLVED"
+    }
+  ],
+  "openFindings": [],
+  "commands": [
+    {
+      "command": "npm test -- tests/phase1-numerical.test.ts tests/phase1-worker.test.ts tests/phase1-persistence.test.ts",
+      "exitCode": 0,
+      "passed": 81,
+      "failed": 0,
+      "skipped": 0,
+      "elapsedReported": "6.50s",
+      "log": "\n> neptune@2.0.0-rc.1 test\n> vitest run tests/phase1-numerical.test.ts tests/phase1-worker.test.ts tests/phase1-persistence.test.ts\n\n\n RUN  v5.0.0 <reviewed-checkout>\n\n\n Test Files  3 passed (3)\n      Tests  81 passed (81)\n   Start at  11:18:32\n   Duration  6.50s (tests 96%, transform 3%, import 1%)\n\n",
+      "logSha256": "b23f363e1a6a0e06846066ea8a81654fc39e4aa428508d389ebc1527f5a5e936"
+    },
+    {
+      "command": "node artifacts/phase-1-review/recheck.mjs",
+      "exitCode": 0,
+      "script": "import assert from 'node:assert/strict';\nimport fs from 'node:fs/promises';\nimport { createServer } from 'vite';\nconst server = await createServer({configFile:false,optimizeDeps:{noDiscovery:true,entries:[]},server:{middlewareMode:true,watch:null,hmr:false,ws:false},appType:'custom'});\nconst checks=[];\ntry {\n  const {buildDesign,DEFAULT_CONFIG}=await server.ssrLoadModule('/src/twin/assets/design.ts');\n  const {initialize,advanceWithStep,summarize}=await server.ssrLoadModule('/src/twin/engine/simulation.ts');\n  const {createWorkerHandler}=await server.ssrLoadModule('/src/twin/engine/worker.ts');\n  const {identity,preflightJSON,validateStructure}=await server.ssrLoadModule('/src/twin/persistence/structure.ts');\n  const {projectFile,serializeProject}=await server.ssrLoadModule('/src/twin/persistence/project.ts');\n  const {allocateGrid}=await server.ssrLoadModule('/src/twin/solvers/electrical.ts');\n  const d=buildDesign({...DEFAULT_CONFIG,requestedAccelerators:1280,batteryWhPerModule:1000});\n  const events=[{id:'trip',timeS:1,assetId:'shore/bus',kind:'trip'},{id:'restore',timeS:8,assetId:'shore/bus',kind:'restore'}];\n  const expected=advanceWithStep(d,initialize(d),12,events,.125),responses=[];\n  await createWorkerHandler(r=>responses.push(r),async()=>{})({version:2,requestId:1,epoch:1,kind:'replay',design:d,events:expected.events,durationS:12,integrationStepS:expected.integrationStepS});\n  assert.equal(responses.at(-1).status,'complete'); const replayed=responses.at(-1).state;replayed.solverMs=0;assert.deepEqual(replayed,expected);checks.push({name:'fractional replay exact',status:'PASS',stepS:replayed.integrationStepS,batteryWh:replayed.modules[0].batteryWh,facilityEnergyWh:replayed.facilityEnergyWh});\n  const small=buildDesign({...DEFAULT_CONFIG,requestedAccelerators:8});\n  const bad=structuredClone(small),state=initialize(small);bad.config.supplyW=Infinity;state.designIdentity=identity(bad);const rejected=[];\n  await createWorkerHandler(r=>rejected.push(r),async()=>{})({version:2,requestId:1,epoch:1,kind:'restore',design:bad,state});assert.equal(rejected.at(-1).status,'failed');assert.equal(rejected.at(-1).state,undefined);assert.equal(rejected.at(-1).diagnostic.kind,'invalid-input');checks.push({name:'worker restore validates design',status:'PASS',diagnostic:rejected.at(-1).diagnostic.code});\n  const shelf=JSON.stringify([{name:'overflow',project:projectFile(small,initialize(small))}]).replaceAll('\"budgetUSD\":null','\"budgetUSD\":1e309');\n  assert.throws(()=>{preflightJSON(shelf);validateStructure(JSON.parse(shelf))},e=>e.diagnostic?.code==='INVALID_NUMBER');checks.push({name:'raw shelf overflow rejects before rewriting',status:'PASS'});\n  assert.throws(()=>allocateGrid(Array(1),10,new Map()),e=>e.diagnostic?.kind==='invalid-input');checks.push({name:'sparse allocation rejected',status:'PASS'});\n  const missing=structuredClone(small);missing.assets=missing.assets.filter(a=>a.id!=='shore/grid');assert.throws(()=>serializeProject(projectFile(missing,initialize(missing))),e=>e.diagnostic?.code==='DESIGN_SOURCE');checks.push({name:'missing source reference rejected',status:'PASS'});\n  const units=structuredClone(small),edge=units.connections.find(c=>c.from==='shore/grid'&&c.medium==='power');units.assets.find(a=>a.id==='shore/grid').ports.find(p=>p.id===edge.fromPort).unit='bit/s';assert.throws(()=>initialize(units),e=>e.diagnostic?.code==='PORT_UNIT');checks.push({name:'connected power port unit mismatch rejected',status:'PASS'});\n  for(const accelerators of [32000,32008]){const campus=buildDesign({...DEFAULT_CONFIG,requestedAccelerators:accelerators,supplyW:1e9});const summary=summarize(campus,initialize(campus));assert.equal(summary.availableAccelerators,accelerators===32000?32000:0);checks.push({name:'deferred shared network boundary',status:'PASS',accelerators,availableAccelerators:summary.availableAccelerators});}\n} finally {await server.close();await fs.writeFile('artifacts/phase-1-review/recheck.json',JSON.stringify({checkedAt:new Date().toISOString(),checks},null,2)+'\\n');}\nconsole.log(JSON.stringify({status:'PASS',checks},null,2));\n",
+      "result": {
+        "checkedAt": "2026-09-09T18:19:28.829Z",
+        "checks": [
+          {
+            "name": "fractional replay exact",
+            "status": "PASS",
+            "stepS": 0.125,
+            "batteryWh": 518.1570257782569,
+            "facilityEnergyWh": 3421.7166607964655
+          },
+          {
+            "name": "worker restore validates design",
+            "status": "PASS",
+            "diagnostic": "INVALID_NUMBER"
+          },
+          {
+            "name": "raw shelf overflow rejects before rewriting",
+            "status": "PASS"
+          },
+          {
+            "name": "sparse allocation rejected",
+            "status": "PASS"
+          },
+          {
+            "name": "missing source reference rejected",
+            "status": "PASS"
+          },
+          {
+            "name": "connected power port unit mismatch rejected",
+            "status": "PASS"
+          },
+          {
+            "name": "deferred shared network boundary",
+            "status": "PASS",
+            "accelerators": 32000,
+            "availableAccelerators": 32000
+          },
+          {
+            "name": "deferred shared network boundary",
+            "status": "PASS",
+            "accelerators": 32008,
+            "availableAccelerators": 0
+          }
+        ]
+      }
+    },
+    {
+      "command": "git diff --name-only f676c1f9902008a7096e5e8122a5701953b7c772 -- docs/phase-0 scripts/phase-0 tests/fixtures/phase-0 public package-lock.json",
+      "exitCode": 0,
+      "result": []
+    }
+  ],
+  "publicationSafety": {
+    "workflow": ".github/workflows/phase-1.yml",
+    "contentsPermission": "read",
+    "steps": "Checkout, pinned major official setup actions, npm install/tests/build, browser installation, local measurements and upload of verification evidence.",
+    "deploymentActions": [],
+    "remoteWritesByReviewer": [],
+    "preflight": "See remote-preflight.json for exact Pages branch/environment restrictions and the disclosed installed-app enumeration limitation."
+  },
+  "limitations": [
+    "No independent browser run during this review; the integration owner and worker/UI author own the new browser and complete acceptance runs. Browser source and added regression assertions were reviewed.",
+    "No full maximum-size/maximum-duration replay or physical validation is claimed. Focused probes used small finite scenarios and the existing 4,000-node shared network boundary.",
+    "Final clean committed-source, prospective merge, CI and post-merge gates remain integration-owner responsibilities. Later source edits must be compared against these hashes; this report does not imply they were reviewed.",
+    "All original defect witnesses were generated during a changing working-tree review before fixes; the final reviewed artifact is identified by the stable file hashes."
+  ],
+  "outcome": "PASS — all confirmed findings resolved in the reviewed artifact; no remaining functional review finding."
+}

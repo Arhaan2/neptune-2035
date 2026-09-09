@@ -1,0 +1,624 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09T18:34:15.140Z",
+  "role": "Independent bounded adversarial review of the committed candidate follow-up",
+  "reviewedCommit": "19b1082b5277b4771dde80b0e7b12f24cac892cf",
+  "implementationCommit": "d710a9f54acd4742e87ca2790bb5a8d02072a084",
+  "baselineSha": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "prospectiveMainBase": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "independence": "Reviewer did not author the runtime solvers, persistence implementation, worker/UI, or the current tests. Reviewer authored the historical verification helper and historical/remote evidence earlier; those are explicitly excluded from independent authorship claims.",
+  "priorReview": {
+    "path": "docs/phase-1/evidence/review-independent.json",
+    "sha256": "b84ba8e42dd714317170bb2053e01bd96f1a4436e619468feb0bfc0d292ea21c",
+    "reviewedAt": "2026-09-09T18:20:55.004Z",
+    "openFindings": []
+  },
+  "scope": [
+    "Compare exact committed blobs against all 31 final hashes from the preceding independent review. Twenty-seven match, including all previously reviewed runtime files and source CI. Re-read the four changed verification/test files and the new work-budget suite.",
+    "Inspect the direct CSV admission guards and standalone startup-deadline integration-grid guard, which already match the final prior-review hashes; execute independent malformed-input and real fractional-startup controls.",
+    "Review scheduling-boundary fixtures, event validation yields, progress cadence, changed browser seek acceptance, retained cancellation checkpoint assertions, and failed-test summary collection/canonicalized paths in the source verifier.",
+    "Inspect the source-only workflow, contract, requirement matrix, numerical audit, integration/rollback record and exact prospective main ancestry. Preserve the original Phase 0 checkpoint and protected artifacts."
+  ],
+  "hashComparison": {
+    "unchangedFromPriorReview": [
+      ".github/workflows/phase-1.yml",
+      "scripts/phase-1/history.mjs",
+      "scripts/phase-1/measure.mjs",
+      "src/twin/analysis/reports.ts",
+      "src/twin/assets/design.ts",
+      "src/twin/engine/simulation.ts",
+      "src/twin/engine/worker.ts",
+      "src/twin/persistence/design.ts",
+      "src/twin/persistence/events.ts",
+      "src/twin/persistence/limits.ts",
+      "src/twin/persistence/project.ts",
+      "src/twin/persistence/state.ts",
+      "src/twin/persistence/storage.ts",
+      "src/twin/persistence/structure.ts",
+      "src/twin/persistence/types.ts",
+      "src/twin/safety.ts",
+      "src/twin/solvers/electrical.ts",
+      "src/twin/solvers/hydraulic.ts",
+      "src/twin/solvers/network.ts",
+      "src/twin/solvers/thermal.ts",
+      "src/twin/types.ts",
+      "src/ui/TwinApp.tsx",
+      "src/ui/useTwin.ts",
+      "tests/browser/phase1.spec.ts",
+      "tests/phase1-deferred.test.ts",
+      "tests/phase1-numerical.test.ts",
+      "tests/twin-physics.test.ts"
+    ],
+    "changedFromPriorReview": [
+      "scripts/phase-1/verify.mjs",
+      "tests/browser/twin.spec.ts",
+      "tests/phase1-persistence.test.ts",
+      "tests/phase1-worker.test.ts"
+    ],
+    "additionalCommittedFiles": [
+      "docs/phase-1/CONTRACT.md",
+      "docs/phase-1/MERGE-AND-ROLLBACK.md",
+      "docs/phase-1/NUMERICAL-AUDIT.md",
+      "docs/phase-1/PLAN.md",
+      "docs/phase-1/REQUIREMENT-TEST-MATRIX.md",
+      "docs/phase-1/evidence/start.json",
+      "tests/phase1-work-budget.test.ts"
+    ],
+    "reviewedFileHashes": {
+      ".github/workflows/phase-1.yml": "24af8c3120278d2f5a7a2dbee7689d750d4579ca1a056fa82145fd094e0ed5f2",
+      "scripts/phase-1/history.mjs": "0b3cdb1fdfd122345d7f45a3a013e86b82f891ffd19da851ea3db82812c5eab2",
+      "scripts/phase-1/measure.mjs": "f6dfd09d4f52ce8e04393b1b8d5b030ca420f3ee9bf877b81dfa05d2ff8d2415",
+      "scripts/phase-1/verify.mjs": "f7e8f525de1bcde5fd63acca6d53277f36e2a5dc6659ee3ce2f9d15dcbc938bd",
+      "src/twin/analysis/reports.ts": "47a1706b3a9875f2d5a935e2143fa5c69d9f2158e4adb283d711368c876c88cc",
+      "src/twin/assets/design.ts": "26246f28049cde4bae0010797e8986f17531fcd86079c0057e95bfb3793d4a95",
+      "src/twin/engine/simulation.ts": "33d297e5f722b627fab035988ad292e494ff8ddea8eb4456b36517890b5a20d4",
+      "src/twin/engine/worker.ts": "4c32b24def61a53309737783310504ad82073bbfe4e0e194c5bdbfe022bd8944",
+      "src/twin/persistence/design.ts": "1f96f4d035d2c828e399a6dc87cdd03eb633466710c7498f1af0e4c5ed0ad931",
+      "src/twin/persistence/events.ts": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af",
+      "src/twin/persistence/limits.ts": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9",
+      "src/twin/persistence/project.ts": "3642328a00f87325b3763aba111d5daee585033d6f925064dbbbc19635d3674d",
+      "src/twin/persistence/state.ts": "75fc1e0dcaa9f10088197884358f5e9859f7c2ec953f298648ee5a25698d4312",
+      "src/twin/persistence/storage.ts": "54d08ec4f6fb883e1c3902c93d9ec0474ae10de3efc6d5ab47ae88d35e91ff1f",
+      "src/twin/persistence/structure.ts": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382",
+      "src/twin/persistence/types.ts": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd",
+      "src/twin/safety.ts": "0235a70ab20f7ae5a93fb20c59c9faa4671022421cd96a476e5a48f34d52464b",
+      "src/twin/solvers/electrical.ts": "e50bb0fa53992ec4aa10c4f869ce555d00a520046dd166fbbdd9cf8d318653b3",
+      "src/twin/solvers/hydraulic.ts": "9bd60a39d19e157b089d1adf2c8bbf5173c2ba618a681dff1a7106c0e1b3818c",
+      "src/twin/solvers/network.ts": "30e959287d0798c39c39583e2ddb8d6255f9ec503da0ca80d52822f950ccaada",
+      "src/twin/solvers/thermal.ts": "91fc68d2f63ec71d48e3ea699432d239143c2666ddeb0dbb57a7967c541816df",
+      "src/twin/types.ts": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7",
+      "src/ui/TwinApp.tsx": "d68029792c495868a147a296510b162012aea31580bed03a98b2e86679fbf29d",
+      "src/ui/useTwin.ts": "be0b505f22fe106f6be4fed265d62782962195a806aec090aaf49c45c71fd9d5",
+      "tests/browser/phase1.spec.ts": "1690396ffd98197bb1528f8a71bb8741b851a7ab058854d0519aa79a99ac0538",
+      "tests/browser/twin.spec.ts": "cd171046755f4a08d0836e7d531d143c8dd647348ae9a80692136c7262f5855e",
+      "tests/phase1-deferred.test.ts": "db0ebde668d5a2203e7dcf0f3278d2d033f594b0874aa0bd2a115b5f136e404a",
+      "tests/phase1-numerical.test.ts": "f5d8eba59d5ab8ad62499ea06a23c36e3f032580a2b2f7f04f3c2d6c3d86e4bd",
+      "tests/phase1-persistence.test.ts": "c2109c6d34d3749893a13c8ad8586a241e64421d862009563fa2b908754dd50c",
+      "tests/phase1-worker.test.ts": "91f68ff26d196714190c90925c9c4081acc6a8d656d36a36c72ddb16bd87e641",
+      "tests/twin-physics.test.ts": "3e3e397b173e1e90d7237d0c390e3d0da862ca2921abfc8828f4db9b8da14ae1",
+      "docs/phase-1/CONTRACT.md": "2a93b41b9da3a069d2b6a1e58e2888856e700c7c9c12a6c9e9ff901a7f7f5a5f",
+      "docs/phase-1/MERGE-AND-ROLLBACK.md": "2a2ec0e584f500c70e7e30c6cdfa57e8155396c83bd16b52a1737ef63aa50e17",
+      "docs/phase-1/NUMERICAL-AUDIT.md": "a420ee1dfe3460464025c3a6a8b4f8b8147139197a44655a29958df3c1adb52f",
+      "docs/phase-1/PLAN.md": "774fb94a954da4123a05bc5f9003cbb4ea4d167bd42a1af8dfdf8933427eb446",
+      "docs/phase-1/REQUIREMENT-TEST-MATRIX.md": "074c65612d1a80e3d34b0635ca96b1792c799ec4290b86e50ee4633d65281002",
+      "docs/phase-1/evidence/start.json": "0572b858072ad520ec26ba6a681c1f9ca2ee6b2592c5f44820d1ff0bb8c95460",
+      "tests/phase1-work-budget.test.ts": "5ba12506a97d7849b542e2c40ae5edc739bcef9c3ad5ca3ff56f4e0e88e5b956"
+    },
+    "sourceMismatchesDuringReview": []
+  },
+  "finalCommitDelta": {
+    "command": "git diff d710a9f54acd4742e87ca2790bb5a8d02072a084 19b1082b5277b4771dde80b0e7b12f24cac892cf",
+    "files": [
+      "tests/phase1-work-budget.test.ts"
+    ],
+    "description": "Only the controlled numerical kernel mock signature changes from events = [] to events; the real zero-duration call already supplies/accepts the optional events argument. No runtime code changes.",
+    "patch": "diff --git a/tests/phase1-work-budget.test.ts b/tests/phase1-work-budget.test.ts\nindex ad9e4e3..86aa937 100644\n--- a/tests/phase1-work-budget.test.ts\n+++ b/tests/phase1-work-budget.test.ts\n@@ -8,7 +8,7 @@ import type { WorkerResponse } from '../src/twin/types';\n // Physical long histories and checkpoint trajectories use the real kernel in the other suites.\n vi.mock('../src/twin/engine/simulation', async (importOriginal) => {\n   const real = await importOriginal<typeof import('../src/twin/engine/simulation')>();\n-  return { ...real, advance: ((design, state, duration, events = []) => duration === 0 ? real.advance(design, state, 0, events) : { ...state, timeS: state.timeS + duration, stepIndex: state.stepIndex + duration / state.integrationStepS }) as typeof real.advance };\n+  return { ...real, advance: ((design, state, duration, events) => duration === 0 ? real.advance(design, state, 0, events) : { ...state, timeS: state.timeS + duration, stepIndex: state.stepIndex + duration / state.integrationStepS }) as typeof real.advance };\n });\n describe('PH1-PER-02 worker work budget one-unit boundaries', () => {\n   it.each([-1, 0, 1])('replay at 2,000,000 %+d module steps retains the correct completed boundary', async offset => {"
+  },
+  "checks": [
+    {
+      "name": "Work-budget boundary fixtures",
+      "status": "PASS",
+      "method": "Source review and focused unit execution",
+      "details": "The actual worker handler schedules one module at 2,000,000 -1, at 2,000,000, and at 2,000,000 +1 work units. The first two complete and the third retains the 2,000,000 boundary with REPLAY_BUDGET. Positive-duration numerical work is explicitly mocked within this test file; zero-duration admission and worker scheduling remain real. The test and requirement matrix do not claim physical integration of those long trajectories."
+    },
+    {
+      "name": "Event-validation and progress cadence boundaries",
+      "status": "PASS",
+      "method": "Source review and focused unit execution",
+      "details": "127/128/129 events require ceil(count/128) yields without truncation. 249/250/251 ms yield clocks yield the declared progress counts and exact normalized physical state after the real 20-second solver trajectory."
+    },
+    {
+      "name": "Browser seek contract",
+      "status": "PASS_SOURCE_REVIEW_ONLY",
+      "details": "The historical current-app seek case now enables 86,401 s and rejects 30-day horizon +1 s while retaining negative/fractional rejection. Other preexisting cancellation assertions explicitly inspect the retained completed project checkpoint and subsequent stale-response immunity. No browser was launched by this follow-up reviewer."
+    },
+    {
+      "name": "Verification script failure evidence",
+      "status": "PASS_SOURCE_REVIEW_AND_SYNTAX",
+      "details": "Unit/browser child processes allow nonzero exit only long enough to collect their JSON summaries. Failed/skipped units fail the gate; failed/skipped/flaky browser cases or any recorded nonzero child exit fail the gate. Logs and source hashes persist in finally. The verified checkout is canonicalized through realpath before path sanitization; summary filenames are repository-relative. Each attempt creates a new output directory."
+    },
+    {
+      "name": "Direct CSV and deadline admission probes",
+      "status": "PASS",
+      "checkedAt": "2026-09-09T18:32:29.471Z",
+      "checks": [
+        {
+          "name": "direct results CSV rejects nonfinite state; valid CSV still exports",
+          "status": "PASS"
+        },
+        {
+          "name": "direct inventory CSV rejects nonfinite design; valid CSV still exports",
+          "status": "PASS"
+        },
+        {
+          "name": "actual pending startup validates on fractional grid and rejects half-grid corruption",
+          "status": "PASS",
+          "integrationStepS": 0.125,
+          "checkpointTimeS": 1,
+          "validDeadlineS": 8,
+          "rejectedDeadlineS": 8.0625
+        }
+      ]
+    },
+    {
+      "name": "Prospective normal merge ancestry and preservation",
+      "status": "PASS",
+      "base": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "checkpoint": "f676c1f9902008a7096e5e8122a5701953b7c772",
+      "head": "19b1082b5277b4771dde80b0e7b12f24cac892cf",
+      "baseIsAncestorOfCheckpoint": true,
+      "checkpointIsAncestorOfHead": true,
+      "mergeBase": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "candidateTree": "59f4c671d697d4198df45e5e848508ec99b42c01",
+      "prospectiveMergeTree": "For unchanged main at base, a normal history-preserving merge has this same tree because base is an ancestor of head. No merge or remote write was performed.",
+      "prerequisiteFileCount": 72,
+      "prerequisitesOnlyAdditions": true,
+      "protectedDiff": "",
+      "protectedFiles": 73,
+      "changedProtected": []
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm test -- tests/phase1-work-budget.test.ts tests/phase1-worker.test.ts tests/phase1-persistence.test.ts --reporter=default --reporter=json --outputFile=artifacts/phase-1-review/committed-focused-unit.json",
+      "exitCode": 0,
+      "summary": {
+        "success": true,
+        "total": 68,
+        "passed": 68,
+        "failed": 0,
+        "skipped": 0
+      },
+      "files": [
+        {
+          "path": "tests/phase1-persistence.test.ts",
+          "status": "passed",
+          "total": 16,
+          "tests": [
+            {
+              "name": "PH1-PER-01 real historical thresholds round-trips real engine-generated 999, 1000, 1001-event applied histories and continues",
+              "status": "passed",
+              "durationMs": 709.36675
+            },
+            {
+              "name": "PH1-PER-01 real historical thresholds advances a real one-node run through 86399, 86400 and 86401 seconds, preserving continuation",
+              "status": "passed",
+              "durationMs": 1545.4145
+            },
+            {
+              "name": "PH1-PER-02 declared boundaries admits 9999/10000 future events through engine/export/import, rejects 10001 atomically",
+              "status": "passed",
+              "durationMs": 1346.868583
+            },
+            {
+              "name": "PH1-PER-02 declared boundaries checks project and event horizon at one-second increments without claiming maximum-duration replay",
+              "status": "passed",
+              "durationMs": 11.680125000000317
+            },
+            {
+              "name": "PH1-PER-02 declared boundaries checks actual UTF-8 bytes below/at/above 64 MiB including multibyte input",
+              "status": "passed",
+              "durationMs": 1010.6620000000003
+            },
+            {
+              "name": "PH1-PER-02 declared boundaries bounds nesting before parse and exact value/key item allocation",
+              "status": "passed",
+              "durationMs": 1398.9896669999998
+            },
+            {
+              "name": "PH1-PER-02 declared boundaries checks each shared allocation maximum independently of semantic shape",
+              "status": "passed",
+              "durationMs": 1.1973330000000715
+            },
+            {
+              "name": "PH1-PER-02 declared boundaries rejects overflow, duplicate keys, non-JSON values and unsafe fields before serialization",
+              "status": "passed",
+              "durationMs": 4.984792000000198
+            },
+            {
+              "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints compares intermediate continuous/chunked/fresh restored trajectories around event and startup boundaries",
+              "status": "passed",
+              "durationMs": 295.93404199999986
+            },
+            {
+              "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints same-time interactive admissions equal replay order and duplicate submissions apply exactly once",
+              "status": "passed",
+              "durationMs": 11.3643749999992
+            },
+            {
+              "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints persists every allowed integration setting and rejects changing a continuation sequence",
+              "status": "passed",
+              "durationMs": 65.65816600000016
+            },
+            {
+              "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints rejects incoherent/missing state without mutating the active checkpoint",
+              "status": "passed",
+              "durationMs": 19.837000000000444
+            },
+            {
+              "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints preserves actual graph changes in the existing design representation",
+              "status": "passed",
+              "durationMs": 13.677166999999827
+            },
+            {
+              "name": "PH1-COMP-01 compatibility and provenance legacy long histories are scenario-only; explicit recalculation preserves parent and original",
+              "status": "passed",
+              "durationMs": 26.074000000000524
+            },
+            {
+              "name": "PH1-COMP-01 compatibility and provenance unknown numerical versions remain inspectable but cannot silently resume",
+              "status": "passed",
+              "durationMs": 8.683415999999852
+            },
+            {
+              "name": "PH1-NUM-03 candidate publication rejects nonfinite and inconsistent direct engine inputs without changing last valid state",
+              "status": "passed",
+              "durationMs": 3.448833000000377
+            }
+          ]
+        },
+        {
+          "path": "tests/phase1-work-budget.test.ts",
+          "status": "passed",
+          "total": 3,
+          "tests": [
+            {
+              "name": "PH1-PER-02 worker work budget one-unit boundaries replay at 2,000,000 %+d module steps retains the correct completed boundary",
+              "status": "passed",
+              "durationMs": 40.61420799999999
+            },
+            {
+              "name": "PH1-PER-02 worker work budget one-unit boundaries replay at 2,000,000 %+d module steps retains the correct completed boundary",
+              "status": "passed",
+              "durationMs": 34.205083
+            },
+            {
+              "name": "PH1-PER-02 worker work budget one-unit boundaries replay at 2,000,000 %+d module steps retains the correct completed boundary",
+              "status": "passed",
+              "durationMs": 33.447834
+            }
+          ]
+        },
+        {
+          "path": "tests/phase1-worker.test.ts",
+          "status": "passed",
+          "total": 49,
+          "tests": [
+            {
+              "name": "PH1-REP-01 committed worker stepping chunk size 1s reproduces the same battery, startup and same-time event trajectory",
+              "status": "passed",
+              "durationMs": 50.69020800000001
+            },
+            {
+              "name": "PH1-REP-01 committed worker stepping chunk size 2s reproduces the same battery, startup and same-time event trajectory",
+              "status": "passed",
+              "durationMs": 25.48583400000001
+            },
+            {
+              "name": "PH1-REP-01 committed worker stepping chunk size 3s reproduces the same battery, startup and same-time event trajectory",
+              "status": "passed",
+              "durationMs": 21.018417
+            },
+            {
+              "name": "PH1-REP-01 committed worker stepping chunk size 9s reproduces the same battery, startup and same-time event trajectory",
+              "status": "passed",
+              "durationMs": 18.351458000000036
+            },
+            {
+              "name": "PH1-REP-01 committed worker stepping chunk size 10s reproduces the same battery, startup and same-time event trajectory",
+              "status": "passed",
+              "durationMs": 18.62870799999996
+            },
+            {
+              "name": "PH1-REP-01 committed worker stepping resumes a fresh worker from a checkpoint during battery discharge and pending startup",
+              "status": "passed",
+              "durationMs": 15.91620899999998
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure cancel acknowledges the latest complete chunk and a fresh worker resumes it",
+              "status": "passed",
+              "durationMs": 22.59212500000001
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure observes cancellation between event-validation batches without partially admitting history",
+              "status": "passed",
+              "durationMs": 1.6429170000000113
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure ignores old epoch and duplicate request IDs after supersession",
+              "status": "passed",
+              "durationMs": 2.4774590000000103
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure wall budget at limit %+d ms has an explicit resource outcome",
+              "status": "passed",
+              "durationMs": 3.3666659999999524
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure wall budget at limit %+d ms has an explicit resource outcome",
+              "status": "passed",
+              "durationMs": 2.5385410000000093
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure wall budget at limit %+d ms has an explicit resource outcome",
+              "status": "passed",
+              "durationMs": 2.140874999999994
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure invalid event and failed state admission do not publish replacement state",
+              "status": "passed",
+              "durationMs": 1.7506249999999568
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 0s",
+              "status": "passed",
+              "durationMs": 0.21833300000002964
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 1s",
+              "status": "passed",
+              "durationMs": 2.3746249999999804
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 2s",
+              "status": "passed",
+              "durationMs": 2.176207999999974
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 9s",
+              "status": "passed",
+              "durationMs": 2.2931669999999826
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 10s",
+              "status": "passed",
+              "durationMs": 1.9827080000000024
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 11s",
+              "status": "passed",
+              "durationMs": 0.12816600000002154
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration NaN",
+              "status": "passed",
+              "durationMs": 0.1528329999999869
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration Infinity",
+              "status": "passed",
+              "durationMs": 0.10804200000001174
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration -Infinity",
+              "status": "passed",
+              "durationMs": 0.10162500000001273
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration null",
+              "status": "passed",
+              "durationMs": 0.11545800000004647
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration 1",
+              "status": "passed",
+              "durationMs": 0.11124999999998408
+            },
+            {
+              "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration undefined",
+              "status": "passed",
+              "durationMs": 0.11679099999997788
+            },
+            {
+              "name": "PH1-UI-01 atomic browser-storage boundary only reports success after a successful replacement and retains old durable data after quota failure",
+              "status": "passed",
+              "durationMs": 7.554499999999962
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries advance duration 86399s is distinct from execution budget",
+              "status": "passed",
+              "durationMs": 2.3759170000000154
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries advance duration 86400s is distinct from execution budget",
+              "status": "passed",
+              "durationMs": 2.238958000000025
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries advance duration 86401s is distinct from execution budget",
+              "status": "passed",
+              "durationMs": 1.1304999999999836
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries replay horizon 2591999s is distinct from execution budget",
+              "status": "passed",
+              "durationMs": 2.2440839999999866
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries replay horizon 2592000s is distinct from execution budget",
+              "status": "passed",
+              "durationMs": 2.0936659999999847
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries replay horizon 2592001s is distinct from execution budget",
+              "status": "passed",
+              "durationMs": 0.12887499999999363
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries preserves or rejects all 9999 events without truncation",
+              "status": "passed",
+              "durationMs": 105.55312500000002
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries preserves or rejects all 10000 events without truncation",
+              "status": "passed",
+              "durationMs": 102.07633299999998
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries preserves or rejects all 10001 events without truncation",
+              "status": "passed",
+              "durationMs": 1.7353749999999764
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries bounds an atomic same-time event batch at 7999 module steps",
+              "status": "passed",
+              "durationMs": 182.65241600000002
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries bounds an atomic same-time event batch at 8000 module steps",
+              "status": "passed",
+              "durationMs": 179.802458
+            },
+            {
+              "name": "PH1-PER-02 worker admission boundaries bounds an atomic same-time event batch at 8001 module steps",
+              "status": "passed",
+              "durationMs": 3.458500000000072
+            },
+            {
+              "name": "PH1-NUM-03 a failed worker timing calculation cannot corrupt the last validated physical checkpoint",
+              "status": "passed",
+              "durationMs": 7.969291999999996
+            },
+            {
+              "name": "PH1-REP-01 replay and restored continuation retain the 0s integration grid",
+              "status": "passed",
+              "durationMs": 29.38404199999991
+            },
+            {
+              "name": "PH1-REP-01 replay and restored continuation retain the 0s integration grid",
+              "status": "passed",
+              "durationMs": 31.14779199999998
+            },
+            {
+              "name": "PH1-REP-01 replay and restored continuation retain the 0s integration grid",
+              "status": "passed",
+              "durationMs": 33.66825000000006
+            },
+            {
+              "name": "PH1-NUM-02 exact worker restoration validates the full design before publishing state",
+              "status": "passed",
+              "durationMs": 1.3892080000000533
+            },
+            {
+              "name": "PH1-PER-02 validates 127 events with the declared bounded yielding cadence",
+              "status": "passed",
+              "durationMs": 3.600791999999956
+            },
+            {
+              "name": "PH1-PER-02 validates 128 events with the declared bounded yielding cadence",
+              "status": "passed",
+              "durationMs": 3.4317499999999654
+            },
+            {
+              "name": "PH1-PER-02 validates 129 events with the declared bounded yielding cadence",
+              "status": "passed",
+              "durationMs": 3.368791999999985
+            },
+            {
+              "name": "PH1-REP-01 249ms progress cadence does not alter the numerical trajectory",
+              "status": "passed",
+              "durationMs": 7.424542000000201
+            },
+            {
+              "name": "PH1-REP-01 250ms progress cadence does not alter the numerical trajectory",
+              "status": "passed",
+              "durationMs": 6.75283300000001
+            },
+            {
+              "name": "PH1-REP-01 251ms progress cadence does not alter the numerical trajectory",
+              "status": "passed",
+              "durationMs": 7.1534999999998945
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "command": "node --check scripts/phase-1/verify.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node artifacts/phase-1-review/committed-boundary-probes.mjs",
+      "exitCode": 0,
+      "sourceSha256": "3c9bddd9ce450f7fbc75708be261415c301f787f60270f874c2f88b3dee269d7",
+      "source": "import assert from 'node:assert/strict';\nimport fs from 'node:fs/promises';\nimport { createServer } from 'vite';\nconst loader = await createServer({ configFile: false, optimizeDeps: { noDiscovery: true, entries: [] }, server: { middlewareMode: true, watch: null, hmr: false, ws: false }, appType: 'custom' });\nconst checks = [];\ntry {\n  const { buildDesign, DEFAULT_CONFIG } = await loader.ssrLoadModule('/src/twin/assets/design.ts');\n  const { initialize, advanceWithStep } = await loader.ssrLoadModule('/src/twin/engine/simulation.ts');\n  const { validateState } = await loader.ssrLoadModule('/src/twin/persistence/state.ts');\n  const { resultsCSV, inventoryCSV } = await loader.ssrLoadModule('/src/twin/analysis/reports.ts');\n  const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 });\n  const initial = initialize(design);\n  assert.match(resultsCSV(design, initial), /coolantK/);\n  assert.match(inventoryCSV(design), /assetId/);\n  const invalidState = structuredClone(initial);\n  invalidState.modules[0].coolantK = Infinity;\n  assert.throws(() => resultsCSV(design, invalidState), e => e.diagnostic?.kind === 'invalid-input');\n  checks.push({ name: 'direct results CSV rejects nonfinite state; valid CSV still exports', status: 'PASS' });\n  const invalidDesign = structuredClone(design);\n  invalidDesign.config.supplyW = Infinity;\n  assert.throws(() => inventoryCSV(invalidDesign), e => e.diagnostic?.kind === 'invalid-input');\n  checks.push({ name: 'direct inventory CSV rejects nonfinite design; valid CSV still exports', status: 'PASS' });\n  const duty = `${design.modules[0].id}/pump-duty`;\n  const state = advanceWithStep(design, initial, 1, [{ id: 'trip', timeS: 0, kind: 'trip', assetId: duty }], 0.125);\n  validateState(design, state);\n  const standby = `${design.modules[0].id}/pump-standby`;\n  assert.equal(state.modules[0].states[standby], 'starting');\n  assert.ok(state.modules[0].startAtS[standby] > state.timeS);\n  const invalidDeadline = structuredClone(state);\n  invalidDeadline.modules[0].startAtS[standby] += 0.0625;\n  assert.throws(() => validateState(design, invalidDeadline), e => e.diagnostic?.code === 'STATE_DEADLINE_GRID');\n  checks.push({ name: 'actual pending startup validates on fractional grid and rejects half-grid corruption', status: 'PASS', integrationStepS: state.integrationStepS, checkpointTimeS: state.timeS, validDeadlineS: state.modules[0].startAtS[standby], rejectedDeadlineS: invalidDeadline.modules[0].startAtS[standby] });\n} finally { await loader.close(); }\nconst result = { status: 'PASS', checkedAt: new Date().toISOString(), checks };\nawait fs.writeFile('artifacts/phase-1-review/committed-boundary-probes.json', JSON.stringify(result, null, 2) + '\\n');\nconsole.log(JSON.stringify(result, null, 2));\n",
+      "result": {
+        "status": "PASS",
+        "checkedAt": "2026-09-09T18:32:29.471Z",
+        "checks": [
+          {
+            "name": "direct results CSV rejects nonfinite state; valid CSV still exports",
+            "status": "PASS"
+          },
+          {
+            "name": "direct inventory CSV rejects nonfinite design; valid CSV still exports",
+            "status": "PASS"
+          },
+          {
+            "name": "actual pending startup validates on fractional grid and rejects half-grid corruption",
+            "status": "PASS",
+            "integrationStepS": 0.125,
+            "checkpointTimeS": 1,
+            "validDeadlineS": 8,
+            "rejectedDeadlineS": 8.0625
+          }
+        ]
+      }
+    },
+    {
+      "command": "git merge-base --is-ancestor 23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f f676c1f9902008a7096e5e8122a5701953b7c772; git merge-base --is-ancestor f676c1f9902008a7096e5e8122a5701953b7c772 19b1082b5277b4771dde80b0e7b12f24cac892cf",
+      "exitCodes": [
+        0,
+        0
+      ],
+      "note": "Executed as separate execFileSync calls; no shell chaining, branch/ref changes or merge was performed."
+    }
+  ],
+  "publicationSafety": {
+    "workflow": ".github/workflows/phase-1.yml",
+    "workflowSha256": "24af8c3120278d2f5a7a2dbee7689d750d4579ca1a056fa82145fd094e0ed5f2",
+    "triggers": [
+      "push main",
+      "push codex/neptune-phase-1",
+      "pull_request targeting main"
+    ],
+    "permissions": {
+      "contents": "read"
+    },
+    "steps": "Checkout, Node setup, npm ci, Playwright browser installation, source verifier, evidence artifact upload. No deployment/release environment, deployment action, push, or Pages write.",
+    "packageScriptsAndLockUnchanged": true,
+    "compiledPublicArtifactsUnchanged": true,
+    "remoteAudit": "Earlier read-only facts and installed-app enumeration limits remain in remote-preflight.json. This review makes no new claim about current remote state or unenumerated external apps.",
+    "remoteWritesPerformed": false
+  },
+  "findings": [],
+  "openFindings": [],
+  "limitations": [
+    "This is a bounded follow-up review tied to the exact commit above, with prior complete runtime review carried forward only for matching hashes. It is not a fresh exhaustive numerical review or a new complete browser run.",
+    "Focused tests ran in the existing local dependency installation with committed tracked sources hash-verified before/after. The lead owns the separate clean exact-ref full acceptance gate, CI, and post-merge verification; their results are not claimed here.",
+    "The verifier failure-summary change was inspected and syntax-checked, not fault-injected end-to-end by this reviewer. No server port was bound; the three boundary probes used Vite only as a middleware-mode module loader with HMR/websocket disabled.",
+    "Prospective tree equality is conditional on main remaining at the stated ancestor and the tested candidate remaining unchanged. A later evidence-only commit, changed base or merged head needs its own tree/diff verification before integration.",
+    "No fresh remote settings audit, push, PR creation, merge, deployment or compiled-artifact promotion was performed in this follow-up."
+  ],
+  "outcome": "PASS: no new actionable findings in the reviewed committed follow-up. Full clean/CI/actual integration gates remain the integration owner's responsibility."
+}

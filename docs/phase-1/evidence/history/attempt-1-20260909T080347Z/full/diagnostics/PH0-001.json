@@ -1,0 +1,79 @@
+{
+  "id": "PH0-001",
+  "classification": "correctness defect",
+  "disposition": "REPRODUCED",
+  "desiredRegressions": [
+    {
+      "name": "reject nonfinite shutoffPa explicitly at pump-rating validation",
+      "outcome": "EXPECTED SEMANTIC FAILURE",
+      "message": "shutoffPa=Infinity must be explicitly rejected as an invalid pump rating\n+ actual - expected\n\n+ 'returned'\n- 'explicit-rating-rejection'\n",
+      "actual": "returned",
+      "expected": "explicit-rating-rejection"
+    },
+    {
+      "name": "reject nonfinite freeFlowM3S explicitly at pump-rating validation",
+      "outcome": "EXPECTED SEMANTIC FAILURE",
+      "message": "freeFlowM3S=Infinity must be explicitly rejected as an invalid pump rating\n+ actual - expected\n\n+ 'numerical-or-unrelated-error'\n- 'explicit-rating-rejection'\n",
+      "actual": "numerical-or-unrelated-error",
+      "expected": "explicit-rating-rejection"
+    }
+  ],
+  "control": {
+    "input": {
+      "lengthM": 58,
+      "diameterM": 0.18,
+      "roughnessM": 0.000045,
+      "densityKgM3": 997,
+      "dynamicViscosityPaS": 0.000855,
+      "fittingsK": 12,
+      "equipmentDropPaAtReference": 80000,
+      "referenceFlowM3S": 0.05,
+      "pumpCount": 1,
+      "pumpSpeed": 1,
+      "shutoffPa": 250000,
+      "freeFlowM3S": 0.1,
+      "efficiency": 0.72
+    },
+    "result": {
+      "flowM3S": 0.0596990034191549,
+      "pressurePa": 160900.72477053275,
+      "electricalW": 13341.129053084076,
+      "reynolds": 492417.7942738406,
+      "darcyFactor": 0.01575649139861,
+      "headResidualPa": -0.0000015394471120089293,
+      "massResidualKgS": 0,
+      "iterations": 37
+    }
+  },
+  "observations": [
+    {
+      "field": "shutoffPa",
+      "value": "Infinity (constructed directly)",
+      "kind": "returned",
+      "result": {
+        "flowM3S": 0.09999999999963621,
+        "pressurePa": 450242.5612997924,
+        "electricalW": 62533.68906918812,
+        "reynolds": 824834.1949943725,
+        "darcyFactor": 0.015263789647400737,
+        "headResidualPa": "Infinity",
+        "massResidualKgS": 0,
+        "iterations": 37
+      }
+    },
+    {
+      "field": "freeFlowM3S",
+      "value": "Infinity (constructed directly)",
+      "kind": "numerical-or-unrelated-error",
+      "message": "Reynolds number must be finite and non-negative"
+    },
+    {
+      "field": "efficiency",
+      "value": "Infinity (constructed directly)",
+      "kind": "explicit-rating-rejection",
+      "message": "Invalid pump rating"
+    }
+  ],
+  "evidenceCheck": "PASS",
+  "elapsedMs": 0.586291999999986
+}

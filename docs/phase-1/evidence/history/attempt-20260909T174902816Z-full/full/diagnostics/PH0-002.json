@@ -1,0 +1,210 @@
+{
+  "id": "PH0-002",
+  "classification": "correctness defect",
+  "disposition": "REPRODUCED",
+  "desiredRegressions": [
+    {
+      "name": "round-trip 1001 valid engine-applied events",
+      "outcome": "EXPECTED SEMANTIC FAILURE",
+      "message": "Real exporter output from 1001 legitimate applied engine events must import\n\nfalse !== true\n",
+      "actual": false,
+      "expected": true
+    },
+    {
+      "name": "round-trip supported scheduled event at 86401s",
+      "outcome": "EXPECTED SEMANTIC FAILURE",
+      "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "actual": false,
+      "expected": true
+    },
+    {
+      "name": "round-trip supported scheduled event at 2592000s",
+      "outcome": "EXPECTED SEMANTIC FAILURE",
+      "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "actual": false,
+      "expected": true
+    },
+    {
+      "name": "round-trip legitimate engine clock at 86401s",
+      "outcome": "EXPECTED SEMANTIC FAILURE",
+      "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "actual": false,
+      "expected": true
+    }
+  ],
+  "config": {
+    "schemaVersion": 2,
+    "generation": 1,
+    "requestedAccelerators": 8,
+    "supplyW": 30000000,
+    "standbyPumps": 1,
+    "seawaterK": 291.15,
+    "workload": 0,
+    "idleFraction": 0.3,
+    "exchangerUAWPerK": 350000,
+    "foulingResistanceKPerW": 0,
+    "batteryWhPerModule": 400000,
+    "batteryMaxWPerModule": 2200000,
+    "pumpSpeed": 1,
+    "requireExternalNetwork": false,
+    "requireClusterNetwork": true,
+    "budgetUSD": null
+  },
+  "timestepS": 1,
+  "records": [
+    {
+      "case": "events-999",
+      "timeS": 0,
+      "eventCount": 999,
+      "eventTimeRangeS": [
+        0,
+        0
+      ],
+      "appliedEventCount": 999,
+      "logCount": 999,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 82396,
+      "accepted": true
+    },
+    {
+      "case": "events-1000",
+      "timeS": 0,
+      "eventCount": 1000,
+      "eventTimeRangeS": [
+        0,
+        0
+      ],
+      "appliedEventCount": 1000,
+      "logCount": 1000,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 82479,
+      "accepted": true
+    },
+    {
+      "case": "events-1001",
+      "timeS": 0,
+      "eventCount": 1001,
+      "eventTimeRangeS": [
+        0,
+        0
+      ],
+      "appliedEventCount": 1001,
+      "logCount": 1000,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 82560,
+      "accepted": false,
+      "rejection": "Time or event count exceeds replay bounds."
+    },
+    {
+      "case": "future-event",
+      "timeS": 0,
+      "eventCount": 1,
+      "eventTimeRangeS": [
+        86399,
+        86399
+      ],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 563,
+      "accepted": true
+    },
+    {
+      "case": "future-event",
+      "timeS": 0,
+      "eventCount": 1,
+      "eventTimeRangeS": [
+        86400,
+        86400
+      ],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 563,
+      "accepted": true
+    },
+    {
+      "case": "future-event",
+      "timeS": 0,
+      "eventCount": 1,
+      "eventTimeRangeS": [
+        86401,
+        86401
+      ],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 563,
+      "accepted": false,
+      "rejection": "Invalid event record."
+    },
+    {
+      "case": "future-event",
+      "timeS": 0,
+      "eventCount": 1,
+      "eventTimeRangeS": [
+        2592000,
+        2592000
+      ],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 565,
+      "accepted": false,
+      "rejection": "Invalid event record."
+    },
+    {
+      "case": "elapsed-time",
+      "timeS": 86399,
+      "eventCount": 0,
+      "eventTimeRangeS": [],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 484,
+      "accepted": true
+    },
+    {
+      "case": "elapsed-time",
+      "timeS": 86400,
+      "eventCount": 0,
+      "eventTimeRangeS": [],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 484,
+      "accepted": true
+    },
+    {
+      "case": "elapsed-time",
+      "timeS": 86401,
+      "eventCount": 0,
+      "eventTimeRangeS": [],
+      "appliedEventCount": 0,
+      "logCount": 0,
+      "schemaVersion": 2,
+      "solverVersion": "2.0.0-rc.1",
+      "encodedBytes": 484,
+      "accepted": false,
+      "rejection": "Time or event count exceeds replay bounds."
+    }
+  ],
+  "engineBoundary": {
+    "maxUniqueEvents": 10000,
+    "maxEventsAppliedObserved": 10000,
+    "maxLogEntriesObserved": 1000,
+    "maxAdvanceDurationS": 86400,
+    "horizonS": 2592000
+  },
+  "evidenceCheck": "PASS",
+  "elapsedMs": 322.59925
+}

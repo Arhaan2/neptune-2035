@@ -1,0 +1,13 @@
+
+> neptune@2.0.0-rc.1 test:browser
+> playwright test --project=webkit tests/browser/acceptance.spec.ts:279 tests/browser/twin.spec.ts:243
+
+
+Running 2 tests using 1 worker
+
+(node:14840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (39.2s)
+  ✓  2 [webkit] › tests/browser/twin.spec.ts:243:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (11.2s)
+
+  2 passed (51.6s)

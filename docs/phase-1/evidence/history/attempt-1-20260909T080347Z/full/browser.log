@@ -1,0 +1,151 @@
+
+> neptune@2.0.0-rc.1 test:browser
+> playwright test
+
+
+Running 48 tests using 1 worker
+
+(node:11811) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (7.1s)
+  ✓   2 [chromium] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (6.9s)
+  ✓   3 [chromium] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (8.0s)
+  ✓   4 [chromium] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (38.9s)
+  ✓   5 [chromium] › tests/browser/twin.spec.ts:49:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (2.1s)
+  ✓   6 [chromium] › tests/browser/twin.spec.ts:85:1 › standby transfer is an actual selected-component state transition (1.7s)
+  ✓   7 [chromium] › tests/browser/twin.spec.ts:98:1 › clock pause and speed are independent of design resets and validated controls (3.3s)
+  ✓   8 [chromium] › tests/browser/twin.spec.ts:114:1 › seek backward and forward restores exact event-boundary numerical results (2.2s)
+  ✓   9 [chromium] › tests/browser/twin.spec.ts:144:1 › cancel run retains completed state and superseding work rejects stale updates (3.2s)
+  ✓  10 [chromium] › tests/browser/twin.spec.ts:171:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (3.8s)
+  ✓  11 [chromium] › tests/browser/twin.spec.ts:198:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (1.9s)
+  ✓  12 [chromium] › tests/browser/twin.spec.ts:215:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (1.8s)
+  ✓  13 [chromium] › tests/browser/twin.spec.ts:230:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (1.5s)
+  ✓  14 [chromium] › tests/browser/twin.spec.ts:243:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (10.7s)
+  ✓  15 [chromium] › tests/browser/twin.spec.ts:285:1 › legacy saved scenario links retain the explicit aggregate model (1.9s)
+  ✓  16 [chromium] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (6.2s)
+(node:11882) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  17 [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (6.5s)
+  ✓  18 [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (5.6s)
+  ✓  19 [firefox] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (7.4s)
+  ✓  20 [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (38.5s)
+  ✓  21 [firefox] › tests/browser/twin.spec.ts:49:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (1.5s)
+  ✓  22 [firefox] › tests/browser/twin.spec.ts:85:1 › standby transfer is an actual selected-component state transition (1.1s)
+  ✓  23 [firefox] › tests/browser/twin.spec.ts:98:1 › clock pause and speed are independent of design resets and validated controls (3.9s)
+  ✓  24 [firefox] › tests/browser/twin.spec.ts:114:1 › seek backward and forward restores exact event-boundary numerical results (1.7s)
+  ✓  25 [firefox] › tests/browser/twin.spec.ts:144:1 › cancel run retains completed state and superseding work rejects stale updates (2.8s)
+  ✓  26 [firefox] › tests/browser/twin.spec.ts:171:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (3.5s)
+  ✓  27 [firefox] › tests/browser/twin.spec.ts:198:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (1.3s)
+  ✓  28 [firefox] › tests/browser/twin.spec.ts:215:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (1.2s)
+  ✓  29 [firefox] › tests/browser/twin.spec.ts:230:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (929ms)
+  ✓  30 [firefox] › tests/browser/twin.spec.ts:243:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (9.6s)
+  ✓  31 [firefox] › tests/browser/twin.spec.ts:285:1 › legacy saved scenario links retain the explicit aggregate model (1.1s)
+  ✓  32 [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (4.4s)
+(node:12009) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  33 [webkit] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (7.6s)
+  ✓  34 [webkit] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (6.3s)
+  ✓  35 [webkit] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (7.4s)
+  ✘  36 [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (14.2m)
+(node:12068) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  37 [webkit] › tests/browser/twin.spec.ts:49:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (2.2s)
+  ✓  38 [webkit] › tests/browser/twin.spec.ts:85:1 › standby transfer is an actual selected-component state transition (1.5s)
+  ✓  39 [webkit] › tests/browser/twin.spec.ts:98:1 › clock pause and speed are independent of design resets and validated controls (4.3s)
+  ✓  40 [webkit] › tests/browser/twin.spec.ts:114:1 › seek backward and forward restores exact event-boundary numerical results (2.2s)
+  ✓  41 [webkit] › tests/browser/twin.spec.ts:144:1 › cancel run retains completed state and superseding work rejects stale updates (3.0s)
+  ✓  42 [webkit] › tests/browser/twin.spec.ts:171:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (3.1s)
+  ✓  43 [webkit] › tests/browser/twin.spec.ts:198:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (1.9s)
+  ✓  44 [webkit] › tests/browser/twin.spec.ts:215:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (1.6s)
+  ✓  45 [webkit] › tests/browser/twin.spec.ts:230:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (1.1s)
+  ✘  46 [webkit] › tests/browser/twin.spec.ts:243:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (7.2m)
+(node:12098) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  47 [webkit] › tests/browser/twin.spec.ts:285:1 › legacy saved scenario links retain the explicit aggregate model (1.5s)
+  ✓  48 [webkit] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (5.9s)
+
+
+  1) [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('main')
+    Expected: "true"
+    Received: "false"
+    Timeout:  8000ms
+
+    Call log:
+      - Expect "toHaveAttribute" locator('main') with timeout 8000ms
+      - waiting for locator('main')
+        14 × locator resolved to <main class="app  " data-xray="true" data-demo="true" data-modules="40" data-ready="true" data-generation="2" data-inside="false" data-exploded="false">…</main>
+           - unexpected value "false"
+
+
+      299 |     timeout: 12000,
+      300 |   });
+    > 301 |   await expect(root(page)).toHaveAttribute('data-exploded', 'true', {
+          |                            ^
+      302 |     timeout: 8000,
+      303 |   });
+      304 |   await expect(root(page)).toHaveAttribute('data-generation', '3', {
+        at /private<clean-checkout>/tests/browser/acceptance.spec.ts:301:28
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › tests/browser/twin.spec.ts:243:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "campus"
+    Received: "cooling"
+
+    Call Log:
+    - Timeout 12000ms exceeded while waiting on the predicate
+
+      269 |   await changeNumber(page,'Requested accelerators','1280');await expect.poll(async()=>(await diagnostics(page))?.totalModules).toBe(1);const small=await diagnostics(page),smallCadence=await frameCadence(page);
+      270 |   await page.getByRole('button',{name:'Campus view',exact:true}).click();
+    > 271 |   await expect.poll(async()=>(await diagnostics(page))?.focus).toBe('campus');
+          |                                                                ^
+      272 |   const start=Date.now();await page.getByLabel('Starting scenario',{exact:true}).selectOption('500000');
+      273 |   await expect.poll(async()=>(await diagnostics(page))?.totalModules,{timeout:20000}).toBe(391);const large=await diagnostics(page),largeInteractionMs=Date.now()-start,largeCadence=await frameCadence(page);
+      274 |   expect(large?.renderedPlatforms).toBe(98);expect(large?.renderedModules).toBe(large?.totalModules);
+        at /private<clean-checkout>/tests/browser/twin.spec.ts:271:64
+
+    attachment #1: cooling-close-up (image/png) ────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/attachments/cooling-close-up-16eea214f3bb8f7f4edf3656fce3585fba795341.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: [webkit] › tests/browser/acceptance.spec.ts (14.6m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  2 failed
+    [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+    [webkit] › tests/browser/twin.spec.ts:243:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+  46 passed (25.6m)

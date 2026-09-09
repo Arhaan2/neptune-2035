@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-09-09T08:29:53.705Z",
+  "historicalSha": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "records": [
+    {
+      "name": "npm-ci",
+      "command": "npm ci",
+      "at": "2026-09-09T08:03:36.477Z",
+      "elapsedMs": 3222.1444159999996,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361"
+    },
+    {
+      "name": "phase0-gate",
+      "command": "node scripts/phase-0/verify.mjs",
+      "at": "2026-09-09T08:03:39.705Z",
+      "elapsedMs": 14088.082833999999,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "3979e06dcecfef0f9c166d66a8766c049259fc95c5fc0cf031f7abc729c41f76"
+    },
+    {
+      "name": "phase0-full",
+      "command": "node scripts/phase-0/clean-check.mjs --out=artifacts/phase1-history-full",
+      "at": "2026-09-09T08:03:53.793Z",
+      "elapsedMs": 1559950.8216249999,
+      "exitCode": 1,
+      "expectedExitCode": 0,
+      "logSha256": "d1d4c94bf09f2ac05d4d1e9ab06d845074a1abfcfc78cffb380b094293a3d5b8"
+    },
+    {
+      "name": "infrastructure",
+      "error": "Error: phase0-full failed; historical evidence is not accepted",
+      "exitCode": 2,
+      "expectedExitCode": 0
+    }
+  ],
+  "status": "FAIL"
+}

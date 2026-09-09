@@ -1,0 +1,183 @@
+{
+  "recordedAt": "2026-09-09T17:51:38.475Z",
+  "historicalSha": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "protectedRuntimeSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "firstAttempt": {
+    "directory": "attempt-1-20260909T080347Z",
+    "fullSuite": {
+      "expected": 46,
+      "unexpected": 2,
+      "skipped": 0,
+      "durationMs": 1533060.9700000002
+    },
+    "failedCases": [
+      {
+        "project": "webkit",
+        "file": "tests/browser/acceptance.spec.ts",
+        "line": 279,
+        "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+        "failure": "data-exploded stayed false at the expected demo waypoint; 8-second assertion and 60-second test deadlines reported.",
+        "reportedWallTime": "14.2m"
+      },
+      {
+        "project": "webkit",
+        "file": "tests/browser/twin.spec.ts",
+        "line": 243,
+        "title": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+        "failure": "diagnostic focus remained cooling after Campus view click; 12-second predicate timeout.",
+        "reportedWallTime": "7.2m"
+      }
+    ],
+    "otherGates": [
+      {
+        "name": "npm-ci",
+        "exitCode": 0,
+        "expectedExitCode": 0
+      },
+      {
+        "name": "typecheck",
+        "exitCode": 0,
+        "expectedExitCode": 0
+      },
+      {
+        "name": "lint",
+        "exitCode": 0,
+        "expectedExitCode": 0
+      },
+      {
+        "name": "build",
+        "exitCode": 0,
+        "expectedExitCode": 0
+      },
+      {
+        "name": "unit-full",
+        "exitCode": 0,
+        "expectedExitCode": 0
+      },
+      {
+        "name": "phase-0",
+        "exitCode": 0,
+        "expectedExitCode": 0
+      },
+      {
+        "name": "desired-hydraulic",
+        "exitCode": 1,
+        "expectedExitCode": 1
+      },
+      {
+        "name": "desired-persistence",
+        "exitCode": 1,
+        "expectedExitCode": 1
+      }
+    ],
+    "sourceMismatches": [],
+    "lockUnchanged": true
+  },
+  "selectedRetry": {
+    "directory": "attempt-20260909T174738576Z-webkit",
+    "status": "PASS",
+    "testsPassed": 2,
+    "testsFailed": 0,
+    "testsChanged": false,
+    "sourceChanged": false,
+    "configChanged": false,
+    "retriesConfigured": false,
+    "command": "npm run test:browser -- --project=webkit tests/browser/acceptance.spec.ts:279 tests/browser/twin.spec.ts:243",
+    "durationMs": 51564.172999999995
+  },
+  "interpretation": "The two initial WebKit failures were not reproducible in a fresh sequential selected invocation or a subsequent complete clean-check. Both used unchanged Phase 0 source, tests, and Playwright configuration. The complete rerun passed 48/48 browser cases and 162/162 unit tests, with no skips or changed protected source files. The original failures and inflated wall times remain preserved; their environmental cause is not proven.",
+  "tracePolicy": "Failure traces/screenshots from the first clean archive remain local only; textual errors and complete machine-readable diagnostic outputs are preserved here. No recording is added to Git.",
+  "fullRerun": {
+    "directory": "attempt-20260909T174902816Z-full",
+    "status": "PASS",
+    "browser": {
+      "startTime": "2026-09-09T17:49:38.779Z",
+      "duration": 296942.479,
+      "expected": 48,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "unitTestsPassed": 162,
+    "unitTestsSkipped": 0,
+    "sourceMismatches": [],
+    "lockUnchanged": true,
+    "standaloneDiagnostics": [
+      {
+        "id": "PH0-001",
+        "evidenceGate": "PASS",
+        "desiredRegressions": [
+          {
+            "name": "reject nonfinite shutoffPa explicitly at pump-rating validation",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "reject nonfinite freeFlowM3S explicitly at pump-rating validation",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          }
+        ]
+      },
+      {
+        "id": "PH0-001-desired",
+        "evidenceGate": "PASS",
+        "desiredRegressions": [
+          {
+            "name": "reject nonfinite shutoffPa explicitly at pump-rating validation",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "reject nonfinite freeFlowM3S explicitly at pump-rating validation",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          }
+        ]
+      },
+      {
+        "id": "PH0-002",
+        "evidenceGate": "PASS",
+        "desiredRegressions": [
+          {
+            "name": "round-trip 1001 valid engine-applied events",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "round-trip supported scheduled event at 86401s",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "round-trip supported scheduled event at 2592000s",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "round-trip legitimate engine clock at 86401s",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          }
+        ]
+      },
+      {
+        "id": "PH0-002-desired",
+        "evidenceGate": "PASS",
+        "desiredRegressions": [
+          {
+            "name": "round-trip 1001 valid engine-applied events",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "round-trip supported scheduled event at 86401s",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "round-trip supported scheduled event at 2592000s",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          },
+          {
+            "name": "round-trip legitimate engine clock at 86401s",
+            "outcome": "EXPECTED SEMANTIC FAILURE"
+          }
+        ]
+      }
+    ],
+    "recoveredFiles": 53,
+    "recoveryMatches": true,
+    "logsHashMismatches": []
+  }
+}

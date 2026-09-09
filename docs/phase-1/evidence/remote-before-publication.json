@@ -1,0 +1,115 @@
+{
+  "checkedAt": "2026-09-09T18:42:49.807Z",
+  "mode": "read-only",
+  "sourceHead": "76cdbcc7c62762c3464b289f97e75bfb6baa6850",
+  "remote": "https://github.com/Arhaan2/neptune-2035.git",
+  "branches": [
+    {
+      "name": "codex/neptune",
+      "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "protected": false
+    },
+    {
+      "name": "codex/neptune-digital-twin-v2",
+      "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "protected": false
+    },
+    {
+      "name": "codex/pages",
+      "sha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "protected": false
+    }
+  ],
+  "pages": {
+    "url": "https://api.github.com/repos/Arhaan2/neptune-2035/pages",
+    "status": "built",
+    "cname": null,
+    "custom_404": false,
+    "html_url": "https://arhaan2.github.io/neptune-2035/",
+    "build_type": "legacy",
+    "source": {
+      "branch": "codex/pages",
+      "path": "/"
+    },
+    "public": true,
+    "protected_domain_state": null,
+    "pending_domain_unverified_at": null,
+    "https_enforced": true
+  },
+  "hooks": [],
+  "rulesets": [],
+  "workflows": [
+    {
+      "id": 353551315,
+      "name": "pages-build-deployment",
+      "path": "dynamic/pages/pages-build-deployment",
+      "state": "active"
+    }
+  ],
+  "pagesEnvironment": {
+    "total_count": 2,
+    "branch_policies": [
+      {
+        "id": 59465437,
+        "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k1OTQ2NTQzNw==",
+        "name": "codex/pages",
+        "type": "branch"
+      },
+      {
+        "id": 59465436,
+        "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k1OTQ2NTQzNg==",
+        "name": "gh-pages",
+        "type": "branch"
+      }
+    ]
+  },
+  "deployments": [
+    {
+      "id": 6340659799,
+      "sha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "ref": "codex/pages",
+      "environment": "github-pages",
+      "createdAt": "2026-09-09T01:35:17Z"
+    },
+    {
+      "id": 6338812039,
+      "sha": "672805a984feadaab375061817c919fd6849b311",
+      "ref": "codex/pages",
+      "environment": "github-pages",
+      "createdAt": "2026-09-08T22:56:50Z"
+    }
+  ],
+  "runs": [
+    {
+      "id": 34299786585,
+      "name": "pages build and deployment",
+      "event": "dynamic",
+      "headBranch": "codex/pages",
+      "headSha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "status": "completed",
+      "conclusion": "success",
+      "path": "dynamic/pages/pages-build-deployment",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34299786585"
+    },
+    {
+      "id": 34288350576,
+      "name": "pages build and deployment",
+      "event": "dynamic",
+      "headBranch": "codex/pages",
+      "headSha": "672805a984feadaab375061817c919fd6849b311",
+      "status": "completed",
+      "conclusion": "success",
+      "path": "dynamic/pages/pages-build-deployment",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34288350576"
+    }
+  ],
+  "releases": [
+    {
+      "id": 385117865,
+      "tag": "v0.1.0",
+      "target": "codex/neptune"
+    }
+  ],
+  "localTags": "29d2c9400af7f6f258948362124157d69928acc7 refs/tags/phase-0-baseline-23de38a-20260909\n4211561ba3507be65afa24cd2f69b47d7fbbc4f7 refs/tags/phase-0-served-artifact-019b24f-20260909\n462f2fbbda5766bdd568ec58c18dd82e542529e9 refs/tags/v0.1.0",
+  "assessment": "Source-only Phase 1 CI has contents:read, no deployment/release step and no environment. Pages remains separately sourced from codex/pages. Installed-app exhaustive inventory visibility limitation is documented in remote-preflight.json; no unknown external configuration is changed or relied upon."
+}
