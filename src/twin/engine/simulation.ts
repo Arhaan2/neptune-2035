@@ -85,10 +85,11 @@ function applyEvents(design:Design,state:SimulationState,ctx:Context) {
     state.appliedEventIds.push(event.id);
   }
 }
-function controller(state:SimulationState,m:ModuleState,design:Design,disabled:boolean,techBlocked:boolean) {
+type EquipmentTransition={next:ModuleState['states'][string];message:string};
+function controller(state:SimulationState,m:ModuleState,design:Design,disabled:boolean,techBlocked:boolean,transitions:Map<string,EquipmentTransition>) {
   const failure=new Set(state.failedAssetIds),duty=`${m.id}/pump-duty`,standby=`${m.id}/pump-standby`;
   const setState=(id:string,next:ModuleState['states'][string],message:string)=>{
-    if(m.states[id]!==next){m.states[id]=next;appendLog(state,id,message,'controller',[m.id]);}
+    if(m.states[id]!==next){m.states[id]=next;transitions.set(id,{next,message});}
   };
   if(disabled){for(const id of [duty,standby,`${m.id}/pump-sea`])if(m.states[id]&&!failure.has(id))setState(id,'isolated','Module isolation removes load and pump power');return;}
   if(techBlocked||state.pumpSpeed===0){
@@ -130,7 +131,8 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     const isFailed=(suffix:string)=>failed.has(`${id}/${suffix}`);
     const techBlocked=disabled||isFailed('hx')||isFailed('cdu')||isFailed('valve-tech')||isFailed('pipe-tech');
     const seaBlocked=disabled||isFailed('hx')||isFailed('valve-sea')||isFailed('pipe-sea');
-    if(runController)controller(state,m,design,disabled,techBlocked);
+    const previousStates={...m.states},transitions=new Map<string,EquipmentTransition>();
+    if(runController)controller(state,m,design,disabled,techBlocked,transitions);
     const pumps=techBlocked?0:Number(m.states[`${id}/pump-duty`]==='running')+Number(m.states[`${id}/pump-standby`]==='running');
     const technical=circuit(c,'technical',pumps,state.pumpSpeed,ctx.hydraulicCache);
     const seawater=circuit(c,'seawater',seaBlocked||isFailed('pump-sea')?0:1,state.pumpSpeed,ctx.hydraulicCache);
@@ -143,7 +145,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     const gridLive=!disabled&&c.supported&&!c.ancestors.some(a=>failed.has(a));
     // Spare upstream power may recharge storage only after module loads; solveElectrical forbids simultaneous charge/discharge.
     const maxChargeW=Math.min(design.config.batteryMaxWPerModule,Math.max(0,design.config.batteryWhPerModule-m.batteryWh)*3600/(E.chargeEfficiency*(dtS||1)))/GRID_EFFICIENCY;
-    return {c,m,disabled,techBlocked,seaBlocked,technical,seawater,networkAvailable:true,desiredNodes,criticalW,gridLive,maxChargeW};
+    return {c,m,disabled,techBlocked,seaBlocked,technical,seawater,networkAvailable:true,desiredNodes,criticalW,gridLive,maxChargeW,previousStates,transitions};
   });
   const domainLimits=new Map<string,number>();
   for(const d of demands)domainLimits.set(d.c.module.powerDomainId,d.c.pathCapacityW);
@@ -197,9 +199,19 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
       if(failed.has(id)){if(m.states[id]!=='maintenance')m.states[id]='failed';}
       else if(d.disabled)m.states[id]='isolated';
       else if(suffix==='pump-sea')m.states[id]=d.seaBlocked?'isolated':seawater.flowM3S>0?'running':'available';
-      else if(suffix.startsWith('pump-')){if(!electrical.criticalPowered&&m.states[id]==='running')m.states[id]='available';}
+      else if(suffix.startsWith('pump-')){if(!electrical.criticalPowered&&(m.states[id]==='running'||m.states[id]==='starting'))m.states[id]='available';}
       else if(suffix==='hx')m.states[id]=technical.flowM3S>0&&seawater.flowM3S>0?'running':'available';
       else m.states[id]=electrical.criticalPowered?'running':'available';
+    }
+    // Controller state is provisional until its motor receives power. Publish only final transitions.
+    for(const suffix of ['pump-duty','pump-standby','pump-sea']){
+      const id=`${m.id}/${suffix}`,before=d.previousStates[id],after=m.states[id],transition=d.transitions.get(id);
+      if(before===after||after===undefined)continue;
+      if(!electrical.criticalPowered&&after==='available'&&(before==='running'||before==='starting')){
+        appendLog(state,id,'Pump not powered: critical bus unavailable; motor stopped','controller',[m.id]);
+      }else if(after==='running'&&d.previousStates[`${m.id}/distribution`]==='available'){
+        appendLog(state,id,`Pump power restored; ${transition?.message??'seawater pump enabled'}`,'controller',[m.id]);
+      }else if(transition?.next===after)appendLog(state,id,transition.message,'controller',[m.id]);
     }
     const warnings:string[]=[];
     if(!d.c.supported)warnings.push('Unsupported power topology: requires an enabled radial upstream path');

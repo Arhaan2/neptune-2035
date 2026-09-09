@@ -133,6 +133,25 @@ describe('coupled deterministic operation',()=>{
     expect(later.modules[0].batteryWh).toBeLessThan(1010);expect(summarize(d,later).instantaneousPUE).toBeNull();
     expect(later.log.some(e=>e.affectedIds.includes(id))).toBe(true);
   });
+  it('logs actual pump power loss and recovery once through a 1800s feeder outage without dropping the original event',()=>{
+    const d=design({batteryWhPerModule:400000}),id=d.modules[0].id,feeder=d.modules[0].powerDomainId;
+    const events:OperationEvent[]=[{id:'feeder-loss',timeS:0,kind:'trip',assetId:feeder},{id:'feeder-return',timeS:1500,kind:'restore',assetId:feeder}];
+    const depleted=replay(d,events,1400);
+    expect(depleted.modules[0].energizedNodes).toBe(0);expect(depleted.modules[0].pumpPowerW).toBe(0);
+    expect(depleted.modules[0].states[`${id}/pump-duty`]).toBe('available');
+    const losses=depleted.log.filter(e=>e.message.startsWith('Pump not powered:'));
+    expect(losses).toHaveLength(2);expect(new Set(losses.map(e=>e.assetId))).toEqual(new Set([`${id}/pump-duty`,`${id}/pump-sea`]));
+    expect(losses[0].timeS).toBeGreaterThan(600);expect(losses[0].timeS).toBeLessThan(900);
+    expect(depleted.log.filter(e=>e.timeS>=losses[0].timeS&&e.message.includes('Duty pump enabled'))).toHaveLength(0);
+    expect(depleted.log.some(e=>e.assetId===feeder&&e.kind==='command'&&e.timeS===0)).toBe(true);
+    expect(depleted.log.length).toBeLessThan(40);
+    const complete=advance(d,depleted,400),direct=replay(d,events,1800);
+    expect(complete).toEqual(direct);expect(complete.modules[0].technicalFlowM3S).toBeGreaterThan(0);
+    expect(complete.log.filter(e=>e.message.startsWith('Pump power restored;'))).toHaveLength(2);
+    expect(complete.log.filter(e=>e.message.startsWith('Pump power restored;')).every(e=>e.timeS===1500)).toBe(true);
+    expect(complete.log.some(e=>e.assetId===feeder&&e.kind==='command'&&e.timeS===0)).toBe(true);
+    expect(complete.log.length).toBeLessThan(45);
+  });
   it('honors upstream transformer and generation failure-domain differences',()=>{
     const a=design({generation:1,requestedAccelerators:10000,batteryWhPerModule:0});
     const b=design({generation:2,requestedAccelerators:10000,batteryWhPerModule:0});

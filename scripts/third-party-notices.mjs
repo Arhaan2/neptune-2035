@@ -55,9 +55,16 @@ for (const [dir, item] of Object.entries(lock.packages)) {
 }
 await fs.writeFile(
   'public/THIRD-PARTY-NOTICES.txt',
-  'NEPTUNE v2 — installed production-dependency license notices\n\nThis file preserves notices from the npm production dependency tree. Some listed packages are development-time tooling or eliminated from browser bundles. No endorsement is implied. Original project geometry, shaders and presentation: Arhaan Aggarwal.\n\n' +
+  (
+    'NEPTUNE v2 — installed production-dependency license notices\n\nThis file preserves notices from the npm production dependency tree. Some listed packages are development-time tooling or eliminated from browser bundles. No endorsement is implied. Original project geometry, shaders and presentation: Arhaan Aggarwal.\n\n' +
     entries.sort().join('\n\n' + '='.repeat(78) + '\n\n') +
-    '\n',
+    '\n'
+  )
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map((line) => line.replace(/[\t ]+$/g, ''))
+    .join('\n')
+    .trimEnd() + '\n',
 );
 console.log(
   JSON.stringify(

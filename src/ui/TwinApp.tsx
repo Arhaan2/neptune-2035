@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Waves,
   Play,
@@ -255,6 +255,25 @@ export default function TwinApp() {
             : 'campus'
     : focus;
   const effectiveXray = xray || (demo && (state?.timeS ?? 0) >= 10);
+  const sceneRegion = useRef<HTMLDivElement>(null);
+  const comparisonRegion = useRef<HTMLElement>(null);
+  const cinematicStage =
+    demo && (state?.timeS ?? 0) >= 180 && (state?.timeS ?? 0) < 220
+      ? 'comparison'
+      : 'scene';
+  useEffect(() => {
+    if (!demo) return;
+    const timer = setTimeout(() => {
+      (cinematicStage === 'comparison'
+        ? comparisonRegion.current
+        : sceneRegion.current
+      )?.scrollIntoView({
+        behavior: reducedMotion ? 'instant' : 'smooth',
+        block: 'start',
+      });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [demo, cinematicStage, reducedMotion]);
   useEffect(() => {
     if (!demo || !state || state.timeS !== 0 || sim.busy || sim.running) return;
     const timer = setTimeout(() => setSimulationRunning(true), 0);
@@ -264,14 +283,18 @@ export default function TwinApp() {
     workspace === 'Compare' ||
     (demo && (state?.timeS ?? 0) >= 180 && (state?.timeS ?? 0) < 220);
   useEffect(() => {
-    if (!demo || !state || state.timeS < 220) return;
+    if (!demo || !state || state.timeS < 220 || sim.busy) return;
     const timer = setTimeout(() => {
       setSimulationRunning(false);
       setDemo(false);
       setFocus('campus');
+      sceneRegion.current?.scrollIntoView({
+        behavior: reducedMotion ? 'instant' : 'smooth',
+        block: 'start',
+      });
     }, 0);
     return () => clearTimeout(timer);
-  }, [demo, state, setSimulationRunning]);
+  }, [demo, state, sim.busy, reducedMotion, setSimulationRunning]);
   const command = (
     kind: OperationEvent['kind'],
     id = selectedId,
@@ -471,6 +494,9 @@ export default function TwinApp() {
       data-selected={selectedId}
       data-workspace={workspace}
       data-time={state?.timeS ?? 0}
+      onWheelCapture={() => {
+        if (demo) setDemo(false);
+      }}
     >
       <header className="twin-header">
         <a className="twin-brand" href="./">
@@ -746,7 +772,7 @@ export default function TwinApp() {
           </div>
         </aside>
         <section className="twin-center">
-          <div className="twin-scene-shell">
+          <div className="twin-scene-shell" ref={sceneRegion}>
             <div className="twin-scene-caption">
               <span>
                 {focus === 'campus'
@@ -979,7 +1005,7 @@ export default function TwinApp() {
           )}
           {state && !showComparison && <Trend history={sim.history} />}
           {showComparison && (
-            <section className="twin-compare">
+            <section className="twin-compare" ref={comparisonRegion}>
               <div className="twin-section-line">
                 <h2>
                   {demo
