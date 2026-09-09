@@ -1,0 +1,111 @@
+
+> neptune@2.0.0-rc.1 test
+> vitest run --reporter=default --reporter=json --outputFile=artifacts/phase1-unit.json
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.0 [39m[90m<verified-checkout>[39m
+
+ [32m✓[39m tests/twin-physics.test.ts [2m([22m[2m28 tests[22m[2m)[22m[33m 10092[2mms[22m[39m
+   [32m✓[39m coupled deterministic operation [2m(14)[22m
+     [33m[2m✓[22m[39m trips the selected pump, starts standby after 8s and preserves full capacity when adequate[33m 366[2mms[22m[39m
+     [33m[2m✓[22m[39m without standby loses flow, heats the bulk node, and curtails by actual hysteresis[33m 443[2mms[22m[39m
+     [33m[2m✓[22m[39m logs actual pump power loss and recovery once through a 1800s feeder outage without dropping the original event[33m 2372[2mms[22m[39m
+     [33m[2m✓[22m[39m honors upstream transformer and generation failure-domain differences[33m 1193[2mms[22m[39m
+     [33m[2m✓[22m[39m replays exactly across different integer chunk schedules and keeps original state immutable[33m 2438[2mms[22m[39m
+     [33m[2m✓[22m[39m converges across 1s, 0.5s and 0.25s constant-load integration without threshold crossings[33m 429[2mms[22m[39m
+     [33m[2m✓[22m[39m responds causally to warmer seawater, fouling and speed with conservation[33m 667[2mms[22m[39m
+     [33m[2m✓[22m[39m respects shared supply cuts under simultaneous module and battery demand[33m 949[2mms[22m[39m
+   [32m✓[39m versioned asynchronous worker [2m(2)[22m
+     [33m[2m✓[22m[39m cancels an in-flight chunked replay and suppresses stale epochs/requests[33m 348[2mms[22m[39m
+ [32m✓[39m tests/phase1-numerical.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 250[2mms[22m[39m
+ [32m✓[39m tests/phase1-worker.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 8538[2mms[22m[39m
+   [32m✓[39m PH1-REP-01 committed worker stepping [2m(6)[22m
+     [33m[2m✓[22m[39m chunk size 3s reproduces the same battery, startup and same-time event trajectory[33m 611[2mms[22m[39m
+     [33m[2m✓[22m[39m chunk size 9s reproduces the same battery, startup and same-time event trajectory[33m 370[2mms[22m[39m
+   [32m✓[39m PH1-REP-02 operational cancellation, stale identity and resource failure [2m(19)[22m
+     [33m[2m✓[22m[39m cancel acknowledges the latest complete chunk and a fresh worker resumes it[33m 329[2mms[22m[39m
+   [32m✓[39m PH1-PER-02 worker admission boundaries [2m(12)[22m
+     [33m[2m✓[22m[39m preserves or rejects all 9999 events without truncation[33m 2474[2mms[22m[39m
+     [33m[2m✓[22m[39m preserves or rejects all 10000 events without truncation[33m 911[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds an atomic same-time event batch at 7999 module steps[33m 1322[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds an atomic same-time event batch at 8000 module steps[33m 895[2mms[22m[39m
+ [31m❯[39m tests/twin-integration.test.ts [2m([22m[2m19 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 14199[2mms[22m[39m
+   [31m❯[39m canonical graph, geometry and operating-state integration [2m(10)[22m
+     [32m✓[39m reconciles exact inventory and stable identity independently of family and transform[32m 161[2mms[22m[39m
+[31m     [31m×[31m bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption[39m[33m 10611[2mms[22m[39m
+     [32m✓[39m accepts graph integrity including zero-grid and storage-power limits, and rejects wrong directions/capacities[32m 133[2mms[22m[39m
+     [32m✓[39m links every rack to its exchanger and keeps technical and sea media separate[32m 58[2mms[22m[39m
+     [32m✓[39m uses physical routed lengths for resistance but all wetted branches for coolant mass[32m 133[2mms[22m[39m
+     [32m✓[39m matches actual floated hull displacement and adds battery mass to draft, preserving equipment/deck attachment[32m 10[2mms[22m[39m
+     [33m[2m✓[22m[39m proves typed cluster reachability through the shore core and observes upstream or disabled link failure[33m 817[2mms[22m[39m
+     [32m✓[39m external-only jobs still depend on the actual carrying platform network; isolated local jobs do not[32m 64[2mms[22m[39m
+     [33m[2m✓[22m[39m shows real generation isolation differences for equivalent power-domain loss[33m 860[2mms[22m[39m
+     [33m[2m✓[22m[39m compares 0 versus 1 standby with identical recorded disturbance and computed 240s results[33m 553[2mms[22m[39m
+   [32m✓[39m constraint and project truthfulness integration [2m(5)[22m
+     [32m✓[39m does not green an IT-only source limit when UPS hides pump and conversion demand[32m 101[2mms[22m[39m
+     [32m✓[39m flags latent peak cooling shortfall before the initially cool bulk state heats up[32m 84[2mms[22m[39m
+     [33m[2m✓[22m[39m reports missing mass/geometry as unassessed instead of zero or an accidental passing NaN comparison[33m 442[2mms[22m[39m
+     [32m✓[39m uses actual hull/deck dimensions for load screen and enforces included-scope budget[32m 39[2mms[22m[39m
+     [32m✓[39m validates imported events through the same asset/value/solver contract as operation[32m 30[2mms[22m[39m
+   [32m✓[39m independent Python-generated numerical fixtures [2m(4)[22m
+     [32m✓[39m matches independent exchanger and closed-form pump benchmarks[32m 1[2mms[22m[39m
+     [32m✓[39m matches an independently rational battery-energy benchmark[32m 1[2mms[22m[39m
+     [32m✓[39m matches the independent rectangular two-pontoon hydrostatic benchmark[32m 7[2mms[22m[39m
+     [32m✓[39m agrees with independent 0.01s RK4 transient rather than importing the production analytical update[32m 2[2mms[22m[39m
+ [32m✓[39m tests/twin-telemetry.test.ts [2m([22m[2m47 tests[22m[2m)[22m[33m 34395[2mms[22m[39m
+   [32m✓[39m source-separated synchronization, staleness, and historical replay [2m(5)[22m
+     [33m[2m✓[22m[39m does not treat simulated milliseconds as missing packet counts[33m 362[2mms[22m[39m
+   [32m✓[39m actual localhost SSE transport [2m(2)[22m
+     [33m[2m✓[22m[39m uses the production adapter with native browser reconnect/Last-Event-ID and source validation[33m 3023[2mms[22m[39m
+   [32m✓[39m running DataPanel acceptance [2m(1)[22m
+     [33m[2m✓[22m[39m operates mapping, raw inspection, simulated dropout, calibration, and actual streaming in the app[33m 30281[2mms[22m[39m
+ [32m✓[39m tests/model.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 62[2mms[22m[39m
+ [32m✓[39m tests/twin-network.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 4983[2mms[22m[39m
+   [32m✓[39m declared network offered-demand and whole-job admission [2m(7)[22m
+     [33m[2m✓[22m[39m detects a shared-core port bottleneck even when every individual platform link fits[33m 3027[2mms[22m[39m
+     [33m[2m✓[22m[39m ignores optional external demand, but enforces the shared external port when the job requires it[33m 441[2mms[22m[39m
+     [33m[2m✓[22m[39m resolves actual failed/disabled path causes, rejects multipath, and restores reproducibly[33m 339[2mms[22m[39m
+     [33m[2m✓[22m[39m couples idle draw to dispatch without committing trial battery energy, and never masks installed peak shortage[33m 680[2mms[22m[39m
+ [32m✓[39m tests/phase1-deferred.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 3241[2mms[22m[39m
+   [32m✓[39m PH1-REG-01 deferred Phase 0 findings remain explicit [2m(4)[22m
+     [33m[2m✓[22m[39m PH0-003 retains the 4000-node shared port boundary and reports the 4001-node design shortfall[33m 1394[2mms[22m[39m
+     [33m[2m✓[22m[39m PH0-005 retains the genuine five-second outage and terminal-only passing assessment[33m 408[2mms[22m[39m
+     [33m[2m✓[22m[39m PH0-006 preserves radial II/III fault behavior without inventing an automatic transfer benefit[33m 1407[2mms[22m[39m
+ [32m✓[39m tests/twin-geometry.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1973[2mms[22m[39m
+   [32m✓[39m dimensioned rendering contract [2m(7)[22m
+     [33m[2m✓[22m[39m all platforms are included in physical campus footprint above the old visual cap[33m 1625[2mms[22m[39m
+ [32m✓[39m tests/scenario.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m tests/phase1-work-budget.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 425[2mms[22m[39m
+ [32m✓[39m tests/phase1-persistence.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 47177[2mms[22m[39m
+   [32m✓[39m PH1-PER-01 real historical thresholds [2m(2)[22m
+     [33m[2m✓[22m[39m round-trips real engine-generated 999, 1000, 1001-event applied histories and continues[33m 11010[2mms[22m[39m
+     [33m[2m✓[22m[39m advances a real one-node run through 86399, 86400 and 86401 seconds, preserving continuation[33m 13848[2mms[22m[39m
+   [32m✓[39m PH1-PER-02 declared boundaries [2m(6)[22m
+     [33m[2m✓[22m[39m admits 9999/10000 future events through engine/export/import, rejects 10001 atomically[33m 8458[2mms[22m[39m
+     [33m[2m✓[22m[39m checks actual UTF-8 bytes below/at/above 64 MiB including multibyte input[33m 6225[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds nesting before parse and exact value/key item allocation[33m 6177[2mms[22m[39m
+   [32m✓[39m PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints [2m(5)[22m
+     [33m[2m✓[22m[39m compares intermediate continuous/chunked/fresh restored trajectories around event and startup boundaries[33m 943[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/twin-integration.test.ts[2m > [22mcanonical graph, geometry and operating-state integration[2m > [22mbounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/twin-integration.test.ts:[2m30:3[22m[39m
+    [90m 28|[39m     for(const m of a.modules){expect(moduleAssets(a,m.id).filter(x=>x.…
+    [90m 29|[39m   });
+    [90m 30|[39m   it('bounds the million-accelerator inventory and 10 GW supply ceilin…
+    [90m   |[39m   [31m^[39m
+    [90m 31|[39m     const d=make({generation:3,requestedAccelerators:1_000_000,supplyW…
+    [90m 32|[39m     expect(d.nodeCount).toBe(125000);expect(d.modules).toHaveLength(78…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m11 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m255 passed[39m[22m[90m (256)[39m
+[2m   Start at [22m 19:49:23
+[2m   Duration [22m 49.27s[2m (tests 93%, import 4%, transform 3%)[22m
+
+JSON report written to <verified-checkout>/artifacts/phase1-unit.json

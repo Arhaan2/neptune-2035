@@ -9,5 +9,6 @@ export default defineConfig({
   css: { postcss: { plugins: [tailwindcss()] } },
   server: { host: '127.0.0.1', watch: { usePolling: true } },
   build: { chunkSizeWarningLimit: 1200 },
-  test: { include: ['tests/**/*.test.ts'], environment: 'node' },
+  // Campus allocation tests and real browser telemetry share the runner's resources.
+  test: { include: ['tests/**/*.test.ts'], environment: 'node', fileParallelism: false },
 });

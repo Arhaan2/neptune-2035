@@ -1,0 +1,990 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09T19:57:35.252Z",
+  "status": "PASS_REVIEW_ONLY",
+  "scope": "Independent bounded CI scheduling and publication review; no product/test edits or remote repository operations.",
+  "baselineCommit": "264de666fac69c575e17186ec1b7342fcf6fd28e",
+  "reviewedArtifact": "Working-tree config plus exact final documentation/evidence hashes below; later commit must preserve these bytes.",
+  "configuration": {
+    "path": "vite.config.ts",
+    "priorSha256": "ba23c12c1490592089a65e9d48265ff1843880c649999720b3dbfb897a293281",
+    "newSha256": "d5049d93190b29791631f350906479be8b2bbe456f96dce86dc6b1b80030df17",
+    "diff": "diff --git a/vite.config.ts b/vite.config.ts\nindex 558e021..1fc6cbf 100644\n--- a/vite.config.ts\n+++ b/vite.config.ts\n@@ -9,5 +9,6 @@ export default defineConfig({\n   css: { postcss: { plugins: [tailwindcss()] } },\n   server: { host: '127.0.0.1', watch: { usePolling: true } },\n   build: { chunkSizeWarningLimit: 1200 },\n-  test: { include: ['tests/**/*.test.ts'], environment: 'node' },\n+  // Campus allocation tests and real browser telemetry share the runner's resources.\n+  test: { include: ['tests/**/*.test.ts'], environment: 'node', fileParallelism: false },\n });",
+    "onlyOptionAndExplanatoryCommentChanged": true,
+    "option": "test.fileParallelism: false",
+    "effectiveFileWorkers": 1,
+    "defaultIsolationPreserved": true,
+    "withinFileConcurrencyUnchanged": true,
+    "applicationWorkerConcurrencyUnchanged": true,
+    "assertionsUnchanged": true,
+    "timeLimitsUnchanged": true,
+    "telemetryFlagsUnchanged": true,
+    "testSelectionUnchanged": true
+  },
+  "optionVerification": {
+    "installedVitestVersion": "5.0.0",
+    "source": [
+      {
+        "path": "node_modules/vitest/dist/chunks/index.B89dZ0-N.js",
+        "sha256": "7ae1406d3a808a5a2915895eede01e4e79fac5838f5a6457adbffd78df1bf56d",
+        "support": "The resolver sets maxWorkers to 1 when fileParallelism is false. It does not alter maxConcurrency in that branch."
+      },
+      {
+        "path": "node_modules/vitest/dist/config.cjs",
+        "sha256": "2acf70ce8144fbfbea3714a3afaea270f37d72e19398cc7134dd766baba30037",
+        "support": "Default isolate is true; the project does not override it."
+      },
+      {
+        "path": "node_modules/vitest/dist/chunks/plugin.d.BbcoZhuj.d.ts",
+        "sha256": "fc8d53b3329bf55bc3dba0709c2280e997a860d2b45189589f43ea21b4076087",
+        "support": "fileParallelism is a supported boolean UserConfig option, default true."
+      }
+    ],
+    "reference": {
+      "url": "https://vitest.dev/config/fileparallelism",
+      "accessedAt": "2026-09-09",
+      "support": "Official documentation confirms false schedules test files with one worker and does not change tests running within the same file."
+    }
+  },
+  "preservation": {
+    "otherSourceConfigWorkflowFiles": 78,
+    "hashes": [
+      {
+        "path": ".github/workflows/phase-1.yml",
+        "priorCommitSha256": "b6c160119b32dfa6c0e45b3f44476bf2d698bde5839128f7ec07bb359b2c78d4",
+        "currentSha256": "b6c160119b32dfa6c0e45b3f44476bf2d698bde5839128f7ec07bb359b2c78d4"
+      },
+      {
+        "path": "package-lock.json",
+        "priorCommitSha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+        "currentSha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9"
+      },
+      {
+        "path": "package.json",
+        "priorCommitSha256": "5772bca9fdf1b6c9779de707b45b3b5cb77a134dc8315dfa898c2364d41e3c22",
+        "currentSha256": "5772bca9fdf1b6c9779de707b45b3b5cb77a134dc8315dfa898c2364d41e3c22"
+      },
+      {
+        "path": "playwright.config.ts",
+        "priorCommitSha256": "f0cce84b98a57b6f6a0f30e6acfcd64952a87c7df994581be213d94fad69b1d5",
+        "currentSha256": "f0cce84b98a57b6f6a0f30e6acfcd64952a87c7df994581be213d94fad69b1d5"
+      },
+      {
+        "path": "scripts/generate-twin-evidence.mjs",
+        "priorCommitSha256": "2355b93022656ea4f9ec09bdc469c1f7e0f1efc0f1b68aa7b25b80b404dc66db",
+        "currentSha256": "2355b93022656ea4f9ec09bdc469c1f7e0f1efc0f1b68aa7b25b80b404dc66db"
+      },
+      {
+        "path": "scripts/package-preview.mjs",
+        "priorCommitSha256": "f765581ce7b380d0a787a1743e74aba5fb3af9869ee220e35ac752e89a8914ba",
+        "currentSha256": "f765581ce7b380d0a787a1743e74aba5fb3af9869ee220e35ac752e89a8914ba"
+      },
+      {
+        "path": "scripts/phase-0/audit.mjs",
+        "priorCommitSha256": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4",
+        "currentSha256": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4"
+      },
+      {
+        "path": "scripts/phase-0/capture-hosted.mjs",
+        "priorCommitSha256": "9923c31b6e480be7f9bd42346f0c0cf99842774397f9e0f29a4dcb3aff1a70fb",
+        "currentSha256": "9923c31b6e480be7f9bd42346f0c0cf99842774397f9e0f29a4dcb3aff1a70fb"
+      },
+      {
+        "path": "scripts/phase-0/clean-check.mjs",
+        "priorCommitSha256": "e9b529983d2a5a3e85ee9e946ed1f3ab2578bb4ba417f8f129863dfac8a64bbe",
+        "currentSha256": "e9b529983d2a5a3e85ee9e946ed1f3ab2578bb4ba417f8f129863dfac8a64bbe"
+      },
+      {
+        "path": "scripts/phase-0/recover-artifacts.mjs",
+        "priorCommitSha256": "27de702007bdaff9a66ac2c2d151b31df93ce8ecd402690160305817b421d140",
+        "currentSha256": "27de702007bdaff9a66ac2c2d151b31df93ce8ecd402690160305817b421d140"
+      },
+      {
+        "path": "scripts/phase-0/verify.mjs",
+        "priorCommitSha256": "ed23978c6a960e707308ffde97d193c5f85c62e6f8d14b5a1793c5f64b9efb4b",
+        "currentSha256": "ed23978c6a960e707308ffde97d193c5f85c62e6f8d14b5a1793c5f64b9efb4b"
+      },
+      {
+        "path": "scripts/phase-1/history.mjs",
+        "priorCommitSha256": "0b3cdb1fdfd122345d7f45a3a013e86b82f891ffd19da851ea3db82812c5eab2",
+        "currentSha256": "0b3cdb1fdfd122345d7f45a3a013e86b82f891ffd19da851ea3db82812c5eab2"
+      },
+      {
+        "path": "scripts/phase-1/measure.mjs",
+        "priorCommitSha256": "f6dfd09d4f52ce8e04393b1b8d5b030ca420f3ee9bf877b81dfa05d2ff8d2415",
+        "currentSha256": "f6dfd09d4f52ce8e04393b1b8d5b030ca420f3ee9bf877b81dfa05d2ff8d2415"
+      },
+      {
+        "path": "scripts/phase-1/verify.mjs",
+        "priorCommitSha256": "f7e8f525de1bcde5fd63acca6d53277f36e2a5dc6659ee3ce2f9d15dcbc938bd",
+        "currentSha256": "f7e8f525de1bcde5fd63acca6d53277f36e2a5dc6659ee3ce2f9d15dcbc938bd"
+      },
+      {
+        "path": "scripts/telemetry-publisher.mjs",
+        "priorCommitSha256": "0fb8f9941c82217b6e3815aa8e269cd0b04c4ee7bd0f6c37a2d9f42dcab42370",
+        "currentSha256": "0fb8f9941c82217b6e3815aa8e269cd0b04c4ee7bd0f6c37a2d9f42dcab42370"
+      },
+      {
+        "path": "scripts/third-party-notices.mjs",
+        "priorCommitSha256": "0cd94b12b34b9251741aa1a9a27b7ef1f4364a6d76d4779c32f60fa2f105c785",
+        "currentSha256": "0cd94b12b34b9251741aa1a9a27b7ef1f4364a6d76d4779c32f60fa2f105c785"
+      },
+      {
+        "path": "scripts/verify-video.mjs",
+        "priorCommitSha256": "879678994c46873550fcb66c6555941945ba6ce48d890231ead3673dc94d52f2",
+        "currentSha256": "879678994c46873550fcb66c6555941945ba6ce48d890231ead3673dc94d52f2"
+      },
+      {
+        "path": "src/domain/model.ts",
+        "priorCommitSha256": "91deb17d0250f423d2b91a4cb0ed47652bc05ae38fb6a00b85946c9e009af0b9",
+        "currentSha256": "91deb17d0250f423d2b91a4cb0ed47652bc05ae38fb6a00b85946c9e009af0b9"
+      },
+      {
+        "path": "src/domain/sources.ts",
+        "priorCommitSha256": "762f3b966ff37ae489c028df253ca0767ec24e871e61fca50809ee2fa0dc8e6c",
+        "currentSha256": "762f3b966ff37ae489c028df253ca0767ec24e871e61fca50809ee2fa0dc8e6c"
+      },
+      {
+        "path": "src/main.tsx",
+        "priorCommitSha256": "add51fe84449511e3b8821cf804af05579eb173ca51a06336be048fd1dc404d9",
+        "currentSha256": "add51fe84449511e3b8821cf804af05579eb173ca51a06336be048fd1dc404d9"
+      },
+      {
+        "path": "src/scene/Facility.tsx",
+        "priorCommitSha256": "f5e59c6b644a2657877966604fb9bb84869a506f960aaa5058226e43f8f0fabd",
+        "currentSha256": "f5e59c6b644a2657877966604fb9bb84869a506f960aaa5058226e43f8f0fabd"
+      },
+      {
+        "path": "src/scene/Scene.tsx",
+        "priorCommitSha256": "9597732627dbf97c93e91b98eb92ba57fc14662eae19a36a853a91d86d4cd838",
+        "currentSha256": "9597732627dbf97c93e91b98eb92ba57fc14662eae19a36a853a91d86d4cd838"
+      },
+      {
+        "path": "src/scene/TwinScene.tsx",
+        "priorCommitSha256": "9ab27e71dc2bb89da9013130dcd069159ddfbdb6a42ecb8bf0c4c4f67ca1f692",
+        "currentSha256": "9ab27e71dc2bb89da9013130dcd069159ddfbdb6a42ecb8bf0c4c4f67ca1f692"
+      },
+      {
+        "path": "src/scene/layout.ts",
+        "priorCommitSha256": "c734f1e6c5a21e414f5f993d9c11c7140057b915a8857260d74b14f4a72ff63b",
+        "currentSha256": "c734f1e6c5a21e414f5f993d9c11c7140057b915a8857260d74b14f4a72ff63b"
+      },
+      {
+        "path": "src/scene/twinGeometry.ts",
+        "priorCommitSha256": "c2caea7a5a3cdb610e0e08f5755e7d2aaf58c6b50f9a966e7c7d0fbd54fb78ff",
+        "currentSha256": "c2caea7a5a3cdb610e0e08f5755e7d2aaf58c6b50f9a966e7c7d0fbd54fb78ff"
+      },
+      {
+        "path": "src/scene/twinScene.css",
+        "priorCommitSha256": "78a79f4deeda90d49938d7e64a86cef06960cf8d2782561341760c5100542dad",
+        "currentSha256": "78a79f4deeda90d49938d7e64a86cef06960cf8d2782561341760c5100542dad"
+      },
+      {
+        "path": "src/state/scenario.ts",
+        "priorCommitSha256": "2fb8f1b90e6237deb87983eb7b5f7d071132beeae4cc887b82d7adc0cf19d9ba",
+        "currentSha256": "2fb8f1b90e6237deb87983eb7b5f7d071132beeae4cc887b82d7adc0cf19d9ba"
+      },
+      {
+        "path": "src/twin/analysis/reports.ts",
+        "priorCommitSha256": "47a1706b3a9875f2d5a935e2143fa5c69d9f2158e4adb283d711368c876c88cc",
+        "currentSha256": "47a1706b3a9875f2d5a935e2143fa5c69d9f2158e4adb283d711368c876c88cc"
+      },
+      {
+        "path": "src/twin/assets/design.ts",
+        "priorCommitSha256": "26246f28049cde4bae0010797e8986f17531fcd86079c0057e95bfb3793d4a95",
+        "currentSha256": "26246f28049cde4bae0010797e8986f17531fcd86079c0057e95bfb3793d4a95"
+      },
+      {
+        "path": "src/twin/catalog/reference.ts",
+        "priorCommitSha256": "615eab81d7728269e568a7037cdb42afce757ac1c924788207b9f28bc9c260b2",
+        "currentSha256": "615eab81d7728269e568a7037cdb42afce757ac1c924788207b9f28bc9c260b2"
+      },
+      {
+        "path": "src/twin/engine/simulation.ts",
+        "priorCommitSha256": "33d297e5f722b627fab035988ad292e494ff8ddea8eb4456b36517890b5a20d4",
+        "currentSha256": "33d297e5f722b627fab035988ad292e494ff8ddea8eb4456b36517890b5a20d4"
+      },
+      {
+        "path": "src/twin/engine/worker.ts",
+        "priorCommitSha256": "4c32b24def61a53309737783310504ad82073bbfe4e0e194c5bdbfe022bd8944",
+        "currentSha256": "4c32b24def61a53309737783310504ad82073bbfe4e0e194c5bdbfe022bd8944"
+      },
+      {
+        "path": "src/twin/persistence/design.ts",
+        "priorCommitSha256": "1f96f4d035d2c828e399a6dc87cdd03eb633466710c7498f1af0e4c5ed0ad931",
+        "currentSha256": "1f96f4d035d2c828e399a6dc87cdd03eb633466710c7498f1af0e4c5ed0ad931"
+      },
+      {
+        "path": "src/twin/persistence/events.ts",
+        "priorCommitSha256": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af",
+        "currentSha256": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af"
+      },
+      {
+        "path": "src/twin/persistence/limits.ts",
+        "priorCommitSha256": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9",
+        "currentSha256": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9"
+      },
+      {
+        "path": "src/twin/persistence/project.ts",
+        "priorCommitSha256": "3642328a00f87325b3763aba111d5daee585033d6f925064dbbbc19635d3674d",
+        "currentSha256": "3642328a00f87325b3763aba111d5daee585033d6f925064dbbbc19635d3674d"
+      },
+      {
+        "path": "src/twin/persistence/state.ts",
+        "priorCommitSha256": "887e1e2b72d04f881aa76e0e48d5f10b2a3f3cead2f6aebec2a40d854757916c",
+        "currentSha256": "887e1e2b72d04f881aa76e0e48d5f10b2a3f3cead2f6aebec2a40d854757916c"
+      },
+      {
+        "path": "src/twin/persistence/storage.ts",
+        "priorCommitSha256": "54d08ec4f6fb883e1c3902c93d9ec0474ae10de3efc6d5ab47ae88d35e91ff1f",
+        "currentSha256": "54d08ec4f6fb883e1c3902c93d9ec0474ae10de3efc6d5ab47ae88d35e91ff1f"
+      },
+      {
+        "path": "src/twin/persistence/structure.ts",
+        "priorCommitSha256": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382",
+        "currentSha256": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382"
+      },
+      {
+        "path": "src/twin/persistence/types.ts",
+        "priorCommitSha256": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd",
+        "currentSha256": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd"
+      },
+      {
+        "path": "src/twin/safety.ts",
+        "priorCommitSha256": "0235a70ab20f7ae5a93fb20c59c9faa4671022421cd96a476e5a48f34d52464b",
+        "currentSha256": "0235a70ab20f7ae5a93fb20c59c9faa4671022421cd96a476e5a48f34d52464b"
+      },
+      {
+        "path": "src/twin/solvers/electrical.ts",
+        "priorCommitSha256": "e50bb0fa53992ec4aa10c4f869ce555d00a520046dd166fbbdd9cf8d318653b3",
+        "currentSha256": "e50bb0fa53992ec4aa10c4f869ce555d00a520046dd166fbbdd9cf8d318653b3"
+      },
+      {
+        "path": "src/twin/solvers/hydraulic.ts",
+        "priorCommitSha256": "9bd60a39d19e157b089d1adf2c8bbf5173c2ba618a681dff1a7106c0e1b3818c",
+        "currentSha256": "9bd60a39d19e157b089d1adf2c8bbf5173c2ba618a681dff1a7106c0e1b3818c"
+      },
+      {
+        "path": "src/twin/solvers/network.ts",
+        "priorCommitSha256": "30e959287d0798c39c39583e2ddb8d6255f9ec503da0ca80d52822f950ccaada",
+        "currentSha256": "30e959287d0798c39c39583e2ddb8d6255f9ec503da0ca80d52822f950ccaada"
+      },
+      {
+        "path": "src/twin/solvers/thermal.ts",
+        "priorCommitSha256": "91fc68d2f63ec71d48e3ea699432d239143c2666ddeb0dbb57a7967c541816df",
+        "currentSha256": "91fc68d2f63ec71d48e3ea699432d239143c2666ddeb0dbb57a7967c541816df"
+      },
+      {
+        "path": "src/twin/telemetry/calibration.ts",
+        "priorCommitSha256": "ef0fe64d91619652a29297fc98f83e234c03f2d76994b219eda5e1927b016a86",
+        "currentSha256": "ef0fe64d91619652a29297fc98f83e234c03f2d76994b219eda5e1927b016a86"
+      },
+      {
+        "path": "src/twin/telemetry/generated.ts",
+        "priorCommitSha256": "e9b4aa635b57f331aadae08199bcf0d9550949454477a0502883acddfee218b0",
+        "currentSha256": "e9b4aa635b57f331aadae08199bcf0d9550949454477a0502883acddfee218b0"
+      },
+      {
+        "path": "src/twin/telemetry/index.ts",
+        "priorCommitSha256": "39ad1ea5be8616c730cf2b5c69b235838dfc556a66709934946086b595ec0061",
+        "currentSha256": "39ad1ea5be8616c730cf2b5c69b235838dfc556a66709934946086b595ec0061"
+      },
+      {
+        "path": "src/twin/telemetry/normalize.ts",
+        "priorCommitSha256": "f45f3c4cc9d4472887ca1395ee09a19764a66107028b24945acccd4698a56d81",
+        "currentSha256": "f45f3c4cc9d4472887ca1395ee09a19764a66107028b24945acccd4698a56d81"
+      },
+      {
+        "path": "src/twin/telemetry/residuals.ts",
+        "priorCommitSha256": "c2ec87b18937cbdb0a5d689ef72d74a58f9e469edb9a7abc3f1613b738527e44",
+        "currentSha256": "c2ec87b18937cbdb0a5d689ef72d74a58f9e469edb9a7abc3f1613b738527e44"
+      },
+      {
+        "path": "src/twin/telemetry/store.ts",
+        "priorCommitSha256": "0771317bd5a5b403e32542b55d33f0f5a4ea09764cd1e224f2d669b647e33c29",
+        "currentSha256": "0771317bd5a5b403e32542b55d33f0f5a4ea09764cd1e224f2d669b647e33c29"
+      },
+      {
+        "path": "src/twin/telemetry/stream.ts",
+        "priorCommitSha256": "9fd614ed0e792a9b9234ae3e404992eae255ad85e8c6cd2f382dea491afe847a",
+        "currentSha256": "9fd614ed0e792a9b9234ae3e404992eae255ad85e8c6cd2f382dea491afe847a"
+      },
+      {
+        "path": "src/twin/types.ts",
+        "priorCommitSha256": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7",
+        "currentSha256": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7"
+      },
+      {
+        "path": "src/ui/App.tsx",
+        "priorCommitSha256": "f473bbddfec483b7f6a1d5b9378e4ba5d08c588367a9c43cefcc70415147216e",
+        "currentSha256": "f473bbddfec483b7f6a1d5b9378e4ba5d08c588367a9c43cefcc70415147216e"
+      },
+      {
+        "path": "src/ui/TwinApp.tsx",
+        "priorCommitSha256": "d68029792c495868a147a296510b162012aea31580bed03a98b2e86679fbf29d",
+        "currentSha256": "d68029792c495868a147a296510b162012aea31580bed03a98b2e86679fbf29d"
+      },
+      {
+        "path": "src/ui/TwinDataPanel.tsx",
+        "priorCommitSha256": "2c83e0fa9de90678e51f437e2fbf1efd60ef9c422ce5100425eb8d2d4b4dd4cb",
+        "currentSha256": "2c83e0fa9de90678e51f437e2fbf1efd60ef9c422ce5100425eb8d2d4b4dd4cb"
+      },
+      {
+        "path": "src/ui/TwinPanels.tsx",
+        "priorCommitSha256": "da548d080659f91f7665c9629b83ea7071ea7d6c67add2bdf93fd243204f1250",
+        "currentSha256": "da548d080659f91f7665c9629b83ea7071ea7d6c67add2bdf93fd243204f1250"
+      },
+      {
+        "path": "src/ui/twin.css",
+        "priorCommitSha256": "fc1bf458615db6bc3ca09454e6b91a9a090544afb3da79dd08f6a8cb7f5ed23c",
+        "currentSha256": "fc1bf458615db6bc3ca09454e6b91a9a090544afb3da79dd08f6a8cb7f5ed23c"
+      },
+      {
+        "path": "src/ui/useTwin.ts",
+        "priorCommitSha256": "be0b505f22fe106f6be4fed265d62782962195a806aec090aaf49c45c71fd9d5",
+        "currentSha256": "be0b505f22fe106f6be4fed265d62782962195a806aec090aaf49c45c71fd9d5"
+      },
+      {
+        "path": "tests/browser/acceptance.spec.ts",
+        "priorCommitSha256": "5c1aa1b2ccfbd2687f15d31da1f59a187550f1faa420f321f0f697cbe082e2e0",
+        "currentSha256": "5c1aa1b2ccfbd2687f15d31da1f59a187550f1faa420f321f0f697cbe082e2e0"
+      },
+      {
+        "path": "tests/browser/phase1.spec.ts",
+        "priorCommitSha256": "1690396ffd98197bb1528f8a71bb8741b851a7ab058854d0519aa79a99ac0538",
+        "currentSha256": "1690396ffd98197bb1528f8a71bb8741b851a7ab058854d0519aa79a99ac0538"
+      },
+      {
+        "path": "tests/browser/record.spec.ts",
+        "priorCommitSha256": "e48631d4c1617eb96b2cc4c4fa2b397e36b46726545212db8129918f1c096d1e",
+        "currentSha256": "e48631d4c1617eb96b2cc4c4fa2b397e36b46726545212db8129918f1c096d1e"
+      },
+      {
+        "path": "tests/browser/twin.spec.ts",
+        "priorCommitSha256": "cd171046755f4a08d0836e7d531d143c8dd647348ae9a80692136c7262f5855e",
+        "currentSha256": "cd171046755f4a08d0836e7d531d143c8dd647348ae9a80692136c7262f5855e"
+      },
+      {
+        "path": "tests/browser/visual.spec.ts",
+        "priorCommitSha256": "43874439f7cc2038425784f162ae26ffd6903df1822d374757365003d42c15cf",
+        "currentSha256": "43874439f7cc2038425784f162ae26ffd6903df1822d374757365003d42c15cf"
+      },
+      {
+        "path": "tests/fixtures/phase-0/scenarios.json",
+        "priorCommitSha256": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094",
+        "currentSha256": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094"
+      },
+      {
+        "path": "tests/model.test.ts",
+        "priorCommitSha256": "172b6ab06e0ecc3a912eb30b2900b5f8c226302c77efb976b7fdc75828734458",
+        "currentSha256": "172b6ab06e0ecc3a912eb30b2900b5f8c226302c77efb976b7fdc75828734458"
+      },
+      {
+        "path": "tests/phase1-deferred.test.ts",
+        "priorCommitSha256": "db0ebde668d5a2203e7dcf0f3278d2d033f594b0874aa0bd2a115b5f136e404a",
+        "currentSha256": "db0ebde668d5a2203e7dcf0f3278d2d033f594b0874aa0bd2a115b5f136e404a"
+      },
+      {
+        "path": "tests/phase1-numerical.test.ts",
+        "priorCommitSha256": "f5d8eba59d5ab8ad62499ea06a23c36e3f032580a2b2f7f04f3c2d6c3d86e4bd",
+        "currentSha256": "f5d8eba59d5ab8ad62499ea06a23c36e3f032580a2b2f7f04f3c2d6c3d86e4bd"
+      },
+      {
+        "path": "tests/phase1-persistence.test.ts",
+        "priorCommitSha256": "c2109c6d34d3749893a13c8ad8586a241e64421d862009563fa2b908754dd50c",
+        "currentSha256": "c2109c6d34d3749893a13c8ad8586a241e64421d862009563fa2b908754dd50c"
+      },
+      {
+        "path": "tests/phase1-work-budget.test.ts",
+        "priorCommitSha256": "5ba12506a97d7849b542e2c40ae5edc739bcef9c3ad5ca3ff56f4e0e88e5b956",
+        "currentSha256": "5ba12506a97d7849b542e2c40ae5edc739bcef9c3ad5ca3ff56f4e0e88e5b956"
+      },
+      {
+        "path": "tests/phase1-worker.test.ts",
+        "priorCommitSha256": "91f68ff26d196714190c90925c9c4081acc6a8d656d36a36c72ddb16bd87e641",
+        "currentSha256": "91f68ff26d196714190c90925c9c4081acc6a8d656d36a36c72ddb16bd87e641"
+      },
+      {
+        "path": "tests/scenario.test.ts",
+        "priorCommitSha256": "1d24a8488ee0a2c2ed8be5860d9f76d49b95546ddef62e37f72d94146c2e63d2",
+        "currentSha256": "1d24a8488ee0a2c2ed8be5860d9f76d49b95546ddef62e37f72d94146c2e63d2"
+      },
+      {
+        "path": "tests/twin-geometry.test.ts",
+        "priorCommitSha256": "958f3576d3367719bf09137b7f637523d4433bd10512b81b8a4918a2a40e8b08",
+        "currentSha256": "958f3576d3367719bf09137b7f637523d4433bd10512b81b8a4918a2a40e8b08"
+      },
+      {
+        "path": "tests/twin-integration.test.ts",
+        "priorCommitSha256": "08f4c419d92245cd205cb2ec25255197153986f478410f037c4d562efb23989f",
+        "currentSha256": "08f4c419d92245cd205cb2ec25255197153986f478410f037c4d562efb23989f"
+      },
+      {
+        "path": "tests/twin-network.test.ts",
+        "priorCommitSha256": "d52efde8ed602b55690c53c68133cadb62f7ef303baeabb4c58cbc2c46235574",
+        "currentSha256": "d52efde8ed602b55690c53c68133cadb62f7ef303baeabb4c58cbc2c46235574"
+      },
+      {
+        "path": "tests/twin-physics.test.ts",
+        "priorCommitSha256": "3e3e397b173e1e90d7237d0c390e3d0da862ca2921abfc8828f4db9b8da14ae1",
+        "currentSha256": "3e3e397b173e1e90d7237d0c390e3d0da862ca2921abfc8828f4db9b8da14ae1"
+      },
+      {
+        "path": "tests/twin-telemetry.test.ts",
+        "priorCommitSha256": "f09b956896fb9e02c3399faf4116bd903abb87942af62d9fcdb89668deba6ee6",
+        "currentSha256": "f09b956896fb9e02c3399faf4116bd903abb87942af62d9fcdb89668deba6ee6"
+      },
+      {
+        "path": "tsconfig.json",
+        "priorCommitSha256": "6e22914754e6475fee096996c9064f39a595c7680452cff23d15196e1bd430d5",
+        "currentSha256": "6e22914754e6475fee096996c9064f39a595c7680452cff23d15196e1bd430d5"
+      }
+    ],
+    "workflowSha256": "b6c160119b32dfa6c0e45b3f44476bf2d698bde5839128f7ec07bb359b2c78d4",
+    "sourceOnlyWorkflowUnchanged": true,
+    "runnerAnd45MinuteJobDeadlineUnchanged": true,
+    "playwrightConfigurationUnchanged": true,
+    "testsAndNumericalTolerancesUnchanged": true,
+    "lockPackagePhase0PublicUnchanged": true,
+    "protectedFiles": 73,
+    "protectedHashMismatches": []
+  },
+  "hostedAttempts": [
+    {
+      "kind": "push",
+      "runId": 34397051589,
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34397051589",
+      "sourceSha": "264de666fac69c575e17186ec1b7342fcf6fd28e",
+      "status": "FAIL",
+      "sourceMismatches": [],
+      "gates": [
+        {
+          "name": "npm-ci",
+          "exitCode": 0,
+          "elapsedMs": 33548.470857
+        },
+        {
+          "name": "typecheck",
+          "exitCode": 0,
+          "elapsedMs": 12009.284828000003
+        },
+        {
+          "name": "lint",
+          "exitCode": 0,
+          "elapsedMs": 4720.145181
+        },
+        {
+          "name": "build",
+          "exitCode": 0,
+          "elapsedMs": 15328.314026
+        },
+        {
+          "name": "unit-full",
+          "exitCode": 1,
+          "elapsedMs": 51804.457372000004
+        },
+        {
+          "name": "gate",
+          "exitCode": 1
+        }
+      ],
+      "units": {
+        "total": 256,
+        "passed": 254,
+        "failed": 2,
+        "skipped": 0,
+        "files": 12
+      },
+      "failedCases": [
+        {
+          "file": "tests/twin-integration.test.ts",
+          "name": "canonical graph, geometry and operating-state integration bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption",
+          "status": "failed",
+          "durationMs": 10861.659043
+        },
+        {
+          "file": "tests/twin-telemetry.test.ts",
+          "name": "running DataPanel acceptance operates mapping, raw inspection, simulated dropout, calibration, and actual streaming in the app",
+          "status": "failed",
+          "durationMs": 40003.482619
+        }
+      ],
+      "telemetryAppCase": [
+        {
+          "file": "tests/twin-telemetry.test.ts",
+          "status": "failed",
+          "durationMs": 40003.482619
+        }
+      ],
+      "reportedTimeoutMessages": [
+        "Error: Test timed out in 5000ms.",
+        "Error: Test timed out in 40000ms."
+      ],
+      "browserStageExecuted": false,
+      "measurementsExecuted": false,
+      "toolchain": {
+        "node": "v24.19.0",
+        "npm": "11.17.0",
+        "os": "darwin",
+        "release": "25.6.0",
+        "arch": "x64",
+        "cpu": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 15032385536,
+        "availableMemoryBytes": 5005152256
+      },
+      "publicCopies": [
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/build.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/execution.json",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/lint.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/npm-ci.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/server.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/typecheck.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/unit-full.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-push/unit-summary.json",
+          "identical": true
+        }
+      ]
+    },
+    {
+      "kind": "pr",
+      "runId": 34397058602,
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34397058602",
+      "sourceSha": "1b028c62c8ad132ef41d1f315bb64cfc14eee1ce",
+      "status": "FAIL",
+      "sourceMismatches": [],
+      "gates": [
+        {
+          "name": "npm-ci",
+          "exitCode": 0,
+          "elapsedMs": 32986.659113999995
+        },
+        {
+          "name": "typecheck",
+          "exitCode": 0,
+          "elapsedMs": 10003.917297
+        },
+        {
+          "name": "lint",
+          "exitCode": 0,
+          "elapsedMs": 2190.676907000001
+        },
+        {
+          "name": "build",
+          "exitCode": 0,
+          "elapsedMs": 13603.272053
+        },
+        {
+          "name": "unit-full",
+          "exitCode": 1,
+          "elapsedMs": 50583.02770599999
+        },
+        {
+          "name": "gate",
+          "exitCode": 1
+        }
+      ],
+      "units": {
+        "total": 256,
+        "passed": 255,
+        "failed": 1,
+        "skipped": 0,
+        "files": 12
+      },
+      "failedCases": [
+        {
+          "file": "tests/twin-integration.test.ts",
+          "name": "canonical graph, geometry and operating-state integration bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption",
+          "status": "failed",
+          "durationMs": 10610.6477
+        }
+      ],
+      "telemetryAppCase": [
+        {
+          "file": "tests/twin-telemetry.test.ts",
+          "status": "passed",
+          "durationMs": 30280.633266000004
+        }
+      ],
+      "reportedTimeoutMessages": [
+        "Error: Test timed out in 5000ms."
+      ],
+      "browserStageExecuted": false,
+      "measurementsExecuted": false,
+      "toolchain": {
+        "node": "v24.19.0",
+        "npm": "11.17.0",
+        "os": "darwin",
+        "release": "25.6.0",
+        "arch": "x64",
+        "cpu": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 15032385536,
+        "availableMemoryBytes": 5306101760
+      },
+      "publicCopies": [
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/build.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/execution.json",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/lint.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/npm-ci.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/server.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/typecheck.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/unit-full.log",
+          "identical": true
+        },
+        {
+          "path": "docs/phase-1/evidence/ci-macos26-intel-pr/unit-summary.json",
+          "identical": true
+        }
+      ]
+    }
+  ],
+  "localOwnerProbe": {
+    "scope": "CI=true local environment comparison only; not a hosted-runner or clean-install acceptance substitute",
+    "startedAt": "2026-09-09T19:52:42.930Z",
+    "completedAt": "2026-09-09T19:53:00.056Z",
+    "exitCode": 0,
+    "passed": 256,
+    "failed": 0,
+    "skipped": 0,
+    "success": true,
+    "command": "CI=true NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 npm test -- --reporter=default --reporter=json --outputFile=<evidence>/unit.json",
+    "viteConfigSha256": "d5049d93190b29791631f350906479be8b2bbe456f96dce86dc6b1b80030df17",
+    "sourceSha": "264de666fac69c575e17186ec1b7342fcf6fd28e",
+    "sourceStatus": "Working tree differs only in reviewed test-file scheduling and CI evidence documentation",
+    "toolchain": {
+      "node": "v24.18.0",
+      "os": "darwin",
+      "release": "25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M4 Pro",
+      "logicalCpus": 14,
+      "totalMemoryBytes": 25769803776
+    },
+    "evidencePath": "docs/phase-1/evidence/ci-serial-local/summary.json",
+    "elapsedMs": 17126,
+    "inspectedByReviewer": true,
+    "executedByReviewer": false,
+    "configurationHashMatchesReviewedChange": true,
+    "interpretation": "All 256 local CI-mode unit cases passed without skips at the same test deadlines. This is supporting local evidence; it does not establish hosted acceptance or prove the precise contention cause."
+  },
+  "rationale": "The failed hosted logs identify the unchanged 5-second campus and 40-second telemetry deadlines rather than wrong-result assertions. Serial file scheduling reduces overlap among allocation-heavy suites and real browser telemetry while preserving isolation and per-file worker/browser tests. Resource contention remains a plausible explanation, not a proven diagnosis; the exact corrected hosted head must run all gates.",
+  "publicMaterialReview": {
+    "scannedAt": "2026-09-09T19:54:37.225Z",
+    "files": 22,
+    "inventory": [
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "bytes": 11078,
+        "sha256": "357564389fa608f3f8e1de5281e22af38a2af6221fda8023e7d34b414a4f7100",
+        "group": "phase-1-documentation-evidence",
+        "tracked": true
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "bytes": 6560,
+        "sha256": "c76e069f9fa920a5f9f8e09a93c58b55725cfe2a72fbf52d1c97832fd971e077",
+        "group": "phase-1-documentation-evidence",
+        "tracked": true
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/build.log",
+        "bytes": 787,
+        "sha256": "3e8e5448fcc7ee6065b742893582ad6c076e242f2738dc92e43b98a29da5d733",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/execution.json",
+        "bytes": 10604,
+        "sha256": "f69c5dfcaee54601c0d1416c90d2dd67c08cdd859caa8e8b53f4e3a3e7da94bb",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/lint.log",
+        "bytes": 175,
+        "sha256": "ff2d823023f83ade27725cc5c7638ba8e3f696d85500c1a51aade79f0f90d1d8",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/npm-ci.log",
+        "bytes": 456,
+        "sha256": "b2e21f1a720910632cca42e7ddd10113a8683511a0edfd11cbfde859bbb87c09",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/server.log",
+        "bytes": 334,
+        "sha256": "b4b818a631b284665be5502a9b748b71626778e39486dd436e97b2fe9566aad3",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/typecheck.log",
+        "bytes": 48,
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/unit-full.log",
+        "bytes": 11301,
+        "sha256": "a40a30706cd0eeac0fb62fb5ff82d09cfa3591e5c8f9720a6f0f195f0d800ffb",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/unit-summary.json",
+        "bytes": 58802,
+        "sha256": "d29a9866ee252552d0e5ba954614cf541458d6e4a7265894173728d5f774cb77",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/build.log",
+        "bytes": 787,
+        "sha256": "b755e2d239c9aca3ffae80683957b116d6b5816b657a2086ebdc3cc736ca94f7",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/execution.json",
+        "bytes": 10599,
+        "sha256": "07bd5b04decb13b596eca44d27889ccdae39aa024d26df14dda7eedf7b7678b8",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/lint.log",
+        "bytes": 175,
+        "sha256": "a307e85cb0a0a75a7997ed3d112649cc882f5e5ce90c369bdb27b653e196d3d4",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/npm-ci.log",
+        "bytes": 456,
+        "sha256": "b2e21f1a720910632cca42e7ddd10113a8683511a0edfd11cbfde859bbb87c09",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/server.log",
+        "bytes": 334,
+        "sha256": "ae3a0f10d5d00c4e2f9cb5919f19dc6d880b118f7bd2e2f3af2cbd5dd2fe0705",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/typecheck.log",
+        "bytes": 48,
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/unit-full.log",
+        "bytes": 16532,
+        "sha256": "7a11fb5f3a4d3259ec101671b281f11cea9252ffd0adc46d04c3b057679f78aa",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/unit-summary.json",
+        "bytes": 58770,
+        "sha256": "9b863f22b974f6c63f599b9b9691bf886b3c321959baea63df43af719f7ccb52",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-serial-local/server.log",
+        "bytes": 257,
+        "sha256": "a62d1dba18d2947e6512b31d73e1fc22c9ba98b946845e46f4fef13613d75241",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-serial-local/summary.json",
+        "bytes": 905,
+        "sha256": "6de94924d4ce16021ec342fe4937e19d50f4136d8115562f6cd6f3afdb221ce6",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-serial-local/unit-summary.json",
+        "bytes": 58855,
+        "sha256": "c6398c83a69af6408233d266f131e52df2c2d08bb568e141f16d1a01f81380fd",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-serial-local/unit.log",
+        "bytes": 2227,
+        "sha256": "0e1241e1deda7b6a8211e6e93b87a0d80b4f33d788539b4e8bf77f12223df68d",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      }
+    ],
+    "reportExcludedFromOwnHashInventory": true,
+    "hostedCopiesByteIdentical": 16,
+    "localProbeFiles": 4,
+    "documentFiles": 2,
+    "unclassifiedHits": [],
+    "credentialMaterialDetected": false,
+    "privateObservationPayloadsDetected": false,
+    "recordingsDetected": false,
+    "classifiedHits": [
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "categories": [
+          "private-observation-terms"
+        ],
+        "disposition": "Telemetry flags, generated verification/test names or scope documentation; no private observation data."
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "categories": [
+          "private-observation-terms"
+        ],
+        "disposition": "Telemetry flags, generated verification/test names or scope documentation; no private observation data."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/execution.json",
+        "categories": [
+          "private-observation-terms"
+        ],
+        "disposition": "Telemetry flags, generated verification/test names or scope documentation; no private observation data."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/unit-full.log",
+        "categories": [
+          "private-observation-terms"
+        ],
+        "disposition": "Telemetry flags, generated verification/test names or scope documentation; no private observation data."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-pr/unit-summary.json",
+        "categories": [
+          "url-userinfo",
+          "private-observation-terms"
+        ],
+        "disposition": "Every userinfo URI matches the unchanged synthetic unsafe-URL test case."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/execution.json",
+        "categories": [
+          "private-observation-terms"
+        ],
+        "disposition": "Telemetry flags, generated verification/test names or scope documentation; no private observation data."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/unit-full.log",
+        "categories": [
+          "credential-url-query",
+          "url-userinfo",
+          "private-observation-terms"
+        ],
+        "disposition": "ANSI formatting made the existing short unsafe-URL fixture sentinel cross the scanner length threshold. After ANSI removal the long-query marker is absent, and every URI matches unchanged synthetic test source."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-push/unit-summary.json",
+        "categories": [
+          "url-userinfo",
+          "private-observation-terms"
+        ],
+        "disposition": "Every userinfo URI matches the unchanged synthetic unsafe-URL test case."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-serial-local/unit-summary.json",
+        "categories": [
+          "url-userinfo",
+          "private-observation-terms"
+        ],
+        "disposition": "Every userinfo URI matches the unchanged synthetic unsafe-URL test case."
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-serial-local/unit.log",
+        "categories": [
+          "private-observation-terms"
+        ],
+        "disposition": "Telemetry flags, generated verification/test names or scope documentation; no private observation data."
+      }
+    ],
+    "docsAssessment": "Final CI-INVESTIGATION and ACCEPTANCE accurately retain both failed unit gates, distinguish 254/256 push from 255/256 PR, do not claim browser or measurement execution, document unchanged assertions/timeouts and label the 256-case local probe as local-only."
+  },
+  "commands": [
+    {
+      "command": "git diff 264de666fac69c575e17186ec1b7342fcf6fd28e -- vite.config.ts; remove only reviewed comment/option and compare bytes",
+      "result": "Exact equivalence to previous config after removing only the proposed correction."
+    },
+    {
+      "command": "Read installed Vitest resolver/defaults/type declarations and official fileParallelism documentation",
+      "result": "Supported option; maxWorkers becomes one, isolation and within-file concurrency stay intact."
+    },
+    {
+      "command": "Inspect both downloaded hosted execution/unit summary/unit logs and compare all 16 public artifact copies by SHA-256",
+      "result": "Timeout counts and exact evidence preservation verified."
+    },
+    {
+      "command": "Read ci-serial-local summary and unit report, compare configuration hash",
+      "result": "Owner local 256/256, zero skips, 17.126 seconds, both telemetry flags; config hash matches."
+    },
+    {
+      "command": "node artifacts/phase-1-review/publication-scan.mjs; classify hits without printing candidate values",
+      "result": "22 new/changed publication files scanned; synthetic test fixtures classified; all 73 protected hashes unchanged."
+    }
+  ],
+  "findings": [],
+  "openFindings": [],
+  "limitations": [
+    "No unit/browser run was executed by this reviewer; the integration owner ran the cited local probe and owns corrected CI.",
+    "This scheduling adjustment is not proof that the corrected hosted unit, browser or measurement gate will pass.",
+    "Changing file-level scheduling reduces cross-file simultaneous load; it does not add a claim of cross-file stress coverage. Existing intentional within-file concurrency and isolation remain unchanged.",
+    "The review is hash-bound and excludes its own report from the publication manifest. Any later source/config/document changes require corresponding review."
+  ],
+  "outcome": "PASS_REVIEW_ONLY: minimal supported test-file scheduling correction, no assertion/timeout/deployment weakening, and no publication blocker in the final 22-file evidence addition/update. Corrected full hosted acceptance and integration remain pending."
+}
