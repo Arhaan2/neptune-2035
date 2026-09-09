@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_REVIEW_ONLY",
+  "reviewedAt": "2026-09-09T21:15:05.036Z",
+  "baseSource": "7e344e7cf09c68a3a86af4672466260f382e5132",
+  "findings": [],
+  "scope": "Independent config/source review, raw failed14-file gate publication assessment, Pause summary readback, controlled Firefox evidence and current acceptance/investigation text. No tests, browser/server launch or remote operation by this reviewer.",
+  "config": {
+    "path": "playwright.config.ts",
+    "sha256": "0dc23bdb98c7413e6120d76cbc249943b123709f5a4234a1b3b1f8ddb5a8cb66",
+    "diffSha256": "460ca1b694219ece1b312f4a5e1774a4ab04f38d7a6bb7980cbf516c18b29c9d",
+    "onlyExecutableChange": true,
+    "unchangedOtherSourceHashes": 78,
+    "assessment": "Restores default headless Firefox and sets layout.frame_rate60. Current Mozilla source selects software vsync at a positive requested rate. Native rAF and real element-rectangle actionability, rendering, deadlines, assertions, viewport/DPR and physical stepping/event order remain. Firefox cadence reports are specific to the configured display."
+  },
+  "failedGate": {
+    "status": "FAIL",
+    "sourceSha": "7e344e7cf09c68a3a86af4672466260f382e5132",
+    "units": "256/256",
+    "browsers": "75/78",
+    "byBrowser": {
+      "chromium": "26/26",
+      "firefox": "23/26",
+      "webkit": "26/26"
+    },
+    "skipped": 0,
+    "flaky": 0,
+    "measurementsExecuted": false,
+    "interpretation": "Exterior Reset view mismatch,391px versus390px document width, and enabled Seek30 stalled before replay; snapshot shows paused/durable20s. All Pause cases passed. These observations do not prove a common cause or numerical corruption.",
+    "rawFiles": 14,
+    "textContexts": 3,
+    "sourceLogAndContextHashMismatches": []
+  },
+  "controlledResults": {
+    "nativeProbe": "Four genuine native probes confirm approx120Hz default versus60Hz configured callbacks, matching CSS/DPR/camera/visibility. Headed391 and headless390 occur under both clock settings despite the same fractional390.350006px edge; no general headed-layout fix is claimed.",
+    "seekMatrix": {
+      "passed": 4,
+      "durationMs": 15251.715,
+      "skipped": 0,
+      "failed": 0,
+      "flaky": 0,
+      "limitation": "All isolated variants passed; necessity or a cure for the intermittent stall is unproven."
+    },
+    "affectedHeadless60": {
+      "passed": 4,
+      "durationMs": 22640.109999999997,
+      "skipped": 0,
+      "failed": 0,
+      "flaky": 0,
+      "coverage": "Three unchanged failed cases plus original native120-frame visual probe."
+    },
+    "pauseSummary": "Original disabled-Pause observation and exact33/33 focused report match prior independent readback; six referenced artifact hashes/lengths, original archived test hash and repair hashes verified."
+  },
+  "publication": {
+    "status": "PASS",
+    "files": 18,
+    "inventoryPath": "artifacts/phase-1-review/firefox-ci-publication-inventory.json",
+    "inventorySha256": "ce7fec5b8366b4a6e0ace4d9f88eb7d3d0b34ec6f0ed028bab8780d283e850c0",
+    "protectedFilesVerified": 73,
+    "phase0LockPublicChanges": [],
+    "assessment": "Regular UTF-8 text/JSON only. No credentials/private observation payloads/media bytes found. Scheduling observations are four local synthetic browser timing/geometry probes. Userinfo is the exact baseline synthetic telemetry fixture; trace/media entries are ignored artifact filenames and hashes. Three path-sanitized text contexts match manifests. Corrected exterior-reset and current-headless wording verified.",
+    "reviewedDocumentHashes": {
+      "docs/phase-1/evidence/review-pause-control.json": "e98ae49ef24269d399436a2f385de9c7ef3dd68e5df891f96ce8a6d455893735",
+      "docs/phase-1/evidence/review-firefox-scheduling.json": "5a193e82843734ec630610c0fec37d8a653921e415977c90ce7fe613803ee071",
+      "docs/phase-1/CI-INVESTIGATION.md": "49ca2867d64105a5995bd13e391dcb39872853c1906e45979f66a06736572a02",
+      "docs/phase-1/ACCEPTANCE.md": "f10569465974e889ef1eb3109f6bd96e5d09d99c2c73e263779600fc2c7ffe66"
+    }
+  },
+  "checks": [
+    "Compare79 current source/config hashes with exact7e execution manifest; only Playwright config differs",
+    "Verify failed14-file evidence, all execution-log hashes and3 context hashes",
+    "Read installed Playwright rAF/rectangle stability check and current Mozilla gfxPlatform.cpp3350–3396",
+    "Read four native probes, unchanged Seek matrix4/4 and affected4/4 JSON; verify four referenced artifact hashes and tested source hashes",
+    "Read Pause summary and previously verified six artifacts/33-case report",
+    "Run publication pattern scans without printing potential values; classify synthetic probe observations and baseline test URL; verify73 protected hashes"
+  ],
+  "references": [
+    "https://github.com/mozilla-firefox/firefox/blob/main/gfx/thebes/gfxPlatform.cpp",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp"
+  ],
+  "limitations": [
+    "No full new candidate acceptance or hosted pass claimed. Failed7e remains failed; next exact source needs complete256-unit/78-browser/measurement and hosted gates.",
+    "Worker executed the focused tests; reviewer independently inspected actual outputs.",
+    "Passing isolated probes does not establish all historical Firefox causes, software60 necessity, or general hardware performance.",
+    "New final gate/docs evidence requires a later publication snapshot."
+  ],
+  "candidateSourceSha": "2699e5b25710636aa69338ee75e21ebc25cf6c6e",
+  "committedSourceHashMatches": 79
+}
