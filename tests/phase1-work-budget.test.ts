@@ -8,7 +8,7 @@ import type { WorkerResponse } from '../src/twin/types';
 // Physical long histories and checkpoint trajectories use the real kernel in the other suites.
 vi.mock('../src/twin/engine/simulation', async (importOriginal) => {
   const real = await importOriginal<typeof import('../src/twin/engine/simulation')>();
-  return { ...real, advance: ((design, state, duration, events = []) => duration === 0 ? real.advance(design, state, 0, events) : { ...state, timeS: state.timeS + duration, stepIndex: state.stepIndex + duration / state.integrationStepS }) as typeof real.advance };
+  return { ...real, advance: ((design, state, duration, events) => duration === 0 ? real.advance(design, state, 0, events) : { ...state, timeS: state.timeS + duration, stepIndex: state.stepIndex + duration / state.integrationStepS }) as typeof real.advance };
 });
 describe('PH1-PER-02 worker work budget one-unit boundaries', () => {
   it.each([-1, 0, 1])('replay at 2,000,000 %+d module steps retains the correct completed boundary', async offset => {
