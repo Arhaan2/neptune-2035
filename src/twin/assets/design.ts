@@ -1,5 +1,6 @@
 import { HARDWARE as H } from '../catalog/reference';
 import type { Asset, AssetType, Connection, Design, DesignConfig, Medium, ModuleSpec, Vec3 } from '../types';
+import { failure, finiteNumber, finiteOutputs } from '../safety';
 
 export const DEFAULT_CONFIG: DesignConfig = {
   schemaVersion: 2, generation: 1, requestedAccelerators: 10_000, supplyW: 30e6,
@@ -143,10 +144,14 @@ export function loopRouteM(m:ModuleSpec):Vec3[]{
   const [x,y,z]=m.positionM,h=y-1.8;
   return [[x+9,h,z-3.5],[x+9,h,z-4.5],[x-10,h,z-4.5],[x-10,h,z+4.5],[x+9,h,z+4.5],[x+9,h,z-3.5]];
 }
-export function routeLengthM(points:Vec3[]){return points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(...p.map((v,j)=>v-points[i][j])),0);}
+export function routeLengthM(points:Vec3[]){
+  if(!Array.isArray(points)||points.length>64)failure('invalid-input','ROUTE_POINTS','Route must contain at most 64 three-coordinate points.');
+  for(const p of points){if(!Array.isArray(p)||p.length!==3)failure('invalid-input','ROUTE_VECTOR','Route point must have three coordinates.');for(const n of p)finiteNumber(n,'route coordinate',{unit:'m'});}
+  return finiteOutputs({lengthM:points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(...p.map((v,j)=>v-points[i][j])),0)},'route geometry').lengthM;
+}
 export function loopGeometry(_design:Design,m:ModuleSpec){
   const rackBranchesM=m.rackCount*2*1.2; // parallel branch wetted mass length; solver equivalent path takes one branch
-  return {technicalLengthM:routeLengthM(loopRouteM(m))+2*1.2,seawaterLengthM:2*(m.positionM[1]+3)+8,rackBranchesM};
+  return finiteOutputs({technicalLengthM:routeLengthM(loopRouteM(m))+2*1.2,seawaterLengthM:2*(m.positionM[1]+3)+8,rackBranchesM},'loop geometry');
 }
 export function packingIssues(design:Design):string[]{
   const issues:string[]=[];

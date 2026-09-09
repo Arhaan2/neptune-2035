@@ -1,0 +1,319 @@
+{
+  "observedAt": "2026-09-09T08:02:22.329034+00:00",
+  "initialHead": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "initialBranch": "codex/neptune-phase-0",
+  "initialStatus": [],
+  "baselineSource": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "remote": "https://github.com/Arhaan2/neptune-2035.git",
+  "remoteMainAtInspection": null,
+  "defaultSourceBranch": "codex/neptune",
+  "defaultSourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "mainResolution": "User explicitly requested creating main from codex/neptune, then targeting main. No remote write yet.",
+  "graph": [
+    "* f676c1f Checkpoint Phase 0: preserve baseline and reproduce six review findings",
+    "* 23de38a Record hosted v2 acceptance and preserved production integrity",
+    "* e044978 Checkpoint G: record numerical, browser, visual and release-candidate evidence",
+    "* dcb9eff Correct powered-state event logging and cinematic viewport transitions",
+    "* 190ae5b Checkpoint B\u2013F: integrate dimensioned asset twin, coupled operations and data workflows",
+    "* 8072ab3 Checkpoint A: preserve baseline and define dimensioned twin reference model",
+    "* 8b78638 Document hosted acceptance and package verified launch assets",
+    "* 127a2fa Wait for portrait canvas resize before visual acceptance",
+    "* 6b224a8 Build NEPTUNE interactive offshore infrastructure simulator",
+    "* 019b24f Add isolated v2 preview while preserving the v0.1 root payload",
+    "* 672805a Publish NEPTUNE source 127a2fa to Pages"
+  ],
+  "protectedFiles": [
+    {
+      "path": "docs/phase-0/ACCEPTANCE.md",
+      "sha256": "152f0d7fd04662ac7fcf583ac6172ebaddc0e8f75efc84c9c19b21b026801ee3"
+    },
+    {
+      "path": "docs/phase-0/BASELINE.md",
+      "sha256": "a313a446adc2c8a9d29d337d2233290c7dbe6da17e0d10b7059cccfa14678b09"
+    },
+    {
+      "path": "docs/phase-0/ISSUES.md",
+      "sha256": "ed318720f4f4fcca5860749f580d5b6858754285393a6fea9b09d07ee4809b47"
+    },
+    {
+      "path": "docs/phase-0/REFERENCE-SCENARIOS.md",
+      "sha256": "d425e5341db27d1c9ceaa5fc207b818368736c256098fb2911498001c4de2de1"
+    },
+    {
+      "path": "docs/phase-0/REQUIREMENT-TEST-MATRIX.md",
+      "sha256": "91d6554f4ede1106db2e631e1ffb7ccb92c67c2b01d67c3a7882ab1843778fb4"
+    },
+    {
+      "path": "docs/phase-0/baseline-manifest.json",
+      "sha256": "9ee5f2c834b922faa422ef389e6dbc6d250be64ed60069da5065695a5662895b"
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/build.log",
+      "sha256": "4e8f7be535a7697b8f8d572ba50770bbd2fc123412678d3446c3af5f17fd4b57"
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/execution.json",
+      "sha256": "9b6fd56e121441cf4e34ea842b458416661a200d22e9ad23f2af63125e0a6fd3"
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/lint.log",
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b"
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/npm-ci.log",
+      "sha256": "f1934b8baebc1c5c6eca45f8e9bb861e27e53fd01ae83a53e61715a6e29ee09c"
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/typecheck.log",
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e"
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/unit.log",
+      "sha256": "e75627d23f5b09efbb3195ea54775bfde83f23d41fc5bb4c05396233b714e29e"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/browser-summary.json",
+      "sha256": "de5525bdf3d869b22ae1a8d018e13e8d116e4ad73de4992fc9ba51c247bdb16a"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/browser.log",
+      "sha256": "f7021e6eb55ef40765db87fe9f5ffcd0ca8b361b00e93a1ddc6a13c5c2b58b97"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/build.log",
+      "sha256": "99185066124b10fd98eca8993dd11ab0ecd00050c0e431757eb1e78f0c04e61a"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-hydraulic.log",
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-hydraulic/audit.json",
+      "sha256": "b53dd9b7789e8192ba7d5928bf33287bbbe46a753eb25741fa47a0e195c8080b"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-persistence.log",
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-persistence/audit.json",
+      "sha256": "f33c53005816e9fe9ecfd19ba48068a40c996caeb3a3e58fd5d5c397233e1f2e"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-001.json",
+      "sha256": "57962e64d78540f044d454e8c4d01fdbfb317044c25885226c51793fa432d00d"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-002-minimal-project.json",
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-002.json",
+      "sha256": "714b8a747d1193a2602107e0a5318176cb5b8f659f8b060fda73bc39099109ac"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-003.json",
+      "sha256": "81e50e5e7cd475a76d5204a3b95674a5a0f952e85a93cb8b62b35ed9c0dbd021"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-004.json",
+      "sha256": "2db0dc8cacdd66f153b796e816d0e164af88669e62a2c31438c9fa335f303f88"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005-engineering-report.md",
+      "sha256": "4a41c9f0d2d73a9d644094fa76a03ec9e8a73bfcfd91b1c009ebdc8ad61fb9d0"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005-terminal-results.csv",
+      "sha256": "409341eed2a12cb462da772b2d40e253553dd2e1220ccf61086617250d67c869"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005.json",
+      "sha256": "e9952867d1d5db51059c0822e8b2af2ea88a81af02fafbff07fd13bec3964a1a"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-006.json",
+      "sha256": "39cce26376f76b08f9c07d68e705b3e657c69e3420479bcf41a15739796bfd52"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/audit.json",
+      "sha256": "fa7d42122925544ef55dabee3a6902a94d0d11eb8551cbc9ee90755b86dea4fd"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/execution.json",
+      "sha256": "8e4ee91da3fdae8fc2c7c11bb48970ba19b38771f11dd7cda06cd1d8d06fe15d"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/lint.log",
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/npm-ci.log",
+      "sha256": "f1934b8baebc1c5c6eca45f8e9bb861e27e53fd01ae83a53e61715a6e29ee09c"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/phase-0.log",
+      "sha256": "3ef8b72bef1e2e6f1f1ee009193d8796d0fb32a3fc5b7301e8ef645377156a93"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/server.log",
+      "sha256": "6ce201ff9acc1eedec7b2a1c86bdd435e0cf3f6422b559891857b9b3aaa9c7fd"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/typecheck.log",
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e"
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/unit-full.log",
+      "sha256": "ffc70946aebf97aa587501ded4d1e24075cf0189c274155c2a7191b73026da5a"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-hydraulic.log",
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-hydraulic/audit.json",
+      "sha256": "a89e23fa6fffa22a5817418707e6363ed17b889b8a60f9f01a15f2b235b1a1d0"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-persistence.log",
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-persistence/audit.json",
+      "sha256": "0af036e608568956d35c67249bbde6c8ca05080a6034266d31494c1275175ccb"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/diagnostics/audit.json",
+      "sha256": "128a8bbc73c56fc1ff39f085976a14ca1491f0165f39740b70fa8a76b4f9f991"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/execution.json",
+      "sha256": "7a3b44d217b9067c96cd3ec6928fef918c02590be2ea171fedbc0c4920d549f2"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/npm-ci.log",
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/phase-0.log",
+      "sha256": "21f4f0cfa5be00cbac776e8441295a85377bc99461d710b5e1ba61d04a6b2cec"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-hydraulic.log",
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-hydraulic/audit.json",
+      "sha256": "9f018bbe3245b9cdc6e93f54a72507549dd9f2818f21913f4d9d701cdb5ea081"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-persistence.log",
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-persistence/audit.json",
+      "sha256": "4523ebb4441671df920b1767ec442ef006ef6d2c9240fb26fda429f36350e3ab"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/diagnostics/audit.json",
+      "sha256": "3c5d2e8f92bc79ab14c917c6b0c381ae963849ae95db8f565c66be993893cde9"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/execution.json",
+      "sha256": "b96d4036903b61504e2d922a4ffcee465bee508402e6ba2e42b1908ce8f820d7"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/npm-ci.log",
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361"
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/phase-0.log",
+      "sha256": "7cee3f34665c275819c31c584beb6d2ddd4bab2d6f045f86c2d57bc3c86d05f3"
+    },
+    {
+      "path": "docs/phase-0/evidence/evidence-manifest.json",
+      "sha256": "d61656bfc574368d541bf93d38e3749e971ba4b917acd9f28692dd7ea4d60d32"
+    },
+    {
+      "path": "docs/phase-0/evidence/gate.json",
+      "sha256": "5b14c84969154f19085260d1eb7fd46ec6ebc0ba9bfccba9936ef304ff7ae86c"
+    },
+    {
+      "path": "docs/phase-0/evidence/harness-manifest.json",
+      "sha256": "438302b1092555b92b93931664593629a8deba8cabdfacc2e850d51d364a13cd"
+    },
+    {
+      "path": "docs/phase-0/evidence/hosted-observation.json",
+      "sha256": "74fcc3c0662f24096269cc3464ab3f85d123b7ee3acf2488ecf7983dcb6087b6"
+    },
+    {
+      "path": "docs/phase-0/evidence/protected-after.json",
+      "sha256": "e1a71cc54ee7e17fd6be760f3bda9bdc44cde0e09a89a28ca16a803f6be0c14e"
+    },
+    {
+      "path": "docs/phase-0/evidence/protected-before.json",
+      "sha256": "3deae1f52268f1cbc146293f9f49b3886940ef63e4fa16cae4a49a20ca64d8aa"
+    },
+    {
+      "path": "docs/phase-0/evidence/published/pages-api.json",
+      "sha256": "563d97060c2459a0ff950c9fdf8d97e70237ccbc433002dd0c4bd5be7680f166"
+    },
+    {
+      "path": "docs/phase-0/evidence/published/production-build-manifest-probe.txt",
+      "sha256": "b620507312c5e97566a3c6cfaf99144fefc18a0da7d941401dfa0f5f58fb0368"
+    },
+    {
+      "path": "docs/phase-0/evidence/published/release.json",
+      "sha256": "27401a4d6bf63f08a9e24e6f4e19b5fc56e30ffe65d1979d2d60be5cc2b7dfad"
+    },
+    {
+      "path": "docs/phase-0/evidence/published/v2-preview--build-manifest.json",
+      "sha256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1"
+    },
+    {
+      "path": "docs/phase-0/evidence/published/v2-preview--release.json",
+      "sha256": "0efe8be9da33ecaba72eb8cd3eb00f3558d9b0bba5c61bd98e65b1f51c5fb5c0"
+    },
+    {
+      "path": "docs/phase-0/evidence/recovery-receipt.json",
+      "sha256": "0e6936fdc3660c63a8935e0fa19bf16458503b40fe91410bfdf512763ea476de"
+    },
+    {
+      "path": "docs/phase-0/evidence/remote-settings.json",
+      "sha256": "80b87ff1951df76ba40dd4edade988e184e223291a3aa950b8e2436d658b01eb"
+    },
+    {
+      "path": "docs/phase-0/evidence/tooling-notes.json",
+      "sha256": "68bd89a8e4232e90c705a71a31295bc6b05a187e070618de2edf22e38ceb3f16"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9"
+    },
+    {
+      "path": "scripts/phase-0/audit.mjs",
+      "sha256": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4"
+    },
+    {
+      "path": "scripts/phase-0/capture-hosted.mjs",
+      "sha256": "9923c31b6e480be7f9bd42346f0c0cf99842774397f9e0f29a4dcb3aff1a70fb"
+    },
+    {
+      "path": "scripts/phase-0/clean-check.mjs",
+      "sha256": "e9b529983d2a5a3e85ee9e946ed1f3ab2578bb4ba417f8f129863dfac8a64bbe"
+    },
+    {
+      "path": "scripts/phase-0/recover-artifacts.mjs",
+      "sha256": "27de702007bdaff9a66ac2c2d151b31df93ce8ecd402690160305817b421d140"
+    },
+    {
+      "path": "scripts/phase-0/verify.mjs",
+      "sha256": "ed23978c6a960e707308ffde97d193c5f85c62e6f8d14b5a1793c5f64b9efb4b"
+    },
+    {
+      "path": "tests/fixtures/phase-0/scenarios.json",
+      "sha256": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094"
+    }
+  ]
+}

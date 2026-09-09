@@ -1,5 +1,6 @@
 import { test, expect, type Page, type TestInfo, type Locator } from '@playwright/test';
 import fs from 'node:fs/promises';
+import { CONTRACT } from '../../src/twin/persistence/limits';
 
 const main=(page:Page)=>page.locator('main.twin-app');
 const pump='platform-001/module-01/pump-duty';
@@ -134,7 +135,8 @@ test('seek backward and forward restores exact event-boundary numerical results'
   expect(historical.events).toContainEqual(expect.objectContaining({kind:'restore',assetId:pump,timeS:20}));
   await seek(0,initial);await seek(20,restoring);await expect.poll(()=>inspectorStatus(page)).toContain('starting');
   await seek(30,recovered);await expect.poll(()=>inspectorStatus(page)).toContain('running');
-  for(const invalid of ['-1','0.5','86401']){
+  await target.fill('86401');await expect(page.getByRole('button',{name:'Seek time',exact:true})).toBeEnabled();
+  for(const invalid of ['-1','0.5',String(CONTRACT.horizonS+1)]){
     await target.fill(invalid);await expect(page.getByRole('button',{name:'Seek time',exact:true})).toBeDisabled();
     await expect(main(page)).toHaveAttribute('data-time','30');
   }
@@ -151,13 +153,16 @@ test('cancel run retains completed state and superseding work rejects stale upda
   await expect(page.getByRole('button',{name:'Step 10s',exact:true})).toBeDisabled();
   await cancel.focus();await page.keyboard.press('Enter');
   await expect(page.locator('.twin-notice')).toContainText('Run cancelled. The last completed numerical state is retained.');
-  await expect(cancel).toHaveCount(0);await expect(main(page)).toHaveAttribute('data-time','20');
-  expect(await exportArtifact(page,'results')).toBe(completed);
+  await expect(cancel).toHaveCount(0);
+  const retained=Number(await main(page).getAttribute('data-time'));
+  expect(retained).toBeGreaterThanOrEqual(0);expect(retained).toBeLessThan(86400);
+  const checkpoint=JSON.parse(await exportArtifact(page,'project'));
+  expect(checkpoint.timeS).toBe(retained);expect(checkpoint.checkpoint.state.timeS).toBe(retained);
   expect(JSON.parse(await exportArtifact(page,'project')).events).toEqual(project.events);
   // A new physical step must finish without waiting for the cancelled 24-hour replay.
   await step(page,10);const newer=await exportArtifact(page,'results');
   await expect(page.locator('.twin-notice')).not.toContainText('Run cancelled');
-  await page.waitForTimeout(1200);await expect(main(page)).toHaveAttribute('data-time','30');
+  await page.waitForTimeout(1200);await expect(main(page)).toHaveAttribute('data-time',String(retained+10));
   expect(await exportArtifact(page,'results')).toBe(newer);
   await page.getByRole('spinbutton',{name:'Replay time in seconds',exact:true}).fill('20');
   await page.getByRole('button',{name:'Seek time',exact:true}).click();

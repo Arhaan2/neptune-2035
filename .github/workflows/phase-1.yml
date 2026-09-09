@@ -1,0 +1,33 @@
+name: Phase 1 source verification
+on:
+  push:
+    branches: [main, codex/neptune-phase-1]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: phase-1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  acceptance:
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx playwright install chromium firefox webkit
+      - run: node scripts/phase-1/verify.mjs --out=artifacts/phase-1-ci
+      - name: Retain source verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1-verification-${{ github.sha }}
+          path: artifacts/phase-1-ci
+          if-no-files-found: error
+          retention-days: 14

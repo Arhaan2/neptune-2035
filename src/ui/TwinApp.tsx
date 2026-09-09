@@ -23,16 +23,26 @@ import {
   conservationResiduals,
   engineeringReport,
   inventoryCSV,
-  parseProject,
-  projectFile,
   resultsCSV,
   signatureEvents,
   sizingCandidates,
   sizingAssessment,
   topologyForSelection,
-  type ProjectFile,
 } from '../twin/analysis/reports';
 import { summarize } from '../twin/engine/simulation';
+import {
+  compatibilityFor,
+  parseProject,
+  projectFile,
+  recalculateProject,
+  serializeProject,
+} from '../twin/persistence/project';
+import type {
+  CurrentProject,
+  ProjectFile,
+  ProjectProvenance,
+} from '../twin/persistence/types';
+import { CONTRACT, type IntegrationStep } from '../twin/persistence/limits';
 import type {
   Design,
   DesignConfig,
@@ -42,6 +52,10 @@ import type {
 import { DataPanel, EvidencePanel, Trend } from './TwinPanels';
 import { runWorkerExperiment, useTwin } from './useTwin';
 import { upstreamConnections } from '../scene/twinGeometry';
+import {
+  preflightJSON,
+  validateStructure,
+} from '../twin/persistence/structure';
 import './twin.css';
 const TwinScene = lazy(() => import('../scene/TwinScene'));
 const romans = ['I', 'II', 'III'],
@@ -123,20 +137,57 @@ function NumberField({
     </label>
   );
 }
+function readSavedScenarios(): {
+  items: { name: string; project: ProjectFile }[];
+  error?: string;
+} {
+  try {
+    const text = localStorage.getItem('neptune-v2-scenarios') ?? '[]';
+    preflightJSON(text);
+    const raw: unknown = JSON.parse(text);
+    validateStructure(raw);
+    if (!Array.isArray(raw) || raw.length > CONTRACT.maxSavedScenarios)
+      throw Error('Saved scenario collection has an invalid count.');
+    const items = raw.map((item) => {
+      if (
+        !item ||
+        typeof item !== 'object' ||
+        typeof item.name !== 'string' ||
+        item.name.length > 60
+      )
+        throw Error('Saved scenario name is invalid.');
+      return {
+        name: item.name,
+        project: parseProject(JSON.stringify(item.project)),
+      };
+    });
+    return { items };
+  } catch (problem) {
+    return {
+      items: [],
+      error: `Saved scenario recovery failed: ${String(problem)}. Stored data was retained.`,
+    };
+  }
+}
 interface Compared {
+  provenance?: ProjectProvenance;
   label: string;
   design: Design;
   state: SimulationState;
 }
 export default function TwinApp() {
   const [config, setConfig] = useState<DesignConfig>(DEFAULT_CONFIG),
+    [designOverride, setDesignOverride] = useState<Design | null>(null),
     [workspace, setWorkspace] = useState<'Explore' | 'Operate' | 'Compare'>(
       'Explore',
     ),
     [detail, setDetail] = useState<'inspection' | 'data' | 'evidence'>(
       'inspection',
     );
-  const design = useMemo(() => buildDesign(config), [config]),
+  const design = useMemo(
+      () => designOverride ?? buildDesign(config),
+      [config, designOverride],
+    ),
     sim = useTwin(design),
     { state, replay: replaySimulation, setRunning: setSimulationRunning } = sim;
   const [selectedId, setSelectedId] = useState(
@@ -157,24 +208,12 @@ export default function TwinApp() {
       'Full load at 0s → selected duty pump trip at 30s → restore at 180s. Both runs use the same parameters through 240s.',
     ),
     [compareBusy, setCompareBusy] = useState(false),
-    [saved, setSaved] = useState<{ name: string; project: ProjectFile }[]>(
-      () => {
-        try {
-          const raw = JSON.parse(
-            localStorage.getItem('neptune-v2-scenarios') ?? '[]',
-          );
-          return Array.isArray(raw)
-            ? raw.slice(0, 8).map((x) => ({
-                name: String(x.name).slice(0, 60),
-                project: parseProject(JSON.stringify(x.project)),
-              }))
-            : [];
-        } catch {
-          return [];
-        }
-      },
+    [savedRead] = useState(readSavedScenarios),
+    [saved, setSaved] = useState(savedRead.items),
+    [pendingProject, setPendingProject] = useState<CurrentProject | null>(null),
+    [inspectionProject, setInspectionProject] = useState<ProjectFile | null>(
+      null,
     ),
-    [pendingProject, setPendingProject] = useState<ProjectFile | null>(null),
     [costScale, setCostScale] = useState(1),
     [replayTimeS, setReplayTimeS] = useState(0),
     [maxPlatforms, setMaxPlatforms] = useState(8),
@@ -224,6 +263,7 @@ export default function TwinApp() {
       const nextDesign = buildDesign(next);
       if (!resolveAsset(nextDesign, selectedId))
         setSelectedId(`${nextDesign.modules[0].id}/pump-duty`);
+      setDesignOverride(null);
       setConfig(next);
       setInside(false);
       setDemo(false);
@@ -237,7 +277,12 @@ export default function TwinApp() {
   useEffect(() => {
     if (state && pendingProject) {
       const timer = setTimeout(() => {
-        replaySimulation(pendingProject.events, pendingProject.timeS);
+        replaySimulation(
+          pendingProject.events,
+          pendingProject.timeS,
+          pendingProject.provenance,
+          1,
+        );
         setPendingProject(null);
       }, 0);
       return () => clearTimeout(timer);
@@ -303,18 +348,60 @@ export default function TwinApp() {
     sim.command(kind, id, value);
     setNotice(`${kind} recorded at ${state?.timeS ?? 0}s for ${id}.`);
   };
+  const inspectOrRestore = (project: ProjectFile) => {
+    const compatibility = compatibilityFor(project);
+    if (!compatibility.canResume) {
+      setInspectionProject(project);
+      setNotice(compatibility.explanation);
+      return;
+    }
+    const restored = sim.restore(project);
+    setConfig(restored.config);
+    setDesignOverride(restored);
+    setPendingProject(null);
+    if (!resolveAsset(restored, selectedId))
+      setSelectedId(`${restored.modules[0].id}/pump-duty`);
+    setDemo(false);
+    setNotice(
+      `Restored exact checkpoint at ${project.timeS}s. ${compatibility.explanation}`,
+    );
+  };
+  const recalculateInspected = () => {
+    if (!inspectionProject) return;
+    try {
+      const derived = recalculateProject(inspectionProject);
+      sim.cancel();
+      setConfig(derived.design);
+      setDesignOverride(derived.designSnapshot);
+      setPendingProject(derived);
+      setNotice(
+        `Separate derived experiment: recalculating ${inspectionProject.solverVersion} with ${derived.solverVersion}. The original remains available for export.`,
+      );
+    } catch (problem) {
+      setNotice(String(problem));
+    }
+  };
   const saveCurrentScenario = () => {
     if (!state) return;
     const next = [
-      ...saved.slice(-7),
+      ...saved.slice(-(CONTRACT.maxSavedScenarios - 1)),
       {
         name: `${romans[config.generation - 1]} · ${state.timeS}s · ${config.standbyPumps} standby`,
-        project: projectFile(design, state),
+        project: sim.captureProject(),
       },
     ];
-    setSaved(next);
     try {
-      localStorage.setItem('neptune-v2-scenarios', JSON.stringify(next));
+      const serialized = JSON.stringify(
+        next.map((item) => ({
+          name: item.name,
+          project: JSON.parse(serializeProject(item.project)),
+        })),
+      );
+      preflightJSON(serialized);
+      validateStructure(next);
+      localStorage.setItem('neptune-v2-scenarios', serialized);
+      setSaved(next);
+      setNotice(`Scenario saved locally at ${state.timeS}s.`);
     } catch {
       setNotice(
         'Local storage unavailable. Export a project file to preserve this scenario.',
@@ -371,18 +458,30 @@ export default function TwinApp() {
         design: Design;
         events: OperationEvent[];
         timeS: number;
+        integrationStepS?: IntegrationStep;
+        provenance?: ProjectProvenance;
       }[] = [];
       if (mode === 'saved') {
         if (saved.length < 2)
           throw Error('Save at least two scenarios to compare.');
         const timeS = Math.max(...saved.slice(-2).map((s) => s.project.timeS));
-        for (const item of saved.slice(-2))
+        for (const item of saved.slice(-2)) {
+          if (
+            item.project.schemaVersion !== 3 ||
+            !compatibilityFor(item.project).canResume
+          )
+            throw Error(
+              'Inspect and explicitly recalculate legacy or incompatible saved scenarios before comparing under the current model.',
+            );
           runs.push({
             label: item.name,
-            design: buildDesign(item.project.design),
+            design: item.project.designSnapshot,
             events: item.project.events,
             timeS,
+            integrationStepS: item.project.checkpoint!.state.integrationStepS,
+            provenance: item.project.provenance,
           });
+        }
       } else {
         for (let variant = 0; variant < 2; variant++) {
           const patch: Partial<DesignConfig> =
@@ -427,7 +526,13 @@ export default function TwinApp() {
         result.push({
           label: r.label,
           design: r.design,
-          state: await runWorkerExperiment(r.design, r.events, r.timeS),
+          ...(r.provenance ? { provenance: r.provenance } : {}),
+          state: await runWorkerExperiment(
+            r.design,
+            r.events,
+            r.timeS,
+            r.integrationStepS,
+          ),
         });
       setComparison(result);
       setNotice(
@@ -955,7 +1060,7 @@ export default function TwinApp() {
                 aria-label="Replay time in seconds"
                 type="number"
                 min={0}
-                max={86400}
+                max={CONTRACT.horizonS}
                 step={1}
                 value={replayTimeS}
                 onChange={(e) => setReplayTimeS(Number(e.target.value))}
@@ -969,7 +1074,7 @@ export default function TwinApp() {
                 !state ||
                 !Number.isInteger(replayTimeS) ||
                 replayTimeS < 0 ||
-                replayTimeS > 86400
+                replayTimeS > CONTRACT.horizonS
               }
               onClick={() => {
                 if (state) {
@@ -990,11 +1095,107 @@ export default function TwinApp() {
                 Cancel run
               </button>
             )}
+            {!sim.busy &&
+              sim.resumeTarget !== null &&
+              state &&
+              sim.resumeTarget > state.timeS && (
+                <button onClick={() => sim.resume()}>
+                  Resume to {sim.resumeTarget}s
+                </button>
+              )}
             <span>
               {sim.busy ? 'Solving…' : sim.running ? 'Running' : 'Paused'} ·
-              fixed 1s steps
+              fixed {state?.integrationStepS ?? 1}s steps
             </span>
           </div>
+          {sim.progress && sim.busy && (
+            <output>
+              Replay progress: {sim.progress.completedTimeS}s /{' '}
+              {sim.progress.targetTimeS}s. Completed checkpoints can be exported
+              while running.
+            </output>
+          )}
+          {savedRead.error && <output>{savedRead.error}</output>}
+          {sim.storageStatus && (
+            <output data-testid="checkpoint-storage">
+              {sim.storageStatus}
+              {sim.durableTimeS !== null &&
+                ` Last successful local checkpoint: ${sim.durableTimeS}s.`}
+            </output>
+          )}
+          {sim.recoveryBlocked && (
+            <div className="twin-notice">
+              Automatic saving is paused because the previous recovery data
+              could not be read. The stored value has been retained.
+              <button onClick={() => sim.dismissRecovery()}>
+                Clear unavailable recovery and enable saving
+              </button>
+            </div>
+          )}
+          {sim.recovery && (
+            <div className="twin-notice" data-testid="checkpoint-recovery">
+              Local checkpoint available at {sim.recovery.timeS}s. Progress
+              after that saved checkpoint may have been lost. Recovery is
+              paused.
+              <button
+                onClick={() => {
+                  try {
+                    inspectOrRestore(sim.recovery!);
+                  } catch (problem) {
+                    setNotice(String(problem));
+                  }
+                }}
+              >
+                Recover saved checkpoint
+              </button>
+              <button
+                onClick={() =>
+                  download(
+                    'neptune-recovery-project.json',
+                    serializeProject(sim.recovery!),
+                  )
+                }
+              >
+                Export recovery project
+              </button>
+              <button onClick={() => sim.dismissRecovery()}>
+                Discard recovery and keep current session
+              </button>
+            </div>
+          )}
+          {inspectionProject && (
+            <div className="twin-notice" data-testid="project-compatibility">
+              <p>{compatibilityFor(inspectionProject).explanation}</p>
+              <p>
+                Saved scenario: {inspectionProject.timeS}s,{' '}
+                {inspectionProject.events.length} events, solver{' '}
+                {inspectionProject.solverVersion}. Exact continuation is{' '}
+                {compatibilityFor(inspectionProject).canResume
+                  ? 'available'
+                  : 'unavailable'}
+                .
+              </p>
+              <button
+                onClick={() =>
+                  download(
+                    'neptune-original-project.json',
+                    serializeProject(inspectionProject),
+                  )
+                }
+              >
+                Export original project
+              </button>
+              <button
+                disabled={!compatibilityFor(inspectionProject).canRecalculate}
+                onClick={recalculateInspected}
+              >
+                Recalculate with current model
+              </button>
+              <button onClick={() => setInspectionProject(null)}>
+                Close project inspection
+              </button>
+            </div>
+          )}
           {(notice || sim.error) && (
             <div className={`twin-notice ${sim.error ? 'error' : ''}`}>
               {sim.error || notice}
@@ -1072,10 +1273,14 @@ export default function TwinApp() {
                         onClick={() =>
                           download(
                             `experiment-${c.design.config.standbyPumps}-standby.json`,
-                            JSON.stringify(
-                              projectFile(c.design, c.state),
-                              null,
-                              2,
+                            serializeProject(
+                              projectFile(
+                                c.design,
+                                c.state,
+                                c.provenance
+                                  ? { provenance: c.provenance }
+                                  : {},
+                              ),
                             ),
                           )
                         }
@@ -1135,11 +1340,7 @@ export default function TwinApp() {
                   <button
                     key={i}
                     onClick={() => {
-                      setConfig(s.project.design);
-                      setPendingProject(s.project);
-                      setNotice(
-                        `Restoring ${s.name} through deterministic replay.`,
-                      );
+                      inspectOrRestore(s.project);
                     }}
                   >
                     {s.name}
@@ -1587,12 +1788,12 @@ export default function TwinApp() {
               onChange={async (e) => {
                 try {
                   if (e.target.files?.[0]) {
+                    if (e.target.files[0].size > CONTRACT.maxProjectBytes)
+                      throw Error(
+                        `Project exceeds ${CONTRACT.maxProjectBytes} UTF-8 bytes.`,
+                      );
                     const p = parseProject(await e.target.files[0].text());
-                    setConfig(p.design);
-                    setPendingProject(p);
-                    setNotice(
-                      'Imported bounded v2 design and event history. Replaying numerical state.',
-                    );
+                    inspectOrRestore(p);
                   }
                 } catch (err) {
                   setNotice(String(err));
@@ -1612,8 +1813,8 @@ export default function TwinApp() {
               try {
                 if (kind === 'project')
                   download(
-                    'neptune-v2-project.json',
-                    JSON.stringify(projectFile(design, state), null, 2),
+                    'neptune-v3-project.json',
+                    serializeProject(sim.captureProject()),
                   );
                 if (kind === 'events')
                   download(

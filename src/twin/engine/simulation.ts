@@ -1,11 +1,20 @@
-import { loopGeometry, resolveAsset } from '../assets/design';
-import { SOLVER_VERSION, TWIN_SCHEMA, type Asset, type Design, type ModuleSpec, type ModuleState, type OperationEvent, type SimulationState, type Summary } from '../types';
+import { loopGeometry } from '../assets/design';
+import { SOLVER_VERSION, type Asset, type Design, type ModuleSpec, type ModuleState, type OperationEvent, type SimulationState, type Summary } from '../types';
 import { allocateGrid, ELECTRICAL_ASSUMPTIONS as E, GRID_EFFICIENCY, nodeDrawW, solveElectrical } from '../solvers/electrical';
 import { solveHydraulics, type HydraulicResult } from '../solvers/hydraulic';
 import { advanceThermal } from '../solvers/thermal';
 import { createNetworkEvaluator, type NetworkIssue } from '../solvers/network';
 
-const MAX_EVENTS = 10_000, MAX_LOG = 1000, MAX_DURATION_S = 86_400;
+import { CONTRACT, INTEGRATION_STEPS, type IntegrationStep } from '../persistence/limits';
+import { validateDesign } from '../persistence/design';
+import { validateState } from '../persistence/state';
+import { mergeEventHistory } from '../persistence/events';
+import { projectFile } from '../persistence/project';
+import { identity, safeJSON } from '../persistence/structure';
+import { failure, finiteNumber, finiteOutputs, diagnosticFor } from '../safety';
+export { validateState } from '../persistence/state';
+export { validateEvent } from '../persistence/events';
+const MAX_LOG = CONTRACT.maxLogEntries;
 const ZERO_HYDRAULIC: HydraulicResult = { flowM3S:0, pressurePa:0, electricalW:0, reynolds:0, darcyFactor:0, headResidualPa:0, massResidualKgS:0, iterations:0 };
 interface ModuleContext { module:ModuleSpec; ancestors:string[]; pathCapacityW:number; supported:boolean; technicalLengthM:number; seawaterLengthM:number }
 interface Context { modules:ModuleContext[]; assets:Map<string,Asset>; hydraulicCache:Map<string,HydraulicResult>; network:ReturnType<typeof createNetworkEvaluator> }
@@ -33,40 +42,11 @@ function appendLog(state:SimulationState, assetId:string, message:string, kind:'
 function affectedModules(ctx:Context, id:string):string[] {
   return ctx.modules.filter(c=>id==='shore/fiber'||id==='shore/cluster-core'||c.ancestors.includes(id)||c.module.networkDomainId===id||c.module.platformId===id||id===c.module.id||id.startsWith(`${c.module.id}/`)).map(c=>c.module.id);
 }
-export function validateEvent(design:Design, event:OperationEvent):void {
-  if(!event||typeof event!=='object'||typeof event.id!=='string'||!/^[A-Za-z0-9_.:-]{1,100}$/.test(event.id))throw Error('Event requires a bounded stable alphanumeric ID');
-  if(!Number.isInteger(event.timeS)||event.timeS<0||event.timeS>30*86400)throw Error('Event time must be an integer second within the 30-day replay horizon');
-  if(typeof event.assetId!=='string'||event.assetId.length>180)throw Error('Invalid event asset ID');
-  const asset=resolveAsset(design,event.assetId);if(!asset)throw Error(`Unknown event asset: ${event.assetId}`);
-  const bounds:Partial<Record<OperationEvent['kind'],[number,number]>>={workload:[0,1],seawater:[275.15,311.15],fouling:[0,0.0001],'pump-speed':[0,1.2]};
-  const limit=bounds[event.kind];
-  if(limit){
-    if(event.assetId!=='shore/grid')throw Error(`${event.kind} is a recorded facility boundary command; assetId must be shore/grid`);
-    if(typeof event.value!=='number'||!Number.isFinite(event.value)||event.value<limit[0]||event.value>limit[1])throw Error(`${event.kind} outside supported limits ${limit.join('–')}`);
-  }else if(['trip','restore','maintenance'].includes(event.kind)){
-    if(['hull'].includes(asset.type)||(asset.type==='platform'&&event.kind==='trip'))throw Error(`Unsupported operational command for ${asset.type}; platform maintenance is supported`);
-    if(event.value!==undefined)throw Error('Failure/restoration commands do not accept a numeric value');
-  }else throw Error(`Unsupported event kind: ${String(event.kind)}`);
-}
-function mergeEvents(design:Design,state:SimulationState,events:OperationEvent[]) {
-  if(state.events.length+events.length>MAX_EVENTS*2)throw Error('Event history exceeds 10000 entries');
-  const merged=new Map(state.events.map(e=>[e.id,e]));
-  for(const event of events){
-    validateEvent(design,event);
-    const existing=merged.get(event.id);
-    if(existing&&JSON.stringify(existing)!==JSON.stringify(event))throw Error(`Conflicting event ID ${event.id}`);
-    if(!existing&&event.timeS<state.timeS)throw Error('An event in the past requires replay');
-    merged.set(event.id,{...event});
-  }
-  if(merged.size>MAX_EVENTS)throw Error('Event history exceeds 10000 entries');
-  state.events=[...merged.values()].sort((a,b)=>a.timeS-b.timeS||a.id.localeCompare(b.id));
-}
 function applyEvents(design:Design,state:SimulationState,ctx:Context) {
-  const applied=new Set(state.appliedEventIds);
-  for(const event of state.events){
+  let count=0;
+  for(const event of state.events.slice(state.appliedEventIds.length)){
     if(event.timeS>state.timeS+1e-8)break;
-    if(applied.has(event.id))continue;
-    validateEvent(design,event);
+
     if(event.kind==='workload')state.workload=event.value!;
     else if(event.kind==='seawater')state.seawaterK=event.value!;
     else if(event.kind==='fouling')state.foulingResistanceKPerW=event.value!;
@@ -83,7 +63,9 @@ function applyEvents(design:Design,state:SimulationState,ctx:Context) {
     const affected=affectedModules(ctx,event.assetId);
     appendLog(state,event.assetId,`${event.kind}${event.value===undefined?'':` = ${event.value} ${event.kind==='seawater'?'K':event.kind==='fouling'?'K/W':'fraction'}`}; ${affected.length} module(s) in dependency scope`,'command',affected);
     state.appliedEventIds.push(event.id);
+    resolveStep(design,state,ctx,0,true);count++;
   }
+  return count;
 }
 type EquipmentTransition={next:ModuleState['states'][string];message:string};
 function controller(state:SimulationState,m:ModuleState,design:Design,disabled:boolean,techBlocked:boolean,transitions:Map<string,EquipmentTransition>) {
@@ -175,8 +157,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     if(newlyBlocked.length===0)break;
     for(const id of newlyBlocked)blockedDomains.add(id);
     if(pass===7){
-      for(const d of demands)blockedDomains.add(d.c.module.networkDomainId);
-      networkIssues.set('coupling-limit',{assetId:'shore/cluster-core',resourceId:'coupling-limit',reason:'Network/electrical coupling exceeded eight passes; required job domains conservatively unavailable (unsupported dispatch)',domainIds:[...blockedDomains]});
+      failure('numerical-failure','DISPATCH_NONCONVERGENCE','Network/electrical coupling exceeded eight passes; last validated state retained.',{assetId:'shore/cluster-core',details:{iterations:8}});
     }
     electricalPlan=planElectrical();
   }
@@ -226,8 +207,8 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     if(electrical.batteryDischargeW>0)warnings.push('UPS discharging: finite power and energy, 10% reserve');
     if(!d.gridLive&&!d.disabled&&!electrical.criticalPowered)warnings.push('UPS cannot support the minimum critical load at its remaining power/energy limit');
     if(!d.gridLive&&!d.disabled&&m.batteryWh<=design.config.batteryWhPerModule*0.1+1e-7)warnings.push('UPS reserve reached; no guaranteed ride-through');
-    if(Math.abs(electrical.normalizedResidual)>1e-9||Math.abs(thermal.normalizedResidual)>1e-9)warnings.push('Conservation tolerance exceeded');
-    if(Math.abs(technical.headResidualPa)>0.01||Math.abs(seawater.headResidualPa)>0.01)warnings.push('Hydraulic operating point did not meet 0.01 Pa head tolerance');
+    if(Math.abs(electrical.normalizedResidual)>1e-9||Math.abs(thermal.normalizedResidual)>1e-9)failure('numerical-failure','CONSERVATION_RESIDUAL','Conservation tolerance exceeded; no state committed.',{assetId:m.id,details:{electrical:electrical.normalizedResidual,thermal:thermal.normalizedResidual,tolerance:1e-9}});
+    if(Math.abs(technical.headResidualPa)>0.01||Math.abs(seawater.headResidualPa)>0.01)failure('numerical-failure','HYDRAULIC_RESIDUAL','Hydraulic operating point did not meet 0.01 Pa head tolerance.',{assetId:m.id,unit:'Pa'});
     for(const warning of warnings)if(!m.warnings.includes(warning)){
       const cause=[...networkIssues.values()].find(issue=>warning.startsWith(issue.reason));
       appendLog(state,cause?.assetId??m.id,warning,'warning',cause?demands.filter(d=>cause.domainIds.includes(d.c.module.networkDomainId)).map(d=>d.m.id):[m.id]);
@@ -237,42 +218,59 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
   }
 }
 export function initialize(design:Design):SimulationState {
-  if(design.schemaVersion!==TWIN_SCHEMA||design.modules.length===0||design.modules.length>6250)throw Error('Unsupported design schema or module count');
+  validateDesign(design);
   const modules:ModuleState[]=design.modules.map(m=>({id:m.id,coolantK:303.15,airK:298.15,batteryWh:design.config.batteryWhPerModule,throttle:1,
     states:{[m.id]:'available',[`${m.id}/pump-duty`]:'running',...(design.config.standbyPumps?{[`${m.id}/pump-standby`]:'standby' as const}:{}),[`${m.id}/pump-sea`]:'running'},startAtS:{},
     technicalFlowM3S:0,seawaterFlowM3S:0,pumpPowerW:0,itW:0,facilityW:0,gridW:0,batteryDischargeW:0,batteryChargeW:0,
     rejectedHeatW:0,thermalResidualW:0,electricalResidualW:0,technicalOutletK:303.15,seawaterOutletK:design.config.seawaterK,pressurePa:0,
     energizedNodes:0,availableAccelerators:0,warnings:[]}));
-  const state:SimulationState={schemaVersion:TWIN_SCHEMA,designRevision:design.revision,solverVersion:SOLVER_VERSION,timeS:0,modules,events:[],log:[],
+  const state:SimulationState={schemaVersion:CONTRACT.stateSchema,designRevision:design.revision,designIdentity:identity(design),solverVersion:SOLVER_VERSION,timeS:0,integrationStepS:1,stepIndex:0,modules,events:[],log:[],
     facilityEnergyWh:0,itEnergyWh:0,gridEnergyWh:0,appliedEventIds:[],workload:design.config.workload,seawaterK:design.config.seawaterK,
     foulingResistanceKPerW:design.config.foulingResistanceKPerW,pumpSpeed:design.config.pumpSpeed,failedAssetIds:[],solverMs:0};
-  resolveStep(design,state,context(design),0,true);return state;
+  resolveStep(design,state,context(design),0,true);validateCandidate(design,state);return state;
 }
-export function advanceWithStep(design:Design,input:SimulationState,durationS:number,events:OperationEvent[]=[],maxStepS=1):SimulationState {
-  if(input.schemaVersion!==TWIN_SCHEMA||input.designRevision!==design.revision||input.solverVersion!==SOLVER_VERSION)throw Error('Simulation revision mismatch; reinitialize after design changes');
-  if(!Number.isInteger(durationS)||durationS<0||durationS>MAX_DURATION_S||input.timeS+durationS>30*86400)throw Error('Advance duration must be an integer within 0–86400 seconds and the 30-day horizon');
-  if(![1,0.5,0.25,0.125].includes(maxStepS))throw Error('Verification timestep must be 1, 0.5, 0.25, or 0.125 seconds');
-  if(!Number.isInteger(input.timeS)||input.timeS<0||![input.facilityEnergyWh,input.itEnergyWh,input.gridEnergyWh].every(n=>Number.isFinite(n)&&n>=0))throw Error('Invalid simulation clock or energy accumulator');
-  if(!Array.isArray(input.modules)||!Array.isArray(input.events)||!Array.isArray(input.appliedEventIds)||!Array.isArray(input.failedAssetIds)||!Array.isArray(input.log))throw Error('Invalid simulation arrays');
-  if(input.modules.some(m=>![m.coolantK,m.airK,m.batteryWh,m.throttle].every(Number.isFinite)||m.coolantK<273.15||m.coolantK>373.15||m.airK<250||m.airK>373.15||m.batteryWh<0||m.batteryWh>design.config.batteryWhPerModule||![0,0.5,1].includes(m.throttle)))throw Error('Invalid bounded numerical module state');
-  if(input.modules.length!==design.modules.length||input.modules.some((m,i)=>m.id!==design.modules[i].id))throw Error('Simulation inventory mismatch');
-  const state:SimulationState={...input,modules:input.modules.map(m=>({...m,states:{...m.states},startAtS:{...m.startAtS},warnings:[...m.warnings]})),events:input.events.map(e=>({...e})),log:[...input.log],appliedEventIds:[...input.appliedEventIds],failedAssetIds:[...input.failedAssetIds],solverMs:0};
-  mergeEvents(design,state,events);const ctx=context(design),end=state.timeS+durationS;
-  while(state.timeS<end-1e-8){
-    applyEvents(design,state,ctx);
-    const dt=Math.min(maxStepS,end-state.timeS);
-    resolveStep(design,state,ctx,dt,true);state.timeS+=dt;
+function validateCandidate(design:Design,state:SimulationState) {
+  try { projectFile(design,state); }
+  catch(error) { const cause=diagnosticFor(error);failure('numerical-failure','INVALID_CANDIDATE',`Candidate state was not committed: ${cause.message}`,{field:cause.field,assetId:cause.assetId,details:{cause: cause.code}}); }
+}
+/** Work counts per-module timesteps and per-event boundary dispatches, independent of wall time. */
+export function advanceWork(design:Design,state:SimulationState,durationS:number,events:OperationEvent[]=[],stepS:number=state.integrationStepS):number {
+  const applied=new Set(state.appliedEventIds),existing=new Set(state.events.map(e=>e.id));
+  const due=state.events.filter(e=>e.timeS<=state.timeS+durationS&&!applied.has(e.id)).length+events.filter(e=>!existing.has(e.id)&&e.timeS<=state.timeS+durationS).length;
+  return design.modules.length*(durationS/stepS+due);
+}
+export function advanceWithStep(design:Design,input:SimulationState,durationS:number,events:OperationEvent[]=[],maxStepS?:number):SimulationState {
+  validateDesign(design);validateState(design,input);
+  maxStepS ??= input.integrationStepS;
+  finiteNumber(durationS,'advance.durationS',{min:0,max:CONTRACT.maxAdvanceS,integer:true,unit:'s'});
+  if(input.timeS+durationS>CONTRACT.horizonS)failure('invalid-input','PROJECT_HORIZON','Advance exceeds the 30-day project horizon.',{unit:'s',details:{max:CONTRACT.horizonS}});
+  if(!INTEGRATION_STEPS.includes(maxStepS as IntegrationStep))failure('invalid-input','INTEGRATION_STEP','Verification timestep must be 1, 0.5, 0.25, or 0.125 seconds.');
+  if(maxStepS!==input.integrationStepS&&(input.timeS!==0||input.events.length!==0))failure('invalid-input','INTEGRATION_CHANGE','Continuation must retain the checkpoint integration step.');
+  const history=mergeEventHistory(design,input.events,events,input.timeS);
+  const work=advanceWork(design,input,durationS,events,maxStepS);
+  if(work>CONTRACT.maxJobModuleSteps)failure('resource-limit','ADVANCE_WORK','Valid scenario exceeds the per-call execution budget; retain/export it and use bounded worker chunks.',{details:{work,max:CONTRACT.maxJobModuleSteps}});
+  // Validate project allocation before numerical work. New events are validated history, not yet applied.
+  const state:SimulationState={...input,integrationStepS:maxStepS as IntegrationStep,modules:input.modules.map(m=>({...m,states:{...m.states},startAtS:{...m.startAtS},warnings:[...m.warnings]})),events:history,log:input.log.map(e=>({...e,affectedIds:[...e.affectedIds]})),appliedEventIds:[...input.appliedEventIds],failedAssetIds:[...input.failedAssetIds],solverMs:0};
+  safeJSON({designSnapshot:design,events:history,checkpoint:{state}});
+  const ctx=context(design),end=state.timeS+durationS;
+  const initiallyApplied=applyEvents(design,state,ctx);
+  if(durationS===0&&!initiallyApplied)resolveStep(design,state,ctx,0,false);
+  while(state.timeS<end){
+    // Each fixed step starts at a committed boundary; chunk endpoints add no controller transitions.
+    resolveStep(design,state,ctx,maxStepS,false);state.timeS+=maxStepS;state.stepIndex++;
+    if(!applyEvents(design,state,ctx))resolveStep(design,state,ctx,0,true);
+    finiteOutputs(state,'simulation accumulators');
   }
-  applyEvents(design,state,ctx);resolveStep(design,state,ctx,0,true);
-  return state;
+  validateCandidate(design,state);return state;
 }
-export function advance(design:Design,state:SimulationState,durationS:number,events:OperationEvent[]=[]):SimulationState{return advanceWithStep(design,state,durationS,events,1);}
+export function advance(design:Design,state:SimulationState,durationS:number,events:OperationEvent[]=[]):SimulationState{return advanceWithStep(design,state,durationS,events);}
 export function replay(design:Design,events:OperationEvent[],durationS:number):SimulationState{return advance(design,initialize(design),durationS,events);}
 export function summarize(design:Design,state:SimulationState):Summary {
+  validateState(design,state);
   const sum=(key:keyof Pick<ModuleState,'itW'|'facilityW'|'gridW'|'pumpPowerW'|'availableAccelerators'|'batteryWh'|'electricalResidualW'|'thermalResidualW'>)=>state.modules.reduce((n,m)=>n+m[key],0);
   const itW=sum('itW'),facilityW=sum('facilityW'),energizedAccelerators=state.modules.reduce((n,m)=>n+m.energizedNodes*8,0);
-  return {timeS:state.timeS,itW,facilityW,gridW:sum('gridW'),pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
+  return finiteOutputs({timeS:state.timeS,itW,facilityW,gridW:sum('gridW'),pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
     curtailedAccelerators:Math.max(0,design.provisionedAccelerators-energizedAccelerators),maxCoolantK:Math.max(...state.modules.map(m=>m.coolantK)),batteryWh:sum('batteryWh'),
     instantaneousPUE:itW>0?facilityW/itW:null,energyPUE:state.itEnergyWh>0?state.facilityEnergyWh/state.itEnergyWh:null,
-    electricalResidualW:sum('electricalResidualW'),thermalResidualW:sum('thermalResidualW'),warnings:[...new Set(state.modules.flatMap(m=>m.warnings))]};
+    electricalResidualW:sum('electricalResidualW'),thermalResidualW:sum('thermalResidualW'),warnings:[...new Set(state.modules.flatMap(m=>m.warnings))]},'simulation summary');
 }
