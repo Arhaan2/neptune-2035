@@ -1,0 +1,69 @@
+{
+  "kind": "diagnostic-only",
+  "status": "INCOMPLETE",
+  "startedAt": "2026-09-09T22:32:58.633Z",
+  "sourceSha": "8cca2d4d78acf3669e7fae1b78bf8d9a75cb2368",
+  "scriptSha256": "a9d8c6cce2a6b494af8ed56365cb9936ccdf4df1b508f0d8ce9374a6a9ff22a0",
+  "sourceStatus": "",
+  "host": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M1 (Virtual)",
+    "logicalCpus": 3,
+    "totalMemoryBytes": 7516192768,
+    "node": "v24.20.0"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1050
+  },
+  "deviceScaleFactor": 1,
+  "limitations": [
+    "Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.",
+    "Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.",
+    "Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.",
+    "No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected."
+  ],
+  "preferenceSources": [
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396"
+  ],
+  "stages": [
+    {
+      "name": "reserve-owned-port-5183",
+      "startedAfterMs": 211.947708,
+      "outcome": "completed",
+      "elapsedMs": 4.598417000000012
+    },
+    {
+      "name": "owned-vite-ready",
+      "startedAfterMs": 218.592958,
+      "outcome": "error",
+      "error": "Error: Diagnostic operation deadline exceeded",
+      "elapsedMs": 8008.789666999999
+    }
+  ],
+  "variants": [],
+  "activeBrowserGroups": [],
+  "cleanupProbe": false,
+  "error": "Error: Diagnostic operation deadline exceeded",
+  "completedAt": "2026-09-09T22:33:06.860Z",
+  "elapsedMs": 8227.879167000001,
+  "supervisor": {
+    "code": 0,
+    "signal": null,
+    "elapsedMs": 8867.926707999999,
+    "budgetMs": 89000,
+    "cleanup": [
+      {
+        "pid": 2482,
+        "term": "absent",
+        "kill": "absent",
+        "finalCheck": "absent"
+      }
+    ],
+    "registeredGroupsAbsent": true
+  }
+}

@@ -2,7 +2,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import net from 'node:net';
 import { spawn, execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -26,7 +25,7 @@ if (!worker) {
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.mkdirSync(out, { recursive: false });
   const started = performance.now();
-  // Vite inherits this group. Playwright detaches Firefox into its own group;
+  // Vite runs in this worker group. Playwright detaches Firefox into its own group;
   // the worker registers that group before browser operations begin.
   const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, ...(cleanupProbe ? ['--cleanup-probe'] : [])], {
     cwd: root, env: process.env, detached: true, stdio: 'ignore',
@@ -108,27 +107,31 @@ async function diagnose() {
       record.outcome = 'error'; record.error = clean(error); throw error;
     } finally { clearTimeout(timer); record.elapsedMs = performance.now() - at; save(); }
   }
-  let vite, browser, browserServer;
+  let vite, browser, browserServer, stopping = false;
   try {
     const supplied = process.env.NEPTUNE_BASE_URL || process.env.BASE_URL;
     let base = supplied || 'http://127.0.0.1:5183/';
     const url = new URL(base);
     if (!['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) || url.protocol !== 'http:' || url.username || url.password || url.search || url.hash) throw Error('Diagnostic base URL must be a plain local HTTP URL');
     if (!supplied) {
-      await stage('reserve-owned-port-5183', () => new Promise((resolve, reject) => {
-        const probe = net.createServer(); probe.once('error', reject);
-        probe.listen(5183, '127.0.0.1', () => probe.close(resolve));
-      }));
-      // Inherit the supervisor-owned process group, including any Vite children.
-      vite = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5183', '--strictPort'], { cwd: root, stdio: ['ignore', 'pipe', 'ignore'] });
-      let listening = false;
-      vite.stdout.on('data', data => { if (String(data).includes('http://127.0.0.1:5183/')) listening = true; });
-      let spawnError; vite.once('error', error => { spawnError = error; });
       await stage('owned-vite-ready', async () => {
+        const { createServer } = await import('vite');
+        // Bind the actual owned server once. CLI colors and another process's
+        // HTTP response cannot establish readiness for this server.
+        vite = await createServer({ root, logLevel: 'silent', server: { host: '127.0.0.1', port: 5183, strictPort: true, open: false } });
+        if (stopping) { await vite.close(); throw Error('Diagnostic startup was cancelled'); }
+        await vite.listen();
+        if (stopping) { await vite.close(); throw Error('Diagnostic startup was cancelled'); }
+        const address = vite.httpServer?.address();
+        if (!vite.httpServer?.listening || !address || typeof address === 'string' || address.address !== '127.0.0.1' || address.port !== 5183) {
+          throw Error('Owned Vite did not bind the required loopback socket');
+        }
         for (;;) {
-          if (spawnError) throw spawnError;
-          if (vite.exitCode !== null) throw Error(`Owned Vite exited ${vite.exitCode}`);
-          try { if (listening && (await fetch(base, { signal: AbortSignal.timeout(500) })).ok) return { port: 5183 }; } catch {}
+          if (stopping) throw Error('Diagnostic startup was cancelled');
+          try {
+            const response = await fetch(base, { signal: AbortSignal.timeout(500) });
+            if (response.ok) return { port: address.port, address: address.address, listening: true, httpStatus: response.status, readiness: 'owned-vite-api' };
+          } catch {}
           await wait(100);
         }
       }, 8000);
@@ -204,8 +207,12 @@ async function diagnose() {
     result.status = result.variants.length === 3 && result.variants.every(v => v.pages.length === 3) ? 'COLLECTED' : 'INCOMPLETE';
   } catch (error) { result.error = clean(error); }
   finally {
+    stopping = true;
     if (browserServer) await Promise.race([browserServer.close().catch(() => {}), wait(1000)]);
-    if (vite) vite.kill('SIGTERM');
+    if (vite) {
+      try { await stage('close-owned-vite', () => vite.close(), 2000); }
+      catch (error) { result.status = 'INCOMPLETE'; result.error = clean(error); }
+    }
     result.completedAt = new Date().toISOString(); result.elapsedMs = performance.now() - started; save();
   }
 }
