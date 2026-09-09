@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 const script = fileURLToPath(import.meta.url), root = process.cwd();
 const args = process.argv.slice(2), worker = args.includes('--worker');
 const cleanupProbe = args.includes('--cleanup-probe');
+const closeFallbackProbe = args.includes('--close-fallback-probe');
 const out = path.resolve(args.find(a => a.startsWith('--out='))?.slice(6) ?? `artifacts/phase-1/firefox-diagnostic-${Date.now()}`);
 const resultFile = path.join(out, 'diagnostic.json');
 // The supervisor must never observe a truncated PID-registration snapshot.
@@ -27,7 +28,7 @@ if (!worker) {
   const started = performance.now();
   // Vite runs in this worker group. Playwright detaches Firefox into its own group;
   // the worker registers that group before browser operations begin.
-  const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, ...(cleanupProbe ? ['--cleanup-probe'] : [])], {
+  const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, ...(cleanupProbe ? ['--cleanup-probe'] : []), ...(closeFallbackProbe ? ['--close-fallback-probe'] : [])], {
     cwd: root, env: process.env, detached: true, stdio: 'ignore',
   });
   const signalGroup = (pid, signal) => {
@@ -86,7 +87,7 @@ async function diagnose() {
       'https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169',
       'https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396',
     ],
-    stages: [], variants: [], activeBrowserGroups: [], cleanupProbe,
+    stages: [], variants: [], activeBrowserGroups: [], cleanupProbe, closeFallbackProbe,
   };
   const save = () => writeResult(result);
   save();
@@ -194,11 +195,31 @@ async function diagnose() {
       } catch (error) { data.error = clean(error); }
       finally {
         if (browserServer) {
+          const ownedServer = browserServer, pid = ownedServer.process().pid;
           try {
-            await stage('close-browser', () => browserServer.close(), 2000, data.stages);
-            result.activeBrowserGroups = result.activeBrowserGroups.filter(pid => pid !== browserServer.process().pid);
+            if (closeFallbackProbe && result.variants.length === 1) {
+              data.intentionalCloseFallbackProbe = 'Only the first graceful-close operation is stalled; the real Firefox remains open for public BrowserServer.kill().';
+              save();
+            }
+            await stage('close-browser', () => closeFallbackProbe && result.variants.length === 1 ? new Promise(() => {}) : ownedServer.close(), 2000, data.stages);
+          } catch {
+            // Keep the graceful-close error in stages. A killed, verified-absent
+            // browser cannot strand later fresh variants in the same process.
+            await stage('force-kill-browser', () => ownedServer.kill(), 2000, data.stages);
           }
-          catch { throw Error('Browser cleanup interrupted; supervisor will terminate its owned process group'); }
+          await stage('verify-browser-group-absent', async () => {
+            const deadline = performance.now() + 1000;
+            do {
+              try { process.kill(-pid, 0); }
+              catch (error) {
+                if (error.code === 'ESRCH') return { pid, groupAbsent: true };
+                throw error;
+              }
+              await wait(25);
+            } while (performance.now() < deadline);
+            throw Error('Owned browser process group remains after cleanup');
+          }, 1000, data.stages);
+          result.activeBrowserGroups = result.activeBrowserGroups.filter(group => group !== pid);
           browser = undefined; browserServer = undefined;
         }
         save();

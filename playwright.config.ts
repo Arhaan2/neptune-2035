@@ -37,8 +37,10 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        // Use a 60 Hz software display clock instead of host-display vsync.
-        launchOptions: { firefoxUserPrefs: { 'layout.frame_rate': 60 } },
+        // Use a software compositor and 60 Hz clock on bounded CI graphics hardware.
+        launchOptions: {
+          firefoxUserPrefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true },
+        },
         viewport: { width: 1600, height: 1050 },
       },
     },

@@ -1,0 +1,1941 @@
+{
+  "kind": "diagnostic-only",
+  "status": "COLLECTED",
+  "startedAt": "2026-09-09T22:53:28.240Z",
+  "sourceSha": "f04c25254dc9d7e1f6c7633564c79de5c803d580",
+  "scriptSha256": "8c50071b4a1766f5c90370dfbc101857911b63ceff43f9cc25e56bdf3f828228",
+  "sourceStatus": " M scripts/phase-1/diagnose-firefox.mjs\n?? docs/phase-1/evidence/ci-diagnostic-readiness-pr/\n?? docs/phase-1/evidence/ci-diagnostic-readiness-push/\n",
+  "host": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "totalMemoryBytes": 25769803776,
+    "node": "v24.18.0"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1050
+  },
+  "deviceScaleFactor": 1,
+  "limitations": [
+    "Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.",
+    "Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.",
+    "Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.",
+    "No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected."
+  ],
+  "preferenceSources": [
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396"
+  ],
+  "stages": [
+    {
+      "name": "owned-vite-ready",
+      "startedAfterMs": 12.793415999999999,
+      "value": {
+        "port": 5183,
+        "address": "127.0.0.1",
+        "listening": true,
+        "httpStatus": 200,
+        "readiness": "owned-vite-api"
+      },
+      "outcome": "completed",
+      "elapsedMs": 148.422084
+    },
+    {
+      "name": "close-owned-vite",
+      "startedAfterMs": 36382.588375,
+      "outcome": "completed",
+      "elapsedMs": 3.032583000000159
+    }
+  ],
+  "variants": [
+    {
+      "name": "headless-software-clock-60",
+      "prefs": {
+        "layout.frame_rate": 60
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 267.202458,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 370.2645
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 11553.293125,
+          "outcome": "error",
+          "error": "Error: Diagnostic operation deadline exceeded",
+          "elapsedMs": 2001.1169160000009
+        },
+        {
+          "name": "force-kill-browser",
+          "startedAfterMs": 13555.690166,
+          "outcome": "completed",
+          "elapsedMs": 38.281709000000774
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 13594.398666000001,
+          "value": {
+            "pid": 9457,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.4388340000004973
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 637.905125,
+              "outcome": "completed",
+              "elapsedMs": 362.165291
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 1000.357625,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 45.85925000000009
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 1047.377916,
+              "outcome": "completed",
+              "elapsedMs": 1.5240420000000086
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 1049.111375,
+              "value": {
+                "native": {
+                  "elapsedMs": 47,
+                  "rafCount": 3,
+                  "timerCount": 0,
+                  "maxRafGapMs": 16.68,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 13.340000000000003,
+                  "sinceLastTimerMs": 47,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.5290410000000065
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 1053.896625,
+              "outcome": "completed",
+              "elapsedMs": 27.648124999999936
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 1081.886583,
+              "outcome": "completed",
+              "elapsedMs": 3003.344792
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 4087.5163750000006,
+              "value": {
+                "native": {
+                  "elapsedMs": 3013,
+                  "rafCount": 180,
+                  "timerCount": 28,
+                  "maxRafGapMs": 17.299999999999955,
+                  "maxTimerGapMs": 113,
+                  "sinceLastRafMs": 20,
+                  "sinceLastTimerMs": 96,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 7.619707999999264
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 4096.256458,
+              "outcome": "completed",
+              "elapsedMs": 13.694666999999754
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 4111.152,
+              "outcome": "completed",
+              "elapsedMs": 127.99799999999959
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 4239.448291,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 163.10133399999995
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 4403.100208,
+              "outcome": "completed",
+              "elapsedMs": 86.32824999999957
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 4499.403125,
+              "outcome": "completed",
+              "elapsedMs": 379.57945800000016
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 4879.434333,
+              "value": {
+                "native": {
+                  "elapsedMs": 632,
+                  "rafCount": 27,
+                  "timerCount": 5,
+                  "maxRafGapMs": 50.06,
+                  "maxTimerGapMs": 125,
+                  "sinceLastRafMs": 18.82000000000005,
+                  "sinceLastTimerMs": 92,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.6549579999991693
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 4884.141958,
+              "outcome": "completed",
+              "elapsedMs": 1.6862079999991693
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 4886.131582999999,
+              "outcome": "completed",
+              "elapsedMs": 3002.0985420000006
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 7889.272083,
+              "value": {
+                "native": {
+                  "elapsedMs": 3006,
+                  "rafCount": 180,
+                  "timerCount": 29,
+                  "maxRafGapMs": 17.23999999999978,
+                  "maxTimerGapMs": 112,
+                  "sinceLastRafMs": 13.159999999999854,
+                  "sinceLastTimerMs": 58,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 5.390374999999949
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 7895.767333,
+              "outcome": "completed",
+              "elapsedMs": 125.09199999999964
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 8021.245166,
+              "value": {
+                "native": {
+                  "elapsedMs": 3138,
+                  "rafCount": 187,
+                  "timerCount": 30,
+                  "maxRafGapMs": 33.340000000000146,
+                  "maxTimerGapMs": 112,
+                  "sinceLastRafMs": 11.820000000000164,
+                  "sinceLastTimerMs": 80,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 37,
+                  "geometries": 24,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.769000000000233
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 8025.3643329999995,
+              "outcome": "completed",
+              "elapsedMs": 3.670708000000559
+            }
+          ]
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 8029.918874999999,
+              "outcome": "completed",
+              "elapsedMs": 94.09662500000013
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 8124.361707999999,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 123.59241699999984
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 8248.329291,
+              "outcome": "completed",
+              "elapsedMs": 1.2087090000004537
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 8249.796333,
+              "outcome": "completed",
+              "elapsedMs": 180.69987500000025
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 8430.8955,
+              "value": {
+                "native": {
+                  "elapsedMs": 300,
+                  "rafCount": 16,
+                  "timerCount": 2,
+                  "maxRafGapMs": 33.34000000000002,
+                  "maxTimerGapMs": 124,
+                  "sinceLastRafMs": 12.04000000000002,
+                  "sinceLastTimerMs": 70,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 1.637791000001016
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 8432.844541,
+              "outcome": "completed",
+              "elapsedMs": 2.0166250000002037
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 8435.161583000001,
+              "outcome": "completed",
+              "elapsedMs": 3002.9366250000003
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 11438.76625,
+              "value": {
+                "native": {
+                  "elapsedMs": 3006,
+                  "rafCount": 176,
+                  "timerCount": 28,
+                  "maxRafGapMs": 66.66000000000008,
+                  "maxTimerGapMs": 129,
+                  "sinceLastRafMs": 3.380000000000109,
+                  "sinceLastTimerMs": 86,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787556,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.1183750000000146
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 11443.509041000001,
+              "outcome": "completed",
+              "elapsedMs": 102.04454199999964
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 11546.068291000001,
+              "value": {
+                "native": {
+                  "elapsedMs": 3113,
+                  "rafCount": 181,
+                  "timerCount": 29,
+                  "maxRafGapMs": 66.66000000000008,
+                  "maxTimerGapMs": 129,
+                  "sinceLastRafMs": 10.38000000000011,
+                  "sinceLastTimerMs": 80,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787556,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.3855839999996533
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 11548.801291,
+              "outcome": "completed",
+              "elapsedMs": 3.6086250000007567
+            }
+          ]
+        }
+      ],
+      "intentionalCloseFallbackProbe": "Only the first graceful-close operation is stalled; the real Firefox remains open for public BrowserServer.kill()."
+    },
+    {
+      "name": "headless-software-clock-60-software-webrender",
+      "prefs": {
+        "layout.frame_rate": 60,
+        "gfx.webrender.software": true
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 13595.601250000002,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 387.18212499999936
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 24857.043083,
+          "outcome": "completed",
+          "elapsedMs": 146.89087500000096
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 25004.286333,
+          "value": {
+            "pid": 9829,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.2532500000015716
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 13983.285416,
+              "outcome": "completed",
+              "elapsedMs": 370.2765839999993
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 14353.911083,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 51.164582999999766
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 14405.375583000001,
+              "outcome": "completed",
+              "elapsedMs": 4.10504199999923
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 14409.844000000001,
+              "value": {
+                "native": {
+                  "elapsedMs": 44,
+                  "rafCount": 3,
+                  "timerCount": 0,
+                  "maxRafGapMs": 16.68,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 10.659999999999997,
+                  "sinceLastTimerMs": 44,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 5.08904099999927
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 14415.204916,
+              "outcome": "completed",
+              "elapsedMs": 0.9874589999999444
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 14416.386583000001,
+              "outcome": "completed",
+              "elapsedMs": 3000.4180419999993
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 17418.001166000002,
+              "value": {
+                "native": {
+                  "elapsedMs": 3008,
+                  "rafCount": 181,
+                  "timerCount": 28,
+                  "maxRafGapMs": 17.41999999999996,
+                  "maxTimerGapMs": 113,
+                  "sinceLastRafMs": 4,
+                  "sinceLastTimerMs": 76,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 7.606041999999434
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 17426.602875,
+              "outcome": "completed",
+              "elapsedMs": 11.121916000000056
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 17438.86375,
+              "outcome": "completed",
+              "elapsedMs": 110.86929099999907
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 17550.112041,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 133.59962499999892
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 17684.154541,
+              "outcome": "completed",
+              "elapsedMs": 1.13629199999923
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 17685.556208,
+              "outcome": "completed",
+              "elapsedMs": 515.6632499999978
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 18201.750708,
+              "value": {
+                "native": {
+                  "elapsedMs": 633,
+                  "rafCount": 30,
+                  "timerCount": 5,
+                  "maxRafGapMs": 50,
+                  "maxTimerGapMs": 117,
+                  "sinceLastRafMs": 12.879999999999995,
+                  "sinceLastTimerMs": 92,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.158833000001323
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 18204.212041,
+              "outcome": "completed",
+              "elapsedMs": 0.8386250000003201
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 18205.322291,
+              "outcome": "completed",
+              "elapsedMs": 3002.1990000000005
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 21208.712916,
+              "value": {
+                "native": {
+                  "elapsedMs": 3007,
+                  "rafCount": 180,
+                  "timerCount": 29,
+                  "maxRafGapMs": 33.33999999999969,
+                  "maxTimerGapMs": 111,
+                  "sinceLastRafMs": 6.519999999999982,
+                  "sinceLastTimerMs": 58,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 6.16504200000054
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 21215.766708,
+              "outcome": "completed",
+              "elapsedMs": 110.00883299999987
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 21326.264750000002,
+              "value": {
+                "native": {
+                  "elapsedMs": 3122,
+                  "rafCount": 186,
+                  "timerCount": 30,
+                  "maxRafGapMs": 33.33999999999969,
+                  "maxTimerGapMs": 111,
+                  "sinceLastRafMs": 21.2199999999998,
+                  "sinceLastTimerMs": 63,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 37,
+                  "geometries": 24,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.269666000000143
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 21329.994583,
+              "outcome": "completed",
+              "elapsedMs": 3.41345800000272
+            }
+          ]
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 21334.108916,
+              "outcome": "completed",
+              "elapsedMs": 90.4098750000012
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 21424.916916000002,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 122.45808399999805
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 21547.753208000002,
+              "outcome": "completed",
+              "elapsedMs": 1.206916999999521
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 21549.458958,
+              "outcome": "completed",
+              "elapsedMs": 180.8092080000024
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 21730.69425,
+              "value": {
+                "native": {
+                  "elapsedMs": 302,
+                  "rafCount": 16,
+                  "timerCount": 2,
+                  "maxRafGapMs": 33.33999999999999,
+                  "maxTimerGapMs": 124,
+                  "sinceLastRafMs": 8.639999999999986,
+                  "sinceLastTimerMs": 66,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.379540999998426
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 21733.47575,
+              "outcome": "completed",
+              "elapsedMs": 2.0916660000002594
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 21735.862166,
+              "outcome": "completed",
+              "elapsedMs": 3002.7106250000033
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 24739.323291,
+              "value": {
+                "native": {
+                  "elapsedMs": 3007,
+                  "rafCount": 173,
+                  "timerCount": 28,
+                  "maxRafGapMs": 83.33999999999992,
+                  "maxTimerGapMs": 141,
+                  "sinceLastRafMs": 17.639999999999873,
+                  "sinceLastTimerMs": 64,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787556,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.556208999998489
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 24743.462750000002,
+              "outcome": "completed",
+              "elapsedMs": 105.95499999999811
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 24849.860625,
+              "value": {
+                "native": {
+                  "elapsedMs": 3116,
+                  "rafCount": 180,
+                  "timerCount": 29,
+                  "maxRafGapMs": 83.33999999999992,
+                  "maxTimerGapMs": 141,
+                  "sinceLastRafMs": 9.960000000000036,
+                  "sinceLastTimerMs": 71,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787556,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.7119579999998678
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 24852.96325,
+              "outcome": "completed",
+              "elapsedMs": 3.5674160000016855
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "headless-default-clock",
+      "prefs": {},
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 25005.16175,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 341.80175000000236
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 36235.014749999995,
+          "outcome": "completed",
+          "elapsedMs": 146.34362500000134
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 36381.775375,
+          "value": {
+            "pid": 10180,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.2705409999980475
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 25347.542875,
+              "outcome": "completed",
+              "elapsedMs": 362.7110410000023
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 25710.684666,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 55.13441700000112
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 25766.319833,
+              "outcome": "completed",
+              "elapsedMs": 2.408332999999402
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 25769.097083,
+              "value": {
+                "native": {
+                  "elapsedMs": 45,
+                  "rafCount": 3,
+                  "timerCount": 0,
+                  "maxRafGapMs": 16.680000000000003,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 5.979999999999997,
+                  "sinceLastTimerMs": 45,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 7.927457999998296
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 25777.404875,
+              "outcome": "completed",
+              "elapsedMs": 2.641875000001164
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 25780.375041,
+              "outcome": "completed",
+              "elapsedMs": 3002.735542000002
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 28784.947791000002,
+              "value": {
+                "native": {
+                  "elapsedMs": 3009,
+                  "rafCount": 181,
+                  "timerCount": 29,
+                  "maxRafGapMs": 17.579999999999927,
+                  "maxTimerGapMs": 111,
+                  "sinceLastRafMs": 6.320000000000164,
+                  "sinceLastTimerMs": 6,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 6.51524999999674
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 28792.367333000002,
+              "outcome": "completed",
+              "elapsedMs": 12.401458000000275
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 28806.162791000002,
+              "outcome": "completed",
+              "elapsedMs": 111.66537499999686
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 28918.2425,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 112.0499579999996
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 29030.7295,
+              "outcome": "completed",
+              "elapsedMs": 1.05962499999805
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 29032.051416000002,
+              "outcome": "completed",
+              "elapsedMs": 532.2574590000004
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 29564.886875,
+              "value": {
+                "native": {
+                  "elapsedMs": 639,
+                  "rafCount": 28,
+                  "timerCount": 6,
+                  "maxRafGapMs": 66.30000000000001,
+                  "maxTimerGapMs": 114,
+                  "sinceLastRafMs": 9.659999999999968,
+                  "sinceLastTimerMs": 3,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.544041000001016
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 29567.931541,
+              "outcome": "completed",
+              "elapsedMs": 0.9745839999995951
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 29569.197041,
+              "outcome": "completed",
+              "elapsedMs": 3000.7521250000027
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 32571.760041,
+              "value": {
+                "native": {
+                  "elapsedMs": 3007,
+                  "rafCount": 180,
+                  "timerCount": 28,
+                  "maxRafGapMs": 17.38000000000011,
+                  "maxTimerGapMs": 113,
+                  "sinceLastRafMs": 19.659999999999854,
+                  "sinceLastTimerMs": 59,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 5.8353749999987485
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 32578.696875,
+              "outcome": "completed",
+              "elapsedMs": 120.84495799999786
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 32700.031916,
+              "value": {
+                "native": {
+                  "elapsedMs": 3133,
+                  "rafCount": 187,
+                  "timerCount": 29,
+                  "maxRafGapMs": 33.320000000000164,
+                  "maxTimerGapMs": 113,
+                  "sinceLastRafMs": 12.320000000000164,
+                  "sinceLastTimerMs": 82,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094916
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 37,
+                  "geometries": 24,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.8327920000010636
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 32703.323416,
+              "outcome": "completed",
+              "elapsedMs": 3.0800000000017462
+            }
+          ]
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 32707.218625,
+              "outcome": "completed",
+              "elapsedMs": 93.26983300000211
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 32801.154707999995,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 118.2914579999997
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 32919.910040999996,
+              "outcome": "completed",
+              "elapsedMs": 1.4787090000027092
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 32921.801290999996,
+              "outcome": "completed",
+              "elapsedMs": 178.67970900000364
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 33100.941791,
+              "value": {
+                "native": {
+                  "elapsedMs": 293,
+                  "rafCount": 16,
+                  "timerCount": 2,
+                  "maxRafGapMs": 33.34,
+                  "maxTimerGapMs": 118,
+                  "sinceLastRafMs": 5.8799999999999955,
+                  "sinceLastTimerMs": 64,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.181416999999783
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 33104.517125,
+              "outcome": "completed",
+              "elapsedMs": 0.9349159999983385
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 33105.752499999995,
+              "outcome": "completed",
+              "elapsedMs": 3002.170708000005
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 36109.451833,
+              "value": {
+                "native": {
+                  "elapsedMs": 3006,
+                  "rafCount": 173,
+                  "timerCount": 28,
+                  "maxRafGapMs": 83.33999999999992,
+                  "maxTimerGapMs": 138,
+                  "sinceLastRafMs": 15.88000000000011,
+                  "sinceLastTimerMs": 45,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787556,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.92949999999837
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 36115.402665999994,
+              "outcome": "completed",
+              "elapsedMs": 111.52529200000572
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 36227.444333,
+              "value": {
+                "native": {
+                  "elapsedMs": 3123,
+                  "rafCount": 179,
+                  "timerCount": 29,
+                  "maxRafGapMs": 83.33999999999992,
+                  "maxTimerGapMs": 138,
+                  "sinceLastRafMs": 15.239999999999782,
+                  "sinceLastTimerMs": 57,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "Apple M1, or similar",
+                  "vendor": "Mozilla",
+                  "version": "WebGL 2.0",
+                  "unmaskedRenderer": "Apple M1, or similar",
+                  "unmaskedVendor": "Apple",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787556,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.417750000000524
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 36230.236416,
+              "outcome": "completed",
+              "elapsedMs": 4.108124999998836
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activeBrowserGroups": [],
+  "cleanupProbe": false,
+  "closeFallbackProbe": true,
+  "server": {
+    "owned": true,
+    "port": 5183
+  },
+  "completedAt": "2026-09-09T22:54:04.626Z",
+  "elapsedMs": 36385.908291,
+  "supervisor": {
+    "code": 0,
+    "signal": null,
+    "elapsedMs": 36827.747917,
+    "budgetMs": 89000,
+    "cleanup": [
+      {
+        "pid": 9450,
+        "term": "absent",
+        "kill": "absent",
+        "finalCheck": "absent"
+      }
+    ],
+    "registeredGroupsAbsent": true
+  }
+}

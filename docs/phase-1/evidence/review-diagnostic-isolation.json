@@ -1,0 +1,145 @@
+{
+  "reviewedAt": "2026-09-09T23:03:12.753Z",
+  "scope": "Independent bounded review of worker-authored browser-close isolation repair, Firefox compositor preference, local reports, and new public evidence. Earlier diagnostic implementation was authored by this reviewer; this repair was not.",
+  "status": "PASS",
+  "findings": [],
+  "headBeforeCommit": "f04c25254dc9d7e1f6c7633564c79de5c803d580",
+  "acceptedFullLocalSource": "61bf694662560d12ba398bfe598540926d11a9cb",
+  "sourcePreservation": {
+    "acceptedHashCount": 80,
+    "unchanged": 78,
+    "changedFiles": [
+      "playwright.config.ts",
+      "scripts/phase-1/diagnose-firefox.mjs"
+    ],
+    "protectedFilesMatched": 73,
+    "applicationTestsWorkflowAndLockUnchanged": true
+  },
+  "changes": {
+    "diagnostic": "Preserves the 2-second graceful-close error, bounds public BrowserServer.kill() to 2 seconds, and verifies group absence within 1 second before unregistering or continuing. A local poll deadline prevents a timed-out poll from surviving; failed cleanup retains supervisor ownership. Normal 89-second budget and all existing scene operation deadlines remain unchanged.",
+    "firefox": "Only gfx.webrender.software:true was added beside the existing 60-Hz preference; headless mode, real WebGL, viewport/DPR, geometry, assertions, 60-second tests, 12-second expectations, cases and retries are preserved.",
+    "reference": {
+      "mozilla": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+      "installedPlaywright": "node_modules/playwright-core/types/types.d.ts:20419-20429"
+    }
+  },
+  "localDiagnostics": {
+    "normal": {
+      "path": "docs/phase-1/evidence/firefox-diagnostic-isolation-normal/diagnostic.json",
+      "sha256": "ef0170de6329a17973e19ca13225bb96a34f557b2a4b45e481d35743b0edb11b",
+      "status": "COLLECTED",
+      "pages": 9,
+      "elapsedMs": 35085.162667,
+      "groupsIndependentlyAbsent": 4
+    },
+    "fallback": {
+      "path": "docs/phase-1/evidence/firefox-diagnostic-isolation-fallback/diagnostic.json",
+      "sha256": "d50c94087a024667f7833228f410026929dbcd42d85c8058f9d6310280395768",
+      "status": "COLLECTED",
+      "pages": 9,
+      "elapsedMs": 36827.747917,
+      "groupsIndependentlyAbsent": 4
+    }
+  },
+  "fallbackSequence": {
+    "gracefulCloseErrorMs": 2001.1169160000009,
+    "publicKillMs": 38.281709000000774,
+    "groupAbsenceMs": 0.4388340000004973,
+    "laterFreshVariantsCollected": true
+  },
+  "localFirefox": {
+    "summary": "docs/phase-1/evidence/firefox-software-local/browser-summary.json",
+    "expected": 27,
+    "unexpected": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "durationMs": 123174.00899999999,
+    "caseSetMatchesAccepted": true
+  },
+  "hostedObservations": {
+    "pushRun": 34413685487,
+    "prRun": 34413689140,
+    "source": "f04c25254dc9d7e1f6c7633564c79de5c803d580",
+    "diagnosticStatus": "INCOMPLETE",
+    "facts": "Vite API readiness succeeded; the first blank page made limited timer/RAF progress. Legacy and later twin evaluations exceeded deadlines; early twin snapshot had no canvas or GL renderer. Graceful close timed out, preventing either comparison variant.",
+    "rootCauseEstablished": false,
+    "completeGateOutcomeClaimed": false
+  },
+  "publication": {
+    "files": [
+      {
+        "path": "scripts/phase-1/diagnose-firefox.mjs",
+        "sha256": "8c50071b4a1766f5c90370dfbc101857911b63ceff43f9cc25e56bdf3f828228",
+        "bytes": 17125
+      },
+      {
+        "path": "playwright.config.ts",
+        "sha256": "7cb921e320b050706fc1f7f230706333875709b33e50d7cfc79ac0810742bca8",
+        "bytes": 1622
+      },
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "sha256": "81ea7bf7b587f0bcd418c572e23017e07c197ef4509487c80dfad3cce93b8548",
+        "bytes": 15670
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "sha256": "0609e5103a3b4fa915df8a5106e5240cdf88515332db50f58e9344dc86e56c33",
+        "bytes": 26762
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-diagnostic-readiness-push/diagnostic.json",
+        "sha256": "4e42606d6da27064dd91081961bb8bacdfc8c7dfe097754cc52abe150b7e5808",
+        "bytes": 10850
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-diagnostic-readiness-pr/diagnostic.json",
+        "sha256": "049057e84ba6a508cdf53b3df68fb77c9b5b8c9693c638c7d667c585ce99d566",
+        "bytes": 10918
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-isolation-normal/diagnostic.json",
+        "sha256": "ef0170de6329a17973e19ca13225bb96a34f557b2a4b45e481d35743b0edb11b",
+        "bytes": 65058
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-isolation-fallback/diagnostic.json",
+        "sha256": "d50c94087a024667f7833228f410026929dbcd42d85c8058f9d6310280395768",
+        "bytes": 65518
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-software-local/browser-summary.json",
+        "sha256": "854dda1ed9100b8fbe5e467f7d7165e92835ff125a0b11f51d4ae0522e9a77c2",
+        "bytes": 9541
+      }
+    ],
+    "patternHits": [
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      }
+    ],
+    "assessment": "Only source, synthetic app/browser/system observations, derived local results and text documentation. No credential shapes, private observation payloads, recordings, binary contents or embedded media found. Terminology/reference hits are explanatory prose; raw diagnostic copies are byte-identical."
+  },
+  "checks": [
+    "Reviewed exact two-source diff and public documentation wording.",
+    "Compared all 80 accepted source hashes and 73 protected hashes.",
+    "Validated exact raw report hashes, 27 unchanged Firefox case identities, results and configuration.",
+    "Verified all eight recorded local process groups are currently absent.",
+    "Read installed public BrowserServer close/kill/process API and current official Mozilla software-WebRender preference handling.",
+    "Scanned all nine publication-scope files with filename/category-only reporting; parsed every JSON."
+  ],
+  "limitations": [
+    "Local probes establish cleanup behavior and local compositor viability only; they do not establish hosted rendering cause or final CI acceptance.",
+    "No additional tests, browsers, servers or remote writes performed by this reviewer.",
+    "Exact next-head normal CI and its actual artifacts remain mandatory before merge."
+  ]
+}
