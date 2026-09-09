@@ -1,0 +1,984 @@
+{
+  "stats": {
+    "startTime": "2026-09-09T22:18:41.018Z",
+    "duration": 383533.038,
+    "expected": 81,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "file": "acceptance.spec.ts",
+      "name": "rendered modes, connected exploded paths, interior and bounded resources",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7334
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "presets, engineering controls, validation and fresh-context sharing",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7036
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 8074
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 39016
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "rendered modes, connected exploded paths, interior and bounded resources",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7006
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "presets, engineering controls, validation and fresh-context sharing",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5761
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7512
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 38619
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "rendered modes, connected exploded paths, interior and bounded resources",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6591
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "presets, engineering controls, validation and fresh-context sharing",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5528
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 7341
+        }
+      ]
+    },
+    {
+      "file": "acceptance.spec.ts",
+      "name": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 38751
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4698
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1491
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2449
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1298
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1859
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6151
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1337
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1856
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1253
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1519
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1897
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4095
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1023
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1422
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 739
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1630
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6721
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 806
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1261
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 754
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 880
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 902
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4323
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1145
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1610
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 953
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1478
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5778
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1082
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1511
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 915
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1014
+        }
+      ]
+    },
+    {
+      "file": "phase1.spec.ts",
+      "name": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1305
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2340
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "standby transfer is an actual selected-component state transition",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1894
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "clock pause and speed are independent of design resets and validated controls",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4475
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "seek backward and forward restores exact event-boundary numerical results",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2542
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "cancel run retains completed state and superseding work rejects stale updates",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3325
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2379
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "project exports and imports replay numerical state, with invalid mappings rejected visibly",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1888
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1681
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 15470
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "legacy saved scenario links retain the explicit aggregate model",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1969
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2024
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "standby transfer is an actual selected-component state transition",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1509
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "clock pause and speed are independent of design resets and validated controls",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4020
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "seek backward and forward restores exact event-boundary numerical results",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2293
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "cancel run retains completed state and superseding work rejects stale updates",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2868
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2012
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "project exports and imports replay numerical state, with invalid mappings rejected visibly",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1296
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1255
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 16431
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "legacy saved scenario links retain the explicit aggregate model",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1304
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2069
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "standby transfer is an actual selected-component state transition",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1491
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "clock pause and speed are independent of design resets and validated controls",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 4198
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "seek backward and forward restores exact event-boundary numerical results",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2211
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "cancel run retains completed state and superseding work rejects stale updates",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 2968
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1981
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "project exports and imports replay numerical state, with invalid mappings rejected visibly",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1524
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1149
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 14840
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "legacy saved scenario links retain the explicit aggregate model",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 1279
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3989
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3681
+        }
+      ]
+    },
+    {
+      "file": "twin.spec.ts",
+      "name": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 3357
+        }
+      ]
+    },
+    {
+      "file": "visual.spec.ts",
+      "name": "capture the first coherent 3D slice",
+      "browser": "chromium",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 6175
+        }
+      ]
+    },
+    {
+      "file": "visual.spec.ts",
+      "name": "capture the first coherent 3D slice",
+      "browser": "firefox",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5462
+        }
+      ]
+    },
+    {
+      "file": "visual.spec.ts",
+      "name": "capture the first coherent 3D slice",
+      "browser": "webkit",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 5499
+        }
+      ]
+    }
+  ]
+}

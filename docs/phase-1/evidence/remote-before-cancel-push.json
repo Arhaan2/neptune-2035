@@ -1,0 +1,241 @@
+{
+  "checkedAt": "2026-09-09T22:27:04.949Z",
+  "mode": "read-only",
+  "sourceHead": "61bf694662560d12ba398bfe598540926d11a9cb",
+  "remote": "https://github.com/Arhaan2/neptune-2035.git",
+  "branches": [
+    {
+      "name": "codex/neptune",
+      "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "protected": false
+    },
+    {
+      "name": "codex/neptune-digital-twin-v2",
+      "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "protected": false
+    },
+    {
+      "name": "codex/neptune-phase-1",
+      "sha": "9007948acc1a695a5a174743e927dd7cb9997044",
+      "protected": false
+    },
+    {
+      "name": "codex/pages",
+      "sha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "protected": false
+    },
+    {
+      "name": "main",
+      "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+      "protected": false
+    }
+  ],
+  "pages": {
+    "url": "https://api.github.com/repos/Arhaan2/neptune-2035/pages",
+    "status": "built",
+    "cname": null,
+    "custom_404": false,
+    "html_url": "https://arhaan2.github.io/neptune-2035/",
+    "build_type": "legacy",
+    "source": {
+      "branch": "codex/pages",
+      "path": "/"
+    },
+    "public": true,
+    "protected_domain_state": null,
+    "pending_domain_unverified_at": null,
+    "https_enforced": true
+  },
+  "hooks": [],
+  "rulesets": [],
+  "workflows": [
+    {
+      "id": 354299574,
+      "name": "Phase 1 source verification",
+      "path": ".github/workflows/phase-1.yml",
+      "state": "active"
+    },
+    {
+      "id": 353551315,
+      "name": "pages-build-deployment",
+      "path": "dynamic/pages/pages-build-deployment",
+      "state": "active"
+    }
+  ],
+  "pagesEnvironment": {
+    "total_count": 2,
+    "branch_policies": [
+      {
+        "id": 59465437,
+        "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k1OTQ2NTQzNw==",
+        "name": "codex/pages",
+        "type": "branch"
+      },
+      {
+        "id": 59465436,
+        "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k1OTQ2NTQzNg==",
+        "name": "gh-pages",
+        "type": "branch"
+      }
+    ]
+  },
+  "deployments": [
+    {
+      "id": 6340659799,
+      "sha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "ref": "codex/pages",
+      "environment": "github-pages",
+      "createdAt": "2026-09-09T01:35:17Z"
+    },
+    {
+      "id": 6338812039,
+      "sha": "672805a984feadaab375061817c919fd6849b311",
+      "ref": "codex/pages",
+      "environment": "github-pages",
+      "createdAt": "2026-09-08T22:56:50Z"
+    }
+  ],
+  "runs": [
+    {
+      "id": 34407002110,
+      "name": "Phase 1 source verification",
+      "event": "pull_request",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "9007948acc1a695a5a174743e927dd7cb9997044",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34407002110"
+    },
+    {
+      "id": 34406998463,
+      "name": "Phase 1 source verification",
+      "event": "push",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "9007948acc1a695a5a174743e927dd7cb9997044",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34406998463"
+    },
+    {
+      "id": 34399395431,
+      "name": "Phase 1 source verification",
+      "event": "pull_request",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "77592c4f18fc85d09d2b6ac96cad48ed8477b770",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34399395431"
+    },
+    {
+      "id": 34399388324,
+      "name": "Phase 1 source verification",
+      "event": "push",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "77592c4f18fc85d09d2b6ac96cad48ed8477b770",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34399388324"
+    },
+    {
+      "id": 34398216144,
+      "name": "Phase 1 source verification",
+      "event": "pull_request",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "21404e192d13e41f60a7f48488c29592d35b1b81",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34398216144"
+    },
+    {
+      "id": 34398209413,
+      "name": "Phase 1 source verification",
+      "event": "push",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "21404e192d13e41f60a7f48488c29592d35b1b81",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34398209413"
+    },
+    {
+      "id": 34397058602,
+      "name": "Phase 1 source verification",
+      "event": "pull_request",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "264de666fac69c575e17186ec1b7342fcf6fd28e",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34397058602"
+    },
+    {
+      "id": 34397051589,
+      "name": "Phase 1 source verification",
+      "event": "push",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "264de666fac69c575e17186ec1b7342fcf6fd28e",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34397051589"
+    },
+    {
+      "id": 34391548016,
+      "name": "Phase 1 source verification",
+      "event": "pull_request",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "82b2a6fbd796fd71968596dcc1157ea02d55be51",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34391548016"
+    },
+    {
+      "id": 34391506009,
+      "name": "Phase 1 source verification",
+      "event": "push",
+      "headBranch": "codex/neptune-phase-1",
+      "headSha": "82b2a6fbd796fd71968596dcc1157ea02d55be51",
+      "status": "completed",
+      "conclusion": "failure",
+      "path": ".github/workflows/phase-1.yml",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34391506009"
+    },
+    {
+      "id": 34299786585,
+      "name": "pages build and deployment",
+      "event": "dynamic",
+      "headBranch": "codex/pages",
+      "headSha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "status": "completed",
+      "conclusion": "success",
+      "path": "dynamic/pages/pages-build-deployment",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34299786585"
+    },
+    {
+      "id": 34288350576,
+      "name": "pages build and deployment",
+      "event": "dynamic",
+      "headBranch": "codex/pages",
+      "headSha": "672805a984feadaab375061817c919fd6849b311",
+      "status": "completed",
+      "conclusion": "success",
+      "path": "dynamic/pages/pages-build-deployment",
+      "url": "https://github.com/Arhaan2/neptune-2035/actions/runs/34288350576"
+    }
+  ],
+  "releases": [
+    {
+      "id": 385117865,
+      "tag": "v0.1.0",
+      "target": "codex/neptune"
+    }
+  ],
+  "localTags": "29d2c9400af7f6f258948362124157d69928acc7 refs/tags/phase-0-baseline-23de38a-20260909\n4211561ba3507be65afa24cd2f69b47d7fbbc4f7 refs/tags/phase-0-served-artifact-019b24f-20260909\n462f2fbbda5766bdd568ec58c18dd82e542529e9 refs/tags/v0.1.0",
+  "assessment": "Source-only Phase 1 CI has contents:read, no deployment/release step and no environment. Pages remains separately sourced from codex/pages. Installed-app exhaustive inventory visibility limitation is documented in remote-preflight.json; no unknown external configuration is changed or relied upon."
+}

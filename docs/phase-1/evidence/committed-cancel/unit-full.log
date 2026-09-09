@@ -1,0 +1,43 @@
+
+> neptune@2.0.0-rc.1 test
+> vitest run --reporter=default --reporter=json --outputFile=artifacts/phase1-unit.json
+
+
+ RUN  v5.0.0 <verified-checkout>
+
+ ✓ tests/twin-telemetry.test.ts (47 tests) 4519ms
+   ✓ actual localhost SSE transport (2)
+     ✓ uses the production adapter with native browser reconnect/Last-Event-ID and source validation 768ms
+   ✓ running DataPanel acceptance (1)
+     ✓ operates mapping, raw inspection, simulated dropout, calibration, and actual streaming in the app 3639ms
+ ✓ tests/twin-physics.test.ts (28 tests) 546ms
+ ✓ tests/phase1-persistence.test.ts (16 tests) 6393ms
+   ✓ PH1-PER-01 real historical thresholds (2)
+     ✓ round-trips real engine-generated 999, 1000, 1001-event applied histories and continues 696ms
+     ✓ advances a real one-node run through 86399, 86400 and 86401 seconds, preserving continuation 1511ms
+   ✓ PH1-PER-02 declared boundaries (6)
+     ✓ admits 9999/10000 future events through engine/export/import, rejects 10001 atomically 1347ms
+     ✓ checks actual UTF-8 bytes below/at/above 64 MiB including multibyte input 1012ms
+     ✓ bounds nesting before parse and exact value/key item allocation 1366ms
+ ✓ tests/phase1-numerical.test.ts (22 tests) 40ms
+ ✓ tests/phase1-worker.test.ts (49 tests) 890ms
+ ✓ tests/twin-integration.test.ts (19 tests) 2166ms
+   ✓ canonical graph, geometry and operating-state integration (10)
+     ✓ bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption 1649ms
+ ✓ tests/twin-network.test.ts (8 tests) 993ms
+   ✓ declared network offered-demand and whole-job admission (7)
+     ✓ detects a shared-core port bottleneck even when every individual platform link fits 586ms
+ ✓ tests/model.test.ts (38 tests) 17ms
+ ✓ tests/phase1-deferred.test.ts (4 tests) 702ms
+   ✓ PH1-REG-01 deferred Phase 0 findings remain explicit (4)
+     ✓ PH0-003 retains the 4000-node shared port boundary and reports the 4001-node design shortfall 327ms
+ ✓ tests/twin-geometry.test.ts (7 tests) 337ms
+ ✓ tests/scenario.test.ts (15 tests) 4ms
+ ✓ tests/phase1-work-budget.test.ts (3 tests) 106ms
+
+ Test Files  12 passed (12)
+      Tests  256 passed (256)
+   Start at  15:18:22
+   Duration  17.95s (tests 96%, import 2%, transform 1%)
+
+JSON report written to <verified-checkout>/artifacts/phase1-unit.json

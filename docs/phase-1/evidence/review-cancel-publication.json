@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_REVIEW_ONLY",
+  "reviewedAt": "2026-09-09T22:31:07.783Z",
+  "candidateSource": "61bf694662560d12ba398bfe598540926d11a9cb",
+  "publishedBaseline": "9007948acc1a695a5a174743e927dd7cb9997044",
+  "preMergeMain": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "findings": [],
+  "scope": "Independent validation of the completed clean local gate, Cancel source delta, retained failed-CI evidence, protected prerequisites, publication bytes and final PR draft. This reviewer authored the standalone diagnostic; its independent source/cleanup review is review-firefox-diagnostic.json by worker_recovery. No new test suite or remote operation was performed for this audit.",
+  "source": {
+    "previouslyAcceptedExecutableFiles": 79,
+    "unchangedPreviousExecutableFiles": 76,
+    "reviewedChanges": [
+      {
+        "path": ".github/workflows/phase-1.yml",
+        "prior": "c44faf291979bb06835b3f96264c5edf9d8fb449b2f3f6e9b02b6dca69c6c079",
+        "current": "bf897ceec0a7dc235a87ba0e33f2e0c0dc62b71ad40604120eed8c9acd3c6bde"
+      },
+      {
+        "path": "src/ui/useTwin.ts",
+        "prior": "af1dc65ae996c54cb08ffe8cf6e047c4cad93707eaa416b5c23499a68e336593",
+        "current": "2f021e03d5079fbf293ae3aa94241660807b95d2fc7433f04a49fdd9dd5ba349"
+      },
+      {
+        "path": "tests/browser/phase1.spec.ts",
+        "prior": "af6b563899215e612bf4a385a5f33b1df4819bab87cdbda87b4dc247c7d5d35e",
+        "current": "ad0ad6c94a73f662d8c94eea58a2dccc614a5d052f1076e5b9370c6a8976fc9a"
+      }
+    ],
+    "newDiagnostic": {
+      "path": "scripts/phase-1/diagnose-firefox.mjs",
+      "sha256": "a9d8c6cce2a6b494af8ed56365cb9936ccdf4df1b508f0d8ce9374a6a9ff22a0"
+    },
+    "currentExecutableFilesVerified": 80,
+    "currentArchiveCommitHashAgreement": true,
+    "originalPhase0Files": 72,
+    "protectedFiles": 73,
+    "protectedMismatches": [],
+    "packageLockPackagePublicUnchanged": true,
+    "linearCommitsAbovePublished": 2,
+    "sourceManifest": "docs/phase-1/evidence/committed-cancel/execution.json",
+    "sourceManifestSha256": "00adcc6489a5d238094df455caedab214a9b5b4ec338e278f317ceb84592ca79"
+  },
+  "localGate": {
+    "status": "PASS",
+    "method": "Clean git archive of exact61bf694 commit with initially clean checkout",
+    "archive": "<temporary-root>/neptune-phase1-rjTKNp",
+    "unitPassed": 256,
+    "telemetryFlags": {
+      "NEPTUNE_TELEMETRY_BROWSER": "1",
+      "NEPTUNE_TELEMETRY_APP": "1"
+    },
+    "browserPassed": 81,
+    "perBrowser": {
+      "chromium": 27,
+      "firefox": 27,
+      "webkit": 27
+    },
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "unitAndBrowserSummariesRebuiltExactlyFromRawArchive": true,
+    "allSevenLogsVerified": true,
+    "allSevenExitCodes": 0,
+    "emptyFailureContexts": true,
+    "browserVersions": {
+      "chromium": "153.0.8010.12",
+      "firefox": "155.0",
+      "webkit": "26.6"
+    },
+    "stageDurations": [
+      {
+        "name": "npm-ci",
+        "elapsedMs": 3524.113959
+      },
+      {
+        "name": "typecheck",
+        "elapsedMs": 3530.8686660000003
+      },
+      {
+        "name": "lint",
+        "elapsedMs": 1568.9797909999998
+      },
+      {
+        "name": "build",
+        "elapsedMs": 4787.786542
+      },
+      {
+        "name": "unit-full",
+        "elapsedMs": 18368.477874999997
+      },
+      {
+        "name": "browser",
+        "elapsedMs": 384061.643083
+      },
+      {
+        "name": "measurements",
+        "elapsedMs": 22040.285957999993
+      }
+    ],
+    "measurementSourceHashesVerified": 18,
+    "longHistory": {
+      "timeS": 86401,
+      "eventCount": 1001,
+      "appliedEvents": 1001,
+      "bytes": 394648,
+      "roundTripExact": true,
+      "continuedExact": true
+    },
+    "campus": {
+      "timeS": 1,
+      "accelerators": 1000000,
+      "nodes": 125000,
+      "modules": 782,
+      "eventCount": 10000,
+      "appliedEvents": 0,
+      "bytes": 19613291,
+      "roundTripExact": true,
+      "continuedExact": true
+    },
+    "memoryMaxRSSKiB": 1191072,
+    "memoryMaxRSSGiB": 1.135894775390625,
+    "evidenceFileHashes": {
+      "browser-contexts.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "browser-summary.json": "2d07714646013b6196ffb630a9f12d0b13b7252acea5111073cb9e9be4661b87",
+      "browser-versions.json": "0edbc5210d04f5294d98e701ab288f623df1bb7514062e5f7edbdfff35785c93",
+      "browser.log": "50b154d07c8846cb49745d0de5299c30cd5cb6a4afd7b733f42ea3463b62fc48",
+      "build.log": "a8741658b6e9b195d289c0eb6b08f1cb960ae9b360245efdd293ba6212446b8c",
+      "execution.json": "00adcc6489a5d238094df455caedab214a9b5b4ec338e278f317ceb84592ca79",
+      "lint.log": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "measurements.json": "ef184268a2911cf7e8c4a1c8d9a25c0da018a34db160ebc3d72942b8963e9f03",
+      "measurements.log": "dc4bc7f7d28407229c758021558778de0dbd72fc7ef22b7eb8ad39ac542124d3",
+      "npm-ci.log": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "server.log": "49056f6676cf467ca659af63530efdc30796f0a3c6d4585dce7f144c5092a2c1",
+      "typecheck.log": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "unit-full.log": "a826af327f4a2e03294147cec7d863d05f81ee9d31343191085edc4ae87190ee",
+      "unit-summary.json": "fa49a722ec419a058c943015093aa69948b6cdfd1daa9ebc24ded1dfed7773a4"
+    }
+  },
+  "publication": {
+    "status": "PASS",
+    "scannedAt": "2026-09-09T22:29:11.456Z",
+    "phase0Files": 72,
+    "phase1TextFiles": 319,
+    "changedExecutableFiles": 4,
+    "totalInventoriedFiles": 395,
+    "totalInventoriedBytes": 6627105,
+    "prDraftSeparatelyScanned": {
+      "name": "neptune-phase1-pr-body.md",
+      "sha256": "0a47b90b60989dbcb650493fef482b4db3938a185d86f31593db83d1cc2c4a9e",
+      "bytes": 8105,
+      "categories": [
+        "private-observation-terms"
+      ]
+    },
+    "currentReviewSelfExcluded": true,
+    "inventoryPath": "artifacts/phase-1-review/cancel-publication-final-inventory.json",
+    "inventorySha256": "f06f58eeb4c77d0ef32ad02004522342b87dd65eb1e0d6213ec208187825d380",
+    "documentHashes": {
+      "docs/phase-1/ACCEPTANCE.md": "effa7ae6ec97ac27aba24c40271975f5f1646bac15093f389683772e03b913df",
+      "docs/phase-1/CI-INVESTIGATION.md": "2d84a3cea17641bb385d950d2fee1fe2141af075eaf6b14ce9f65ea9b6d3b155",
+      "docs/phase-1/MERGE-AND-ROLLBACK.md": "1d362075751ff888c129dcbde48819007ed43334f905dc8b4bb5189f1b5eeb0e",
+      "docs/phase-1/CONTRACT.md": "dddaf6940e78896b33f070e546aacdff972bbf5146d70a9dceebf792c9c5c89d",
+      "docs/phase-1/REQUIREMENT-TEST-MATRIX.md": "e0129b53c0f7220fc93fbd0aa737e858a35e31a5d59264f5ff464ed025eee0de",
+      "docs/phase-1/evidence/remote-before-cancel-push.json": "f2c3ab4a498d85a56377da5f77e0cc9767f12a92bf51ac5f3c9623cbd2911328"
+    },
+    "priorIndependentReviews": {
+      "docs/phase-1/evidence/review-cancel-control.json": "f07103bf3d943628f02bdf829e8adab86f20cbbe7e7f16cff64b080a36dd6853",
+      "docs/phase-1/evidence/review-ci-software60.json": "e9a1d6cc5450d3bc3ad9a6bb35099561e41cf7490d657ddf5b807f19d3bcc910",
+      "docs/phase-1/evidence/review-firefox-diagnostic.json": "b00666d65d4dde3dc636105d9bc56938f50fdfbeb47c6bb540c2398b1b6e575b"
+    },
+    "rawCICopiesVerified": [
+      {
+        "directory": "docs/phase-1/evidence/ci-software60-push",
+        "files": 18,
+        "rawByteMismatches": [],
+        "unitPassed": 256,
+        "browserExpected": 71,
+        "browserUnexpected": 7
+      },
+      {
+        "directory": "docs/phase-1/evidence/ci-software60-pr",
+        "files": 20,
+        "rawByteMismatches": [],
+        "unitPassed": 256,
+        "browserExpected": 69,
+        "browserUnexpected": 9
+      }
+    ],
+    "diagnosticCopiesVerified": [
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-local/diagnostic.json",
+        "sha256": "e4fba5ba9a7f6139782efdf5706edfd1b328fba369486bfb857d64d3b83966a9",
+        "byteIdentical": true
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-cleanup/diagnostic.json",
+        "sha256": "77df826b5c386f9998adedd395418b66f0d42e5e63f616c165d076cf34e89149",
+        "byteIdentical": true
+      }
+    ],
+    "assessment": "All intended files are regular UTF-8 text, with parseable JSON and no changes during final hashing. No new credentials, private observation payloads, recording bytes or binary bundles found. Three new unit-summary userinfo strings match the exact original synthetic telemetry fixture; trace references are filenames only. Previously classified historical ANSI/fixture query matches remain byte-identical to published900. Original Phase0 embedded public-page UI icons and synthetic probes retain prior classifications. Full395-file inventory and source hashes remain stable.",
+    "documentationAssessment": "Acceptance and PR draft state exact61bf694 local256/81/measurements acceptance while preserving failed hosted900 results and mandatory future normal CI/merge/post-merge checks. Measurement values match raw evidence; campus10000 events are explicitly future/unapplied, and large-file operations remain synchronous. Rollback preserves Phase0 and separate Pages deployment. Remote snapshot is lead-collected at22:27:04 UTC; it shows main23de, feature900, Pages019b, two original deployments and no hook/ruleset changes. This reviewer made no fresh remote request."
+  },
+  "checks": [
+    "Compare all80 executable/configuration hashes against exact commit blobs, current checkout and actual clean archive; verify73 protected hashes and original72-file Phase0 bytes.",
+    "Rebuild public unit/browser summaries from raw archive JSON; inspect every case result and zero skipped/flaky counts.",
+    "Verify all7 raw-log hashes/zero exits and18 measurement-source hashes; compare exact preservation/continuation, bytes, times and RSS values.",
+    "Read Cancel admission/persistence code and preserved/new native-worker regression; match independent source-review hashes.",
+    "Compare all38 new hosted-failure files and2 diagnostic JSON files byte-for-byte with their retained raw artifacts.",
+    "Scan395 intended text/source files plus final PR draft for credential/payload/recording shapes; classify filename-only hits and rehash final snapshot."
+  ],
+  "limitations": [
+    "This is a local acceptance/publication review. Exact final published head CI, prospective merge review, actual remote merge and clean post-merge verification remain outstanding.",
+    "The local Firefox diagnostic does not reproduce the hosted stall or establish a compositor/GPU cause; its script is independently reviewed by another agent.",
+    "Installed GitHub Apps cannot be exhaustively enumerated with current access, as already documented; no unknown external setting is changed or relied upon.",
+    "This review file is excluded from its own hash inventory. Subsequent source or publication changes require revalidation."
+  ]
+}
