@@ -43,6 +43,10 @@ The campus keeps its correctly reported shared-network shortfall. Its 10,000 eve
 
 Independent/adversarial review identified and repaired full design binding, fault/equipment and duty-deadline coherence, array serialization/accessor bypass, legacy mixed-sequence recalculation, fractional-grid replay, raw saved-collection overflow, source/reference/unit validation, worker restore validation, sparse allocation and comparison provenance. [Committed review](evidence/review-committed.json), [independent review](evidence/review-independent.json), [persistence review](evidence/review-persistence.json) and [optimization review](evidence/review-scope-optimization.json) record actual probes and source hashes. Public-material review excludes credentials, recordings, recovery bundles and private observation payloads.
 
+## Hosted CI follow-up
+
+The first hosted push run passed installation/build checks and 256 unit tests but failed 33 of 75 browser cases: all 25 frozen macOS-14 WebKit cases failed at page setup with `Unknown setting: PushAPIEnabled`, and eight Firefox cases timed out during existing interaction/render tests. Its measurement gate was not reached. The PR run passed all 256 unit cases, failed 34 of 75 browser cases, and did not reach measurements; its uploaded evidence records FAIL while GitHub marked the job cancelled at its 45-minute deadline. These are failed/cancelled attempts, not accepted gates. [CI-INVESTIGATION.md](CI-INVESTIGATION.md) preserves their evidence and the scoped change to the current `macos-26-intel` runner; all test assertions/timeouts, product code and telemetry coverage remain unchanged. Integration stays NOT MERGED until corrected normal CI passes.
+
 ## Issue disposition, integration and recovery
 
 PH0-001 and PH0-002 pass current desired-behavior regressions. PH0-003 retains the 4,000-node shared-network boundary (Phase 3); PH0-004 remains an equipment-ownership risk without a demonstrated numerical mismatch (Phase 2); PH0-005 retains the outage/terminal-assessment gap (Phase 4); PH0-006 receives no invented transfer benefit (Phase 5). Durable current tests preserve each deferred finding.

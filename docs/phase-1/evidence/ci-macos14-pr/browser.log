@@ -1,0 +1,887 @@
+
+> neptune@2.0.0-rc.1 test:browser
+> playwright test
+
+
+Running 75 tests using 1 worker
+
+  ✓   1 [chromium] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (15.0s)
+  ✓   2 [chromium] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (15.1s)
+  ✓   3 [chromium] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (12.5s)
+  ✓   4 [chromium] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (42.3s)
+  ✓   5 [chromium] › tests/browser/phase1.spec.ts:51:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally (6.7s)
+  ✓   6 [chromium] › tests/browser/phase1.spec.ts:93:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export (3.4s)
+  ✓   7 [chromium] › tests/browser/phase1.spec.ts:127:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity (4.7s)
+  ✓   8 [chromium] › tests/browser/phase1.spec.ts:195:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target (21.3s)
+  ✓   9 [chromium] › tests/browser/phase1.spec.ts:232:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue (3.4s)
+  ✓  10 [chromium] › tests/browser/phase1.spec.ts:272:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it (3.6s)
+  ✓  11 [chromium] › tests/browser/phase1.spec.ts:325:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available (3.0s)
+  ✓  12 [chromium] › tests/browser/phase1.spec.ts:356:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid (3.1s)
+  ✓  13 [chromium] › tests/browser/phase1.spec.ts:384:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null (3.9s)
+  ✓  14 [chromium] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (7.2s)
+  ✓  15 [chromium] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition (5.5s)
+  ✓  16 [chromium] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls (7.3s)
+  ✓  17 [chromium] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results (6.9s)
+  ✓  18 [chromium] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates (7.7s)
+  ✓  19 [chromium] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (5.1s)
+  ✓  20 [chromium] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (7.2s)
+  ✓  21 [chromium] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (5.1s)
+  ✓  22 [chromium] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (4.3s)
+  ✓  23 [chromium] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (29.0s)
+  ✓  24 [chromium] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model (4.3s)
+  ✓  25 [chromium] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (9.5s)
+  ✘  26 [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (22.6s)
+  ✘  27 [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (1.2m)
+  ✘  28 [firefox] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (1.1m)
+  ✘  29 [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (1.1m)
+  ✓  30 [firefox] › tests/browser/phase1.spec.ts:51:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally (5.8s)
+  ✓  31 [firefox] › tests/browser/phase1.spec.ts:93:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export (2.2s)
+  ✓  32 [firefox] › tests/browser/phase1.spec.ts:127:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity (3.8s)
+  ✓  33 [firefox] › tests/browser/phase1.spec.ts:195:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target (21.6s)
+  ✓  34 [firefox] › tests/browser/phase1.spec.ts:232:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue (2.4s)
+  ✓  35 [firefox] › tests/browser/phase1.spec.ts:272:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it (2.5s)
+  ✓  36 [firefox] › tests/browser/phase1.spec.ts:325:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available (2.0s)
+  ✓  37 [firefox] › tests/browser/phase1.spec.ts:356:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid (2.5s)
+  ✓  38 [firefox] › tests/browser/phase1.spec.ts:384:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null (2.3s)
+  ✘  39 [firefox] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (1.1m)
+  ✓  40 [firefox] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition (46.5s)
+  ✓  41 [firefox] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls (41.0s)
+  ✓  42 [firefox] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results (43.8s)
+  ✓  43 [firefox] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates (29.2s)
+  ✘  44 [firefox] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (20.0s)
+  ✘  45 [firefox] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (1.2m)
+  ✓  46 [firefox] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (18.1s)
+  ✓  47 [firefox] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (2.6s)
+  ✘  48 [firefox] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (1.2m)
+  ✓  49 [firefox] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model (26.7s)
+  ✘  50 [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (1.1m)
+  ✘  51 [webkit] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (1.0m)
+  ✘  52 [webkit] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (1.0m)
+  ✘  53 [webkit] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (1.0m)
+  ✘  54 [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (1.0m)
+  ✘  55 [webkit] › tests/browser/phase1.spec.ts:51:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally (1.0m)
+  ✘  56 [webkit] › tests/browser/phase1.spec.ts:93:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export (1.0m)
+  ✘  57 [webkit] › tests/browser/phase1.spec.ts:127:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity (1.0m)
+  ✘  58 [webkit] › tests/browser/phase1.spec.ts:195:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target (1.0m)
+  ✘  59 [webkit] › tests/browser/phase1.spec.ts:232:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue (1.0m)
+  ✘  60 [webkit] › tests/browser/phase1.spec.ts:272:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it (1.0m)
+  ✘  61 [webkit] › tests/browser/phase1.spec.ts:325:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available (1.0m)
+  ✘  62 [webkit] › tests/browser/phase1.spec.ts:356:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid (1.0m)
+  ✘  63 [webkit] › tests/browser/phase1.spec.ts:384:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null (1.0m)
+  ✘  64 [webkit] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (1.0m)
+  ✘  65 [webkit] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition (1.0m)
+  ✘  66 [webkit] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls (1.0m)
+  ✘  67 [webkit] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results (1.0m)
+  ✘  68 [webkit] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates (1.0m)
+  ✘  69 [webkit] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (1.0m)
+  ✘  70 [webkit] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (1.0m)
+  ✘  71 [webkit] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (1.0m)
+  ✘  72 [webkit] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (1.0m)
+  ✘  73 [webkit] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (1.0m)
+  ✘  74 [webkit] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model (1.0m)
+  ✘  75 [webkit] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (1.0m)
+
+
+  1) [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('main')
+    Expected: "true"
+    Received: "false"
+    Timeout:  12000ms
+
+    Call log:
+      - Expect "toHaveAttribute" locator('main') with timeout 12000ms
+      - waiting for locator('main')
+        - locator resolved to <main class="app  " data-modules="40" data-xray="false" data-demo="false" data-ready="false" data-generation="2" data-inside="false" data-exploded="false">…</main>
+        - unexpected value "false"
+
+
+       5 | async function load(page: Page) {
+       6 |   await page.goto('./?legacy=1');
+    >  7 |   await expect(root(page)).toHaveAttribute('data-ready', 'true');
+         |                            ^
+       8 |   await expect(page.locator('canvas')).toBeVisible();
+       9 |   await page.waitForTimeout(1600);
+      10 | }
+        at load (<verified-checkout>/tests/browser/acceptance.spec.ts:7:28)
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:37:3
+
+    Error Context: test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'NEPTUNE I 2026' })
+        - locator resolved to <button aria-pressed="false">…</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+
+
+      149 |     await imageDifference(initial, await page.locator('canvas').screenshot()),
+      150 |   ).toBeGreaterThan(0.025);
+    > 151 |   await page.getByRole('button', { name: 'NEPTUNE I 2026' }).click();
+          |                                                              ^
+      152 |   await expect(page.getByTestId('module-total')).toHaveText('04');
+      153 |   const input = page.getByRole('spinbutton', {
+      154 |     name: 'Accelerators',
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:151:62
+
+    Error Context: test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [firefox] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 900
+    Received:   570
+
+    Call Log:
+    - Test timeout of 60000ms exceeded
+
+      272 |   await expect
+      273 |     .poll(async () => (await page.locator('canvas').boundingBox())!.height)
+    > 274 |     .toBeGreaterThan(900);
+          |      ^
+      275 |   await page.waitForTimeout(1500);
+      276 |   await capture(page, `${info.project.name}-portrait`);
+      277 | });
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:274:6
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Play demo', exact: true })
+
+
+      295 |   await page.mouse.click(b.x + 20, b.y + 100);
+      296 |   await expect(root(page)).toHaveAttribute('data-demo', 'false');
+    > 297 |   await page.getByRole('button', { name: 'Play demo', exact: true }).click();
+          |                                                                      ^
+      298 |   await expect(page.getByText('Two circuits. One heat exchange.')).toBeVisible({
+      299 |     timeout: 12000,
+      300 |   });
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:297:70
+
+    Error Context: test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [firefox] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Step 10s', exact: true })
+        - locator resolved to <button>Step 10s</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+
+
+      15 |   const before=Number(await main(page).getAttribute('data-time'));
+      16 |   for(let n=0;n<seconds/10;n++){
+    > 17 |     await page.getByRole('button',{name:'Step 10s',exact:true}).click();
+         |                                                                 ^
+      18 |     await expect(main(page)).toHaveAttribute('data-time',String(before+(n+1)*10));
+      19 |     await expect(page.getByRole('button',{name:'Step 10s',exact:true})).toBeEnabled();
+      20 |   }
+        at step (<verified-checkout>/tests/browser/twin.spec.ts:17:65)
+        at <verified-checkout>/tests/browser/twin.spec.ts:66:71
+
+    Error Context: test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [firefox] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "cooling"
+    Received: undefined
+
+    Call Log:
+    - Timeout 12000ms exceeded while waiting on the predicate
+
+      179 |     const before=await exportArtifact(page,'results'),selected=await main(page).getAttribute('data-selected');
+      180 |     await page.getByRole('button',{name:'Cooling close-up',exact:true}).tap();
+    > 181 |     await expect.poll(async()=>(await diagnostics(page))?.focus).toBe('cooling');
+          |                                                                  ^
+      182 |     await page.getByRole('button',{name:'Inside module',exact:true}).tap();
+      183 |     await expect.poll(async()=>(await diagnostics(page))?.inside).toBe(true);
+      184 |     const entrance=(await diagnostics(page))?.camera;
+        at <verified-checkout>/tests/browser/twin.spec.ts:181:66
+
+    Error Context: test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [firefox] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories 
+
+    Test timeout of 60000ms exceeded.
+
+    attachment #1: comparison (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-firefox/attachments/comparison-e012b1507d903be55b97f07e3796e24921e342a3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [firefox] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Inside module', exact: true })
+        - locator resolved to <button>Inside module</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+
+
+      256 |   await expect.poll(async()=>(await diagnostics(page))?.focus).toBe('cooling');
+      257 |   await screenshot(page,info,'cooling-close-up');
+    > 258 |   await page.getByRole('button',{name:'Inside module',exact:true}).click();await expect.poll(async()=>(await diagnostics(page))?.inside).toBe(true);
+          |                                                                    ^
+      259 |   const inside=(await diagnostics(page))?.camera;await canvas.focus();await page.keyboard.down('w');await page.waitForTimeout(300);await page.keyboard.up('w');
+      260 |   await expect.poll(async()=>(await diagnostics(page))?.camera).not.toEqual(inside);
+      261 |   await page.keyboard.press('Escape');await expect.poll(async()=>(await diagnostics(page))?.inside).toBe(false);
+        at <verified-checkout>/tests/browser/twin.spec.ts:258:68
+
+    attachment #1: cooling-close-up (image/png) ────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/attachments/cooling-close-up-96b0685c2bfc529dc46bbb614868bf9b550e5bcb.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice ────────────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: page.evaluate: Test timeout of 60000ms exceeded.
+
+      19 |     fullPage: true,
+      20 |   });
+    > 21 |   const timing = await page.evaluate(async () => {
+         |                             ^
+      22 |     const intervals: number[] = [];
+      23 |     let last = window.performance.now();
+      24 |     await new Promise<void>((resolve) => {
+        at <verified-checkout>/tests/browser/visual.spec.ts:21:29
+
+    Error Context: test-results/visual-capture-the-first-coherent-3D-slice-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/visual-capture-the-first-coherent-3D-slice-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/visual-capture-the-first-coherent-3D-slice-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [webkit] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [webkit] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [webkit] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [webkit] › tests/browser/phase1.spec.ts:51:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-UI-01-saves-com-2755c-rmed-import-transactionally-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-UI-01-saves-com-2755c-rmed-import-transactionally-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-UI-01-saves-com-2755c-rmed-import-transactionally-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-UI-01-saves-com-2755c-rmed-import-transactionally-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [webkit] › tests/browser/phase1.spec.ts:93:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-UI-01-quota-fai-0bc11-llows-current-manual-export-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-UI-01-quota-fai-0bc11-llows-current-manual-export-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-UI-01-quota-fai-0bc11-llows-current-manual-export-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-UI-01-quota-fai-0bc11-llows-current-manual-export-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) [webkit] › tests/browser/phase1.spec.ts:127:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-COMP-01-legacy--047a5-serve-the-original-identity-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-COMP-01-legacy--047a5-serve-the-original-identity-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-COMP-01-legacy--047a5-serve-the-original-identity-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-COMP-01-legacy--047a5-serve-the-original-identity-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) [webkit] › tests/browser/phase1.spec.ts:195:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-02-replay-c-72c72-ume-reaches-the-same-target-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-REP-02-replay-c-72c72-ume-reaches-the-same-target-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-02-replay-c-72c72-ume-reaches-the-same-target-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-REP-02-replay-c-72c72-ume-reaches-the-same-target-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) [webkit] › tests/browser/phase1.spec.ts:232:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-02-an-actua-9014e-d-a-new-worker-can-continue-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-REP-02-an-actua-9014e-d-a-new-worker-can-continue-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-02-an-actua-9014e-d-a-new-worker-can-continue-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-REP-02-an-actua-9014e-d-a-new-worker-can-continue-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) [webkit] › tests/browser/phase1.spec.ts:272:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-02-import-s-84013-esponse-cannot-overwrite-it-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-REP-02-import-s-84013-esponse-cannot-overwrite-it-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-02-import-s-84013-esponse-cannot-overwrite-it-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-REP-02-import-s-84013-esponse-cannot-overwrite-it-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) [webkit] › tests/browser/phase1.spec.ts:325:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-UI-01-unreadabl-75fa4-al-export-remains-available-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-UI-01-unreadabl-75fa4-al-export-remains-available-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-UI-01-unreadabl-75fa4-al-export-remains-available-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-UI-01-unreadabl-75fa4-al-export-remains-available-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) [webkit] › tests/browser/phase1.spec.ts:356:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-01-exact-re-98f9a-fractional-integration-grid-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-REP-01-exact-re-98f9a-fractional-integration-grid-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-REP-01-exact-re-98f9a-fractional-integration-grid-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-REP-01-exact-re-98f9a-fractional-integration-grid-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) [webkit] › tests/browser/phase1.spec.ts:384:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/phase1-PH1-NUM-03-a-stored-a732f-iting-can-turn-it-into-null-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/phase1-PH1-NUM-03-a-stored-a732f-iting-can-turn-it-into-null-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/phase1-PH1-NUM-03-a-stored-a732f-iting-can-turn-it-into-null-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/phase1-PH1-NUM-03-a-stored-a732f-iting-can-turn-it-into-null-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) [webkit] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) [webkit] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-standby-transfer-is-a-ffe8e--component-state-transition-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-standby-transfer-is-a-ffe8e--component-state-transition-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-standby-transfer-is-a-ffe8e--component-state-transition-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-standby-transfer-is-a-ffe8e--component-state-transition-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  25) [webkit] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-clock-pause-and-speed-3e04f-sets-and-validated-controls-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-clock-pause-and-speed-3e04f-sets-and-validated-controls-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-clock-pause-and-speed-3e04f-sets-and-validated-controls-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-clock-pause-and-speed-3e04f-sets-and-validated-controls-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  26) [webkit] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-seek-backward-and-for-313ff--boundary-numerical-results-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-seek-backward-and-for-313ff--boundary-numerical-results-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-seek-backward-and-for-313ff--boundary-numerical-results-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-seek-backward-and-for-313ff--boundary-numerical-results-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  27) [webkit] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-cancel-run-retains-co-7b95d--work-rejects-stale-updates-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-cancel-run-retains-co-7b95d--work-rejects-stale-updates-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-cancel-run-retains-co-7b95d--work-rejects-stale-updates-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-cancel-run-retains-co-7b95d--work-rejects-stale-updates-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  28) [webkit] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  29) [webkit] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-comparison-renders-tw-d1ab3-tical-disturbance-histories-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  30) [webkit] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-project-exports-and-i-17f47-d-mappings-rejected-visibly-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-project-exports-and-i-17f47-d-mappings-rejected-visibly-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-project-exports-and-i-17f47-d-mappings-rejected-visibly-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-project-exports-and-i-17f47-d-mappings-rejected-visibly-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31) [webkit] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-mobile-keyboard-and-e-5f818-ction-operation-and-exports-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-mobile-keyboard-and-e-5f818-ction-operation-and-exports-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-mobile-keyboard-and-e-5f818-ction-operation-and-exports-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-mobile-keyboard-and-e-5f818-ction-operation-and-exports-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  32) [webkit] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  33) [webkit] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model 
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-legacy-saved-scenario-5beda-he-explicit-aggregate-model-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-legacy-saved-scenario-5beda-he-explicit-aggregate-model-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-legacy-saved-scenario-5beda-he-explicit-aggregate-model-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-legacy-saved-scenario-5beda-he-explicit-aggregate-model-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  34) [webkit] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice ────────────
+
+    Test timeout of 60000ms exceeded while setting up "page".
+
+    Error: browserContext.newPage: Protocol error (Page.overrideSetting): Unknown setting: PushAPIEnabled
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/visual-capture-the-first-coherent-3D-slice-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/visual-capture-the-first-coherent-3D-slice-webkit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/visual-capture-the-first-coherent-3D-slice-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/visual-capture-the-first-coherent-3D-slice-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  34 failed
+    [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources 
+    [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing 
+    [firefox] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback 
+    [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+    [firefox] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay 
+    [firefox] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state 
+    [firefox] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories 
+    [firefox] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+    [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice ─────────────
+    [webkit] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources 
+    [webkit] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing 
+    [webkit] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback 
+    [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+    [webkit] › tests/browser/phase1.spec.ts:51:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally 
+    [webkit] › tests/browser/phase1.spec.ts:93:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export 
+    [webkit] › tests/browser/phase1.spec.ts:127:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity 
+    [webkit] › tests/browser/phase1.spec.ts:195:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target 
+    [webkit] › tests/browser/phase1.spec.ts:232:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue 
+    [webkit] › tests/browser/phase1.spec.ts:272:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it 
+    [webkit] › tests/browser/phase1.spec.ts:325:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available 
+    [webkit] › tests/browser/phase1.spec.ts:356:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid 
+    [webkit] › tests/browser/phase1.spec.ts:384:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null 
+    [webkit] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay 
+    [webkit] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition 
+    [webkit] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls 
+    [webkit] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results 
+    [webkit] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates 
+    [webkit] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state 
+    [webkit] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories 
+    [webkit] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly 
+    [webkit] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports 
+    [webkit] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+    [webkit] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model 
+    [webkit] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice ──────────────
+  41 passed (43.1m)
