@@ -49,6 +49,8 @@ The first hosted push run passed installation/build checks and 256 unit tests bu
 
 The initial current-Intel-runner attempts passed installation/typecheck/lint/build but failed unit timeouts: push 254/256, PR 255/256, with zero skipped. Their browser and measurement gates were not executed. The next scoped correction runs test files sequentially to bound simultaneous campus allocation and real-browser telemetry work; assertions, test timeouts, isolation and runtime code remain unchanged. The linked CI investigation retains both attempts, and complete normal CI on the next exact head remains mandatory.
 
+The subsequent serial Intel runs also failed (push 254/256, PR 255/256); browser and measurement gates remained unexecuted. The current runner is the standard Apple Silicon `macos-26`, preserving all test deadlines and checks. This combines the architecture of the original fully passing hosted unit runs with a current WebKit-compatible OS. The CI investigation retains the failed scheduling hypothesis and all actual attempts; hosted acceptance is still pending.
+
 ## Issue disposition, integration and recovery
 
 PH0-001 and PH0-002 pass current desired-behavior regressions. PH0-003 retains the 4,000-node shared-network boundary (Phase 3); PH0-004 remains an equipment-ownership risk without a demonstrated numerical mismatch (Phase 2); PH0-005 retains the outage/terminal-assessment gap (Phase 4); PH0-006 receives no invented transfer benefit (Phase 5). Durable current tests preserve each deferred finding.

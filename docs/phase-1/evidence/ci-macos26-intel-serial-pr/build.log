@@ -1,0 +1,19 @@
+
+> neptune@2.0.0-rc.1 build
+> tsc --noEmit && vite build
+
+[36mvite v8.2.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 2570 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          1.23 kB │ gzip:   0.60 kB
+dist/assets/worker-DZSZtFkS.js          76.37 kB
+dist/assets/TwinScene-DkCf7rj3.css       4.50 kB │ gzip:   1.38 kB
+dist/assets/index-DIqDRqMW.css         208.33 kB │ gzip:  34.84 kB
+dist/assets/Scene-3mmooQWX.js           16.32 kB │ gzip:   6.61 kB
+dist/assets/TwinScene-BCh4v52P.js       63.89 kB │ gzip:  20.01 kB
+dist/assets/index-BO8X3F9E.js          512.81 kB │ gzip: 165.47 kB
+dist/assets/OrbitControls-CdCtNsoH.js  934.18 kB │ gzip: 247.96 kB
+
+[32m✓ built in 2.39s[39m
