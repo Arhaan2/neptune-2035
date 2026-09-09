@@ -1,0 +1,669 @@
+{
+  "url": "http://127.0.0.1:5175",
+  "startedAt": "2026-09-09T01:27:51.393Z",
+  "reducedMotion": "no-preference",
+  "speed": 5,
+  "stages": [
+    {
+      "timeS": 0,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "running · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "30 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          115.72107971424577,
+          56.88725022253836,
+          129.18873149479148
+        ],
+        "target": [
+          25.180717431749663,
+          0,
+          0
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "campus",
+        "exploded": false,
+        "simulationTimeS": 0
+      },
+      "log": [
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "01-exterior",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-01-exterior.png",
+      "screenshotCompletedTimeS": 0
+    },
+    {
+      "timeS": 10,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "running · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "29.98 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          45.28275425670543,
+          33.76874287173271,
+          58.89211398915616
+        ],
+        "target": [
+          1.9542883012332,
+          4.216916997542817,
+          -4.1303346283480336
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "module",
+        "exploded": false,
+        "simulationTimeS": 10
+      },
+      "log": [
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "02-module-xray",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-02-module-xray.png",
+      "screenshotCompletedTimeS": 10
+    },
+    {
+      "timeS": 25,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "running · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "29.95 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          1.2002784546399283,
+          21.071816899888514,
+          13.975943675522686
+        ],
+        "target": [
+          -9.242203718244626,
+          5.769688762178908,
+          -5.999677768565788
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "cooling",
+        "exploded": false,
+        "simulationTimeS": 25
+      },
+      "log": [
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "03-cooling",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-03-cooling.png",
+      "screenshotCompletedTimeS": 25
+    },
+    {
+      "timeS": 30,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "failed · simulated",
+      "flow": "0 / 66.37 L/s",
+      "coolant": "29.95 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          -10.757205828238726,
+          10.245599374632079,
+          -4.426345438697652
+        ],
+        "target": [
+          -3.6142739160453776,
+          5.23659959545439,
+          -5.999993587366513
+        ],
+        "drawCalls": 53,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "cooling",
+        "exploded": false,
+        "simulationTimeS": 25
+      },
+      "log": [
+        "30s · warningplatform-001/module-01Technical coolant flow lost; heat accumulating in bulk thermal node",
+        "30s · controllerplatform-001/module-01/pump-standbyDuty unavailable; standby startup scheduled after 8 seconds",
+        "30s · commandplatform-001/module-01/pump-dutytrip; 1 module(s) in dependency scope",
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "04-pump-trip",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-04-pump-trip.png",
+      "screenshotCompletedTimeS": 30
+    },
+    {
+      "timeS": 40,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "failed · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "30.51 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          -10.99324546551685,
+          10.031890838847964,
+          -4.789604929143083
+        ],
+        "target": [
+          -3.503179100638431,
+          5.226076464453437,
+          -5.999999821600519
+        ],
+        "drawCalls": 50,
+        "geometries": 52,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "cooling",
+        "exploded": false,
+        "simulationTimeS": 35
+      },
+      "log": [
+        "38s · controllerplatform-001/module-01/pump-standbyStandby startup delay elapsed; parallel branch enabled",
+        "30s · warningplatform-001/module-01Technical coolant flow lost; heat accumulating in bulk thermal node",
+        "30s · controllerplatform-001/module-01/pump-standbyDuty unavailable; standby startup scheduled after 8 seconds",
+        "30s · commandplatform-001/module-01/pump-dutytrip; 1 module(s) in dependency scope",
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "05-standby",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-05-standby.png",
+      "screenshotCompletedTimeS": 40
+    },
+    {
+      "timeS": 180,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [
+        false,
+        false
+      ],
+      "selectedStatus": "starting · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "30.03 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          -10.99324546551685,
+          10.031890838847964,
+          -4.789604929143083
+        ],
+        "target": [
+          -3.503179100638431,
+          5.226076464453437,
+          -5.999999821600519
+        ],
+        "drawCalls": 53,
+        "geometries": 55,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "cooling",
+        "exploded": false,
+        "simulationTimeS": 175
+      },
+      "log": [
+        "180s · commandplatform-001/module-01/pump-dutyrestore; 1 module(s) in dependency scope",
+        "38s · controllerplatform-001/module-01/pump-standbyStandby startup delay elapsed; parallel branch enabled",
+        "30s · warningplatform-001/module-01Technical coolant flow lost; heat accumulating in bulk thermal node",
+        "30s · controllerplatform-001/module-01/pump-standbyDuty unavailable; standby startup scheduled after 8 seconds",
+        "30s · commandplatform-001/module-01/pump-dutytrip; 1 module(s) in dependency scope",
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [
+        "Family I feeder fault1 UNIT = 1 m8 / 8 modulesLOD: 40 racks · 160 nodes · 1 selected module— Technical coolant— Seawater— Power— Network28.49 °C · 59.69 L/s10,000 available / 10,00013.95 MW · 0 controller actions0 MW grid import · 2,386.2 kWh storedExport reproducible run",
+        "Family II feeder fault1 UNIT = 1 m8 / 8 modulesLOD: 40 racks · 160 nodes · 1 selected module— Technical coolant— Seawater— Power— Network28.49 °C · 59.69 L/s10,000 available / 10,00013.95 MW · 0 controller actions6.81 MW grid import · 2,783.6 kWh storedExport reproducible run"
+      ],
+      "comparisonInViewport": true,
+      "sceneInViewport": true,
+      "name": "06-restore-comparison",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-06-restore-comparison.png",
+      "screenshotCompletedTimeS": 180
+    },
+    {
+      "timeS": 185,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": false,
+      "fullComparisonCardsInViewport": [
+        true,
+        true
+      ],
+      "selectedStatus": "running · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "30.02 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          54.2697621804446,
+          58.16235909117647,
+          79.04584548403064
+        ],
+        "target": [
+          -0.03378193356554679,
+          3.740243070240926,
+          -0.057859329923971664
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "platform",
+        "exploded": false,
+        "simulationTimeS": 180
+      },
+      "log": [
+        "183s · controllerplatform-001/module-01/pump-standbyDuty restored; redundant pump held in standby",
+        "183s · controllerplatform-001/module-01/pump-dutyDuty pump enabled",
+        "180s · commandplatform-001/module-01/pump-dutyrestore; 1 module(s) in dependency scope",
+        "38s · controllerplatform-001/module-01/pump-standbyStandby startup delay elapsed; parallel branch enabled",
+        "30s · warningplatform-001/module-01Technical coolant flow lost; heat accumulating in bulk thermal node",
+        "30s · controllerplatform-001/module-01/pump-standbyDuty unavailable; standby startup scheduled after 8 seconds",
+        "30s · commandplatform-001/module-01/pump-dutytrip; 1 module(s) in dependency scope",
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [
+        "Family I feeder faultpump dutyplatform-001/module-01/pump-duty1 UNIT = 1 m8 / 8 modulesLOD: 40 racks · 160 nodes · 1 selected module— Technical coolant— Seawater— Power— Network28.49 °C · 59.69 L/s10,000 available / 10,00013.95 MW · 0 controller actions0 MW grid import · 2,386.2 kWh storedExport reproducible run",
+        "Family II feeder faultpump dutyplatform-001/module-01/pump-duty1 UNIT = 1 m8 / 8 modulesLOD: 40 racks · 160 nodes · 1 selected module— Technical coolant— Seawater— Power— Network28.49 °C · 59.69 L/s10,000 available / 10,00013.95 MW · 0 controller actions6.81 MW grid import · 2,783.6 kWh storedExport reproducible run"
+      ],
+      "comparisonInViewport": true,
+      "sceneInViewport": false,
+      "name": "07-recovered-comparison",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-07-recovered-comparison.png",
+      "screenshotCompletedTimeS": 185
+    },
+    {
+      "timeS": 220,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "running · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "29.95 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          125.04123513553763,
+          45.875803498303206,
+          131.00276101135242
+        ],
+        "target": [
+          34.97512894798773,
+          0.001611364370009621,
+          -3.286604912445492e-7
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "campus",
+        "exploded": false,
+        "simulationTimeS": 220
+      },
+      "log": [
+        "183s · controllerplatform-001/module-01/pump-standbyDuty restored; redundant pump held in standby",
+        "183s · controllerplatform-001/module-01/pump-dutyDuty pump enabled",
+        "180s · commandplatform-001/module-01/pump-dutyrestore; 1 module(s) in dependency scope",
+        "38s · controllerplatform-001/module-01/pump-standbyStandby startup delay elapsed; parallel branch enabled",
+        "30s · warningplatform-001/module-01Technical coolant flow lost; heat accumulating in bulk thermal node",
+        "30s · controllerplatform-001/module-01/pump-standbyDuty unavailable; standby startup scheduled after 8 seconds",
+        "30s · commandplatform-001/module-01/pump-dutytrip; 1 module(s) in dependency scope",
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "08-campus-complete",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-08-campus-complete.png",
+      "screenshotCompletedTimeS": 220
+    },
+    {
+      "timeS": 20,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "sourceQualifier": "Design-stage digital twin · Simulated operationreference-v2-aa6189d9 · 1 world unit = 1 m",
+      "sourceQualifierInViewport": true,
+      "fullSceneInViewport": true,
+      "fullComparisonCardsInViewport": [],
+      "selectedStatus": "running · simulated",
+      "flow": "59.69 / 66.37 L/s",
+      "coolant": "29.96 °C",
+      "caption": "FACILITY / DIMENSIONED MODEL8 modules · 313 exact racks",
+      "scene": {
+        "camera": [
+          115.3514068165926,
+          44.39945082932792,
+          122.23919705125188
+        ],
+        "target": [
+          30.964826914424535,
+          0.513723272377209,
+          -0.5026422370330992
+        ],
+        "drawCalls": 57,
+        "geometries": 54,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "module",
+        "exploded": false,
+        "simulationTimeS": 20
+      },
+      "log": [
+        "0s · commandshore/gridworkload = 1 fraction; 8 module(s) in dependency scope"
+      ],
+      "comparisons": [],
+      "comparisonInViewport": false,
+      "sceneInViewport": true,
+      "name": "09-restarted-after-220",
+      "screenshot": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-09-restarted-after-220.png",
+      "screenshotCompletedTimeS": 20
+    }
+  ],
+  "errors": [],
+  "manual": {
+    "input": "actual mouse wheel",
+    "before": {
+      "timeS": 20,
+      "scene": {
+        "camera": [
+          115.3514068165926,
+          44.39945082932792,
+          122.23919705125188
+        ],
+        "target": [
+          30.964826914424535,
+          0.513723272377209,
+          -0.5026422370330992
+        ],
+        "drawCalls": 57,
+        "geometries": 54,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "module",
+        "exploded": false,
+        "simulationTimeS": 20
+      }
+    },
+    "after": {
+      "timeS": 20,
+      "scene": {
+        "camera": [
+          115.3514068165926,
+          44.39945082932792,
+          122.23919705125188
+        ],
+        "target": [
+          30.964826914424535,
+          0.513723272377209,
+          -0.5026422370330992
+        ],
+        "drawCalls": 57,
+        "geometries": 54,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "module",
+        "exploded": false,
+        "simulationTimeS": 20
+      }
+    },
+    "eventsPreserved": true
+  },
+  "passed": true,
+  "bundleScripts": [
+    "http://127.0.0.1:5175/assets/index-BNuczDvm.js"
+  ],
+  "familyComparisons": [
+    {
+      "schemaVersion": 2,
+      "kind": "neptune-project",
+      "design": {
+        "schemaVersion": 2,
+        "generation": 1,
+        "requestedAccelerators": 10000,
+        "supplyW": 30000000,
+        "standbyPumps": 1,
+        "seawaterK": 291.15,
+        "workload": 0.8,
+        "idleFraction": 0.3,
+        "exchangerUAWPerK": 350000,
+        "foulingResistanceKPerW": 0,
+        "batteryWhPerModule": 400000,
+        "batteryMaxWPerModule": 2200000,
+        "pumpSpeed": 1,
+        "requireExternalNetwork": false,
+        "requireClusterNetwork": true,
+        "budgetUSD": null
+      },
+      "events": [
+        {
+          "id": "feeder-fault",
+          "kind": "trip",
+          "assetId": "shore/bus",
+          "timeS": 30
+        }
+      ],
+      "timeS": 240,
+      "sourceMode": "simulated",
+      "solverVersion": "2.0.0-rc.1"
+    },
+    {
+      "schemaVersion": 2,
+      "kind": "neptune-project",
+      "design": {
+        "schemaVersion": 2,
+        "generation": 2,
+        "requestedAccelerators": 10000,
+        "supplyW": 30000000,
+        "standbyPumps": 1,
+        "seawaterK": 291.15,
+        "workload": 0.8,
+        "idleFraction": 0.3,
+        "exchangerUAWPerK": 350000,
+        "foulingResistanceKPerW": 0,
+        "batteryWhPerModule": 400000,
+        "batteryMaxWPerModule": 2200000,
+        "pumpSpeed": 1,
+        "requireExternalNetwork": false,
+        "requireClusterNetwork": true,
+        "budgetUSD": null
+      },
+      "events": [
+        {
+          "id": "feeder-fault",
+          "kind": "trip",
+          "assetId": "platform-001/switchboard",
+          "timeS": 30
+        }
+      ],
+      "timeS": 240,
+      "sourceMode": "simulated",
+      "solverVersion": "2.0.0-rc.1"
+    }
+  ],
+  "experiment": {
+    "schemaVersion": 2,
+    "kind": "neptune-project",
+    "design": {
+      "schemaVersion": 2,
+      "generation": 1,
+      "requestedAccelerators": 10000,
+      "supplyW": 30000000,
+      "standbyPumps": 1,
+      "seawaterK": 291.15,
+      "workload": 0.8,
+      "idleFraction": 0.3,
+      "exchangerUAWPerK": 350000,
+      "foulingResistanceKPerW": 0,
+      "batteryWhPerModule": 400000,
+      "batteryMaxWPerModule": 2200000,
+      "pumpSpeed": 1,
+      "requireExternalNetwork": false,
+      "requireClusterNetwork": true,
+      "budgetUSD": null
+    },
+    "events": [
+      {
+        "id": "load",
+        "timeS": 0,
+        "kind": "workload",
+        "assetId": "shore/grid",
+        "value": 1
+      },
+      {
+        "id": "trip",
+        "timeS": 30,
+        "kind": "trip",
+        "assetId": "platform-001/module-01/pump-duty"
+      },
+      {
+        "id": "restore",
+        "timeS": 180,
+        "kind": "restore",
+        "assetId": "platform-001/module-01/pump-duty"
+      }
+    ],
+    "timeS": 220,
+    "sourceMode": "simulated",
+    "solverVersion": "2.0.0-rc.1"
+  },
+  "restart": {
+    "fromCompletedTimeS": 220,
+    "newTimeS": 20,
+    "running": true,
+    "staleEndStateDidNotStop": true
+  },
+  "video": "/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/v2/cinematic-actual.webm",
+  "completedAt": "2026-09-09T01:28:39.712Z"
+}

@@ -1,0 +1,591 @@
+{
+  "method": "Chromium Metal; hasTouch=true;390x844;reducedMotion=reduce. Actual tap for every button, keyboard ArrowRight/Escape. Read diagnostic after each state/camera has settled for360ms. Two fresh pages; second includes preceding/following results export as sibling acceptance did.",
+  "runs": [
+    {
+      "trial": 0,
+      "stages": [
+        {
+          "name": "initial",
+          "camera": [
+            179.12938631660103,
+            73.37496030663318,
+            209.64274373323775
+          ],
+          "target": [
+            35,
+            0,
+            0
+          ],
+          "drawCalls": 57,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "campus",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "cooling",
+          "camera": [
+            -15.499999999999998,
+            12.905775333456816,
+            -4.0800000000000125
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "entrance",
+          "camera": [
+            -22.799506529926642,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -21.799506529926642,
+            5.775775333456814,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "rack-aisle",
+          "camera": [
+            -13.999506529926641,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -12.999506529926641,
+            5.775775333456814,
+            -6
+          ],
+          "drawCalls": 54,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "cooling-bay",
+          "camera": [
+            -5.799506529926643,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -4.799506529926643,
+            5.775775333456814,
+            -6
+          ],
+          "drawCalls": 28,
+          "geometries": 56,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "look-right",
+          "camera": [
+            -5.799506529926643,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -4.886303452484607,
+            5.775775333456814,
+            -5.59249522781887
+          ],
+          "drawCalls": 28,
+          "geometries": 56,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "escaped",
+          "camera": [
+            -15.499999999999998,
+            12.905775333456816,
+            -4.0800000000000125
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "exploded",
+          "camera": [
+            -15.500000000000002,
+            15.905775333456813,
+            0.9199999999999988
+          ],
+          "target": [
+            -3.5,
+            8.225775333456813,
+            -1
+          ],
+          "drawCalls": 54,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": true,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "unexploded",
+          "camera": [
+            -15.500000000000002,
+            12.905775333456813,
+            -4.080000000000001
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "final",
+          "camera": [
+            -15.500000000000002,
+            12.905775333456813,
+            -4.080000000000001
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        }
+      ],
+      "escapeCameraErrorM": 0,
+      "escapeTargetErrorM": 0,
+      "afterExplosionCameraErrorM": 1.25921023641576e-14,
+      "afterExplosionTargetErrorM": 0,
+      "selectionPreserved": true,
+      "timePreserved": true,
+      "resultsUnchanged": true
+    },
+    {
+      "trial": 1,
+      "stages": [
+        {
+          "name": "initial",
+          "camera": [
+            179.12938631660103,
+            73.37496030663318,
+            209.64274373323775
+          ],
+          "target": [
+            35,
+            0,
+            0
+          ],
+          "drawCalls": 57,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "campus",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "cooling",
+          "camera": [
+            -15.499999999999998,
+            12.905775333456816,
+            -4.0800000000000125
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "entrance",
+          "camera": [
+            -22.799506529926642,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -21.799506529926642,
+            5.775775333456814,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "rack-aisle",
+          "camera": [
+            -13.999506529926641,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -12.999506529926641,
+            5.775775333456814,
+            -6
+          ],
+          "drawCalls": 54,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "cooling-bay",
+          "camera": [
+            -5.799506529926643,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -4.799506529926643,
+            5.775775333456814,
+            -6
+          ],
+          "drawCalls": 28,
+          "geometries": 56,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "look-right",
+          "camera": [
+            -5.799506529926643,
+            5.775775333456814,
+            -6
+          ],
+          "target": [
+            -4.89613965701624,
+            5.775775333456814,
+            -5.571131380341158
+          ],
+          "drawCalls": 28,
+          "geometries": 56,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": true,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "escaped",
+          "camera": [
+            -15.499999999999998,
+            12.905775333456816,
+            -4.0800000000000125
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "exploded",
+          "camera": [
+            -15.500000000000002,
+            15.905775333456813,
+            0.9199999999999988
+          ],
+          "target": [
+            -3.5,
+            8.225775333456813,
+            -1
+          ],
+          "drawCalls": 54,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": true,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "unexploded",
+          "camera": [
+            -15.500000000000002,
+            12.905775333456813,
+            -4.080000000000001
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        },
+        {
+          "name": "final",
+          "camera": [
+            -15.500000000000002,
+            12.905775333456813,
+            -4.080000000000001
+          ],
+          "target": [
+            -3.5,
+            5.225775333456813,
+            -6
+          ],
+          "drawCalls": 55,
+          "geometries": 57,
+          "textures": 1,
+          "selectedId": "platform-001/module-01/pump-duty",
+          "renderedModules": 8,
+          "totalModules": 8,
+          "renderedPlatforms": 2,
+          "detailModuleId": "platform-001/module-01",
+          "renderedRacks": 40,
+          "renderedNodes": 160,
+          "worldUnitsPerMeter": 1,
+          "inside": false,
+          "focus": "cooling",
+          "exploded": false,
+          "simulationTimeS": 0
+        }
+      ],
+      "escapeCameraErrorM": 0,
+      "escapeTargetErrorM": 0,
+      "afterExplosionCameraErrorM": 1.25921023641576e-14,
+      "afterExplosionTargetErrorM": 0,
+      "selectionPreserved": true,
+      "timePreserved": true,
+      "resultsUnchanged": true
+    }
+  ],
+  "errors": [],
+  "passed": true
+}

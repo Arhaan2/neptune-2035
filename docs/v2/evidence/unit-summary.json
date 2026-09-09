@@ -1,0 +1,11 @@
+{
+  "numTotalTestSuites": 29,
+  "numPassedTestSuites": 29,
+  "numTotalTests": 162,
+  "numPassedTests": 162,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "success": true,
+  "startTime": 1788916898019,
+  "scope": "Final solver/log implementation; full combined suite with native browser and running-app telemetry flags, local5173. Physical validation pending."
+}

@@ -1,0 +1,1041 @@
+{
+  "audit": "NEPTUNE v2 actual-browser performance and bounded resource audit",
+  "startedAt": "2026-09-09T01:06:19.126Z",
+  "sourceBefore": {
+    "gitHEAD": "8072ab38ea0c8d71d045a8ad869363be8dcb1cbe",
+    "files": [
+      {
+        "file": "src/scene/TwinScene.tsx",
+        "sha256": "9ab27e71dc2bb89da9013130dcd069159ddfbdb6a42ecb8bf0c4c4f67ca1f692"
+      },
+      {
+        "file": "src/scene/twinGeometry.ts",
+        "sha256": "c2caea7a5a3cdb610e0e08f5755e7d2aaf58c6b50f9a966e7c7d0fbd54fb78ff"
+      },
+      {
+        "file": "src/scene/twinScene.css",
+        "sha256": "78a79f4deeda90d49938d7e64a86cef06960cf8d2782561341760c5100542dad"
+      },
+      {
+        "file": "src/twin/assets/design.ts",
+        "sha256": "5554530d61c1d720b78436fba2061ad77875d50bb5e172a5ec39b8c96841357b"
+      },
+      {
+        "file": "src/twin/types.ts",
+        "sha256": "d64626837a29f5136f2d40df1f47bc832212ad388a4b421f0b3163c6c9cc4ee7"
+      },
+      {
+        "file": "src/twin/engine/simulation.ts",
+        "sha256": "d7edfc1b847402aa26616acf235f8690caedc7ad2b60b78c82a511e8430f5be2"
+      },
+      {
+        "file": "src/twin/engine/worker.ts",
+        "sha256": "c529394cc5ad171d8f86902623fe6ee02648c415c6737e6625101fc6b66ebf45"
+      },
+      {
+        "file": "src/twin/solvers/electrical.ts",
+        "sha256": "c6c9107a2014505b778090b645fcdeb5ada1c120f56d549b4aef0ea871fbe4b6"
+      },
+      {
+        "file": "src/twin/solvers/hydraulic.ts",
+        "sha256": "1f0c2a9a90348ee061214d67785b555338f8a10b42b834949c8d709efff285ee"
+      },
+      {
+        "file": "src/twin/solvers/thermal.ts",
+        "sha256": "c210be2a7b09d9fd6a036acee78c403fd05a9697af1b00adfe1c468fab683b86"
+      },
+      {
+        "file": "src/twin/solvers/network.ts",
+        "sha256": "bfcfccf10e056ffa8d82be49144028468eba82191e8e1b89bbc391c964d30ce1"
+      },
+      {
+        "file": "src/ui/TwinApp.tsx",
+        "sha256": "aaaa5f9e1edf7265eec577ccc7f420707e575f41639f7e273bd63e49ccae3bf7"
+      },
+      {
+        "file": "src/ui/useTwin.ts",
+        "sha256": "ecdf82317f00056dd89efd35ed697a37f71b648733a30c7ffd9b3458851db36f"
+      }
+    ],
+    "combinedSha256": "b03eb8228fbd50cad9d7e1222fc2d995101570ebffc52c16220121cfe6da64f8"
+  },
+  "environment": {
+    "url": "http://127.0.0.1:5173/",
+    "serverMode": "Vite development server",
+    "browserVersion": "153.0.8010.12",
+    "headless": true,
+    "launchArgs": [
+      "--use-angle=metal"
+    ],
+    "viewport": {
+      "width": 1600,
+      "height": 1050
+    },
+    "reducedMotion": true,
+    "cpu": "Apple M4 Pro",
+    "logicalHostCPUs": 14,
+    "totalMemoryGiB": 24,
+    "os": {
+      "platform": "darwin",
+      "release": "25.6.0",
+      "architecture": "arm64"
+    },
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+    "hardwareConcurrency": 14,
+    "devicePixelRatio": 1,
+    "renderBufferRatio": 1,
+    "webglVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+    "vendor": "Google Inc. (Apple)"
+  },
+  "cases": [
+    {
+      "scenario": {
+        "name": "small",
+        "count": 1280,
+        "generation": 1,
+        "supplyMW": 30
+      },
+      "designReadyMs": 820.6316670000001,
+      "actionRoundtripMs": [
+        126.38074999999981,
+        99.64870799999971,
+        96.80937500000027
+      ],
+      "coolingFocusReadyMs": 232.84341700000004,
+      "workerSteps": [
+        {
+          "start": 2035,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 1,
+            "requestedAccelerators": 1280,
+            "supplyW": 30000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 7,
+          "epoch": 3,
+          "roundtripMs": 56.80000000447035,
+          "solverMs": 3.2000000029802322,
+          "timeS": 10,
+          "designRevision": "reference-v2-bcb507c9",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 1,
+          "availableAccelerators": 1280,
+          "energizedNodes": 160,
+          "facilityW": 1783545.2305550494,
+          "warnings": []
+        },
+        {
+          "start": 2165,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 1,
+            "requestedAccelerators": 1280,
+            "supplyW": 30000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 8,
+          "epoch": 3,
+          "roundtripMs": 29,
+          "solverMs": 1.8999999985098839,
+          "timeS": 20,
+          "designRevision": "reference-v2-bcb507c9",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 1,
+          "availableAccelerators": 1280,
+          "energizedNodes": 160,
+          "facilityW": 1783545.2305550494,
+          "warnings": []
+        },
+        {
+          "start": 2265.2000000029802,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 1,
+            "requestedAccelerators": 1280,
+            "supplyW": 30000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 9,
+          "epoch": 3,
+          "roundtripMs": 28.19999999552965,
+          "solverMs": 2,
+          "timeS": 30,
+          "designRevision": "reference-v2-bcb507c9",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 1,
+          "availableAccelerators": 1280,
+          "energizedNodes": 160,
+          "facilityW": 1783545.2305550494,
+          "warnings": []
+        }
+      ],
+      "clicks": [
+        {
+          "timeS": 10,
+          "clickToDomCommitMs": 77.80000000447035
+        },
+        {
+          "timeS": 20,
+          "clickToDomCommitMs": 50.30000000447035
+        },
+        {
+          "timeS": 30,
+          "clickToDomCommitMs": 47.399999998509884
+        }
+      ],
+      "latest": {
+        "start": 2265.2000000029802,
+        "kind": "advance",
+        "durationS": 10,
+        "config": {
+          "schemaVersion": 2,
+          "generation": 1,
+          "requestedAccelerators": 1280,
+          "supplyW": 30000000,
+          "standbyPumps": 1,
+          "seawaterK": 291.15,
+          "workload": 0.8,
+          "idleFraction": 0.3,
+          "exchangerUAWPerK": 350000,
+          "foulingResistanceKPerW": 0,
+          "batteryWhPerModule": 400000,
+          "batteryMaxWPerModule": 2200000,
+          "pumpSpeed": 1,
+          "requireExternalNetwork": false,
+          "requireClusterNetwork": true,
+          "budgetUSD": null
+        },
+        "requestId": 9,
+        "epoch": 3,
+        "roundtripMs": 28.19999999552965,
+        "solverMs": 2,
+        "timeS": 30,
+        "designRevision": "reference-v2-bcb507c9",
+        "solverVersion": "2.0.0-rc.1",
+        "moduleCount": 1,
+        "availableAccelerators": 1280,
+        "energizedNodes": 160,
+        "facilityW": 1783545.2305550494,
+        "warnings": []
+      },
+      "rendering": {
+        "camera": [
+          44.278416017287704,
+          22.54173906334647,
+          64.40496875241847
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "drawCalls": 55,
+        "geometries": 55,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 1,
+        "totalModules": 1,
+        "renderedPlatforms": 1,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "campus",
+        "exploded": false,
+        "simulationTimeS": 30
+      },
+      "cadence": {
+        "samples": 60,
+        "medianIntervalMs": 16.699999999999818,
+        "p95IntervalMs": 16.700000000000273,
+        "minimumIntervalMs": 16.59999999999991,
+        "maximumIntervalMs": 16.800000000000182
+      }
+    },
+    {
+      "scenario": {
+        "name": "default",
+        "count": 10000,
+        "generation": 1,
+        "supplyMW": 30
+      },
+      "designReadyMs": 368.3316249999998,
+      "actionRoundtripMs": [
+        120.6068750000004,
+        97.74895800000013,
+        100.92862499999956
+      ],
+      "coolingFocusReadyMs": 148.83695799999987,
+      "workerSteps": [
+        {
+          "start": 1601.8999999985099,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 1,
+            "requestedAccelerators": 10000,
+            "supplyW": 30000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 5,
+          "epoch": 2,
+          "roundtripMs": 44.30000000447035,
+          "solverMs": 19.600000001490116,
+          "timeS": 10,
+          "designRevision": "reference-v2-aa6189d9",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 8,
+          "availableAccelerators": 10000,
+          "energizedNodes": 1250,
+          "facilityW": 13942645.004000345,
+          "warnings": []
+        },
+        {
+          "start": 1716.8000000044703,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 1,
+            "requestedAccelerators": 10000,
+            "supplyW": 30000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 6,
+          "epoch": 2,
+          "roundtripMs": 30.69999999552965,
+          "solverMs": 12.200000002980232,
+          "timeS": 20,
+          "designRevision": "reference-v2-aa6189d9",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 8,
+          "availableAccelerators": 10000,
+          "energizedNodes": 1250,
+          "facilityW": 13942645.004000345,
+          "warnings": []
+        },
+        {
+          "start": 1816.7000000029802,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 1,
+            "requestedAccelerators": 10000,
+            "supplyW": 30000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 7,
+          "epoch": 2,
+          "roundtripMs": 30.399999998509884,
+          "solverMs": 11.200000002980232,
+          "timeS": 30,
+          "designRevision": "reference-v2-aa6189d9",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 8,
+          "availableAccelerators": 10000,
+          "energizedNodes": 1250,
+          "facilityW": 13942645.004000345,
+          "warnings": []
+        }
+      ],
+      "clicks": [
+        {
+          "timeS": 10,
+          "clickToDomCommitMs": 67.89999999850988
+        },
+        {
+          "timeS": 20,
+          "clickToDomCommitMs": 52.399999998509884
+        },
+        {
+          "timeS": 30,
+          "clickToDomCommitMs": 52.20000000298023
+        }
+      ],
+      "latest": {
+        "start": 1816.7000000029802,
+        "kind": "advance",
+        "durationS": 10,
+        "config": {
+          "schemaVersion": 2,
+          "generation": 1,
+          "requestedAccelerators": 10000,
+          "supplyW": 30000000,
+          "standbyPumps": 1,
+          "seawaterK": 291.15,
+          "workload": 0.8,
+          "idleFraction": 0.3,
+          "exchangerUAWPerK": 350000,
+          "foulingResistanceKPerW": 0,
+          "batteryWhPerModule": 400000,
+          "batteryMaxWPerModule": 2200000,
+          "pumpSpeed": 1,
+          "requireExternalNetwork": false,
+          "requireClusterNetwork": true,
+          "budgetUSD": null
+        },
+        "requestId": 7,
+        "epoch": 2,
+        "roundtripMs": 30.399999998509884,
+        "solverMs": 11.200000002980232,
+        "timeS": 30,
+        "designRevision": "reference-v2-aa6189d9",
+        "solverVersion": "2.0.0-rc.1",
+        "moduleCount": 8,
+        "availableAccelerators": 10000,
+        "energizedNodes": 1250,
+        "facilityW": 13942645.004000345,
+        "warnings": []
+      },
+      "rendering": {
+        "camera": [
+          125.08086644787558,
+          45.85935019164577,
+          131.0267148332736
+        ],
+        "target": [
+          35,
+          0,
+          0
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 8,
+        "totalModules": 8,
+        "renderedPlatforms": 2,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "campus",
+        "exploded": false,
+        "simulationTimeS": 30
+      },
+      "cadence": {
+        "samples": 60,
+        "medianIntervalMs": 16.699999999999818,
+        "p95IntervalMs": 16.700000000000273,
+        "minimumIntervalMs": 16.5,
+        "maximumIntervalMs": 16.799999999999727
+      }
+    },
+    {
+      "scenario": {
+        "name": "large",
+        "count": 500000,
+        "generation": 3,
+        "supplyMW": 1200
+      },
+      "designReadyMs": 2435.889209000001,
+      "actionRoundtripMs": [
+        755.4396670000006,
+        747.7115840000006,
+        720.3565830000007
+      ],
+      "coolingFocusReadyMs": 233.09974999999758,
+      "workerSteps": [
+        {
+          "start": 3667.39999999851,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 3,
+            "requestedAccelerators": 500000,
+            "supplyW": 1200000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 9,
+          "epoch": 4,
+          "roundtripMs": 610.8000000044703,
+          "solverMs": 580.7000000029802,
+          "timeS": 10,
+          "designRevision": "reference-v2-0ccf7369",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 391,
+          "availableAccelerators": 0,
+          "energizedNodes": 62500,
+          "facilityW": 254887172.22385523,
+          "warnings": [
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-003/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-004/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-005/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-006/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-007/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-008/cluster unavailable; energized nodes retain idle draw"
+          ]
+        },
+        {
+          "start": 4416.60000000149,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 3,
+            "requestedAccelerators": 500000,
+            "supplyW": 1200000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 10,
+          "epoch": 4,
+          "roundtripMs": 606.1999999955297,
+          "solverMs": 585.1000000014901,
+          "timeS": 20,
+          "designRevision": "reference-v2-0ccf7369",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 391,
+          "availableAccelerators": 0,
+          "energizedNodes": 62500,
+          "facilityW": 254887172.22385523,
+          "warnings": [
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-003/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-004/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-005/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-006/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-007/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-008/cluster unavailable; energized nodes retain idle draw"
+          ]
+        },
+        {
+          "start": 5165.89999999851,
+          "kind": "advance",
+          "durationS": 10,
+          "config": {
+            "schemaVersion": 2,
+            "generation": 3,
+            "requestedAccelerators": 500000,
+            "supplyW": 1200000000,
+            "standbyPumps": 1,
+            "seawaterK": 291.15,
+            "workload": 0.8,
+            "idleFraction": 0.3,
+            "exchangerUAWPerK": 350000,
+            "foulingResistanceKPerW": 0,
+            "batteryWhPerModule": 400000,
+            "batteryMaxWPerModule": 2200000,
+            "pumpSpeed": 1,
+            "requireExternalNetwork": false,
+            "requireClusterNetwork": true,
+            "budgetUSD": null
+          },
+          "requestId": 11,
+          "epoch": 4,
+          "roundtripMs": 578.2000000029802,
+          "solverMs": 556.5,
+          "timeS": 30,
+          "designRevision": "reference-v2-0ccf7369",
+          "solverVersion": "2.0.0-rc.1",
+          "moduleCount": 391,
+          "availableAccelerators": 0,
+          "energizedNodes": 62500,
+          "facilityW": 254887172.22385523,
+          "warnings": [
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-003/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-004/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-005/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-006/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-007/cluster unavailable; energized nodes retain idle draw",
+            "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-008/cluster unavailable; energized nodes retain idle draw"
+          ]
+        }
+      ],
+      "clicks": [
+        {
+          "timeS": 10,
+          "clickToDomCommitMs": 644.7000000029802
+        },
+        {
+          "timeS": 20,
+          "clickToDomCommitMs": 646.6000000014901
+        },
+        {
+          "timeS": 30,
+          "clickToDomCommitMs": 618.6000000014901
+        }
+      ],
+      "latest": {
+        "start": 5165.89999999851,
+        "kind": "advance",
+        "durationS": 10,
+        "config": {
+          "schemaVersion": 2,
+          "generation": 3,
+          "requestedAccelerators": 500000,
+          "supplyW": 1200000000,
+          "standbyPumps": 1,
+          "seawaterK": 291.15,
+          "workload": 0.8,
+          "idleFraction": 0.3,
+          "exchangerUAWPerK": 350000,
+          "foulingResistanceKPerW": 0,
+          "batteryWhPerModule": 400000,
+          "batteryMaxWPerModule": 2200000,
+          "pumpSpeed": 1,
+          "requireExternalNetwork": false,
+          "requireClusterNetwork": true,
+          "budgetUSD": null
+        },
+        "requestId": 11,
+        "epoch": 4,
+        "roundtripMs": 578.2000000029802,
+        "solverMs": 556.5,
+        "timeS": 30,
+        "designRevision": "reference-v2-0ccf7369",
+        "solverVersion": "2.0.0-rc.1",
+        "moduleCount": 391,
+        "availableAccelerators": 0,
+        "energizedNodes": 62500,
+        "facilityW": 254887172.22385523,
+        "warnings": [
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-003/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-004/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-005/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-006/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-007/cluster unavailable; energized nodes retain idle draw",
+          "Declared offered demand 6250.000 Gbit/s exceeds 400.000 Gbit/s at port:shore/cluster-core:cluster-out; whole job domain platform-008/cluster unavailable; energized nodes retain idle draw"
+        ]
+      },
+      "rendering": {
+        "camera": [
+          877.2001561943932,
+          286.2109886080548,
+          1024.745681737299
+        ],
+        "target": [
+          315,
+          0,
+          207
+        ],
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "selectedId": "platform-001/module-01/pump-duty",
+        "renderedModules": 391,
+        "totalModules": 391,
+        "renderedPlatforms": 98,
+        "detailModuleId": "platform-001/module-01",
+        "renderedRacks": 40,
+        "renderedNodes": 160,
+        "worldUnitsPerMeter": 1,
+        "inside": false,
+        "focus": "campus",
+        "exploded": false,
+        "simulationTimeS": 30
+      },
+      "cadence": {
+        "samples": 60,
+        "medianIntervalMs": 16.699999999999818,
+        "p95IntervalMs": 16.700000000000728,
+        "minimumIntervalMs": 16.599999999999454,
+        "maximumIntervalMs": 16.800000000000182
+      }
+    }
+  ],
+  "cycles": {
+    "count": 20,
+    "scenario": "large (500000 accelerators, generation III, 1200 MW supply)",
+    "definition": "Cooling close-up; X-ray off; explode on/off; X-ray on; resize to 1440x960 or 1280x900; campus; X-ray off; restore1600x1050. One full warmup cycle precedes baseline.",
+    "baseline": {
+      "camera": [
+        877.2001561943932,
+        286.2109886080548,
+        1024.745681737299
+      ],
+      "target": [
+        315,
+        0,
+        207
+      ],
+      "drawCalls": 57,
+      "geometries": 57,
+      "textures": 1,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "renderedModules": 391,
+      "totalModules": 391,
+      "renderedPlatforms": 98,
+      "detailModuleId": "platform-001/module-01",
+      "renderedRacks": 40,
+      "renderedNodes": 160,
+      "worldUnitsPerMeter": 1,
+      "inside": false,
+      "focus": "campus",
+      "exploded": false,
+      "simulationTimeS": 30
+    },
+    "final": {
+      "camera": [
+        877.2001561943932,
+        286.2109886080548,
+        1024.745681737299
+      ],
+      "target": [
+        315,
+        0,
+        207
+      ],
+      "drawCalls": 57,
+      "geometries": 57,
+      "textures": 1,
+      "selectedId": "platform-001/module-01/pump-duty",
+      "renderedModules": 391,
+      "totalModules": 391,
+      "renderedPlatforms": 98,
+      "detailModuleId": "platform-001/module-01",
+      "renderedRacks": 40,
+      "renderedNodes": 160,
+      "worldUnitsPerMeter": 1,
+      "inside": false,
+      "focus": "campus",
+      "exploded": false,
+      "simulationTimeS": 30
+    },
+    "samples": [
+      {
+        "cycle": 1,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 2,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 3,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 4,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 5,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 6,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 7,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 8,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 9,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 10,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 11,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 12,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 13,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 14,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 15,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 16,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 17,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 18,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 19,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      },
+      {
+        "cycle": 20,
+        "drawCalls": 57,
+        "geometries": 57,
+        "textures": 1,
+        "renderedModules": 391
+      }
+    ],
+    "heapBefore": {
+      "usedSize": 68540900,
+      "totalSize": 70483968,
+      "embedderHeapUsedSize": 3734984,
+      "backingStorageSize": 30899256
+    },
+    "heapAfter": {
+      "usedSize": 70062360,
+      "totalSize": 71794688,
+      "embedderHeapUsedSize": 5085536,
+      "backingStorageSize": 30899258
+    },
+    "retainedHeapDeltaBytes": 1521460,
+    "geometryPlateau": true,
+    "texturePlateau": true,
+    "minGeometries": 57,
+    "maxGeometries": 57,
+    "note": "JS heap measured after explicit Chromium garbage collection at baseline/end; renderer allocations measured via Three.js diagnostics."
+  },
+  "screenshots": [
+    "artifacts/v2/scene-final-campus.png",
+    "artifacts/v2/scene-final-cooling.png",
+    "artifacts/v2/scene-final-interior.png"
+  ],
+  "errors": {
+    "page": [],
+    "console": [],
+    "http": []
+  },
+  "limitations": [
+    "One available Mac and headless Chromium Metal; not software CI or a general laptop performance claim.",
+    "Development mode and reduced motion; measurements include dev/React/worker serialization overhead.",
+    "requestAnimationFrame intervals measure browser scheduling cadence, not GPU raster execution time or a benchmark FPS rating.",
+    "500,000-accelerator required-job availability may be zero because of the declared shared network bottleneck; that result is retained rather than masked for the test.",
+    "Twenty repeated cycles test a bounded resource plateau; they do not prove absence of all possible long-duration leaks."
+  ],
+  "finishedAt": "2026-09-09T01:07:00.631Z",
+  "sourceAfter": {
+    "gitHEAD": "8072ab38ea0c8d71d045a8ad869363be8dcb1cbe",
+    "files": [
+      {
+        "file": "src/scene/TwinScene.tsx",
+        "sha256": "9ab27e71dc2bb89da9013130dcd069159ddfbdb6a42ecb8bf0c4c4f67ca1f692"
+      },
+      {
+        "file": "src/scene/twinGeometry.ts",
+        "sha256": "c2caea7a5a3cdb610e0e08f5755e7d2aaf58c6b50f9a966e7c7d0fbd54fb78ff"
+      },
+      {
+        "file": "src/scene/twinScene.css",
+        "sha256": "78a79f4deeda90d49938d7e64a86cef06960cf8d2782561341760c5100542dad"
+      },
+      {
+        "file": "src/twin/assets/design.ts",
+        "sha256": "5554530d61c1d720b78436fba2061ad77875d50bb5e172a5ec39b8c96841357b"
+      },
+      {
+        "file": "src/twin/types.ts",
+        "sha256": "d64626837a29f5136f2d40df1f47bc832212ad388a4b421f0b3163c6c9cc4ee7"
+      },
+      {
+        "file": "src/twin/engine/simulation.ts",
+        "sha256": "d7edfc1b847402aa26616acf235f8690caedc7ad2b60b78c82a511e8430f5be2"
+      },
+      {
+        "file": "src/twin/engine/worker.ts",
+        "sha256": "c529394cc5ad171d8f86902623fe6ee02648c415c6737e6625101fc6b66ebf45"
+      },
+      {
+        "file": "src/twin/solvers/electrical.ts",
+        "sha256": "c6c9107a2014505b778090b645fcdeb5ada1c120f56d549b4aef0ea871fbe4b6"
+      },
+      {
+        "file": "src/twin/solvers/hydraulic.ts",
+        "sha256": "1f0c2a9a90348ee061214d67785b555338f8a10b42b834949c8d709efff285ee"
+      },
+      {
+        "file": "src/twin/solvers/thermal.ts",
+        "sha256": "c210be2a7b09d9fd6a036acee78c403fd05a9697af1b00adfe1c468fab683b86"
+      },
+      {
+        "file": "src/twin/solvers/network.ts",
+        "sha256": "bfcfccf10e056ffa8d82be49144028468eba82191e8e1b89bbc391c964d30ce1"
+      },
+      {
+        "file": "src/ui/TwinApp.tsx",
+        "sha256": "aaaa5f9e1edf7265eec577ccc7f420707e575f41639f7e273bd63e49ccae3bf7"
+      },
+      {
+        "file": "src/ui/useTwin.ts",
+        "sha256": "ecdf82317f00056dd89efd35ed697a37f71b648733a30c7ffd9b3458851db36f"
+      }
+    ],
+    "combinedSha256": "b03eb8228fbd50cad9d7e1222fc2d995101570ebffc52c16220121cfe6da64f8"
+  },
+  "sourceStable": true,
+  "passed": true
+}

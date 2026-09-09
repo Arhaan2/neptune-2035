@@ -1,0 +1,141 @@
+{
+  "observedAt": "2026-09-09T01:21:20.880Z",
+  "platform": "darwin",
+  "arch": "arm64",
+  "cpu": "Apple M4 Pro",
+  "logicalCPUs": 14,
+  "node": "v24.18.0",
+  "scope": "Local numerical CPU timings; excludes rendering/worker messaging, not ordinary-laptop benchmark.",
+  "timings": [
+    {
+      "requestedAccelerators": 1280,
+      "samples": [
+        {
+          "buildMs": 0.826082999999926,
+          "initializeMs": 0.8319169999999758,
+          "advance10SecondsMs": 0.9964999999999691,
+          "moduleCount": 1,
+          "itW": 1651199.9999999998
+        },
+        {
+          "buildMs": 0.7363339999999425,
+          "initializeMs": 0.784832999999935,
+          "advance10SecondsMs": 0.6955000000000382,
+          "moduleCount": 1,
+          "itW": 1651199.9999999998
+        },
+        {
+          "buildMs": 0.7035839999998643,
+          "initializeMs": 0.690958000000137,
+          "advance10SecondsMs": 0.7395419999998012,
+          "moduleCount": 1,
+          "itW": 1651199.9999999998
+        }
+      ]
+    },
+    {
+      "requestedAccelerators": 10000,
+      "samples": [
+        {
+          "buildMs": 4.823333000000048,
+          "initializeMs": 6.625250000000051,
+          "advance10SecondsMs": 5.580874999999878,
+          "moduleCount": 8,
+          "itW": 12899999.999999998
+        },
+        {
+          "buildMs": 4.817291999999952,
+          "initializeMs": 5.404749999999922,
+          "advance10SecondsMs": 6.680708000000095,
+          "moduleCount": 8,
+          "itW": 12899999.999999998
+        },
+        {
+          "buildMs": 4.909541999999874,
+          "initializeMs": 4.942208000000164,
+          "advance10SecondsMs": 6.643082999999933,
+          "moduleCount": 8,
+          "itW": 12899999.999999998
+        }
+      ]
+    },
+    {
+      "requestedAccelerators": 100000,
+      "samples": [
+        {
+          "buildMs": 49.62279199999989,
+          "initializeMs": 64.76608299999998,
+          "advance10SecondsMs": 71.89704200000006,
+          "moduleCount": 79,
+          "itW": 45000000
+        },
+        {
+          "buildMs": 50.7365420000001,
+          "initializeMs": 72.019542,
+          "advance10SecondsMs": 71.65383299999985,
+          "moduleCount": 79,
+          "itW": 45000000
+        },
+        {
+          "buildMs": 52.55733400000008,
+          "initializeMs": 66.71170799999982,
+          "advance10SecondsMs": 70.66208300000017,
+          "moduleCount": 79,
+          "itW": 45000000
+        }
+      ]
+    },
+    {
+      "requestedAccelerators": 500000,
+      "samples": [
+        {
+          "buildMs": 264.42425000000003,
+          "initializeMs": 373.248875,
+          "advance10SecondsMs": 376.13262499999973,
+          "moduleCount": 391,
+          "itW": 225000000
+        },
+        {
+          "buildMs": 266.657459,
+          "initializeMs": 361.77816600000006,
+          "advance10SecondsMs": 378.18804199999977,
+          "moduleCount": 391,
+          "itW": 225000000
+        },
+        {
+          "buildMs": 273.0416250000003,
+          "initializeMs": 356.3408340000001,
+          "advance10SecondsMs": 357.4245000000001,
+          "moduleCount": 391,
+          "itW": 225000000
+        }
+      ]
+    },
+    {
+      "requestedAccelerators": 1000000,
+      "samples": [
+        {
+          "buildMs": 571.9951250000004,
+          "initializeMs": 871.4432919999999,
+          "advance10SecondsMs": 760.2417909999995,
+          "moduleCount": 782,
+          "itW": 450000000
+        },
+        {
+          "buildMs": 573.6157499999999,
+          "initializeMs": 891.706792,
+          "advance10SecondsMs": 757.898000000001,
+          "moduleCount": 782,
+          "itW": 450000000
+        },
+        {
+          "buildMs": 588.7037499999988,
+          "initializeMs": 863.3028329999997,
+          "advance10SecondsMs": 769.8661670000001,
+          "moduleCount": 782,
+          "itW": 450000000
+        }
+      ]
+    }
+  ]
+}
