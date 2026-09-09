@@ -28,7 +28,7 @@ export function validateState(design: Design, value: unknown, options: { allowDi
   array(value.appliedEventIds, 'state.appliedEventIds', CONTRACT.maxEvents);
   const due = value.events.filter(e => e.timeS <= (value.timeS as number));
   if (due.length !== value.appliedEventIds.length || due.some((e, i) => e.id !== (value.appliedEventIds as unknown[])[i])) failure('invalid-input', 'STATE_EVENT_CURSOR', 'Checkpoint applied-event cursor must contain exactly the events due at this boundary, in order.');
-  const known = new Set(design.assets.map(a => a.id)), local = new Map<string, Set<string>>();
+  const known = new Set(design.assets.map(a => a.id)), moduleIds = new Set(design.modules.map(m => m.id)), local = new Map<string, Set<string>>();
   const assetKnown = (id: string) => {
     if (known.has(id)) return true;
     const m = design.modules.find(m => id.startsWith(`${m.id}/`)); if (!m) return false;
@@ -97,6 +97,6 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     string(entry.assetId, 'log.assetId', CONTRACT.maxAssetIdLength); string(entry.message, 'log.message');
     if (!assetKnown(entry.assetId) || !['command', 'controller', 'warning'].includes(String(entry.kind))) failure('invalid-input', 'STATE_LOG', 'Invalid causal trace asset or kind.');
     array(entry.affectedIds, 'log.affectedIds', CONTRACT.maxModules);
-    for (const id of entry.affectedIds) if (typeof id !== 'string' || !design.modules.some(m => m.id === id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');
+    for (const id of entry.affectedIds) if (typeof id !== 'string' || !moduleIds.has(id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');
   }
 }
