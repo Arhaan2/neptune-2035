@@ -178,22 +178,21 @@ export function useTwin(design: Design) {
     clockTimer.current = null;
     setRunningState(false);
   }, []);
-  const invalidate = useCallback(
-    (acceptCancellation = false) => {
-      epoch.current++;
-      pending.current = false;
-      stopClock();
-      setBusy(false);
-      worker.current?.postMessage({
-        version: 2,
-        requestId: ++requestId.current,
-        epoch: epoch.current,
-        kind: 'cancel',
-      } satisfies WorkerRequest);
-      if (!acceptCancellation) requestId.current++;
-    },
-    [stopClock],
-  );
+  const invalidate = useCallback(() => {
+    epoch.current++;
+    pending.current = false;
+    stopClock();
+    setBusy(false);
+    worker.current?.postMessage({
+      version: 2,
+      requestId: ++requestId.current,
+      epoch: epoch.current,
+      kind: 'cancel',
+    } satisfies WorkerRequest);
+    // Its acknowledgement may contain worker progress the UI never committed.
+    // Keep that later state from replacing the checkpoint after controls unlock.
+    requestId.current++;
+  }, [stopClock]);
   const setRunning = useCallback(
     (next: boolean) => {
       if (!next) {
@@ -387,7 +386,7 @@ export function useTwin(design: Design) {
     [accept, invalidate],
   );
   const cancel = useCallback(() => {
-    invalidate(true);
+    invalidate();
     setError('Run cancelled. The last completed numerical state is retained.');
     persist();
   }, [invalidate, persist]);

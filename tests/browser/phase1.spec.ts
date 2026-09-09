@@ -62,9 +62,7 @@ async function importText(page: Page, text: string) {
   });
 }
 
-test('PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint', async ({
-  page,
-}) => {
+async function installWorkerReplyProbe(page: Page) {
   await page.addInitScript(() => {
     const NativeWorker = Worker;
     const probe: PauseProbe = {
@@ -104,6 +102,12 @@ test('PH1-REP-02 Pause remains available during an advance and delayed real work
       }
     };
   });
+}
+
+test('PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint', async ({
+  page,
+}) => {
+  await installWorkerReplyProbe(page);
   await load(page);
   await page.evaluate(() => {
     window.phase1PauseProbe.hold = true;
@@ -181,6 +185,67 @@ test('PH1-REP-02 Pause remains available during an advance and delayed real work
     page.getByRole('button', { name: 'Start', exact: true }),
   ).toBeEnabled();
   expect(JSON.parse(await projectText(page)).checkpoint.state.timeS).toBe(30);
+});
+
+test('PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step', async ({
+  page,
+}) => {
+  await installWorkerReplyProbe(page);
+  await load(page);
+  await step(page);
+  const before = JSON.parse(await projectText(page));
+  await page.evaluate(() => {
+    window.phase1PauseProbe.hold = true;
+  });
+  await page
+    .getByRole('spinbutton', { name: 'Replay time in seconds', exact: true })
+    .fill('100');
+  await page.getByRole('button', { name: 'Seek time', exact: true }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.phase1PauseProbe.replies.some(
+          ({ response }) =>
+            response.status === 'complete' && response.state?.timeS === 100,
+        ),
+      ),
+    )
+    .toBe(true);
+  await page.getByRole('button', { name: 'Cancel run', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Step 10s', exact: true }),
+  ).toBeEnabled();
+  await expect(main(page)).toHaveAttribute('data-time', '10');
+  expect(JSON.parse(await projectText(page)).checkpoint).toEqual(
+    before.checkpoint,
+  );
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.phase1PauseProbe.replies.some(
+          ({ response }) =>
+            response.status === 'cancelled' && response.state?.timeS === 100,
+        ),
+      ),
+    )
+    .toBe(true);
+  // Deliver genuine old progress, completion and cancellation messages before
+  // the next manual request, when they would otherwise replace its base state.
+  await page.evaluate(() => window.phase1PauseProbe.release());
+  const durableBeforeStep = await page.evaluate(
+    () => JSON.parse(localStorage.getItem('neptune-checkpoint-v3')!).timeS,
+  );
+  const resumeBeforeStep = await page
+    .getByRole('button', { name: 'Resume to 100s', exact: true })
+    .count();
+  await page.getByRole('button', { name: 'Step 10s', exact: true }).click();
+  await expect(main(page)).toHaveAttribute('data-time', '20');
+  expect(durableBeforeStep).toBe(10);
+  expect(resumeBeforeStep).toBe(1);
+  await expect(page.getByTestId('checkpoint-storage')).toContainText(
+    'Checkpoint saved locally at 20s',
+  );
+  expect(JSON.parse(await projectText(page)).checkpoint.state.timeS).toBe(20);
 });
 
 test('PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally', async ({
