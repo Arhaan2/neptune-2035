@@ -7,7 +7,13 @@ export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': fileURLToPath(new URL('.', import.meta.url)) } },
   css: { postcss: { plugins: [tailwindcss()] } },
-  server: { host: '127.0.0.1', watch: { usePolling: true } },
+  server: {
+    host: '127.0.0.1',
+    watch: {
+      usePolling: true,
+      ignored: ['**/artifacts/**', '**/test-results/**', '**/assets/screenshots/**'],
+    },
+  },
   build: { chunkSizeWarningLimit: 1200 },
   // Campus allocation tests and real browser telemetry share the runner's resources.
   test: { include: ['tests/**/*.test.ts'], environment: 'node', fileParallelism: false },

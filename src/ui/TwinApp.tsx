@@ -1006,7 +1006,7 @@ export default function TwinApp() {
           <div className="twin-clock">
             <button
               className="primary"
-              disabled={!state || sim.busy}
+              disabled={!state || (!sim.running && sim.busy)}
               onClick={() => {
                 setDemo(false);
                 sim.setRunning(!sim.running);

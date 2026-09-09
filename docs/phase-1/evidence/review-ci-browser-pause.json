@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_REVIEW_ONLY",
+  "reviewedAt": "2026-09-09T20:55:00.033Z",
+  "parentHead": "77592c4f18fc85d09d2b6ac96cad48ed8477b770",
+  "scope": "Independent bounded review of browser execution settings, generated-output watcher exclusions, textual failure diagnostics, Pause control/clock invalidation, unchanged-test preservation, and new failed ARM CI evidence. Reviewer did not author these implementation changes.",
+  "findings": [],
+  "hostedEvidence": [
+    {
+      "runId": 34399388324,
+      "event": "push",
+      "sourceSha": "77592c4f18fc85d09d2b6ac96cad48ed8477b770",
+      "unitPassed": 256,
+      "browserPassed": 64,
+      "browserFailed": 11,
+      "browsers": {
+        "chromium": "25/25",
+        "firefox": "15/25",
+        "webkit": "24/25"
+      },
+      "status": "FAIL"
+    },
+    {
+      "runId": 34399395431,
+      "event": "pull_request",
+      "sourceSha": "153d72617327e4eda23c691a2c53ff2e9756d28e",
+      "unitPassed": 256,
+      "browserPassed": 67,
+      "browserFailed": 8,
+      "browsers": {
+        "chromium": "25/25",
+        "firefox": "17/25",
+        "webkit": "25/25"
+      },
+      "status": "FAIL"
+    }
+  ],
+  "evidenceAssessment": [
+    "Both uploaded gates preserve zero skipped/flaky cases and no measurement execution after browser failure. All 20 public gate files are byte-identical to the downloaded artifact files.",
+    "Push-only WebKit cancellation failure reached the final console-error assertion after the numerical assertions; errors name ANGLE metal/ContextMtl.mm, OUT_OF_MEMORY and failed host-memory allocation. The corresponding full WebKit PR suite passed.",
+    "Firefox failures include interaction/frame stalls and post-Pause time drift. Hosted summaries alone do not prove a single cause. The separately reproduced busy-Pause defect is a demonstrated application defect; browser headless mode, pixel density and file watching are distinct execution variables."
+  ],
+  "checks": [
+    "Installed Playwright device definitions give Chrome/Firefox DPR1 and Safari DPR2. Firefox headless:false preserves the existing deadlines; Safari DPR1 explicitly changes backing resolution at the same 1600x1050 CSS viewport. No debug, retry or assertion relaxation.",
+    "Installed Vite resolveChokidarOptions appends custom ignores to its defaults. test-results was already ignored; artifacts and assets/screenshots are generated report/screenshot output, with no application source imports. Source watching, polling, build settings and test.fileParallelism:false remain.",
+    "The exact extracted diagnostic collector passed six synthetic filesystem checks: markdown-only copy, checkout/root/home path replacement, manifest byte/hash correctness, trace/image exclusion, absent-directory empty manifest, and collection before the unchanged failure guard.",
+    "Pause remains enabled while running/busy; Start remains blocked during pending manual work. Synchronous clock ref and timer cancellation prevent further interval sends before React effect cleanup. Epoch/request invalidation rejects both held advance and cancellation replies; accepted UI checkpoint remains authoritative and resume sends it back to the worker.",
+    "New regression delays genuine native-worker messages rather than computing substitute states. It checks pending manual Start exclusion, Pause availability, held completion/cancellation replies, no later timer send, exact exported checkpoint, and resume. Existing tests are unchanged; playwright --list reports 78 tests in four files.",
+    "Read final focused browser report: 33/33 expected, zero skipped/unexpected/flaky, including the added regression in all three browsers. This is another agent’s executed evidence, independently inspected; this reviewer did not rerun browsers.",
+    "The six executable deltas were reviewed. All other parent source/config hashes match; numerical engine/persistence sources, dependency lock, 73 protected files, public assets and source-only CI/deployment separation remain unchanged."
+  ],
+  "reviewedSourceHashes": {
+    "playwright.config.ts": "5f497031b654df7823514430185472025d36c9e8e808a1cac73e05df0fe51288",
+    "scripts/phase-1/verify.mjs": "9e7ba4e3913313613e2a0aa8c6796e8ef6bbb47fb401b1233fedcf6d5e6628d1",
+    "src/ui/TwinApp.tsx": "6213e04ddde6999bb234e3c0a2d7a7406a9d3541fa2ba19966851eaa059d1c66",
+    "src/ui/useTwin.ts": "af1dc65ae996c54cb08ffe8cf6e047c4cad93707eaa416b5c23499a68e336593",
+    "tests/browser/phase1.spec.ts": "af6b563899215e612bf4a385a5f33b1df4819bab87cdbda87b4dc247c7d5d35e",
+    "vite.config.ts": "b8773605118d2b8382df2653faf42f96e24486ed78b521e2d108e8988d55e645"
+  },
+  "diffSha256": "1bd3c3d0b39bed7a0f8999477f81f854554cc49ae91a1ca167821fd9244651e3",
+  "diagnosticsProbe": {
+    "status": "PASS",
+    "at": "2026-09-09T20:50:45.465Z",
+    "sourceSha256": "9e7ba4e3913313613e2a0aa8c6796e8ef6bbb47fb401b1233fedcf6d5e6628d1",
+    "collectorSha256": "f733c2d1f3373119b9e8459e9d2d2e35670d463501343dd8302d59fde50d9bf8",
+    "checks": [
+      "Exact extracted collector copies only error-context.md",
+      "Checkout/root/home path redaction retained",
+      "Manifest content hash and byte length correct",
+      "Trace and screenshot bytes excluded",
+      "Absent test-results emits empty manifest",
+      "Existing browser failures/skips/flaky/nonzero-exit guard unchanged and follows collection"
+    ],
+    "limitations": [
+      "Synthetic filesystem diagnostic only; no browser or full gate launched"
+    ]
+  },
+  "focusedEvidence": {
+    "originalFailureContext": "artifacts/phase-1/pause-before/phase1-PH1-REP-02-Pause-re-464be--cannot-move-its-checkpoint-chromium/error-context.md",
+    "originalFailureContextSha256": "5f1bd4de5caf74003528f8fe2e99c2ef5075d1b793a7b9a180f88cbed977e2b0",
+    "observedOriginalFailure": "Pause expected enabled, received disabled for unchanged 12000ms expect deadline",
+    "inspectedReport": "artifacts/phase-1-review/pause-focused-independent.json",
+    "inspectedReportSha256": "083071130df8244bbd5377730971ef2310dccb8d3be398118e079626c720e67c",
+    "stats": {
+      "startTime": "2026-09-09T20:44:15.610Z",
+      "duration": 78251.66500000001,
+      "expected": 33,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "publication": {
+    "status": "PASS_FOR_RECORDED_SNAPSHOT",
+    "scannedAt": "2026-09-09T20:50:54.569Z",
+    "totalPrerequisiteAndDocumentationFiles": 298,
+    "newOrChangedFiles": 21,
+    "rawCopiesVerified": 20,
+    "protectedHashMismatches": [],
+    "immutableWorkingTreeChanges": [],
+    "inventory": [
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "bytes": 12717,
+        "sha256": "aa59ce1c355216a43dec5732f336969c4a90452b07e6e1d74aaa48e4daf74bcc",
+        "group": "phase-1-documentation-evidence",
+        "tracked": true
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/browser-summary.json",
+        "bytes": 23269,
+        "sha256": "42a5dbf395f21a175ab57b2063e8e168cf40a1cc1e8a00dffc1d017a998b9127",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/browser.log",
+        "bytes": 33489,
+        "sha256": "016edad62339cfe5d189942936d6364cef876c9330f573d08d8630e74721abab",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/build.log",
+        "bytes": 787,
+        "sha256": "9037a32cfbbad54d52f1c2828c5eb245f870ffa17963fa696288dc9cd98d7061",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/execution.json",
+        "bytes": 10943,
+        "sha256": "33be8a0017cd57422ebfa775844c6675c7989d50724b7ff3f045dd2c070eb6b0",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/lint.log",
+        "bytes": 175,
+        "sha256": "d3a897546bc926b05961d8ff1c75990cf3719cd811643e194f288a728f8d3bb8",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/npm-ci.log",
+        "bytes": 451,
+        "sha256": "6d65354c304a65a22f758edaad16a03ab96cb0688261d2c63aaf6f08166f7334",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/server.log",
+        "bytes": 334,
+        "sha256": "db2f1da448eb993d134342032ed770ac9c227f375ae035b94919785aaffa36eb",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/typecheck.log",
+        "bytes": 48,
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/unit-full.log",
+        "bytes": 5041,
+        "sha256": "8ddb8b487f5466c3ba1e6cc9f8f248512424169de9ecc3e2f76575291bc0fd6e",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-pr/unit-summary.json",
+        "bytes": 58839,
+        "sha256": "9a22bf10c854bf4a1f5cae8691a9beae9a008087bea460efdad9318ac4b6d581",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/browser-summary.json",
+        "bytes": 23277,
+        "sha256": "a8eeb60a62290a31034b2bfcdd8ba7c80de7c3523d0276319a8a7de07fe65d05",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/browser.log",
+        "bytes": 57371,
+        "sha256": "f9931a4e0f2132bc1abc470482cac2bad36e5798c487d69e5173fe5b676b48e3",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/build.log",
+        "bytes": 787,
+        "sha256": "e98b0f093f9c252d868b66ba957e0e480f88522a4d377219b2fb80bc62b165a1",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/execution.json",
+        "bytes": 10953,
+        "sha256": "f6c9f9276d04db3935f32287773bb5b51ab252377b39704ac2b85f4902575619",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/lint.log",
+        "bytes": 175,
+        "sha256": "1be258b6a4d26781be258ced36a4bb1776d3c56f842a9a8a380a96e335903a30",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/npm-ci.log",
+        "bytes": 451,
+        "sha256": "9fedd5d2ca8553a43868840bf861bb3a2f26c2ba903c3a8484418808536032c5",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/server.log",
+        "bytes": 334,
+        "sha256": "9a9addabd3ce7c66e6f1a3743284cc67d35ab23d5d9fc38d7e5467b987fca4ec",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/typecheck.log",
+        "bytes": 48,
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/unit-full.log",
+        "bytes": 4928,
+        "sha256": "eddde1451b6e21f9412cb89db916d2e7c8278949b53a180c6fd1962d47bd9ee5",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-arm-push/unit-summary.json",
+        "bytes": 58790,
+        "sha256": "58e3bb54e3667a492030f3560b719d2b66975405b5a3553284a6d4e42ab97300",
+        "group": "phase-1-documentation-evidence",
+        "tracked": false
+      }
+    ],
+    "hitAssessment": "No credential/token/private-key, observation-payload, binary, embedded recording, non-UTF8 or JSON-parse failures in the new material. Two userinfo mentions are exact pre-existing synthetic telemetry test fixtures. Trace references contain filenames only; telemetry terms describe test names or flags, without observation payloads. Original Phase0 classifications remain as recorded in review-publication.json."
+  },
+  "commands": [
+    "git diff HEAD -- playwright.config.ts scripts/phase-1/verify.mjs src/ui/TwinApp.tsx src/ui/useTwin.ts tests/browser/phase1.spec.ts vite.config.ts",
+    "Read both ci-macos26-arm-* execution/unit/browser summaries and raw browser logs; SHA-256 compare all 20 copies with downloaded artifacts",
+    "Read installed Playwright devices and Vite resolveChokidarOptions; rg source references to generated output paths",
+    "Execute exact extracted diagnostic collector against synthetic filesystem fixtures under ignored artifacts/phase-1-review",
+    "npx playwright test --list --reporter=list",
+    "node artifacts/phase-1-review/publication-scan.mjs; exact baseline fixture comparison without printing values",
+    "Read original failing Pause error-context and final 33-case browser-results.json"
+  ],
+  "references": [
+    "https://playwright.dev/docs/test-cli",
+    "https://playwright.dev/docs/api/class-testoptions#test-options-headless",
+    "https://playwright.dev/docs/api/class-testoptions#test-options-device-scale-factor",
+    "https://vite.dev/config/server-options#server-watch"
+  ],
+  "limitations": [
+    "No new full local or hosted acceptance claimed. The final candidate still needs full 256-unit/78-browser/measurement gates.",
+    "Headed Firefox and standard-density WebKit passing locally would not prove all earlier hosted causes or general hardware performance.",
+    "Publication assessment covers the recorded current bytes; final acceptance documents and new local gate evidence must be scanned and hashed before publication.",
+    "Diagnostic sanitization replaces filesystem paths; it is not a general secret scrubber. Only synthetic test contexts are expected, and publication remains subject to content review.",
+    "No remote operation, port/server or browser launch performed by this reviewer."
+  ]
+}

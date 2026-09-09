@@ -1,5 +1,19 @@
 import { expect, test, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
+import type { WorkerRequest, WorkerResponse } from '../../src/twin/types';
+
+type PauseProbe = {
+  hold: boolean;
+  requests: WorkerRequest[];
+  replies: { worker: Worker; response: WorkerResponse }[];
+  release: () => void;
+};
+
+declare global {
+  interface Window {
+    phase1PauseProbe: PauseProbe;
+  }
+}
 
 const main = (page: Page) => page.locator('main.twin-app');
 async function load(page: Page) {
@@ -47,6 +61,127 @@ async function importText(page: Page, text: string) {
     buffer: Buffer.from(text),
   });
 }
+
+test('PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const NativeWorker = Worker;
+    const probe: PauseProbe = {
+      hold: false,
+      requests: [],
+      replies: [],
+      release() {
+        this.hold = false;
+        for (const { worker, response } of this.replies)
+          worker.dispatchEvent(new MessageEvent('message', { data: response }));
+        this.replies = [];
+      },
+    };
+    window.phase1PauseProbe = probe;
+    window.Worker = class extends NativeWorker {
+      constructor(url: string | URL, options?: WorkerOptions) {
+        super(url, options);
+        this.addEventListener(
+          'message',
+          (event: MessageEvent<WorkerResponse>) => {
+            if (!probe.hold) return;
+            event.stopImmediatePropagation();
+            probe.replies.push({
+              worker: this,
+              response: structuredClone(event.data),
+            });
+          },
+        );
+      }
+      override postMessage(
+        message: WorkerRequest,
+        options?: StructuredSerializeOptions | Transferable[],
+      ) {
+        probe.requests.push(structuredClone(message));
+        if (Array.isArray(options)) super.postMessage(message, options);
+        else super.postMessage(message, options);
+      }
+    };
+  });
+  await load(page);
+  await page.evaluate(() => {
+    window.phase1PauseProbe.hold = true;
+  });
+  await page.getByRole('button', { name: 'Step 10s', exact: true }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.phase1PauseProbe.replies.some(
+          ({ response }) =>
+            response.status === 'complete' && response.state?.timeS === 10,
+        ),
+      ),
+    )
+    .toBe(true);
+  await expect(
+    page.getByRole('button', { name: 'Start', exact: true }),
+  ).toBeDisabled();
+  await page.evaluate(() => window.phase1PauseProbe.release());
+  await expect(main(page)).toHaveAttribute('data-time', '10');
+  await expect(
+    page.getByRole('button', { name: 'Step 10s', exact: true }),
+  ).toBeEnabled();
+  const before = JSON.parse(await projectText(page));
+  await page.getByLabel('Simulation speed', { exact: true }).selectOption('20');
+  await page.evaluate(() => {
+    window.phase1PauseProbe.hold = true;
+  });
+  await page.getByRole('button', { name: 'Start', exact: true }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.phase1PauseProbe.replies.some(
+          ({ response }) =>
+            response.status === 'complete' && response.state?.timeS === 30,
+        ),
+      ),
+    )
+    .toBe(true);
+  await expect(
+    page.getByRole('button', { name: 'Step 10s', exact: true }),
+  ).toBeDisabled();
+  const pause = page.getByRole('button', { name: 'Pause', exact: true });
+  await expect(pause).toBeEnabled();
+  await pause.click();
+  await expect(
+    page.getByRole('button', { name: 'Start', exact: true }),
+  ).toBeEnabled();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        window.phase1PauseProbe.replies.some(
+          ({ response }) => response.status === 'cancelled',
+        ),
+      ),
+    )
+    .toBe(true);
+  const sent = await page.evaluate(
+    () => window.phase1PauseProbe.requests.length,
+  );
+  await page.evaluate(() => window.phase1PauseProbe.release());
+  await page.waitForTimeout(1250);
+  expect(
+    await page.evaluate(() => window.phase1PauseProbe.requests.length),
+  ).toBe(sent);
+  await expect(main(page)).toHaveAttribute('data-time', '10');
+  expect(JSON.parse(await projectText(page)).checkpoint).toEqual(
+    before.checkpoint,
+  );
+  await page
+    .getByRole('button', { name: 'Resume to 30s', exact: true })
+    .click();
+  await expect(main(page)).toHaveAttribute('data-time', '30');
+  await expect(
+    page.getByRole('button', { name: 'Start', exact: true }),
+  ).toBeEnabled();
+  expect(JSON.parse(await projectText(page)).checkpoint.state.timeS).toBe(30);
+});
 
 test('PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally', async ({
   page,

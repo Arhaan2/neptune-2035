@@ -37,6 +37,8 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Exercise a foreground window on macOS rather than a hidden compositor.
+        headless: false,
         viewport: { width: 1600, height: 1050 },
       },
     },
@@ -44,6 +46,8 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
+        // Match the other desktop projects' pixel density on bounded CI hardware.
+        deviceScaleFactor: 1,
         viewport: { width: 1600, height: 1050 },
       },
     },

@@ -63,6 +63,23 @@ try {
   const walk = suites => { for (const suite of suites) { for (const spec of suite.specs ?? []) for (const test of spec.tests) browserTests.push({ file: spec.file, name: spec.title, browser: test.projectName, status: test.status, results: test.results.map(r => ({ status: r.status, durationMs: r.duration })) }); walk(suite.suites ?? []); } };
   walk(browser.suites);
   await fs.writeFile(path.join(out, 'browser-summary.json'), JSON.stringify({ stats: browser.stats, tests: browserTests }, null, 2) + '\n');
+  // Preserve textual failure context (including control states) for remote diagnosis.
+  // Screenshots, traces and recordings remain outside the published source evidence.
+  const contextFiles = [];
+  const resultDir = path.join(checkout, 'test-results');
+  const resultFiles = await fs.readdir(resultDir, { recursive: true }).catch(error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  for (const file of resultFiles) {
+    if (!file.endsWith('error-context.md')) continue;
+    const content = sanitize(await fs.readFile(path.join(resultDir, file), 'utf8'));
+    const name = file.replaceAll(path.sep, '--');
+    await fs.mkdir(path.join(out, 'browser-contexts'), { recursive: true });
+    await fs.writeFile(path.join(out, 'browser-contexts', name), content);
+    contextFiles.push({ path: `browser-contexts/${name}`, bytes: Buffer.byteLength(content), sha256: createHash('sha256').update(content).digest('hex') });
+  }
+  await fs.writeFile(path.join(out, 'browser-contexts.json'), JSON.stringify(contextFiles, null, 2) + '\n');
   if (browser.stats.unexpected || browser.stats.skipped || browser.stats.flaky || records.some(r => r.exitCode !== 0)) throw Error('Coverage has failures, skips or flaky retries');
   const { chromium, firefox, webkit } = await import(pathToFileURL(path.join(checkout, 'node_modules/playwright/index.mjs')));
   const versions = {};

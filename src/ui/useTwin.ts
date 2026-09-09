@@ -85,7 +85,7 @@ export function runWorkerExperiment(
 }
 export function useTwin(design: Design) {
   const [state, setState] = useState<SimulationState | null>(null),
-    [running, setRunning] = useState(false),
+    [running, setRunningState] = useState(false),
     [speed, setSpeed] = useState(1),
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false),
@@ -112,6 +112,8 @@ export function useTwin(design: Design) {
     epoch = useRef(0),
     requestId = useRef(0),
     pending = useRef(false),
+    clockRunning = useRef(false),
+    clockTimer = useRef<ReturnType<typeof setInterval> | null>(null),
     designRef = useRef(design),
     restoredDesign = useRef<Design | null>(null),
     provenance = useRef<ProjectProvenance | undefined>(undefined),
@@ -170,19 +172,42 @@ export function useTwin(design: Design) {
     },
     [persist],
   );
-  const invalidate = useCallback((acceptCancellation = false) => {
-    epoch.current++;
-    pending.current = false;
-    setRunning(false);
-    setBusy(false);
-    worker.current?.postMessage({
-      version: 2,
-      requestId: ++requestId.current,
-      epoch: epoch.current,
-      kind: 'cancel',
-    } satisfies WorkerRequest);
-    if (!acceptCancellation) requestId.current++;
+  const stopClock = useCallback(() => {
+    clockRunning.current = false;
+    if (clockTimer.current !== null) clearInterval(clockTimer.current);
+    clockTimer.current = null;
+    setRunningState(false);
   }, []);
+  const invalidate = useCallback(
+    (acceptCancellation = false) => {
+      epoch.current++;
+      pending.current = false;
+      stopClock();
+      setBusy(false);
+      worker.current?.postMessage({
+        version: 2,
+        requestId: ++requestId.current,
+        epoch: epoch.current,
+        kind: 'cancel',
+      } satisfies WorkerRequest);
+      if (!acceptCancellation) requestId.current++;
+    },
+    [stopClock],
+  );
+  const setRunning = useCallback(
+    (next: boolean) => {
+      if (!next) {
+        // Pause freezes the last UI-committed checkpoint, including when an
+        // advance or cancellation reply is already on its way from the worker.
+        invalidate();
+        persist();
+      } else if (worker.current && current.current && !pending.current) {
+        clockRunning.current = true;
+        setRunningState(true);
+      }
+    },
+    [invalidate, persist],
+  );
   const send = useCallback(
     (
       kind: WorkerRequest['kind'],
@@ -216,7 +241,7 @@ export function useTwin(design: Design) {
         }
       } catch (problem) {
         setError(diagnosticFor(problem).message);
-        setRunning(false);
+        stopClock();
         return;
       }
       pending.current = true;
@@ -237,7 +262,7 @@ export function useTwin(design: Design) {
           : {}),
       } satisfies WorkerRequest);
     },
-    [],
+    [stopClock],
   );
   useEffect(() => {
     const w = new Worker(new URL('../twin/engine/worker.ts', import.meta.url), {
@@ -249,7 +274,7 @@ export function useTwin(design: Design) {
       epoch.current++;
       pending.current = false;
       setBusy(false);
-      setRunning(false);
+      stopClock();
       setError(
         `Simulation worker interrupted: ${e.message}. Last received checkpoint at ${current.current?.timeS ?? 0}s retained; any later in-flight progress was lost. Resume uses a new worker.`,
       );
@@ -280,7 +305,7 @@ export function useTwin(design: Design) {
         }
         if (r.error) {
           setError(r.error);
-          setRunning(false);
+          stopClock();
         }
       } catch (problem) {
         invalidate();
@@ -293,7 +318,7 @@ export function useTwin(design: Design) {
       w.terminate();
       if (worker.current === w) worker.current = null;
     };
-  }, [workerGeneration, accept, persist, invalidate]);
+  }, [workerGeneration, accept, persist, invalidate, stopClock]);
   useEffect(() => {
     designRef.current = design;
     if (restoredDesign.current === design) {
@@ -309,9 +334,20 @@ export function useTwin(design: Design) {
     send('initialize');
   }, [design, invalidate, send]);
   useEffect(() => {
-    if (!running || state?.designRevision !== design.revision) return;
-    const id = setInterval(() => send('advance', speed), 1000);
-    return () => clearInterval(id);
+    if (
+      !running ||
+      !clockRunning.current ||
+      state?.designRevision !== design.revision
+    )
+      return;
+    const id = setInterval(() => {
+      if (clockRunning.current) send('advance', speed);
+    }, 1000);
+    clockTimer.current = id;
+    return () => {
+      clearInterval(id);
+      if (clockTimer.current === id) clockTimer.current = null;
+    };
   }, [running, speed, send, state?.designRevision, design.revision]);
   const replay = useCallback(
     (
