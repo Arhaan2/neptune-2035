@@ -1,0 +1,337 @@
+{
+  "evidence": "generated",
+  "designRevision": "reference-v2-f74d75ad",
+  "solverVersion": "2.0.0-rc.1",
+  "trace": [
+    {
+      "timeS": 0,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 303.15,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": null,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": []
+    },
+    {
+      "timeS": 30,
+      "itW": 4500000,
+      "facilityW": 5106119.648252722,
+      "gridW": 5106119.648252722,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.81966769889135,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.1346932551672715,
+      "energyPUE": 1.080825112301897,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+        "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 60,
+      "itW": 4500000,
+      "facilityW": 5106119.648252722,
+      "gridW": 5106119.648252722,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 301.4418112178298,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.1346932551672715,
+      "energyPUE": 1.0947565285601915,
+      "electricalResidualW": 0,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+        "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 90,
+      "itW": 4500000,
+      "facilityW": 5106119.648252722,
+      "gridW": 5106119.648252722,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 300.2980662415297,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.1346932551672715,
+      "energyPUE": 1.1029627052602853,
+      "electricalResidualW": 0,
+      "thermalResidualW": 4.656612873077393e-10,
+      "warnings": [
+        "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+        "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 120,
+      "itW": 4500000,
+      "facilityW": 5106119.648252722,
+      "gridW": 5106119.648252722,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 299.348654899498,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.1346932551672715,
+      "energyPUE": 1.1083713217217108,
+      "electricalResidualW": 0,
+      "thermalResidualW": -1.1641532182693481e-10,
+      "warnings": [
+        "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+        "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 150,
+      "itW": 4500000,
+      "facilityW": 5106119.648252722,
+      "gridW": 5106119.648252722,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 298.56055797662043,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.1346932551672715,
+      "energyPUE": 1.1122046130001968,
+      "electricalResidualW": 0,
+      "thermalResidualW": 1.7462298274040222e-10,
+      "warnings": [
+        "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+        "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 180,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 297.906366550468,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.1150633386994067,
+      "electricalResidualW": 0,
+      "thermalResidualW": -3.4924596548080444e-10,
+      "warnings": []
+    },
+    {
+      "timeS": 210,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 298.46697966650515,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.1059189676739742,
+      "electricalResidualW": 0,
+      "thermalResidualW": -5.820766091346741e-11,
+      "warnings": []
+    },
+    {
+      "timeS": 240,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 298.93233904458896,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.100629576590639,
+      "electricalResidualW": 0,
+      "thermalResidualW": -1.7462298274040222e-10,
+      "warnings": []
+    }
+  ],
+  "log": [
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "trip; 8 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/fiber",
+      "message": "Required external path unreachable through shore/fiber; whole job domain platform-002/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 180,
+      "assetId": "shore/fiber",
+      "message": "restore; 8 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    }
+  ]
+}

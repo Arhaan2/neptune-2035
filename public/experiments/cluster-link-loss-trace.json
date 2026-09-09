@@ -1,0 +1,244 @@
+{
+  "evidence": "generated",
+  "designRevision": "reference-v2-42667792",
+  "solverVersion": "2.0.0-rc.1",
+  "trace": [
+    {
+      "timeS": 0,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 303.15,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": null,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": []
+    },
+    {
+      "timeS": 30,
+      "itW": 8599200,
+      "facilityW": 9418343.50686833,
+      "gridW": 9418343.50686833,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 4880,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.81966769889135,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0952581062038713,
+      "energyPUE": 1.080825112301897,
+      "electricalResidualW": 0,
+      "thermalResidualW": -6.548361852765083e-10,
+      "warnings": [
+        "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 60,
+      "itW": 8599200,
+      "facilityW": 9418343.50686833,
+      "gridW": 9418343.50686833,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 4880,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.5454621375024,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0952581062038713,
+      "energyPUE": 1.0865979876257226,
+      "electricalResidualW": 0,
+      "thermalResidualW": -2.764863893389702e-10,
+      "warnings": [
+        "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 90,
+      "itW": 8599200,
+      "facilityW": 9418343.50686833,
+      "gridW": 9418343.50686833,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 4880,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.31784682515104,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0952581062038713,
+      "energyPUE": 1.089072208570274,
+      "electricalResidualW": 0,
+      "thermalResidualW": 2.3283064365386963e-10,
+      "warnings": [
+        "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 120,
+      "itW": 8599200,
+      "facilityW": 9418343.50686833,
+      "gridW": 9418343.50686833,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 4880,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.1289056156644,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0952581062038713,
+      "energyPUE": 1.0904468098615892,
+      "electricalResidualW": 0,
+      "thermalResidualW": -2.3283064365386963e-10,
+      "warnings": [
+        "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 150,
+      "itW": 8599200,
+      "facilityW": 9418343.50686833,
+      "gridW": 9418343.50686833,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 4880,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 301.97206739474905,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0952581062038713,
+      "energyPUE": 1.0913215688200484,
+      "electricalResidualW": 0,
+      "thermalResidualW": 2.3283064365386963e-10,
+      "warnings": [
+        "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw"
+      ]
+    },
+    {
+      "timeS": 180,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 301.8418775457121,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.0919271769542773,
+      "electricalResidualW": 0,
+      "thermalResidualW": 2.6921043172478676e-10,
+      "warnings": []
+    },
+    {
+      "timeS": 210,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 301.7338082454275,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.089845418799518,
+      "electricalResidualW": 0,
+      "thermalResidualW": 2.473825588822365e-10,
+      "warnings": []
+    },
+    {
+      "timeS": 240,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 301.6441009929002,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.0884210901442917,
+      "electricalResidualW": 0,
+      "thermalResidualW": -2.3283064365386963e-10,
+      "warnings": []
+    }
+  ],
+  "log": [
+    {
+      "timeS": 30,
+      "assetId": "platform-001/cluster",
+      "message": "trip; 4 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/cluster",
+      "message": "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/cluster",
+      "message": "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/cluster",
+      "message": "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/cluster",
+      "message": "Required cluster path unreachable through platform-001/cluster; whole job domain platform-001/cluster unavailable; energized nodes retain idle draw",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 180,
+      "assetId": "platform-001/cluster",
+      "message": "restore; 4 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ]
+    }
+  ]
+}

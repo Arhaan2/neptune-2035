@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 test('capture the first coherent 3D slice', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('./');
+  await page.goto('./?legacy=1');
   await expect(page.locator('main')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('canvas')).toBeVisible();
   await page.waitForTimeout(1800);

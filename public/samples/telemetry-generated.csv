@@ -1,0 +1,6 @@
+assetId,metric,value,unit,sourceId,evidence,observedAt,receivedAt,sequence,quality,mappingVersion
+platform-001/module-01,temperatureK,37,C,generated:import-fixture,generated,2026-01-01T00:00:00.000Z,2026-01-01T00:00:00.050Z,0,fixture-generated|simulated-clock,reference-v2-aa6189d9
+platform-001/module-01,temperatureK,37.1,C,generated:import-fixture,generated,2026-01-01T00:00:01.000Z,2026-01-01T00:00:01.050Z,1,fixture-generated|simulated-clock,reference-v2-aa6189d9
+platform-001/module-01,temperatureK,37.2,C,generated:import-fixture,generated,2026-01-01T00:00:02.000Z,2026-01-01T00:00:02.050Z,2,fixture-generated|simulated-clock,reference-v2-aa6189d9
+platform-001/module-01,temperatureK,37.4,C,generated:import-fixture,generated,2026-01-01T00:00:04.000Z,2026-01-01T00:00:04.050Z,4,fixture-generated|simulated-clock,reference-v2-aa6189d9
+platform-001/module-01,temperatureK,37.5,C,generated:import-fixture,generated,2026-01-01T00:00:05.000Z,2026-01-01T00:00:05.050Z,5,fixture-generated|simulated-clock,reference-v2-aa6189d9

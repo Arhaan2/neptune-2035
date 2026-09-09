@@ -1,0 +1,51 @@
+{
+  "airTransientRK4": {
+    "absoluteToleranceK": 1e-07,
+    "ambientK": 298.15,
+    "capacitanceJPerK": 12000000,
+    "conductanceWPerK": 22500,
+    "durationS": 120,
+    "finalK": 299.04548347218207,
+    "initialK": 298.15,
+    "powerW": 100000,
+    "stepS": 0.01
+  },
+  "batteryDischarge": {
+    "absoluteToleranceWh": 1e-08,
+    "durationS": 30.0,
+    "efficiency": 0.95,
+    "finalWh": 5614.035087719299,
+    "initialWh": 10000.0,
+    "terminalW": 500000.0
+  },
+  "evidence": "independent numerical verification; no measurements",
+  "generator": "reference/benchmarks.py",
+  "heatExchangerEqualCapacity": {
+    "absoluteToleranceW": 1e-07,
+    "capacityRateWPerK": 1000,
+    "coldInletK": 293.15,
+    "coldOutletK": 303.15,
+    "effectiveness": 0.5,
+    "heatW": 10000.0,
+    "hotInletK": 313.15,
+    "hotOutletK": 303.15,
+    "uaWPerK": 1000
+  },
+  "hydraulicQuadratic": {
+    "absoluteFlowToleranceM3S": 1e-10,
+    "absolutePressureTolerancePa": 0.01,
+    "fittingsK": 0,
+    "flowM3S": 0.06622661785325219,
+    "lengthM": 0,
+    "pressurePa": 140350.87719298244,
+    "pumpElectricalW": 12909.672096150525
+  },
+  "rectangularPontoons": {
+    "densityKgM3": 1025,
+    "draftM": 1.4017381553125876,
+    "freeboardM": 3.5982618446874124,
+    "massKg": 1000000,
+    "waterplaneM2": 696
+  },
+  "schemaVersion": 1
+}

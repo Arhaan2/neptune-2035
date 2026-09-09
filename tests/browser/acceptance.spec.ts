@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import sharp from 'sharp';
 const root = (page: Page) => page.locator('main');
 async function load(page: Page) {
-  await page.goto('./');
+  await page.goto('./?legacy=1');
   await expect(root(page)).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('canvas')).toBeVisible();
   await page.waitForTimeout(1600);
@@ -241,7 +241,7 @@ test('mobile controls, contextual inspection and explicit WebGL fallback', async
     page.getByRole('button', { name: 'Exit inside', exact: true }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Exit inside', exact: true }).click();
-  await page.goto('./?fallback=1');
+  await page.goto('./?legacy=1&fallback=1');
   await expect(
     page.getByText('SCHEMATIC VIEW · WEBGL2 UNAVAILABLE'),
   ).toBeVisible();

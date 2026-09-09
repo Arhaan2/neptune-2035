@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "kind": "neptune-project",
+  "design": {
+    "schemaVersion": 2,
+    "generation": 2,
+    "requestedAccelerators": 10000,
+    "supplyW": 30000000,
+    "standbyPumps": 1,
+    "seawaterK": 291.15,
+    "workload": 0.8,
+    "idleFraction": 0.3,
+    "exchangerUAWPerK": 350000,
+    "foulingResistanceKPerW": 0,
+    "batteryWhPerModule": 400000,
+    "batteryMaxWPerModule": 2200000,
+    "pumpSpeed": 1,
+    "requireExternalNetwork": false,
+    "requireClusterNetwork": true,
+    "budgetUSD": null
+  },
+  "events": [
+    {
+      "id": "load",
+      "timeS": 0,
+      "kind": "workload",
+      "assetId": "shore/grid",
+      "value": 1
+    },
+    {
+      "id": "feeder-loss",
+      "timeS": 30,
+      "kind": "trip",
+      "assetId": "platform-001/switchboard"
+    },
+    {
+      "id": "feeder-return",
+      "timeS": 1200,
+      "kind": "restore",
+      "assetId": "platform-001/switchboard"
+    }
+  ],
+  "timeS": 1260,
+  "sourceMode": "simulated",
+  "solverVersion": "2.0.0-rc.1"
+}

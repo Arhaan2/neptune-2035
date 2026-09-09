@@ -1,6 +1,6 @@
 {
   "name": "neptune",
-  "version": "0.1.0",
+  "version": "2.0.0-rc.1",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -13,7 +13,12 @@
     "format": "oxfmt",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "evidence:twin": "node scripts/generate-twin-evidence.mjs",
+    "telemetry:publisher": "node scripts/telemetry-publisher.mjs",
+    "test:telemetry": "NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 vitest run tests/twin-telemetry.test.ts",
+    "package:preview": "node scripts/package-preview.mjs",
+    "licenses:notice": "node scripts/third-party-notices.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

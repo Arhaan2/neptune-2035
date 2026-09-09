@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "kind": "neptune-project",
+  "design": {
+    "schemaVersion": 2,
+    "generation": 1,
+    "requestedAccelerators": 1280,
+    "supplyW": 30000000,
+    "standbyPumps": 1,
+    "seawaterK": 291.15,
+    "workload": 0.8,
+    "idleFraction": 0.3,
+    "exchangerUAWPerK": 350000,
+    "foulingResistanceKPerW": 0,
+    "batteryWhPerModule": 400000,
+    "batteryMaxWPerModule": 2200000,
+    "pumpSpeed": 1,
+    "requireExternalNetwork": false,
+    "requireClusterNetwork": true,
+    "budgetUSD": null
+  },
+  "events": [
+    {
+      "id": "load",
+      "timeS": 0,
+      "kind": "workload",
+      "assetId": "shore/grid",
+      "value": 1
+    },
+    {
+      "id": "exchanger-fouling",
+      "timeS": 30,
+      "kind": "fouling",
+      "assetId": "shore/grid",
+      "value": 0.00001
+    }
+  ],
+  "timeS": 300,
+  "sourceMode": "simulated",
+  "solverVersion": "2.0.0-rc.1"
+}

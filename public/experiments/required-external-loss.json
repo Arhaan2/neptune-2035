@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 2,
+  "kind": "neptune-project",
+  "design": {
+    "schemaVersion": 2,
+    "generation": 2,
+    "requestedAccelerators": 10000,
+    "supplyW": 30000000,
+    "standbyPumps": 1,
+    "seawaterK": 291.15,
+    "workload": 0.8,
+    "idleFraction": 0.3,
+    "exchangerUAWPerK": 350000,
+    "foulingResistanceKPerW": 0,
+    "batteryWhPerModule": 400000,
+    "batteryMaxWPerModule": 2200000,
+    "pumpSpeed": 1,
+    "requireExternalNetwork": true,
+    "requireClusterNetwork": true,
+    "budgetUSD": null
+  },
+  "events": [
+    {
+      "id": "disturbance",
+      "timeS": 30,
+      "kind": "trip",
+      "assetId": "shore/fiber"
+    },
+    {
+      "id": "recovery",
+      "timeS": 180,
+      "kind": "restore",
+      "assetId": "shore/fiber"
+    }
+  ],
+  "timeS": 240,
+  "sourceMode": "simulated",
+  "solverVersion": "2.0.0-rc.1"
+}

@@ -1,5 +1,34 @@
 # NEPTUNE
 
+## v2 release candidate
+
+**Design-stage digital twin · Simulated operation.** The v2 branch implements a dimensioned, asset-linked offshore reference design, a pure TypeScript worker simulation, deterministic pump/feeder failures and recovery, finite UPS behavior, distinct power/network domains, observation import/replay/read-only streaming, bounded calibration, comparison/sizing and traceable exports.
+
+The preserved v0.1.0 production release below is unchanged. In a v2 build, open `?legacy=1` for its original model; existing `#s=` scenarios also select Legacy mode without reinterpreting their assumed PUE.
+
+Start with **Explore → Cooling close-up → Inspect duty pump**. In **Operate**, use **Trip selected asset**, **Step 10s**, **Restore selected asset**, and **Replay**. **Compare pump experiment** runs the same timestamped disturbance with zero and one standby pump. The scene, ports, numerical values and log use the same exact asset identity. There is no physical facility or measured commissioning claim.
+
+```sh
+npm ci
+npm run dev
+npm run typecheck
+npm run lint
+npm test
+npm run test:browser
+npm run test:telemetry   # requires the local dev server; opens native Chromium
+npm run evidence:twin
+npm run build
+```
+
+For a real read-only local test stream, run the command displayed in **Data & replay**, which includes the current design mapping version. `scripts/telemetry-publisher.mjs` runs independently of the static site. It is not deployed on GitHub Pages.
+
+- [Baseline audit](docs/v2/BASELINE.md), [architecture](docs/v2/ARCHITECTURE.md), [reference design](docs/v2/REFERENCE-DESIGN.md), [requirement matrix](docs/v2/REQUIREMENTS.md).
+- [Model cards and numerical tolerances](docs/v2/MODELS.md), [data contract / samples / calibration](docs/v2/DATA.md), [scene and export fidelity](docs/v2/SCENE.md).
+- [Independent equation harness](reference/benchmarks.py), [reproducible pump experiment files](public/experiments/index.json).
+- [Release candidate and remaining limits](docs/v2/RELEASE-CANDIDATE.md).
+
+The following is the preserved v0.1.0 product/release description.
+
 **Design the AI Data Center of 2035** — an interactive 3D offshore AI infrastructure concept by **Arhaan Aggarwal**.
 
 [Open NEPTUNE](https://arhaan2.github.io/neptune-2035/) · [Source repository](https://github.com/Arhaan2/neptune-2035) · [Release record](docs/RELEASE.md)

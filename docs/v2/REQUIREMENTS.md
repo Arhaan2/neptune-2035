@@ -14,7 +14,7 @@ Status records delivered scope, not a global feasible badge. Browser/hosted acce
 | C-03 | Feeder/UPS, isolation, network faults | graph traversal, battery limits | energy conservation, reserve/exhaustion, graph fault tests |
 | D-01 | Hierarchical campus and families | lazy nodes/racks, all platform instances | >25-platform +million-accelerator tests |
 | D-02 | Mass/draft/freeboard/packing | canonical floating geometry, reports | floated hull and unknown-mass regression tests |
-| D-03 | Network reachability | cluster/external graphs + explicit job needs | disconnect tests; demand bottleneck remains unassessed without traffic specification |
+| D-03 | Network reachability and demand | cluster/external graphs + required job needs + versioned offered traffic | exact disconnect, edge/port bottleneck, idle dispatch and whole job-domain tests |
 | D-04 | Advanced distribution | III open ties recorded | closed meshed ties unsupported; no redundancy credit |
 | E-01 | Generated, imported, replayed observations | telemetry generator/parser/store | telemetry schema/units/source/stale/gap tests |
 | E-02 | Real local read-only stream | native EventSource + local publisher | actual HTTP/CORS/Last-Event-ID/reconnect browser tests |
