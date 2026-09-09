@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 2,
+  "evidence": "generated",
+  "physicalValidation": "pending",
+  "experiments": [
+    {
+      "name": "module-pump-0-standby",
+      "designRevision": "reference-v2-b4ef91f0",
+      "summary": {
+        "timeS": 240,
+        "itW": 1920000,
+        "facilityW": 2066314.0105806736,
+        "gridW": 2066314.0105806736,
+        "pumpPowerW": 26238.098457988322,
+        "availableAccelerators": 1280,
+        "energizedAccelerators": 1280,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 310.7505333104916,
+        "batteryWh": 400000,
+        "instantaneousPUE": 1.0762052138441007,
+        "energyPUE": 1.071545248408164,
+        "electricalResidualW": 0,
+        "thermalResidualW": 1.1641532182693481e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "module-pump-1-standby",
+      "designRevision": "reference-v2-bcb507c9",
+      "summary": {
+        "timeS": 240,
+        "itW": 1920000,
+        "facilityW": 2066314.0081691882,
+        "gridW": 2066314.0081691882,
+        "pumpPowerW": 26238.0961656302,
+        "availableAccelerators": 1280,
+        "energizedAccelerators": 1280,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 303.0710948305798,
+        "batteryWh": 400000,
+        "instantaneousPUE": 1.0762052125881187,
+        "energyPUE": 1.075961554264673,
+        "electricalResidualW": 0,
+        "thermalResidualW": -1.1641532182693481e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "family-1-feeder-recovery",
+      "designRevision": "reference-v2-aa6189d9",
+      "summary": {
+        "timeS": 1260,
+        "itW": 15000000,
+        "facilityW": 16292152.423762597,
+        "gridW": 17600000,
+        "pumpPowerW": 209878.34080273187,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 302.8236130562337,
+        "batteryWh": 341818.8543353198,
+        "instantaneousPUE": 1.0861434949175064,
+        "energyPUE": 1.0782577228707169,
+        "electricalResidualW": 0,
+        "thermalResidualW": -4.656612873077393e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "family-2-feeder-recovery",
+      "designRevision": "reference-v2-42667792",
+      "summary": {
+        "timeS": 1260,
+        "itW": 15000000,
+        "facilityW": 16203609.168371383,
+        "gridW": 16686533.556420071,
+        "pumpPowerW": 209877.33762903718,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 302.8298436579638,
+        "batteryWh": 1768059.1304768925,
+        "instantaneousPUE": 1.080240611224759,
+        "energyPUE": 1.0773856138656646,
+        "electricalResidualW": 0,
+        "thermalResidualW": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "family-3-feeder-recovery",
+      "designRevision": "reference-v2-892e264f",
+      "summary": {
+        "timeS": 1260,
+        "itW": 15000000,
+        "facilityW": 16203609.168371383,
+        "gridW": 16686533.556420071,
+        "pumpPowerW": 209877.33762903718,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 302.8298436579638,
+        "batteryWh": 1768059.1304768925,
+        "instantaneousPUE": 1.080240611224759,
+        "energyPUE": 1.0773856138656646,
+        "electricalResidualW": 0,
+        "thermalResidualW": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "warm-seawater",
+      "designRevision": "reference-v2-bcb507c9",
+      "summary": {
+        "timeS": 300,
+        "itW": 1920000,
+        "facilityW": 2066314.0081691882,
+        "gridW": 2066314.0081691882,
+        "pumpPowerW": 26238.0961656302,
+        "availableAccelerators": 1280,
+        "energizedAccelerators": 1280,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 312.63473986796475,
+        "batteryWh": 400000,
+        "instantaneousPUE": 1.0762052125881187,
+        "energyPUE": 1.0762052125881212,
+        "electricalResidualW": 0,
+        "thermalResidualW": -1.1641532182693481e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "exchanger-fouling",
+      "designRevision": "reference-v2-bcb507c9",
+      "summary": {
+        "timeS": 300,
+        "itW": 1920000,
+        "facilityW": 2066314.0081691882,
+        "gridW": 2066314.0081691882,
+        "pumpPowerW": 26238.0961656302,
+        "availableAccelerators": 1280,
+        "energizedAccelerators": 1280,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 311.4889099971794,
+        "batteryWh": 400000,
+        "instantaneousPUE": 1.0762052125881187,
+        "energyPUE": 1.0762052125881212,
+        "electricalResidualW": 0,
+        "thermalResidualW": -1.1641532182693481e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "workload-ramp",
+      "designRevision": "reference-v2-bcb507c9",
+      "summary": {
+        "timeS": 300,
+        "itW": 1920000,
+        "facilityW": 2066314.0081691882,
+        "gridW": 2066314.0081691882,
+        "pumpPowerW": 26238.0961656302,
+        "availableAccelerators": 1280,
+        "energizedAccelerators": 1280,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 302.5185841500951,
+        "batteryWh": 400000,
+        "instantaneousPUE": 1.0762052125881187,
+        "energyPUE": 1.0786316824349118,
+        "electricalResidualW": 0,
+        "thermalResidualW": -1.1641532182693481e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "module-maintenance",
+      "designRevision": "reference-v2-42667792",
+      "summary": {
+        "timeS": 240,
+        "itW": 12899999.999999998,
+        "facilityW": 13942643.948694544,
+        "gridW": 13942643.948694544,
+        "pumpPowerW": 209877.33762903718,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 302.3178354475635,
+        "batteryWh": 3200000,
+        "instantaneousPUE": 1.0808251123019028,
+        "energyPUE": 1.080883927824817,
+        "electricalResidualW": 0,
+        "thermalResidualW": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "cluster-link-loss",
+      "designRevision": "reference-v2-42667792",
+      "summary": {
+        "timeS": 240,
+        "itW": 12899999.999999998,
+        "facilityW": 13942643.948694544,
+        "gridW": 13942643.948694544,
+        "pumpPowerW": 209877.33762903718,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 301.6441009929002,
+        "batteryWh": 3200000,
+        "instantaneousPUE": 1.0808251123019028,
+        "energyPUE": 1.0884210901442917,
+        "electricalResidualW": 0,
+        "thermalResidualW": -2.3283064365386963e-10,
+        "warnings": []
+      }
+    },
+    {
+      "name": "required-external-loss",
+      "designRevision": "reference-v2-f74d75ad",
+      "summary": {
+        "timeS": 240,
+        "itW": 12899999.999999998,
+        "facilityW": 13942643.948694544,
+        "gridW": 13942643.948694544,
+        "pumpPowerW": 209877.33762903718,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 298.93233904458896,
+        "batteryWh": 3200000,
+        "instantaneousPUE": 1.0808251123019028,
+        "energyPUE": 1.100629576590639,
+        "electricalResidualW": 0,
+        "thermalResidualW": -1.7462298274040222e-10,
+        "warnings": []
+      }
+    }
+  ]
+}

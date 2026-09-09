@@ -1,0 +1,152 @@
+[
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:00.000Z",
+    "observedHeatW": 2244164.1472324296,
+    "boundary": {
+      "technicalInletK": 309,
+      "seawaterInletK": 291,
+      "technicalFlowM3S": 0.05,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:01.000Z",
+    "observedHeatW": 2341885.523673873,
+    "boundary": {
+      "technicalInletK": 310,
+      "seawaterInletK": 291.3333333333333,
+      "technicalFlowM3S": 0.051000000000000004,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:02.000Z",
+    "observedHeatW": 2440128.7603179733,
+    "boundary": {
+      "technicalInletK": 311,
+      "seawaterInletK": 291.6666666666667,
+      "technicalFlowM3S": 0.052000000000000005,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:03.000Z",
+    "observedHeatW": 2538865.8672372396,
+    "boundary": {
+      "technicalInletK": 312,
+      "seawaterInletK": 292,
+      "technicalFlowM3S": 0.053000000000000005,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:04.000Z",
+    "observedHeatW": 2638070.726223922,
+    "boundary": {
+      "technicalInletK": 313,
+      "seawaterInletK": 292.3333333333333,
+      "technicalFlowM3S": 0.054000000000000006,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:05.000Z",
+    "observedHeatW": 2737718.9447011356,
+    "boundary": {
+      "technicalInletK": 314,
+      "seawaterInletK": 292.6666666666667,
+      "technicalFlowM3S": 0.055,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:06.000Z",
+    "observedHeatW": 2837787.7223223853,
+    "boundary": {
+      "technicalInletK": 315,
+      "seawaterInletK": 293,
+      "technicalFlowM3S": 0.056,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:07.000Z",
+    "observedHeatW": 2938255.729086159,
+    "boundary": {
+      "technicalInletK": 316,
+      "seawaterInletK": 293.3333333333333,
+      "technicalFlowM3S": 0.057,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:08.000Z",
+    "observedHeatW": 3039102.9939015633,
+    "boundary": {
+      "technicalInletK": 317,
+      "seawaterInletK": 293.6666666666667,
+      "technicalFlowM3S": 0.058,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  },
+  {
+    "assetId": "platform-001/module-01/hx",
+    "mappingVersion": "reference-v2-aa6189d9",
+    "sourceId": "generated:calibration-fixture",
+    "evidence": "generated",
+    "observedAt": "2026-01-01T00:00:09.000Z",
+    "observedHeatW": 3140310.802640722,
+    "boundary": {
+      "technicalInletK": 318,
+      "seawaterInletK": 294,
+      "technicalFlowM3S": 0.059000000000000004,
+      "seawaterFlowM3S": 0.06,
+      "foulingResistanceKPerW": 0
+    }
+  }
+]

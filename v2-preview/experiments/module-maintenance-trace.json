@@ -1,0 +1,244 @@
+{
+  "evidence": "generated",
+  "designRevision": "reference-v2-42667792",
+  "solverVersion": "2.0.0-rc.1",
+  "trace": [
+    {
+      "timeS": 0,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 303.15,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": null,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": []
+    },
+    {
+      "timeS": 30,
+      "itW": 11248799.999999998,
+      "facilityW": 12159102.35946245,
+      "gridW": 12159102.35946245,
+      "pumpPowerW": 183642.7029050079,
+      "availableAccelerators": 8720,
+      "energizedAccelerators": 8720,
+      "curtailedAccelerators": 1280,
+      "maxCoolantK": 302.81966769889135,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0809243972212548,
+      "energyPUE": 1.080825112301897,
+      "electricalResidualW": 0,
+      "thermalResidualW": 9.094947017729282e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 60,
+      "itW": 11248799.999999998,
+      "facilityW": 12159102.35946245,
+      "gridW": 12159102.35946245,
+      "pumpPowerW": 183642.7029050079,
+      "availableAccelerators": 8720,
+      "energizedAccelerators": 8720,
+      "curtailedAccelerators": 1280,
+      "maxCoolantK": 302.8196630578736,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0809243972212548,
+      "energyPUE": 1.0808713604053624,
+      "electricalResidualW": 0,
+      "thermalResidualW": 1.4551915228366852e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 90,
+      "itW": 11248799.999999998,
+      "facilityW": 12159102.35946245,
+      "gridW": 12159102.35946245,
+      "pumpPowerW": 183642.7029050079,
+      "availableAccelerators": 8720,
+      "energizedAccelerators": 8720,
+      "curtailedAccelerators": 1280,
+      "maxCoolantK": 302.8196630578736,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0809243972212548,
+      "energyPUE": 1.0808882146704704,
+      "electricalResidualW": 0,
+      "thermalResidualW": 5.820766091346741e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 120,
+      "itW": 11248799.999999998,
+      "facilityW": 12159102.35946245,
+      "gridW": 12159102.35946245,
+      "pumpPowerW": 183642.7029050079,
+      "availableAccelerators": 8720,
+      "energizedAccelerators": 8720,
+      "curtailedAccelerators": 1280,
+      "maxCoolantK": 302.8196630578736,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0809243972212548,
+      "energyPUE": 1.0808969401085915,
+      "electricalResidualW": 0,
+      "thermalResidualW": 5.820766091346741e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 150,
+      "itW": 11248799.999999998,
+      "facilityW": 12159102.35946245,
+      "gridW": 12159102.35946245,
+      "pumpPowerW": 183642.7029050079,
+      "availableAccelerators": 8720,
+      "energizedAccelerators": 8720,
+      "curtailedAccelerators": 1280,
+      "maxCoolantK": 302.8196630578736,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0809243972212548,
+      "energyPUE": 1.0809022749130042,
+      "electricalResidualW": 0,
+      "thermalResidualW": 1.0186340659856796e-10,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 180,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.8196630578736,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.0809058739154025,
+      "electricalResidualW": 0,
+      "thermalResidualW": 6.912159733474255e-11,
+      "warnings": []
+    },
+    {
+      "timeS": 210,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.54545376197785,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.080893175548523,
+      "electricalResidualW": 0,
+      "thermalResidualW": 1.4551915228366852e-11,
+      "warnings": []
+    },
+    {
+      "timeS": 240,
+      "itW": 12899999.999999998,
+      "facilityW": 13942643.948694544,
+      "gridW": 13942643.948694544,
+      "pumpPowerW": 209877.33762903718,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.3178354475635,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0808251123019028,
+      "energyPUE": 1.080883927824817,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": []
+    }
+  ],
+  "log": [
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01",
+      "message": "maintenance; 1 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "Module isolation removes load and pump power",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01/pump-standby",
+      "message": "Module isolation removes load and pump power",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01/pump-sea",
+      "message": "Module isolation removes load and pump power",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 180,
+      "assetId": "platform-001/module-01",
+      "message": "restore; 1 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 180,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 180,
+      "assetId": "platform-001/module-01/pump-standby",
+      "message": "Duty restored; redundant pump held in standby",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    }
+  ]
+}

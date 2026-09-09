@@ -1,0 +1,1063 @@
+{
+  "evidence": "generated",
+  "designRevision": "reference-v2-aa6189d9",
+  "solverVersion": "2.0.0-rc.1",
+  "trace": [
+    {
+      "timeS": 0,
+      "itW": 15000000,
+      "facilityW": 16151776.079110805,
+      "gridW": 16151776.079110805,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 303.15,
+      "batteryWh": 3200000,
+      "instantaneousPUE": 1.0767850719407204,
+      "energyPUE": null,
+      "electricalResidualW": 0,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": []
+    },
+    {
+      "timeS": 60,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 303.0504238461135,
+      "batteryWh": 3065316.856659626,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0771251093318555,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.511093720793724e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 120,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.9818108314665,
+      "batteryWh": 2795950.569978877,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0772951280274436,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.5838532969355583e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 180,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.9345329883764,
+      "batteryWh": 2526584.283298129,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0773518009259422,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 240,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.9019561593486,
+      "batteryWh": 2257217.9966173805,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0773801373751861,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 300,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.87950907377626,
+      "batteryWh": 1987851.7099366314,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0773971392447563,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.511093720793724e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 360,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.8640418946274,
+      "batteryWh": 1718485.4232558808,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0774084738244778,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.802132025361061e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 420,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.8533842246124,
+      "batteryWh": 1449119.1365751307,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0774165699528502,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 480,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.8460405500446,
+      "batteryWh": 1179752.8498943802,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0774226420491337,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 540,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.84098038623034,
+      "batteryWh": 910386.5632136305,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0774273647906698,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 600,
+      "itW": 15000000,
+      "facilityW": 16161977.200844979,
+      "gridW": 0,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.8374936770096,
+      "batteryWh": 641020.27653288,
+      "instantaneousPUE": 1.0774651467229985,
+      "energyPUE": 1.0774311429838799,
+      "electricalResidualW": 1.6298145055770874e-9,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": [
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 660,
+      "itW": 1560000,
+      "facilityW": 1688668.2369199765,
+      "gridW": 0,
+      "pumpPowerW": 26234.8250739777,
+      "availableAccelerators": 1040,
+      "energizedAccelerators": 1040,
+      "curtailedAccelerators": 8960,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 384501.04556768195,
+      "instantaneousPUE": 1.082479639051267,
+      "energyPUE": 1.0774432522953696,
+      "electricalResidualW": 0,
+      "thermalResidualW": -5.820766091346741e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 720,
+      "itW": 1560000,
+      "facilityW": 1688668.2369199765,
+      "gridW": 0,
+      "pumpPowerW": 26234.8250739777,
+      "availableAccelerators": 1040,
+      "energizedAccelerators": 1040,
+      "curtailedAccelerators": 8960,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 356356.57495234883,
+      "instantaneousPUE": 1.082479639051267,
+      "energyPUE": 1.0774906269440616,
+      "electricalResidualW": 0,
+      "thermalResidualW": -5.820766091346741e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 780,
+      "itW": 1560000,
+      "facilityW": 1688668.2369199765,
+      "gridW": 0,
+      "pumpPowerW": 26234.8250739777,
+      "availableAccelerators": 1040,
+      "energizedAccelerators": 1040,
+      "curtailedAccelerators": 8960,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 328212.1043370157,
+      "instantaneousPUE": 1.082479639051267,
+      "energyPUE": 1.077537118641269,
+      "electricalResidualW": 0,
+      "thermalResidualW": -5.820766091346741e-11,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "UPS discharging: finite power and energy, 10% reserve"
+      ]
+    },
+    {
+      "timeS": 840,
+      "itW": 0,
+      "facilityW": 0,
+      "gridW": 0,
+      "pumpPowerW": 0,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 0,
+      "curtailedAccelerators": 10000,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": null,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "130 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 900,
+      "itW": 0,
+      "facilityW": 0,
+      "gridW": 0,
+      "pumpPowerW": 0,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 0,
+      "curtailedAccelerators": 10000,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": null,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "130 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 960,
+      "itW": 0,
+      "facilityW": 0,
+      "gridW": 0,
+      "pumpPowerW": 0,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 0,
+      "curtailedAccelerators": 10000,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": null,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "130 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 1020,
+      "itW": 0,
+      "facilityW": 0,
+      "gridW": 0,
+      "pumpPowerW": 0,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 0,
+      "curtailedAccelerators": 10000,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": null,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "130 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 1080,
+      "itW": 0,
+      "facilityW": 0,
+      "gridW": 0,
+      "pumpPowerW": 0,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 0,
+      "curtailedAccelerators": 10000,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": null,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "130 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 1140,
+      "itW": 0,
+      "facilityW": 0,
+      "gridW": 0,
+      "pumpPowerW": 0,
+      "availableAccelerators": 0,
+      "energizedAccelerators": 0,
+      "curtailedAccelerators": 10000,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": null,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": 0,
+      "warnings": [
+        "160 whole compute nodes curtailed or isolated",
+        "UPS cannot support the minimum critical load at its remaining power/energy limit",
+        "130 whole compute nodes curtailed or isolated"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "itW": 15000000,
+      "facilityW": 16292152.423762597,
+      "gridW": 17600000,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.82083582856126,
+      "batteryWh": 320021.39473136317,
+      "instantaneousPUE": 1.0861434949175064,
+      "energyPUE": 1.0775530354186835,
+      "electricalResidualW": 0,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": []
+    },
+    {
+      "timeS": 1260,
+      "itW": 15000000,
+      "facilityW": 16292152.423762597,
+      "gridW": 17600000,
+      "pumpPowerW": 209878.34080273187,
+      "availableAccelerators": 10000,
+      "energizedAccelerators": 10000,
+      "curtailedAccelerators": 0,
+      "maxCoolantK": 302.8236130562337,
+      "batteryWh": 341818.8543353198,
+      "instantaneousPUE": 1.0861434949175064,
+      "energyPUE": 1.0782577228707169,
+      "electricalResidualW": 0,
+      "thermalResidualW": -4.656612873077393e-10,
+      "warnings": []
+    }
+  ],
+  "log": [
+    {
+      "timeS": 0,
+      "assetId": "shore/grid",
+      "message": "workload = 1 fraction; 8 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "shore/bus",
+      "message": "trip; 8 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-02",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-03",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-04",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-002/module-01",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-002/module-02",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-002/module-03",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-002/module-04",
+      "message": "UPS discharging: finite power and energy, 10% reserve",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-001/module-01",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-001/module-02",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-001/module-03",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-001/module-04",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-002/module-01",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-002/module-02",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 656,
+      "assetId": "platform-002/module-03",
+      "message": "32 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-01/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-01",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-01",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-02/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-02/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-02",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-02",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-03/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-03/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-03",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-03",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-04/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-04/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-04",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-001/module-04",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-01/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-01/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-01",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-01",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-02/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-02/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-02",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-02",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-03/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-03/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-03",
+      "message": "160 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 657,
+      "assetId": "platform-002/module-03",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 797,
+      "assetId": "platform-002/module-04",
+      "message": "72 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 798,
+      "assetId": "platform-002/module-04/pump-duty",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 798,
+      "assetId": "platform-002/module-04/pump-sea",
+      "message": "Pump not powered: critical bus unavailable; motor stopped",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 798,
+      "assetId": "platform-002/module-04",
+      "message": "130 whole compute nodes curtailed or isolated",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 798,
+      "assetId": "platform-002/module-04",
+      "message": "UPS cannot support the minimum critical load at its remaining power/energy limit",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "shore/bus",
+      "message": "restore; 8 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04",
+        "platform-002/module-01",
+        "platform-002/module-02",
+        "platform-002/module-03",
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-01/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-02/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-02/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-02"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-03/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-03/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-03"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-04/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-001/module-04/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-04"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-01/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-01/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-01"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-02/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-02/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-02"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-03/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-03/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-03"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-04/pump-duty",
+      "message": "Pump power restored; Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    },
+    {
+      "timeS": 1200,
+      "assetId": "platform-002/module-04/pump-sea",
+      "message": "Pump power restored; seawater pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-002/module-04"
+      ]
+    }
+  ]
+}
