@@ -1,0 +1,145 @@
+{
+  "reviewedAt": "2026-09-09T23:09:51.517Z",
+  "kind": "independent-hosted-diagnostic-interpretation",
+  "acceptanceClaim": false,
+  "sourceCandidate": "a1c81c264f28adfde3290b17f3746b974f333f49",
+  "scriptSha256": "8c50071b4a1766f5c90370dfbc101857911b63ceff43f9cc25e56bdf3f828228",
+  "rawReports": {
+    "push": {
+      "path": "artifacts/phase-1/ci-software-diagnostic-push/diagnostic.json",
+      "sha256": "12a847c622dc86839f5abf8d54fd59b35e81a66bff37818774884b0adcc70f98",
+      "sourceSha": "a1c81c264f28adfde3290b17f3746b974f333f49",
+      "status": "INCOMPLETE",
+      "elapsedMs": 88431.95,
+      "pageEntries": 9,
+      "budgetExpired": true,
+      "registeredGroupsAbsent": true
+    },
+    "pr": {
+      "path": "artifacts/phase-1/ci-software-diagnostic-pr/diagnostic.json",
+      "sha256": "04891c9717e6d7a02cb70cea6d2732e3aeaec60e580ba916faac5c203d6fcd9d",
+      "sourceSha": "e0a7270c530eab7079aa6752dd2bc9314e50fd7f",
+      "status": "COLLECTED",
+      "elapsedMs": 77372.73,
+      "pageEntries": 9,
+      "budgetExpired": false,
+      "registeredGroupsAbsent": true
+    }
+  },
+  "host": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M1 (Virtual)",
+    "logicalCpus": 3,
+    "totalMemoryBytes": 7516192768,
+    "node": "v24.20.0"
+  },
+  "observations": {
+    "readiness": "Owned Vite API readiness and all three fresh Firefox launches completed in both runs.",
+    "blankNativeSamples": {
+      "push": [
+        {
+          "variant": "headless-software-clock-60",
+          "elapsedMs": 3071,
+          "rafCount": 64,
+          "timerCount": 21,
+          "maxRafGapMs": 85.65999999999985,
+          "maxTimerGapMs": 177
+        },
+        {
+          "variant": "headless-software-clock-60-software-webrender",
+          "elapsedMs": 3019,
+          "rafCount": 77,
+          "timerCount": 21,
+          "maxRafGapMs": 82.66000000000008,
+          "maxTimerGapMs": 176
+        },
+        {
+          "variant": "headless-default-clock",
+          "elapsedMs": 3027,
+          "rafCount": 181,
+          "timerCount": 21,
+          "maxRafGapMs": 21.299999999999955,
+          "maxTimerGapMs": 175
+        }
+      ],
+      "pr": [
+        {
+          "variant": "headless-software-clock-60",
+          "elapsedMs": 3061,
+          "rafCount": 62,
+          "timerCount": 21,
+          "maxRafGapMs": 87.25999999999999,
+          "maxTimerGapMs": 182
+        },
+        {
+          "variant": "headless-software-clock-60-software-webrender",
+          "elapsedMs": 3014,
+          "rafCount": 77,
+          "timerCount": 20,
+          "maxRafGapMs": 78.12000000000012,
+          "maxTimerGapMs": 174
+        },
+        {
+          "variant": "headless-default-clock",
+          "elapsedMs": 3014,
+          "rafCount": 181,
+          "timerCount": 21,
+          "maxRafGapMs": 23.480000000000018,
+          "maxTimerGapMs": 175
+        }
+      ]
+    },
+    "legacy": "Every variant in both runs exceeded the 4.5-second DOM-ready and 2.5-second evaluate-before stages; none captured a legacy canvas or renderer.",
+    "softwareTwin": {
+      "push": {
+        "observationMs": 3299,
+        "rafCount": 8,
+        "timerCount": 4,
+        "maxRafGapMs": 2872.44,
+        "maxTimerGapMs": 2972,
+        "evaluateLatencyMs": 195.14,
+        "canvasAtObservation": null,
+        "click": "Timeout after 3504.36 ms; later evaluate also timed out."
+      },
+      "pr": {
+        "observationMs": 3888,
+        "rafCount": 5,
+        "timerCount": 3,
+        "maxRafGapMs": 3651.4,
+        "maxTimerGapMs": 3732,
+        "evaluateLatencyMs": 888.02,
+        "canvasAtObservation": null,
+        "click": "Timeout after 3503.92 ms despite the log reaching visible, enabled, stable and scrolled into view.",
+        "afterClick": {
+          "evaluateLatencyMs": 1188.8,
+          "canvas": {
+            "width": 1046,
+            "height": 640
+          },
+          "webglVersion": "WebGL 2.0",
+          "renderer": "Apple M1, or similar",
+          "vendor": "Mozilla",
+          "unmaskedVendor": "Apple Inc.",
+          "contextLost": false
+        }
+      }
+    },
+    "rendererCorrection": "The PR captured actual WebGL metadata after the failed twin click in BOTH baseline-60 and software-WebRender variants. Earlier snapshots were null; a blanket no-renderer-captured statement is false for this report. Push captured no renderer.",
+    "defaultClock": "Both blank pages recorded 181 RAF callbacks in about three seconds versus 62/64 baseline-60 and 77/77 software-WebRender. The PR default twin click completed in 2741.20 ms, but its post-click canvas remained null and legacy still failed. Push default twin hit the global work budget, so it is incomplete.",
+    "cleanup": "Baseline and software-WebRender graceful closes exceeded two seconds in both runs. Public kill and owned-group absence checks completed before later fresh variants. PR default close was graceful. Push exhausted the 82-second worker work budget and reached the supervisor watchdog at 88.43 seconds; registered groups were reported absent after cleanup."
+  },
+  "interpretation": [
+    "COLLECTED means the diagnostic completed its bounded observations, including recorded per-page failures. It does not mean application acceptance passed.",
+    "Software-WebRender did not eliminate the recorded rendered-path stalls in these runs. A valid late WebGL context also does not establish a stable rendered scene or identify the stalled subsystem.",
+    "Native timer and RAF progress both show multi-second twin gaps; observations do not isolate compositor, compilation, startup, host scheduling or other causes.",
+    "Default-clock blank RAF progress is higher in both runs, but variants always ran in the same order. This is not an order-controlled causal comparison or evidence that reverting the preference would pass the full suite.",
+    "The normal full CI outcomes are outside this review and remain required."
+  ],
+  "rawExtract": {
+    "path": "artifacts/phase-1/ci-software-diagnostic-extracted.json",
+    "sha256": "213775edd6b11eae2a63fbe4a554f71c4aaac6140e20196c4a688df4f3134f99"
+  },
+  "actions": "Read and summarized local downloaded JSON only; no public copies, source/configuration edits, tests, remote writes or candidate changes."
+}

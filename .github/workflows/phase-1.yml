@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   acceptance:
-    runs-on: macos-26
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npx playwright install chromium firefox webkit
+      - run: npx playwright install --with-deps chromium firefox webkit
       - name: Observe Firefox rendering environment
         timeout-minutes: 2
         run: node scripts/phase-1/diagnose-firefox.mjs --out=artifacts/phase-1-firefox

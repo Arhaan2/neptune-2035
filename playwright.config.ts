@@ -30,7 +30,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1600, height: 1050 },
-        launchOptions: { args: ['--use-angle=metal'] },
+        launchOptions: { args: process.platform === 'darwin' ? ['--use-angle=metal'] : [] },
       },
     },
     {

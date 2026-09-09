@@ -1,0 +1,931 @@
+{
+  "kind": "diagnostic-only",
+  "status": "INCOMPLETE",
+  "startedAt": "2026-09-09T23:05:22.032Z",
+  "sourceSha": "a1c81c264f28adfde3290b17f3746b974f333f49",
+  "scriptSha256": "8c50071b4a1766f5c90370dfbc101857911b63ceff43f9cc25e56bdf3f828228",
+  "sourceStatus": "",
+  "host": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M1 (Virtual)",
+    "logicalCpus": 3,
+    "totalMemoryBytes": 7516192768,
+    "node": "v24.20.0"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1050
+  },
+  "deviceScaleFactor": 1,
+  "limitations": [
+    "Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.",
+    "Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.",
+    "Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.",
+    "No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected."
+  ],
+  "preferenceSources": [
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396"
+  ],
+  "stages": [
+    {
+      "name": "owned-vite-ready",
+      "startedAfterMs": 479.93612500000006,
+      "value": {
+        "port": 5183,
+        "address": "127.0.0.1",
+        "listening": true,
+        "httpStatus": 200,
+        "readiness": "owned-vite-api"
+      },
+      "outcome": "completed",
+      "elapsedMs": 848.364416
+    },
+    {
+      "name": "close-owned-vite",
+      "startedAfterMs": 83013.506291,
+      "outcome": "error",
+      "error": "Error: Global diagnostic work budget exhausted",
+      "elapsedMs": 2.096084000004339
+    }
+  ],
+  "variants": [
+    {
+      "name": "headless-software-clock-60",
+      "prefs": {
+        "layout.frame_rate": 60
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 1755.18325,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 5433.327833
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 30973.276458,
+          "outcome": "error",
+          "error": "Error: Diagnostic operation deadline exceeded",
+          "elapsedMs": 2000.6689579999984
+        },
+        {
+          "name": "force-kill-browser",
+          "startedAfterMs": 32974.996374999995,
+          "outcome": "completed",
+          "elapsedMs": 84.95566600000166
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 33060.313958,
+          "value": {
+            "pid": 2160,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.7834999999977299
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 7189.196833,
+              "outcome": "completed",
+              "elapsedMs": 1789.4906249999995
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 8979.571790999998,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 133.85400000000118
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 9114.306541,
+              "outcome": "completed",
+              "elapsedMs": 5.515916999998808
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 9120.554,
+              "value": {
+                "native": {
+                  "elapsedMs": 113,
+                  "rafCount": 2,
+                  "timerCount": 0,
+                  "maxRafGapMs": 37.28,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 60.86,
+                  "sinceLastTimerMs": 113,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 27.617082999999184
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 9148.867499999998,
+              "outcome": "completed",
+              "elapsedMs": 66.06129099999998
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 9215.669415999999,
+              "outcome": "completed",
+              "elapsedMs": 3002.275667
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 12218.973375,
+              "value": {
+                "native": {
+                  "elapsedMs": 3071,
+                  "rafCount": 64,
+                  "timerCount": 21,
+                  "maxRafGapMs": 85.65999999999985,
+                  "maxTimerGapMs": 177,
+                  "sinceLastRafMs": 17.800000000000182,
+                  "sinceLastTimerMs": 84,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 10.98620800000026
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 12230.401291,
+              "outcome": "completed",
+              "elapsedMs": 45.113624999999956
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 12278.92925,
+              "outcome": "completed",
+              "elapsedMs": 693.626416000001
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 12973.070915999999,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 1538.1414170000007
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 14511.729166,
+              "outcome": "completed",
+              "elapsedMs": 335.1168749999997
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 14859.273040999999,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 4511.220959000002
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 19372.199041,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 2501.5400420000005
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 21875.875208,
+              "outcome": "completed",
+              "elapsedMs": 31.925208000000566
+            }
+          ],
+          "error": "Error: Diagnostic operation deadline exceeded"
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 21909.312625000002,
+              "outcome": "completed",
+              "elapsedMs": 1366.4027499999975
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 23276.18475,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 1061.0020409999997
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 24337.87225,
+              "outcome": "completed",
+              "elapsedMs": 4.95337500000096
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 24343.782875,
+              "outcome": "completed",
+              "elapsedMs": 705.6608330000017
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 25049.994875,
+              "value": {
+                "native": {
+                  "elapsedMs": 1760,
+                  "rafCount": 24,
+                  "timerCount": 9,
+                  "maxRafGapMs": 160.60000000000014,
+                  "maxTimerGapMs": 400,
+                  "sinceLastRafMs": 89.46000000000004,
+                  "sinceLastTimerMs": 41,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 32.72820800000045
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 25083.230416000002,
+              "outcome": "completed",
+              "elapsedMs": 346.50091699999757
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 25430.577458,
+              "outcome": "completed",
+              "elapsedMs": 3001.368583000003
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 28433.201250000002,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 2502.7318749999977
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 30936.987625,
+              "outcome": "completed",
+              "elapsedMs": 35.510833000000275
+            }
+          ],
+          "error": "Error: Diagnostic operation deadline exceeded"
+        }
+      ]
+    },
+    {
+      "name": "headless-software-clock-60-software-webrender",
+      "prefs": {
+        "layout.frame_rate": 60,
+        "gfx.webrender.software": true
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 33061.992541,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 1372.5893339999966
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 58019.609541,
+          "outcome": "error",
+          "error": "Error: Diagnostic operation deadline exceeded",
+          "elapsedMs": 2002.5464589999974
+        },
+        {
+          "name": "force-kill-browser",
+          "startedAfterMs": 60024.0375,
+          "outcome": "completed",
+          "elapsedMs": 91.57883299999958
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 60116.269291,
+          "value": {
+            "pid": 2738,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.5298750000001746
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 34436.035040999996,
+              "outcome": "completed",
+              "elapsedMs": 1221.3064169999998
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 35663.271708,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 108.88733299999876
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 35772.568,
+              "outcome": "completed",
+              "elapsedMs": 3.8377909999981057
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 35776.774375,
+              "value": {
+                "native": {
+                  "elapsedMs": 82,
+                  "rafCount": 3,
+                  "timerCount": 0,
+                  "maxRafGapMs": 43.2,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 2.0600000000000023,
+                  "sinceLastTimerMs": 82,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 12.93895799999882
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 35790.119374999995,
+              "outcome": "completed",
+              "elapsedMs": 2.554500000005646
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 35793.073790999995,
+              "outcome": "completed",
+              "elapsedMs": 3002.5863339999996
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 38797.994415999994,
+              "value": {
+                "native": {
+                  "elapsedMs": 3019,
+                  "rafCount": 77,
+                  "timerCount": 21,
+                  "maxRafGapMs": 82.66000000000008,
+                  "maxTimerGapMs": 176,
+                  "sinceLastRafMs": 3.3400000000001455,
+                  "sinceLastTimerMs": 140,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 15.226500000004307
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 38813.729583,
+              "outcome": "completed",
+              "elapsedMs": 38.2132500000007
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 38856.258707999994,
+              "outcome": "completed",
+              "elapsedMs": 389.8688750000001
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 39246.811291,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 591.6754169999986
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 39839.184416,
+              "outcome": "completed",
+              "elapsedMs": 2.230042000002868
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 39841.903833,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 4502.5089579999985
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 44346.410625,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 2504.3670829999974
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 46851.585583,
+              "outcome": "completed",
+              "elapsedMs": 28.07104199999594
+            }
+          ],
+          "error": "Error: Diagnostic operation deadline exceeded"
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 46881.236915999994,
+              "outcome": "completed",
+              "elapsedMs": 480.3834590000042
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 47362.184291,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 673.0766670000012
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 48036.222665999994,
+              "outcome": "completed",
+              "elapsedMs": 9.000625000000582
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 48045.728208,
+              "outcome": "completed",
+              "elapsedMs": 410.23854199999914
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 48459.048875,
+              "value": {
+                "native": {
+                  "elapsedMs": 1076,
+                  "rafCount": 22,
+                  "timerCount": 7,
+                  "maxRafGapMs": 184.67999999999995,
+                  "maxTimerGapMs": 270,
+                  "sinceLastRafMs": 51.59999999999991,
+                  "sinceLastTimerMs": 20,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 14.025332999997772
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 48473.986249999994,
+              "outcome": "completed",
+              "elapsedMs": 304.25820800000656
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 48778.857165999994,
+              "outcome": "completed",
+              "elapsedMs": 3003.1668340000033
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 51786.269208,
+              "value": {
+                "native": {
+                  "elapsedMs": 3299,
+                  "rafCount": 8,
+                  "timerCount": 4,
+                  "maxRafGapMs": 2872.4399999999996,
+                  "maxTimerGapMs": 2972,
+                  "sinceLastRafMs": 23.300000000000182,
+                  "sinceLastTimerMs": 2,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 195.14233299999614
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 51987.448040999996,
+              "outcome": "error",
+              "error": "TimeoutError: locator.click: Timeout 3500ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: 'Cooling close-up', exact: true })\n",
+              "elapsedMs": 3504.3611670000028
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 55492.431165999995,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 2502.269042
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 57995.732458,
+              "outcome": "completed",
+              "elapsedMs": 22.23358300000109
+            }
+          ],
+          "error": "Error: Diagnostic operation deadline exceeded"
+        }
+      ]
+    },
+    {
+      "name": "headless-default-clock",
+      "prefs": {},
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 60117.875499999995,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 1461.827541000006
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 82006.454833,
+          "outcome": "error",
+          "error": "Error: Global diagnostic work budget exhausted",
+          "elapsedMs": 1.1342920000024606
+        },
+        {
+          "name": "force-kill-browser",
+          "startedAfterMs": 82008.4295,
+          "outcome": "error",
+          "error": "Error: Global diagnostic work budget exhausted",
+          "elapsedMs": 1.094375000000582
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 61581.983125,
+              "outcome": "completed",
+              "elapsedMs": 1268.2687910000022
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 62851.479332999996,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 218.41258300000482
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 63070.536457999995,
+              "outcome": "completed",
+              "elapsedMs": 43.031042000002344
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 63114.175749999995,
+              "value": {
+                "native": {
+                  "elapsedMs": 248,
+                  "rafCount": 15,
+                  "timerCount": 1,
+                  "maxRafGapMs": 18.460000000000008,
+                  "maxTimerGapMs": 138,
+                  "sinceLastRafMs": 9.699999999999989,
+                  "sinceLastTimerMs": 110,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 37.02366600000096
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 63152.605958,
+              "outcome": "completed",
+              "elapsedMs": 13.570874999997613
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 63167.238708,
+              "outcome": "completed",
+              "elapsedMs": 3004.6981670000023
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 66174.003666,
+              "value": {
+                "native": {
+                  "elapsedMs": 3027,
+                  "rafCount": 181,
+                  "timerCount": 21,
+                  "maxRafGapMs": 21.299999999999955,
+                  "maxTimerGapMs": 175,
+                  "sinceLastRafMs": 20.88000000000011,
+                  "sinceLastTimerMs": 46,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 19.05975000000035
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 66193.673625,
+              "outcome": "completed",
+              "elapsedMs": 35.88933299999917
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 66232.615708,
+              "outcome": "completed",
+              "elapsedMs": 566.6586249999964
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 66800.948916,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 720.4867499999964
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 67522.227291,
+              "outcome": "completed",
+              "elapsedMs": 3.889041999995243
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 67527.01229099999,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 4502.473167000004
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 72031.062708,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 2501.9725000000035
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 74534.06725,
+              "outcome": "completed",
+              "elapsedMs": 34.28529100000742
+            }
+          ],
+          "error": "Error: Diagnostic operation deadline exceeded"
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 74570.436666,
+              "outcome": "completed",
+              "elapsedMs": 453.08312500000466
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 75024.90299999999,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 638.7957910000114
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 75664.361791,
+              "outcome": "completed",
+              "elapsedMs": 8.363541999991867
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 75673.239625,
+              "outcome": "completed",
+              "elapsedMs": 788.6975410000014
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 76462.946125,
+              "value": {
+                "native": {
+                  "elapsedMs": 1441,
+                  "rafCount": 69,
+                  "timerCount": 10,
+                  "maxRafGapMs": 100.01999999999992,
+                  "maxTimerGapMs": 247,
+                  "sinceLastRafMs": 19.299999999999955,
+                  "sinceLastTimerMs": 15,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 43.93795799999498
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 76508.230708,
+              "outcome": "completed",
+              "elapsedMs": 22.57804199999373
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 76531.520708,
+              "outcome": "completed",
+              "elapsedMs": 3004.0468330000003
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 79547.546875,
+              "outcome": "error",
+              "error": "Error: Diagnostic operation deadline exceeded",
+              "elapsedMs": 2455.985625000001
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 82004.851958,
+              "outcome": "error",
+              "error": "Error: Global diagnostic work budget exhausted",
+              "elapsedMs": 0.7332080000051064
+            }
+          ],
+          "error": "Error: Diagnostic operation deadline exceeded"
+        }
+      ],
+      "error": "Error: Global diagnostic work budget exhausted"
+    }
+  ],
+  "activeBrowserGroups": [
+    3202
+  ],
+  "cleanupProbe": false,
+  "closeFallbackProbe": false,
+  "server": {
+    "owned": true,
+    "port": 5183
+  },
+  "error": "Error: Global diagnostic work budget exhausted",
+  "completedAt": "2026-09-09T23:06:45.048Z",
+  "elapsedMs": 83016.392083,
+  "supervisor": {
+    "budgetExpired": true,
+    "elapsedMs": 88431.95045900001,
+    "budgetMs": 89000,
+    "cleanup": [
+      {
+        "pid": 2146,
+        "term": "signalled",
+        "kill": "absent",
+        "finalCheck": "absent"
+      },
+      {
+        "pid": 3202,
+        "term": "absent",
+        "kill": "absent",
+        "finalCheck": "absent"
+      }
+    ],
+    "registeredGroupsAbsent": true
+  }
+}
