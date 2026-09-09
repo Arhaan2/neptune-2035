@@ -37,6 +37,8 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Linux uses the CI Xvfb display so Firefox initializes GTK graphics.
+        headless: process.platform !== 'linux',
         // Use a software compositor and 60 Hz clock on bounded CI graphics hardware.
         launchOptions: {
           firefoxUserPrefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true },

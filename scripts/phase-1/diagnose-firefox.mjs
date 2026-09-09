@@ -10,6 +10,7 @@ const script = fileURLToPath(import.meta.url), root = process.cwd();
 const args = process.argv.slice(2), worker = args.includes('--worker');
 const cleanupProbe = args.includes('--cleanup-probe');
 const closeFallbackProbe = args.includes('--close-fallback-probe');
+const headed = args.includes('--headed'), mode = headed ? 'headed' : 'headless';
 const out = path.resolve(args.find(a => a.startsWith('--out='))?.slice(6) ?? `artifacts/phase-1/firefox-diagnostic-${Date.now()}`);
 const resultFile = path.join(out, 'diagnostic.json');
 // The supervisor must never observe a truncated PID-registration snapshot.
@@ -28,7 +29,7 @@ if (!worker) {
   const started = performance.now();
   // Vite runs in this worker group. Playwright detaches Firefox into its own group;
   // the worker registers that group before browser operations begin.
-  const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, ...(cleanupProbe ? ['--cleanup-probe'] : []), ...(closeFallbackProbe ? ['--close-fallback-probe'] : [])], {
+  const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, ...(cleanupProbe ? ['--cleanup-probe'] : []), ...(closeFallbackProbe ? ['--close-fallback-probe'] : []), ...(headed ? ['--headed'] : [])], {
     cwd: root, env: process.env, detached: true, stdio: 'ignore',
   });
   const signalGroup = (pid, signal) => {
@@ -76,11 +77,14 @@ async function diagnose() {
     sourceStatus: clean(execFileSync('git', ['status', '--short'], { encoding: 'utf8' })),
     host: { platform: os.platform(), release: os.release(), arch: os.arch(), cpu: os.cpus()[0]?.model, logicalCpus: os.cpus().length, totalMemoryBytes: os.totalmem(), node: process.version },
     viewport: { width: 1600, height: 1050 }, deviceScaleFactor: 1,
+    mode, headless: !headed, displayEnvironmentPresent: Boolean(process.env.DISPLAY),
     limitations: [
       'Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.',
       'Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.',
       'Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.',
       'No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected.',
+      'The blank-page WebGL probe runs after the native frame observation; successful native readback does not establish app 3D rendering.',
+      'The native WebGL probe may warm graphics initialization before the app pages.',
     ],
     preferenceSources: [
       'https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123',
@@ -110,6 +114,22 @@ async function diagnose() {
   }
   let vite, browser, browserServer, stopping = false;
   try {
+    if (headed && process.env.MOZ_HEADLESS !== undefined) throw Error('--headed requires MOZ_HEADLESS to be unset; run with env -u MOZ_HEADLESS');
+    if (headed && process.platform === 'linux') {
+      await stage('linux-graphics-environment', () => {
+        const observe = (command, commandArgs) => {
+          try {
+            return { outcome: 'completed', output: clean(execFileSync(command, commandArgs, { encoding: 'utf8', timeout: 2000, killSignal: 'SIGKILL', maxBuffer: 16_384, stdio: ['ignore', 'pipe', 'pipe'] })) };
+          } catch (error) {
+            return { outcome: 'error', error: clean(error.message), stdout: clean(error.stdout ?? ''), stderr: clean(error.stderr ?? '') };
+          }
+        };
+        return {
+          glxinfo: observe('glxinfo', ['-B']),
+          packages: observe('dpkg-query', ['-W', '-f=${Package}\t${Version}\n', 'xvfb', 'libglx-mesa0', 'libgl1-mesa-dri', 'libegl-mesa0', 'mesa-utils']),
+        };
+      }, 5000);
+    }
     const supplied = process.env.NEPTUNE_BASE_URL || process.env.BASE_URL;
     let base = supplied || 'http://127.0.0.1:5183/';
     const url = new URL(base);
@@ -140,26 +160,28 @@ async function diagnose() {
     result.server = { owned: !supplied, port: Number(url.port) || 80 };
     const { firefox } = await import('playwright');
     const variants = [
-      { name: 'headless-software-clock-60', prefs: { 'layout.frame_rate': 60 } },
-      { name: 'headless-software-clock-60-software-webrender', prefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true } },
-      { name: 'headless-default-clock', prefs: {} },
+      { name: `${mode}-software-clock-60`, prefs: { 'layout.frame_rate': 60 } },
+      { name: `${mode}-software-clock-60-software-webrender`, prefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true } },
+      { name: `${mode}-default-clock`, prefs: {} },
     ];
     for (const variant of variants) {
       if (performance.now() - started > activeBudgetMs - 10_000) break;
       const data = { ...variant, stages: [], pages: [] }; result.variants.push(data); save();
       try {
         await stage('launch-firefox', async () => {
-          browserServer = await firefox.launchServer({ host: '127.0.0.1', headless: true, firefoxUserPrefs: variant.prefs, timeout: 5000 });
+          browserServer = await firefox.launchServer({ host: '127.0.0.1', headless: !headed, firefoxUserPrefs: variant.prefs, timeout: 5000 });
           result.activeBrowserGroups.push(browserServer.process().pid); save();
           browser = await firefox.connect(browserServer.wsEndpoint(), { timeout: 2000 });
-          return { browserVersion: browser.version() };
+          return { browserVersion: browser.version(), mode, headless: !headed };
         }, 7500, data.stages);
         if (cleanupProbe) {
           result.intentionalCleanupProbe = 'A real launched Firefox is left open until the supervisor deadline.'; save();
           await new Promise(() => {});
         }
         for (const scene of ['blank', 'legacy', 'twin']) {
-          const pageData = { scene, stages: [] }; data.pages.push(pageData); save();
+          const pageData = { scene, stages: [] };
+          if (scene !== 'blank') pageData.cameraChangeAfterClick = { status: 'unknown', reason: 'Before or after camera data is unavailable.' };
+          data.pages.push(pageData); save();
           let context;
           try {
             let page;
@@ -180,11 +202,17 @@ async function diagnose() {
             await stage('evaluate-before', () => page.evaluate(snapshot), 2500, pageData.stages);
             await stage('reset-native-counters', () => page.evaluate(() => window.__NEPTUNE_NATIVE_DIAGNOSTIC__.reset()), 2000, pageData.stages);
             await stage('native-observation-3000ms', () => wait(3000), 3100, pageData.stages);
-            await stage('evaluate-after', () => page.evaluate(snapshot), 2500, pageData.stages);
-            if (scene !== 'blank') {
+            const beforeClick = await stage('evaluate-after', () => page.evaluate(snapshot), 2500, pageData.stages);
+            if (scene === 'blank') {
+              await stage('native-webgl2-probe', () => page.evaluate(probeNativeWebGL2), 2500, pageData.stages);
+            } else {
               const button = page.getByRole('button', scene === 'twin' ? { name: 'Cooling close-up', exact: true } : { name: /^X-ray/ });
               try { await stage('normal-locator-click', () => button.click({ timeout: 3500 }), 4000, pageData.stages); } catch {}
-              await stage('evaluate-after-click', () => page.evaluate(snapshot), 2500, pageData.stages);
+              const afterClick = await stage('evaluate-after-click', () => page.evaluate(snapshot), 2500, pageData.stages);
+              const before = beforeClick?.scene?.camera, after = afterClick?.scene?.camera;
+              if ([before, after].every(camera => Array.isArray(camera) && camera.length === 3 && camera.every(Number.isFinite))) {
+                pageData.cameraChangeAfterClick = { status: 'observed', changed: before.some((value, index) => value !== after[index]) };
+              }
             }
           } catch (error) { pageData.error = clean(error); }
           finally {
@@ -263,9 +291,55 @@ function snapshot() {
   return {
     native: window.__NEPTUNE_NATIVE_DIAGNOSTIC__?.read(),
     domReady: document.querySelector('main')?.getAttribute('data-ready') ?? null,
+    sceneReady: document.querySelector('main')?.getAttribute('data-scene-ready') ?? null,
+    fallback: { twin: Boolean(document.querySelector('[data-testid="twin-fallback"]')), legacy: Boolean(document.querySelector('.fallback[aria-label="Accessible schematic of compute modules connected to power and two cooling circuits"]')) },
+    totalCanvases: document.querySelectorAll('canvas').length,
     documentReadyState: document.readyState, visibility: document.visibilityState, focused: document.hasFocus(), dpr: devicePixelRatio,
     canvas: canvas ? { width: canvas.width, height: canvas.height, cssWidth: canvas.clientWidth, cssHeight: canvas.clientHeight } : null,
     webgl: gl ? { renderer: gl.getParameter(gl.RENDERER), vendor: gl.getParameter(gl.VENDOR), version: gl.getParameter(gl.VERSION), unmaskedRenderer: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : null, unmaskedVendor: extension ? gl.getParameter(extension.UNMASKED_VENDOR_WEBGL) : null, attributes: gl.getContextAttributes(), contextLost: gl.isContextLost(), drawingBufferWidth: gl.drawingBufferWidth, drawingBufferHeight: gl.drawingBufferHeight } : null,
     scene: scene ? Object.fromEntries(keys.filter(key => key in scene).map(key => [key, scene[key]])) : null,
   };
+}
+
+async function probeNativeWebGL2() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 2;
+  const info = { available: false, creationErrors: [], cleanup: { contextLossRequested: false } };
+  const short = value => String(value).replace(/https?:\/\/[^\s)]+/g, '<url>').slice(0, 300);
+  const creationError = event => { if (info.creationErrors.length < 3) info.creationErrors.push(short(event.statusMessage)); };
+  canvas.addEventListener('webglcontextcreationerror', creationError);
+  let gl;
+  try {
+    gl = canvas.getContext('webgl2');
+    info.available = Boolean(gl);
+    if (!gl) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+      return info;
+    }
+    const extension = gl.getExtension('WEBGL_debug_renderer_info');
+    info.attributes = gl.getContextAttributes();
+    info.renderer = short(gl.getParameter(gl.RENDERER));
+    info.vendor = short(gl.getParameter(gl.VENDOR));
+    info.version = short(gl.getParameter(gl.VERSION));
+    info.unmaskedRenderer = extension ? short(gl.getParameter(extension.UNMASKED_RENDERER_WEBGL)) : null;
+    info.unmaskedVendor = extension ? short(gl.getParameter(extension.UNMASKED_VENDOR_WEBGL)) : null;
+    gl.clearColor(1, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    const pixel = new Uint8Array(4);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+    info.redPixel = Array.from(pixel);
+    info.redPixelMatches = pixel[0] === 255 && pixel[1] === 0 && pixel[2] === 0 && pixel[3] === 255;
+    info.glError = gl.getError();
+    info.contextLost = gl.isContextLost();
+  } catch (error) { info.error = short(error); }
+  finally {
+    if (gl) {
+      try {
+        const loss = gl.getExtension('WEBGL_lose_context');
+        if (loss) { loss.loseContext(); info.cleanup.contextLossRequested = true; }
+      } catch (error) { info.cleanup.error = short(error); }
+    }
+    canvas.removeEventListener('webglcontextcreationerror', creationError);
+  }
+  return info;
 }

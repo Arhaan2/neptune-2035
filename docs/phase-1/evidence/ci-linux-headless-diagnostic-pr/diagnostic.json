@@ -1,0 +1,1303 @@
+{
+  "kind": "diagnostic-only",
+  "status": "COLLECTED",
+  "startedAt": "2026-09-09T23:25:22.348Z",
+  "sourceSha": "9200ebc92847ea0b6c1f10d58f72109e55c4b8ef",
+  "scriptSha256": "8c50071b4a1766f5c90370dfbc101857911b63ceff43f9cc25e56bdf3f828228",
+  "sourceStatus": "",
+  "host": {
+    "platform": "linux",
+    "release": "6.17.0-1022-azure",
+    "arch": "x64",
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "logicalCpus": 4,
+    "totalMemoryBytes": 16766414848,
+    "node": "v24.20.0"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1050
+  },
+  "deviceScaleFactor": 1,
+  "limitations": [
+    "Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.",
+    "Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.",
+    "Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.",
+    "No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected."
+  ],
+  "preferenceSources": [
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396"
+  ],
+  "stages": [
+    {
+      "name": "owned-vite-ready",
+      "startedAfterMs": 67.615002,
+      "value": {
+        "port": 5183,
+        "address": "127.0.0.1",
+        "listening": true,
+        "httpStatus": 200,
+        "readiness": "owned-vite-api"
+      },
+      "outcome": "completed",
+      "elapsedMs": 374.63784599999997
+    },
+    {
+      "name": "close-owned-vite",
+      "startedAfterMs": 53137.182774,
+      "outcome": "completed",
+      "elapsedMs": 7.846667999998317
+    }
+  ],
+  "variants": [
+    {
+      "name": "headless-software-clock-60",
+      "prefs": {
+        "layout.frame_rate": 60
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 713.66511,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 998.5103590000001
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 18575.621268,
+          "outcome": "completed",
+          "elapsedMs": 346.2571260000004
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 18922.147074999997,
+          "value": {
+            "pid": 5316,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.4003370000027644
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 1712.705868,
+              "outcome": "completed",
+              "elapsedMs": 1144.9558220000001
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 2857.857735,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 94.15921600000001
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 2952.2108620000004,
+              "outcome": "completed",
+              "elapsedMs": 4.012884999999642
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 2956.365021,
+              "value": {
+                "native": {
+                  "elapsedMs": 91,
+                  "rafCount": 5,
+                  "timerCount": 0,
+                  "maxRafGapMs": 17.099999999999998,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 13.900000000000006,
+                  "sinceLastTimerMs": 91,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 12.281558000000132
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 2968.884793,
+              "outcome": "completed",
+              "elapsedMs": 4.281488000000081
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 2973.341358,
+              "outcome": "completed",
+              "elapsedMs": 3000.598287
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 5974.277244999999,
+              "value": {
+                "native": {
+                  "elapsedMs": 3005,
+                  "rafCount": 180,
+                  "timerCount": 30,
+                  "maxRafGapMs": 17.179999999999836,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 10.940000000000055,
+                  "sinceLastTimerMs": 98,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.540597000000162
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 5978.989332,
+              "outcome": "completed",
+              "elapsedMs": 12.158057999999983
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 5991.637234,
+              "outcome": "completed",
+              "elapsedMs": 215.33983799999987
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 6207.219313,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 646.208971
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 6853.704239,
+              "outcome": "completed",
+              "elapsedMs": 85.02310599999964
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 6939.088248,
+              "outcome": "error",
+              "error": "TimeoutError: page.waitForFunction: Timeout 4000ms exceeded.",
+              "elapsedMs": 4005.870641999999
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 10945.207293000001,
+              "value": {
+                "native": {
+                  "elapsedMs": 4709,
+                  "rafCount": 262,
+                  "timerCount": 46,
+                  "maxRafGapMs": 133.26,
+                  "maxTimerGapMs": 151,
+                  "sinceLastRafMs": 0.3999999999996362,
+                  "sinceLastTimerMs": 15,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.0261350000000675
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 10948.387896,
+              "outcome": "completed",
+              "elapsedMs": 1.7926170000009733
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 10950.339219000001,
+              "outcome": "completed",
+              "elapsedMs": 3000.1803659999987
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 13950.919691000001,
+              "value": {
+                "native": {
+                  "elapsedMs": 3004,
+                  "rafCount": 180,
+                  "timerCount": 30,
+                  "maxRafGapMs": 17.140000000000327,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 7.859999999999673,
+                  "sinceLastTimerMs": 18,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.9494880000002013
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 13955.541965,
+              "outcome": "completed",
+              "elapsedMs": 140.78872799999954
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 14096.700743000001,
+              "value": {
+                "native": {
+                  "elapsedMs": 3151,
+                  "rafCount": 188,
+                  "timerCount": 31,
+                  "maxRafGapMs": 33.24000000000069,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 5.199999999999818,
+                  "sinceLastTimerMs": 64,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.902305999999953
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 14101.85598,
+              "outcome": "completed",
+              "elapsedMs": 14.246978999999556
+            }
+          ]
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 14116.803817,
+              "outcome": "completed",
+              "elapsedMs": 232.63799100000142
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 14349.71592,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 432.3459700000003
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 14783.056696000001,
+              "outcome": "completed",
+              "elapsedMs": 3.5845769999996264
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 14786.85935,
+              "outcome": "completed",
+              "elapsedMs": 547.5269879999996
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 15335.554607,
+              "value": {
+                "native": {
+                  "elapsedMs": 973,
+                  "rafCount": 44,
+                  "timerCount": 8,
+                  "maxRafGapMs": 133.42000000000002,
+                  "maxTimerGapMs": 204,
+                  "sinceLastRafMs": 4.779999999999973,
+                  "sinceLastTimerMs": 56,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 12.998169000000416
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 15348.899322000001,
+              "outcome": "completed",
+              "elapsedMs": 14.497088000000076
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 15363.800594,
+              "outcome": "completed",
+              "elapsedMs": 3000.0181869999997
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 18364.232322,
+              "value": {
+                "native": {
+                  "elapsedMs": 3014,
+                  "rafCount": 172,
+                  "timerCount": 30,
+                  "maxRafGapMs": 67.44000000000005,
+                  "maxTimerGapMs": 105,
+                  "sinceLastRafMs": 12.88000000000011,
+                  "sinceLastTimerMs": 71,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.7459879999987606
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 18368.270634999997,
+              "outcome": "completed",
+              "elapsedMs": 191.87490400000024
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 18560.478901,
+              "value": {
+                "native": {
+                  "elapsedMs": 3210,
+                  "rafCount": 180,
+                  "timerCount": 32,
+                  "maxRafGapMs": 67.44000000000005,
+                  "maxTimerGapMs": 118,
+                  "sinceLastRafMs": 8.600000000000364,
+                  "sinceLastTimerMs": 35,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.0016649999997753
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 18563.706247,
+              "outcome": "completed",
+              "elapsedMs": 11.471543999999994
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "headless-software-clock-60-software-webrender",
+      "prefs": {
+        "layout.frame_rate": 60,
+        "gfx.webrender.software": true
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 18923.126872999997,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 428.4082140000028
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 35611.807741000004,
+          "outcome": "completed",
+          "elapsedMs": 362.1483989999979
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 35974.286637000005,
+          "value": {
+            "pid": 5581,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.35129500000039116
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 19352.152888999997,
+              "outcome": "completed",
+              "elapsedMs": 737.0717470000018
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 20089.54824,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 107.0413469999985
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 20196.932406,
+              "outcome": "completed",
+              "elapsedMs": 38.23127899999963
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 20235.48277,
+              "value": {
+                "native": {
+                  "elapsedMs": 115,
+                  "rafCount": 7,
+                  "timerCount": 1,
+                  "maxRafGapMs": 17.14,
+                  "maxTimerGapMs": 105,
+                  "sinceLastRafMs": 7.859999999999999,
+                  "sinceLastTimerMs": 10,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 17.673197000000073
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 20253.505369,
+              "outcome": "completed",
+              "elapsedMs": 3.379422000001796
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 20257.163481,
+              "outcome": "completed",
+              "elapsedMs": 3000.4039889999985
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 23258.03398,
+              "value": {
+                "native": {
+                  "elapsedMs": 3005,
+                  "rafCount": 181,
+                  "timerCount": 30,
+                  "maxRafGapMs": 17.140000000000327,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 3.4600000000000364,
+                  "sinceLastTimerMs": 17,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.816259999999602
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 23262.08108,
+              "outcome": "completed",
+              "elapsedMs": 10.71871999999712
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 23273.483205,
+              "outcome": "completed",
+              "elapsedMs": 233.96324599999934
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 23507.787417,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 484.7461889999977
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 23992.983094,
+              "outcome": "completed",
+              "elapsedMs": 5.073771999999735
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 23998.383155,
+              "outcome": "error",
+              "error": "TimeoutError: page.waitForFunction: Timeout 4000ms exceeded.",
+              "elapsedMs": 4005.2276319999983
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 28003.954207,
+              "value": {
+                "native": {
+                  "elapsedMs": 4476,
+                  "rafCount": 246,
+                  "timerCount": 43,
+                  "maxRafGapMs": 116.63999999999999,
+                  "maxTimerGapMs": 131,
+                  "sinceLastRafMs": 10.88000000000011,
+                  "sinceLastTimerMs": 78,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.747232999998232
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 28007.93188,
+              "outcome": "completed",
+              "elapsedMs": 1.7400329999982205
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 28009.883567999997,
+              "outcome": "completed",
+              "elapsedMs": 2999.7636450000027
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 31010.168115,
+              "value": {
+                "native": {
+                  "elapsedMs": 3003,
+                  "rafCount": 181,
+                  "timerCount": 30,
+                  "maxRafGapMs": 17.140000000000327,
+                  "maxTimerGapMs": 111,
+                  "sinceLastRafMs": 1.1599999999998545,
+                  "sinceLastTimerMs": 62,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.650203999997757
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 31015.187087,
+              "outcome": "completed",
+              "elapsedMs": 129.112975
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 31144.687856,
+              "value": {
+                "native": {
+                  "elapsedMs": 3140,
+                  "rafCount": 188,
+                  "timerCount": 31,
+                  "maxRafGapMs": 34.26000000000022,
+                  "maxTimerGapMs": 111,
+                  "sinceLastRafMs": 5.3400000000001455,
+                  "sinceLastTimerMs": 98,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 7.3842639999966195
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 31152.431690999998,
+              "outcome": "completed",
+              "elapsedMs": 13.242551999999705
+            }
+          ]
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 31166.439930999997,
+              "outcome": "completed",
+              "elapsedMs": 235.69290600000022
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 31402.587224,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 430.2924459999995
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 31833.556712999998,
+              "outcome": "completed",
+              "elapsedMs": 3.3958550000024843
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 31837.2752,
+              "outcome": "completed",
+              "elapsedMs": 538.8957229999978
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 32376.621594,
+              "value": {
+                "native": {
+                  "elapsedMs": 956,
+                  "rafCount": 43,
+                  "timerCount": 8,
+                  "maxRafGapMs": 116.78000000000003,
+                  "maxTimerGapMs": 206,
+                  "sinceLastRafMs": 7.6200000000000045,
+                  "sinceLastTimerMs": 45,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 6.205454999999347
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 32383.267872,
+              "outcome": "completed",
+              "elapsedMs": 9.888124999997672
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 32393.566351999998,
+              "outcome": "completed",
+              "elapsedMs": 3000.5216599999985
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 35394.593385,
+              "value": {
+                "native": {
+                  "elapsedMs": 3006,
+                  "rafCount": 171,
+                  "timerCount": 30,
+                  "maxRafGapMs": 66.60000000000014,
+                  "maxTimerGapMs": 108,
+                  "sinceLastRafMs": 6.760000000000218,
+                  "sinceLastTimerMs": 49,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.5838020000010147
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 35398.545384000005,
+              "outcome": "completed",
+              "elapsedMs": 196.51099399999657
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 35595.552924,
+              "value": {
+                "native": {
+                  "elapsedMs": 3206,
+                  "rafCount": 178,
+                  "timerCount": 32,
+                  "maxRafGapMs": 66.60000000000014,
+                  "maxTimerGapMs": 113,
+                  "sinceLastRafMs": 6.319999999999709,
+                  "sinceLastTimerMs": 36,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.941757000000507
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 35598.728818,
+              "outcome": "completed",
+              "elapsedMs": 12.386039999997593
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "headless-default-clock",
+      "prefs": {},
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 35975.329702,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 403.3594159999993
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 52782.214368,
+          "outcome": "completed",
+          "elapsedMs": 353.4653499999986
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 53136.094853,
+          "value": {
+            "pid": 5827,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.4358340000035241
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 36379.327659,
+              "outcome": "completed",
+              "elapsedMs": 750.5959040000016
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 37130.384764,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 113.51051000000007
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 37244.467641,
+              "outcome": "completed",
+              "elapsedMs": 39.54945800000132
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 37284.395996,
+              "value": {
+                "native": {
+                  "elapsedMs": 120,
+                  "rafCount": 8,
+                  "timerCount": 1,
+                  "maxRafGapMs": 17.120000000000005,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 5.02000000000001,
+                  "sinceLastTimerMs": 19,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 16.218401000005542
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 37301.025132,
+              "outcome": "completed",
+              "elapsedMs": 3.867471999998088
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 37305.317506,
+              "outcome": "completed",
+              "elapsedMs": 3000.4199179999996
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 40306.296958,
+              "value": {
+                "native": {
+                  "elapsedMs": 3106,
+                  "rafCount": 187,
+                  "timerCount": 31,
+                  "maxRafGapMs": 17.16000000000031,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 0.9200000000000728,
+                  "sinceLastTimerMs": 26,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 105.14611600000353
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 40411.828644,
+              "outcome": "completed",
+              "elapsedMs": 53.15942499999801
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 40465.847011000005,
+              "outcome": "completed",
+              "elapsedMs": 248.5774769999989
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 40714.824404,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 429.4078970000046
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 41144.750509000005,
+              "outcome": "completed",
+              "elapsedMs": 3.713350999998511
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 41148.82822,
+              "outcome": "error",
+              "error": "TimeoutError: page.waitForFunction: Timeout 4000ms exceeded.",
+              "elapsedMs": 4004.019008999996
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 45153.331723,
+              "value": {
+                "native": {
+                  "elapsedMs": 4418,
+                  "rafCount": 245,
+                  "timerCount": 42,
+                  "maxRafGapMs": 116.98000000000002,
+                  "maxTimerGapMs": 200,
+                  "sinceLastRafMs": 2,
+                  "sinceLastTimerMs": 72,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.128006999999343
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 45156.727380000004,
+              "outcome": "completed",
+              "elapsedMs": 1.9930620000013732
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 45159.116341,
+              "outcome": "completed",
+              "elapsedMs": 3000.295290000002
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 48160.050633,
+              "value": {
+                "native": {
+                  "elapsedMs": 3005,
+                  "rafCount": 180,
+                  "timerCount": 30,
+                  "maxRafGapMs": 17.18000000000029,
+                  "maxTimerGapMs": 101,
+                  "sinceLastRafMs": 10.140000000000327,
+                  "sinceLastTimerMs": 76,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.578972000002977
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 48164.940926,
+              "outcome": "completed",
+              "elapsedMs": 139.11097799999698
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 48304.655269,
+              "value": {
+                "native": {
+                  "elapsedMs": 3151,
+                  "rafCount": 188,
+                  "timerCount": 32,
+                  "maxRafGapMs": 33.26000000000022,
+                  "maxTimerGapMs": 114,
+                  "sinceLastRafMs": 6.220000000000255,
+                  "sinceLastTimerMs": 7,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "false",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 4.741461999998137
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 48309.770368000005,
+              "outcome": "completed",
+              "elapsedMs": 13.661675999996078
+            }
+          ]
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 48324.483175,
+              "outcome": "completed",
+              "elapsedMs": 232.73123099999793
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 48557.653074,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 414.6394900000014
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 48972.902021,
+              "outcome": "completed",
+              "elapsedMs": 3.584584000003815
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 48976.881361,
+              "outcome": "completed",
+              "elapsedMs": 565.2801410000029
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 49542.654242000004,
+              "value": {
+                "native": {
+                  "elapsedMs": 981,
+                  "rafCount": 43,
+                  "timerCount": 8,
+                  "maxRafGapMs": 116.30000000000001,
+                  "maxTimerGapMs": 185,
+                  "sinceLastRafMs": 11.259999999999991,
+                  "sinceLastTimerMs": 74,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 15.339646000000357
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 49558.431284000006,
+              "outcome": "completed",
+              "elapsedMs": 4.788799999994808
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 49563.687897,
+              "outcome": "completed",
+              "elapsedMs": 3001.4810429999998
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 52565.767307,
+              "value": {
+                "native": {
+                  "elapsedMs": 3006,
+                  "rafCount": 170,
+                  "timerCount": 30,
+                  "maxRafGapMs": 67.3599999999999,
+                  "maxTimerGapMs": 103,
+                  "sinceLastRafMs": 6.599999999999909,
+                  "sinceLastTimerMs": 78,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.5917350000017905
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 52569.726708,
+              "outcome": "completed",
+              "elapsedMs": 195.8901590000023
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 52766.06815,
+              "value": {
+                "native": {
+                  "elapsedMs": 3206,
+                  "rafCount": 178,
+                  "timerCount": 32,
+                  "maxRafGapMs": 67.3599999999999,
+                  "maxTimerGapMs": 141,
+                  "sinceLastRafMs": 6.359999999999673,
+                  "sinceLastTimerMs": 36,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.8596460000044317
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 52769.239748,
+              "outcome": "completed",
+              "elapsedMs": 11.996815000005881
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activeBrowserGroups": [],
+  "cleanupProbe": false,
+  "closeFallbackProbe": false,
+  "server": {
+    "owned": true,
+    "port": 5183
+  },
+  "completedAt": "2026-09-09T23:26:15.493Z",
+  "elapsedMs": 53145.394303,
+  "supervisor": {
+    "code": 0,
+    "signal": null,
+    "elapsedMs": 53627.191324,
+    "budgetMs": 89000,
+    "cleanup": [
+      {
+        "pid": 5293,
+        "term": "absent",
+        "kill": "absent",
+        "finalCheck": "absent"
+      }
+    ],
+    "registeredGroupsAbsent": true
+  }
+}

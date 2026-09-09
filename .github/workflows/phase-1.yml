@@ -22,9 +22,11 @@ jobs:
           node-version: 24
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Prepare virtual display and Mesa graphics
+        run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
       - name: Observe Firefox rendering environment
         timeout-minutes: 2
-        run: node scripts/phase-1/diagnose-firefox.mjs --out=artifacts/phase-1-firefox
+        run: env -u MOZ_HEADLESS xvfb-run -a -s '-screen 0 1920x1200x24' node scripts/phase-1/diagnose-firefox.mjs --headed --out=artifacts/phase-1-firefox
       - name: Retain bounded Firefox diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -35,7 +37,7 @@ jobs:
           retention-days: 14
       # A diagnostic failure remains a failed job and cannot suppress acceptance.
       - if: ${{ !cancelled() }}
-        run: node scripts/phase-1/verify.mjs --out=artifacts/phase-1-ci
+        run: env -u MOZ_HEADLESS xvfb-run -a -s '-screen 0 1920x1200x24' node scripts/phase-1/verify.mjs --out=artifacts/phase-1-ci
       - name: Retain source verification evidence
         if: always()
         uses: actions/upload-artifact@v4
