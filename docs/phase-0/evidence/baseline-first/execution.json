@@ -1,0 +1,72 @@
+{
+  "startedAt": "2026-09-09T05:27:44.633Z",
+  "completedAt": "2026-09-09T05:28:05.951Z",
+  "sourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "sourceMethod": "git archive of full pinned commit into fresh mkdtemp; no node_modules or output inherited",
+  "harnessMethod": "not overlaid",
+  "toolchain": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "memoryBytes": 25769803776
+  },
+  "baselineOnly": true,
+  "beforeLock": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "afterLock": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "commands": [
+    {
+      "name": "npm-ci",
+      "command": "npm ci",
+      "environment": {},
+      "startedAt": "2026-09-09T05:27:44.636Z",
+      "exitCode": 0,
+      "elapsedMs": 3618.957292,
+      "log": "npm-ci.log",
+      "logSha256": "f1934b8baebc1c5c6eca45f8e9bb861e27e53fd01ae83a53e61715a6e29ee09c"
+    },
+    {
+      "name": "typecheck",
+      "command": "npm run typecheck",
+      "environment": {},
+      "startedAt": "2026-09-09T05:27:48.256Z",
+      "exitCode": 0,
+      "elapsedMs": 4676.983833,
+      "log": "typecheck.log",
+      "logSha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "environment": {},
+      "startedAt": "2026-09-09T05:27:52.933Z",
+      "exitCode": 0,
+      "elapsedMs": 3701.2456669999992,
+      "log": "lint.log",
+      "logSha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "environment": {},
+      "startedAt": "2026-09-09T05:27:56.634Z",
+      "exitCode": 0,
+      "elapsedMs": 7496.067000000001,
+      "log": "build.log",
+      "logSha256": "4e8f7be535a7697b8f8d572ba50770bbd2fc123412678d3446c3af5f17fd4b57"
+    },
+    {
+      "name": "unit",
+      "command": "npm test",
+      "environment": {},
+      "startedAt": "2026-09-09T05:28:04.130Z",
+      "exitCode": 0,
+      "elapsedMs": 1818.2665000000015,
+      "log": "unit.log",
+      "logSha256": "e75627d23f5b09efbb3195ea54775bfde83f23d41fc5bb4c05396233b714e29e"
+    }
+  ]
+}

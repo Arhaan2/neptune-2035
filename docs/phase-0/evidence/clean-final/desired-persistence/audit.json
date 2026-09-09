@@ -1,0 +1,244 @@
+{
+  "startedAt": "2026-09-09T05:39:21.387Z",
+  "baselineSourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "scope": "Evidence checks only; known defects remain open. No physics validation or physical connection.",
+  "environment": {
+    "node": "v24.18.0",
+    "os": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro"
+  },
+  "sourceHashes": {
+    "src/twin/assets/design.ts": "5554530d61c1d720b78436fba2061ad77875d50bb5e172a5ec39b8c96841357b",
+    "src/twin/types.ts": "d64626837a29f5136f2d40df1f47bc832212ad388a4b421f0b3163c6c9cc4ee7",
+    "src/twin/engine/simulation.ts": "6a91ab2be00db1685f24b24c0d8559a8893d3c414c73e01594a0effe87f629f2",
+    "src/twin/analysis/reports.ts": "4fbafaeccef292177729c9f10923b4a6d32bd8f667e01b1aea7c1516e94bf42d",
+    "src/twin/solvers/hydraulic.ts": "1f0c2a9a90348ee061214d67785b555338f8a10b42b834949c8d709efff285ee",
+    "src/twin/solvers/network.ts": "bfcfccf10e056ffa8d82be49144028468eba82191e8e1b89bbc391c964d30ce1",
+    "src/twin/catalog/reference.ts": "615eab81d7728269e568a7037cdb42afce757ac1c924788207b9f28bc9c260b2"
+  },
+  "harnessHashes": {
+    "scripts/phase-0/audit.mjs": "7f5ea31db1b1edb8f6447797897ae77233ebb5ea2fa83d5969b014f761d3a05d",
+    "tests/fixtures/phase-0/scenarios.json": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094"
+  },
+  "findings": [
+    {
+      "id": "PH0-002",
+      "classification": "correctness defect",
+      "disposition": "REPRODUCED",
+      "desiredRegressions": [
+        {
+          "name": "round-trip 1001 valid engine-applied events",
+          "outcome": "EXPECTED SEMANTIC FAILURE",
+          "message": "Real exporter output from 1001 legitimate applied engine events must import\n\nfalse !== true\n",
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "round-trip supported scheduled event at 86401s",
+          "outcome": "EXPECTED SEMANTIC FAILURE",
+          "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "round-trip supported scheduled event at 2592000s",
+          "outcome": "EXPECTED SEMANTIC FAILURE",
+          "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+          "actual": false,
+          "expected": true
+        },
+        {
+          "name": "round-trip legitimate engine clock at 86401s",
+          "outcome": "EXPECTED SEMANTIC FAILURE",
+          "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+          "actual": false,
+          "expected": true
+        }
+      ],
+      "config": {
+        "schemaVersion": 2,
+        "generation": 1,
+        "requestedAccelerators": 8,
+        "supplyW": 30000000,
+        "standbyPumps": 1,
+        "seawaterK": 291.15,
+        "workload": 0,
+        "idleFraction": 0.3,
+        "exchangerUAWPerK": 350000,
+        "foulingResistanceKPerW": 0,
+        "batteryWhPerModule": 400000,
+        "batteryMaxWPerModule": 2200000,
+        "pumpSpeed": 1,
+        "requireExternalNetwork": false,
+        "requireClusterNetwork": true,
+        "budgetUSD": null
+      },
+      "timestepS": 1,
+      "records": [
+        {
+          "case": "events-999",
+          "timeS": 0,
+          "eventCount": 999,
+          "eventTimeRangeS": [
+            0,
+            0
+          ],
+          "appliedEventCount": 999,
+          "logCount": 999,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 82396,
+          "accepted": true
+        },
+        {
+          "case": "events-1000",
+          "timeS": 0,
+          "eventCount": 1000,
+          "eventTimeRangeS": [
+            0,
+            0
+          ],
+          "appliedEventCount": 1000,
+          "logCount": 1000,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 82479,
+          "accepted": true
+        },
+        {
+          "case": "events-1001",
+          "timeS": 0,
+          "eventCount": 1001,
+          "eventTimeRangeS": [
+            0,
+            0
+          ],
+          "appliedEventCount": 1001,
+          "logCount": 1000,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 82560,
+          "accepted": false,
+          "rejection": "Time or event count exceeds replay bounds."
+        },
+        {
+          "case": "future-event",
+          "timeS": 0,
+          "eventCount": 1,
+          "eventTimeRangeS": [
+            86399,
+            86399
+          ],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 563,
+          "accepted": true
+        },
+        {
+          "case": "future-event",
+          "timeS": 0,
+          "eventCount": 1,
+          "eventTimeRangeS": [
+            86400,
+            86400
+          ],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 563,
+          "accepted": true
+        },
+        {
+          "case": "future-event",
+          "timeS": 0,
+          "eventCount": 1,
+          "eventTimeRangeS": [
+            86401,
+            86401
+          ],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 563,
+          "accepted": false,
+          "rejection": "Invalid event record."
+        },
+        {
+          "case": "future-event",
+          "timeS": 0,
+          "eventCount": 1,
+          "eventTimeRangeS": [
+            2592000,
+            2592000
+          ],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 565,
+          "accepted": false,
+          "rejection": "Invalid event record."
+        },
+        {
+          "case": "elapsed-time",
+          "timeS": 86399,
+          "eventCount": 0,
+          "eventTimeRangeS": [],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 484,
+          "accepted": true
+        },
+        {
+          "case": "elapsed-time",
+          "timeS": 86400,
+          "eventCount": 0,
+          "eventTimeRangeS": [],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 484,
+          "accepted": true
+        },
+        {
+          "case": "elapsed-time",
+          "timeS": 86401,
+          "eventCount": 0,
+          "eventTimeRangeS": [],
+          "appliedEventCount": 0,
+          "logCount": 0,
+          "schemaVersion": 2,
+          "solverVersion": "2.0.0-rc.1",
+          "encodedBytes": 484,
+          "accepted": false,
+          "rejection": "Time or event count exceeds replay bounds."
+        }
+      ],
+      "engineBoundary": {
+        "maxUniqueEvents": 10000,
+        "maxEventsAppliedObserved": 10000,
+        "maxLogEntriesObserved": 1000,
+        "maxAdvanceDurationS": 86400,
+        "horizonS": 2592000
+      },
+      "evidenceCheck": "PASS",
+      "elapsedMs": 335.697333
+    }
+  ],
+  "sourceBaselineVerification": {
+    "checkedFiles": 216,
+    "mismatches": []
+  },
+  "completedAt": "2026-09-09T05:39:21.800Z",
+  "evidenceGate": "PASS",
+  "mode": "desired behavior: known semantic failures return exit 1"
+}

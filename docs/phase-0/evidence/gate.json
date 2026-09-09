@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-09-09T07:40:29.090Z",
+  "status": "PASS",
+  "baselineSourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "meaning": "Phase 0 evidence and preservation only. Known defects remain; no physical validation or production promotion.",
+  "checks": [
+    {
+      "name": "source checkpoint and unchanged original tag",
+      "status": "PASS"
+    },
+    {
+      "name": "216 baseline tracked files equal pinned Git source and current checkout",
+      "status": "PASS"
+    },
+    {
+      "name": "recorded before/after preservation of every application and publication file",
+      "status": "PASS"
+    },
+    {
+      "name": "raw evidence content hashes and executed harness identity",
+      "status": "PASS"
+    },
+    {
+      "name": "final diagnostic helper revision rechecked with fresh baseline npm ci",
+      "status": "PASS"
+    },
+    {
+      "name": "observed identities, complete compiled recovery and published manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "read-only Pages publication trigger evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh install/build/existing tests and semantic desired failures",
+      "status": "PASS"
+    },
+    {
+      "name": "all six findings reproduce now with a fresh baseline source and npm ci",
+      "status": "PASS"
+    }
+  ]
+}

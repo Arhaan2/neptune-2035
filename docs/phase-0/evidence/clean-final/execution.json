@@ -1,0 +1,128 @@
+{
+  "startedAt": "2026-09-09T05:33:53.493Z",
+  "completedAt": "2026-09-09T05:39:21.830Z",
+  "sourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "sourceMethod": "git archive of full pinned commit into fresh mkdtemp; no node_modules or output inherited",
+  "harnessMethod": "only scripts/phase-0, tests/fixtures/phase-0 and provenance evidence copied after application checks",
+  "protectedSourceFiles": 216,
+  "sourceMismatches": [],
+  "toolchain": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "memoryBytes": 25769803776
+  },
+  "baselineOnly": false,
+  "beforeLock": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "afterLock": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "commands": [
+    {
+      "name": "npm-ci",
+      "command": "npm ci",
+      "environment": {},
+      "startedAt": "2026-09-09T05:33:53.519Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 3630.8875420000004,
+      "log": "npm-ci.log",
+      "logSha256": "f1934b8baebc1c5c6eca45f8e9bb861e27e53fd01ae83a53e61715a6e29ee09c"
+    },
+    {
+      "name": "typecheck",
+      "command": "npm run typecheck",
+      "environment": {},
+      "startedAt": "2026-09-09T05:33:57.150Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 3942.635708,
+      "log": "typecheck.log",
+      "logSha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "environment": {},
+      "startedAt": "2026-09-09T05:34:01.093Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 1822.7432919999992,
+      "log": "lint.log",
+      "logSha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b"
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "environment": {},
+      "startedAt": "2026-09-09T05:34:02.916Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 4871.0755420000005,
+      "log": "build.log",
+      "logSha256": "99185066124b10fd98eca8993dd11ab0ecd00050c0e431757eb1e78f0c04e61a"
+    },
+    {
+      "name": "unit-full",
+      "command": "npm test",
+      "environment": {
+        "NEPTUNE_TELEMETRY_BROWSER": "1",
+        "NEPTUNE_TELEMETRY_APP": "1"
+      },
+      "startedAt": "2026-09-09T05:34:07.992Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 5879.890416999999,
+      "log": "unit-full.log",
+      "logSha256": "ffc70946aebf97aa587501ded4d1e24075cf0189c274155c2a7191b73026da5a"
+    },
+    {
+      "name": "browser",
+      "command": "npm run test:browser",
+      "environment": {
+        "NEPTUNE_BASE_URL": "http://127.0.0.1:5173"
+      },
+      "startedAt": "2026-09-09T05:34:13.871Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 299204.40425,
+      "log": "browser.log",
+      "logSha256": "f7021e6eb55ef40765db87fe9f5ffcd0ca8b361b00e93a1ddc6a13c5c2b58b97"
+    },
+    {
+      "name": "phase-0",
+      "command": "node scripts/phase-0/audit.mjs --out=<audit-repository>/artifacts/phase-0/clean-final/diagnostics",
+      "environment": {},
+      "startedAt": "2026-09-09T05:39:13.055Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 8041.717208000016,
+      "log": "phase-0.log",
+      "logSha256": "3ef8b72bef1e2e6f1f1ee009193d8796d0fb32a3fc5b7301e8ef645377156a93"
+    },
+    {
+      "name": "desired-hydraulic",
+      "command": "node scripts/phase-0/audit.mjs PH0-001 --desired --out=<audit-repository>/artifacts/phase-0/clean-final/desired-hydraulic",
+      "environment": {},
+      "startedAt": "2026-09-09T05:39:21.097Z",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "elapsedMs": 211.06191599997692,
+      "log": "desired-hydraulic.log",
+      "logSha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "name": "desired-persistence",
+      "command": "node scripts/phase-0/audit.mjs PH0-002 --desired --out=<audit-repository>/artifacts/phase-0/clean-final/desired-persistence",
+      "environment": {},
+      "startedAt": "2026-09-09T05:39:21.308Z",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "elapsedMs": 497.7532080000383,
+      "log": "desired-persistence.log",
+      "logSha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    }
+  ]
+}

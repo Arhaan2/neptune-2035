@@ -1,0 +1,34 @@
+# Phase 0 requirement-to-evidence matrix
+
+The complete preservation/evidence command is `node scripts/phase-0/verify.mjs`. It validates the retained fresh-checkout records and their hashes, then creates a new source archive, runs `npm ci`, and reruns the six diagnostics. It does not retrieve live sites or repeat the unchanged application/browser suite on each invocation. For an independent new clean install and full suite, run `node scripts/phase-0/clean-check.mjs`; this archives the pinned source and overlays only the Phase 0 harness. For a new timestamped live observation, run `node scripts/phase-0/capture-hosted.mjs` and review changed deployment evidence before updating dispositions or acceptance. None of these tools deploys.
+
+| Requirement | Executable check / evidence | Result |
+| --- | --- | --- |
+| Inspect existing implementation and reuse earlier work | BASELINE source map; preserved `docs/v2/BASELINE.md`, release evidence and existing fixtures | No previous six-finding Phase 0 framework; V2 foundation retained |
+| Distinguish original baseline, current source and tooling | `baseline-manifest.json`; new annotated source tag/full target; `harness-manifest.json`; clean audit `sourceHashes` and `harnessHashes` | Distinct identities; source baseline never advanced on rerun |
+| Record clean/dirty state and preserve user changes | Initial clean Git status; current tracked hashes; local Phase 0 branch; original 216 tracked files unchanged | No unrelated edits, stash, reset or cleanup |
+| Verify both public identities rather than equate HEAD with deployment | `published/*release.json`; `hosted-observation.json`; recorded source difference paths | Fresh metadata identifies both source SHAs independently |
+| Published manifest presence/absence | Preview file manifest bytes and SHA; original root manifest probe HTTP 404 with body hash | Alternative artifact identity established for original production |
+| Preserve production and preview recovery | Compiled Git commit, annotated local artifact tag, complete local bundle, executed `recover-artifacts.mjs`, `recovery-receipt.json` | 53/53 reconstructed bytes match; source rebuild equivalence not claimed |
+| Identify publication triggers without changing them | Authenticated `remote-settings.json`; Git tree has no tracked workflow | Pages publishes `codex/pages` `/`; no remote changes |
+| Record versions, configuration, timestamps, hashes | Baseline manifest, raw HTTP receipts, execution logs, evidence/harness inventories | Actual names and values, no guessed deployed SHA |
+| Frozen dependency install from clean source | Both `baseline-first/npm-ci.log` and `clean-final/npm-ci.log`; `execution.json` | Fresh `npm ci`, exit 0, lockfile unchanged |
+| Existing build and application checks | `clean-final/{typecheck,lint,build,unit-full,browser}.log`; browser summary | Exit 0; 162/162 unit/integration, 48/48 browser, no skips/flaky/errors in final run |
+| Disclose earlier skips / environmental issues | First clean ordinary test log; `tooling-notes.json` | Initial two pre-existing opt-in skips documented; enabled and executed in final run |
+| PH0-001 finite control + real nonfinite API input | `audit.mjs PH0-001`; explicit desired rejection assertions; raw observation fields | Reproduced accepted infinite shutoff and downstream free-flow numerical failure |
+| PH0-002 legitimate engine history and actual serialization boundary | `audit.mjs PH0-002`; generated project; focused limits in JSON | Reproduced event-count, clock and future-event mismatch; exact rejection reasons |
+| PH0-003 independent network boundary and actual energized presets | `audit.mjs PH0-003`; nine literal JSON scenarios | Below/at/above + rounding + large presets; correctly reported inadequacy |
+| PH0-004 concrete specification-to-solver ownership | `audit.mjs PH0-004`; pinned `circuit` characterization | Structural risk; no unsupported runtime-mismatch assertion |
+| PH0-005 earlier interruption / recovered final state | `audit.mjs PH0-005`; fault and control traces; real report and terminal CSV | Service outage observed; final sizing passes; retained logs/events explicitly acknowledged |
+| PH0-006 matched architecture disturbance and limitations | `audit.mjs PH0-006`; topology, domains, traces, unsupported tie characterization | No transfer benefit demonstrated in this radial case; differences recorded |
+| Reference scenario assumptions and bounded timing | `tests/fixtures/phase-0/scenarios.json`; REFERENCE-SCENARIOS; PH0-003 JSON | Actual defaults, inventory rounding, cold start, dt/duration, measured elapsed times |
+| Known defects cannot become misleading green correctness tests | `--desired` runs and their raw JSON; expected semantic AssertionErrors; diagnostic failure/unexpected-pass logic | Desired tests exit 1 for identified defects; evidence mode is separately labeled |
+| Unexpected pass / unrelated failure discrimination | `desired()` records unexpected passing behavior and requires disposition change; witness/control errors fail finding; verifier inspects semantic JSON as well as exit codes | No loose catch-all expected failure, silent diagnostic skip or relaxed adequacy assertion |
+| Reproduce against original source with later harness | Clean archive, source inventory checks before import and after tests, test-only overlay, separate harness hashes | All 216 source files unchanged in disposable checkout |
+| Identify final test-helper changes separately | Fresh `clean-check.mjs --diagnostics-only`, `diagnostic-verified/execution.json.runnerSha256` and diagnostic hashes | Latest helper revision checked without relabeling earlier complete-suite evidence |
+| Protected application/publication inventory before/after | `protected-before.json`, `protected-after.json`; verifier recomputes baseline/current tracked hashes and any present local artifacts | 261/261 preserved (216 tracked + 45 ignored local compiled files) |
+| Preserve absent local output semantics in fresh clone | Verifier checks historical before/after receipt; current tracked files always required; ignored original `dist` checked when present | A clean source checkout need not inherit old local build output |
+| Phase 0-only checkpoint and no publication | Allowed additions under three Phase 0 prefixes; local commit; saved refs/settings | No remote push, tag movement, runtime change or Phases 1–9 implementation |
+| Bounded Phase 1 handoff | ISSUES PH0-001/002 and ACCEPTANCE | Numerical input safety and persistence contract only |
+
+Missing required evidence yields BLOCKED; a demonstrated preservation/evidence mismatch yields FAIL. A reproduced known defect is compatible with Phase 0 PASS. The diagnostic runner alone prints “diagnostic evidence” and explicitly disclaims the complete preservation gate; use the verifier for that gate.

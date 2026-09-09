@@ -1,0 +1,13 @@
+{
+  "product": "NEPTUNE",
+  "version": "2.0.0-rc.1",
+  "channel": "separate-preview",
+  "sourceSha": "dcb9effd698bf10bbe0f98eba165213d2b0e5c16",
+  "sourceBranch": "codex/neptune-digital-twin-v2",
+  "builtAt": "2026-09-09T01:26:57.773Z",
+  "artifactSha256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1",
+  "artifactIdentity": "SHA-256 of build-manifest.json; its file entries hash all compiled/static files except the two identity manifests.",
+  "qualifier": "Design-stage digital twin · Simulated operation",
+  "physicalValidation": "pending",
+  "productionPromotion": "not performed"
+}

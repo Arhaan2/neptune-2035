@@ -1,0 +1,37 @@
+{
+  "capturedAt": "2026-09-09T07:40:11.382737+00:00",
+  "baselineSourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "identity": "Phase 0-only file-content identity; final diagnostic hashes and runner hash are in diagnostic-verified. Earlier complete application checks retain original harness identities. Gate verifier is independently executed at acceptance. No self-referential commit hash.",
+  "files": [
+    {
+      "path": "scripts/phase-0/audit.mjs",
+      "sha256": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4",
+      "bytes": 21795
+    },
+    {
+      "path": "scripts/phase-0/capture-hosted.mjs",
+      "sha256": "9923c31b6e480be7f9bd42346f0c0cf99842774397f9e0f29a4dcb3aff1a70fb",
+      "bytes": 3177
+    },
+    {
+      "path": "scripts/phase-0/clean-check.mjs",
+      "sha256": "e9b529983d2a5a3e85ee9e946ed1f3ab2578bb4ba417f8f129863dfac8a64bbe",
+      "bytes": 7725
+    },
+    {
+      "path": "scripts/phase-0/recover-artifacts.mjs",
+      "sha256": "27de702007bdaff9a66ac2c2d151b31df93ce8ecd402690160305817b421d140",
+      "bytes": 1730
+    },
+    {
+      "path": "scripts/phase-0/verify.mjs",
+      "sha256": "ed23978c6a960e707308ffde97d193c5f85c62e6f8d14b5a1793c5f64b9efb4b",
+      "bytes": 10265
+    },
+    {
+      "path": "tests/fixtures/phase-0/scenarios.json",
+      "sha256": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094",
+      "bytes": 10287
+    }
+  ]
+}

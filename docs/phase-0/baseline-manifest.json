@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "scope": "Phase 0 evidence and preservation only",
+  "baselineSourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "initialHeadSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "initialBranch": "codex/neptune-digital-twin-v2",
+  "initialWorkingTreeStatus": [],
+  "workingBranch": "codex/neptune-phase-0",
+  "localBaselineTag": "phase-0-baseline-23de38a-20260909",
+  "localBaselineTagObject": "29d2c9400af7f6f258948362124157d69928acc7",
+  "remote": "https://github.com/Arhaan2/neptune-2035.git",
+  "priorLegacyBaseline": {
+    "sourceSha": "8b78638838a82ee603fdb001bfc978df49a9665d",
+    "tag": "v0.1.0",
+    "tagObject": "462f2fbbda5766bdd568ec58c18dd82e542529e9",
+    "record": "docs/v2/BASELINE.md"
+  },
+  "toolchain": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "cpu": "arm",
+    "logicalCpus": 14
+  },
+  "lockfiles": [
+    {
+      "path": "package-lock.json",
+      "sha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9"
+    }
+  ],
+  "controllingScope": "User Phase 0 request; no separate phased execution plan attachment located by scoped title/content search",
+  "capturedAt": "2026-09-09T05:25:00.271983+00:00",
+  "protectedInventory": "evidence/protected-before.json",
+  "harnessIdentity": "Separate from baseline; file hashes in evidence/harness-manifest.json, commit in Git history and completion response (no self-reference).",
+  "deploymentVerification": {
+    "observedAt": "2026-09-09T05:26:32.099Z",
+    "all51PublicFilesMatch": true,
+    "production": {
+      "url": "https://arhaan2.github.io/neptune-2035/",
+      "publishedMetadata": {
+        "name": "NEPTUNE",
+        "sourceCommit": "127a2fade93112d58f8edd9f6fc6e9e02b12b57c",
+        "sourceRepository": "https://github.com/Arhaan2/neptune-2035",
+        "builtAt": "2026-09-08",
+        "kind": "static concept simulator"
+      },
+      "compiledArtifactSha": "672805a984feadaab375061817c919fd6849b311",
+      "carriedUnchangedIn": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+      "publishedBuildManifest": "absent; HTTP 404 body and hash retained; observational Git/HTTP inventory supplied"
+    },
+    "preview": {
+      "url": "https://arhaan2.github.io/neptune-2035/v2-preview/",
+      "publishedMetadata": {
+        "product": "NEPTUNE",
+        "version": "2.0.0-rc.1",
+        "channel": "separate-preview",
+        "sourceSha": "dcb9effd698bf10bbe0f98eba165213d2b0e5c16",
+        "sourceBranch": "codex/neptune-digital-twin-v2",
+        "builtAt": "2026-09-09T01:26:57.773Z",
+        "artifactSha256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1",
+        "artifactIdentity": "SHA-256 of build-manifest.json; its file entries hash all compiled/static files except the two identity manifests.",
+        "qualifier": "Design-stage digital twin \u00b7 Simulated operation",
+        "physicalValidation": "pending",
+        "productionPromotion": "not performed"
+      },
+      "publishedBuildManifestSha256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1",
+      "compiledArtifactSha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711"
+    },
+    "observationalManifest": "evidence/hosted-observation.json",
+    "sourceRelationship": {
+      "previewToAudit": [
+        "README.md",
+        "docs/v2/RELEASE-CANDIDATE.md",
+        "docs/v2/REQUIREMENTS.md",
+        "docs/v2/evidence/browser-performance-final.json",
+        "docs/v2/evidence/browser-touch-restoration.json",
+        "docs/v2/evidence/build-manifest.json",
+        "docs/v2/evidence/cinematic-final.json",
+        "docs/v2/evidence/compiled-browser-48-summary.json",
+        "docs/v2/evidence/final-browser-33-summary.json",
+        "docs/v2/evidence/geometry-export.json",
+        "docs/v2/evidence/hosted-browser-48-summary.json",
+        "docs/v2/evidence/hosted-integrity.json",
+        "docs/v2/evidence/numerical-performance.json",
+        "docs/v2/evidence/production-preservation.json",
+        "docs/v2/evidence/release.json",
+        "docs/v2/evidence/seek-cancel-touch-summary.json",
+        "docs/v2/evidence/unit-summary.json",
+        "docs/v2/images/campus.png",
+        "docs/v2/images/cinematic-campus.png",
+        "docs/v2/images/cinematic-comparison.png",
+        "docs/v2/images/cooling.png",
+        "docs/v2/images/hosted-mobile-fallback.png",
+        "docs/v2/images/hosted-pump-trip.png",
+        "docs/v2/images/interior.png",
+        "docs/v2/images/telemetry.png"
+      ],
+      "legacySourceToReleaseCheckpoint": [
+        "README.md",
+        "docs/BUILD_LOG.md",
+        "docs/DEMO.md",
+        "docs/LINKEDIN_LAUNCH.md",
+        "docs/QA.md",
+        "docs/RELEASE.md",
+        "docs/evidence.json",
+        "docs/images/cooling.png",
+        "docs/images/demo-storyboard.png",
+        "docs/images/exploded.png",
+        "docs/images/hero.png",
+        "docs/images/interior.png",
+        "docs/images/mobile.png",
+        "docs/images/xray.png",
+        "scripts/verify-video.mjs"
+      ],
+      "interpretation": "Differences are documentation/evidence only; protected runtime trees compare equal. Published metadata identifies different source SHAs from the Phase 0 source checkpoint."
+    }
+  },
+  "versions": {
+    "package.version": "2.0.0-rc.1",
+    "TWIN_SCHEMA": 2,
+    "SOLVER_VERSION": "2.0.0-rc.1",
+    "DesignConfig.schemaVersion": 2,
+    "ProjectFile.schemaVersion": 2,
+    "ProjectFile.kind": "neptune-project",
+    "ProjectFile.sourceMode": "simulated",
+    "src/state/scenario.ts:SCHEMA_VERSION": 1,
+    "ObservationEnvelope.schemaVersion": 2,
+    "NETWORK_ASSUMPTIONS.id": "illustrative-job-traffic-v1",
+    "NETWORK_ASSUMPTIONS.revision": "1.0.0",
+    "asset.revision": "2.0.0",
+    "catalogIds": [
+      "generic-hardware-v2",
+      "layout-v2",
+      "equipment-v2"
+    ],
+    "designRevisionAlgorithm": "revisionFor(config): reference-v2- plus 8 hex digits (32-bit FNV-style over JSON.stringify validated config); mappingVersion uses design.revision"
+  },
+  "buildConfiguration": {
+    "packageManager": "npm only",
+    "cleanInstall": "npm ci",
+    "build": "npm run build (tsc --noEmit && vite build)",
+    "vite.base": "./",
+    "vite.outputDefault": "dist",
+    "noTrackedGithubWorkflows": true,
+    "hostingConfigPresent": false,
+    "publicationTrigger": "Authenticated Pages source codex/pages at /, legacy branch publishing; managed pages-build-deployment workflow. Source branch pushes are not the currently configured Pages trigger; workflow/settings changes could alter publishing. No pushes or settings/workflow changes authorized or performed."
+  },
+  "recovery": {
+    "artifactTag": "phase-0-served-artifact-019b24f-20260909",
+    "artifactTagObject": "4211561ba3507be65afa24cd2f69b47d7fbbc4f7",
+    "artifactCommit": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+    "verifiedRecoveryFiles": 53,
+    "receipt": "evidence/recovery-receipt.json",
+    "command": "node scripts/phase-0/recover-artifacts.mjs",
+    "offlineBundle": {
+      "path": "artifacts/phase-0/recovery.bundle",
+      "sha256": "18ed6be5281b85e62852317cbd2d9619028c6d689bbf022023201d92d266482e",
+      "bytes": 10375225,
+      "committed": false,
+      "verification": "git bundle verify: okay, complete history, both new Phase 0 tags plus unchanged v0.1.0"
+    },
+    "sourceRebuildBitForBit": "not claimed; successful build is recorded independently from compiled-artifact recovery"
+  }
+}
