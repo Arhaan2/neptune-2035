@@ -1,6 +1,6 @@
-# Phase 2 equipment authority — work in progress
+# Phase 2 equipment authority
 
-Scope: make installed, immutable equipment specifications authoritative for the existing simulated design-stage prototype. This document is not release acceptance. Full Phase 1 acceptance, strict performance targets, stability batches, exhaustive stress/measurement work and physical validation remain deferred.
+Scope: make installed, immutable equipment specifications authoritative for the existing simulated design-stage prototype. Source changes alone are not release acceptance: the frozen-candidate test/review receipts and public deployment verification establish promotion. Full Phase 1 acceptance, strict performance targets, stability batches, exhaustive stress/measurement work and physical validation remain deferred.
 
 ## Verified starting point
 
@@ -32,6 +32,26 @@ Use versioned reference specification snapshots, stable logical asset slots, exp
 
 Original duplicate equipment owners include `moduleAssets` versus hydraulic pump fallbacks (curve/efficiency), `HARDWARE`/electrical/report compute peak, report pump efficiency, battery capacity versus generated mass, fixed conversion ratings and storage efficiency. Control/workload/environment stay explicit and retain existing behavior. New spec consumers must include generated module equipment, actual workers, geometry, inventories, inspectors and reports.
 
+## Implemented scope and use
+
+`src/twin/catalog/equipment.ts` owns immutable reference records, units, assumptions, installed references and separate economics. `buildDesign`/`reconfigureDesign` resolve at a design boundary; `resolveModuleEngineering` supplies the actual engine/worker; generated assets, geometry, inventory and reports use the same records. Controller delays/thresholds/initial conditions and network offered-demand assumptions are explicit versioned records. Config retains requested service, seawater/fouling and the legacy construction controls. Price/budget changes preserve engineering identity and the complete operating checkpoint.
+
+| Supported demonstration | Declared specification values |
+| --- | --- |
+| Reference pump | v1.0.0; 250 kPa shutoff, 0.1 m³/s free flow, efficiency .72; 45 kW motor; 1.2 × 1.2 × .8 m, 180 kg |
+| Efficiency-only pump | v1.0.0; efficiency .84; same curve, motor, envelope and mass |
+| Physical pump replacement | v1.0.0; 280 kPa, .11 m³/s, efficiency .8; 55 kW; 1.35 × 1.3 × .9 m, 240 kg; assumed unit price USD 32,000 |
+| Battery consistency fixture | v1.0.0; 600 kWh, 1.8 MW storage rate, 2.2 MW connection rating; charge/discharge efficiency .94; fixed 2.4 × 2.1 × 1.5 m and 4,600 kg; assumed USD 300,000 |
+| Compute/conversion fixtures | Whole-server peak 10 kW and liquid capture .85; module conversion efficiency .99/rating 2 MW, tested through actual electrical allocation |
+
+All alternatives are synthetic reference assumptions, not vendor products, calibrated curves or procurement quotations. Unknown shore-transformer and standalone fan masses stay unknown. Existing free-form battery capacity controls retain the explicitly named legacy relationship `energyWh / 130 + 300 kg`; the battery alternative uses its own fixed declared mass/envelope. No new scaling relation is inferred.
+
+Use the **Exact equipment** selector to inspect a duty, seawater or standby pump. Under **Replace installed pump**, choose a **Replacement specification**, review its ratings/envelope/mass and reset explanation, then select **Apply and reset**. The logical slot ID is retained; specification ID/version plus physical design revision identify the installation. The current checkpoint is first saved in Compare's existing saved scenarios. A failed history write prevents the change. The new run starts paused at 0 s with declared temperatures, full declared battery energy and a fresh event history. Prior checkpoints/events stay with the original design; revision-bound telemetry is incompatible after replacement.
+
+Schema-3 projects persist immutable catalog snapshots/references and economics. Solver 2.2.0 rejects incompatible checkpoint resume. Real Phase 1 schema-3 and schema-2 fixtures remain inspectable; explicit recalculation creates a separate derived project with parent provenance and retains the original. Unsupported spec versions and changed immutable values fail at import/worker admission. The 30-day horizon, event limit and integration/replay contract are unchanged. Comparisons retain the installed hardware; only explicitly derived no-standby variants omit an overridden slot they remove.
+
+Fixed platform/hull/module/rack packing and geometry remain versioned reference layout templates; root assets persist full snapshots. Fixed network ports/topology retain their existing versioned representation and actual evaluator; offered traffic remains 100 Mbit/s cluster and 1 Mbit/s external per active node. This release adds no network resizing, routing architecture, optimization, arbitrary component editor, broad catalog or new physical model. Thermal capacitance/conductance and fluid-property approximations remain declared reduced-order model assumptions. The separate historical Legacy v0.1 view is preserved.
+
 ## Requirement-to-evidence map
 
 | Requirement | Required evidence |
@@ -50,10 +70,25 @@ Original duplicate equipment owners include `moduleAssets` versus hydraulic pump
 
 ## Issue queue
 
-No candidate findings yet. Each entry must name severity/requirement, tested SHA, reproduction, expected/actual behavior, owner and disposition. Evidence must be invalidated when its affected production inputs change.
+Slice A: builder `36542a55cb57df65a24d672f9d9f54dc934458b6`, integrated as `3a82a8e0632810af1e294698993aa17c53929944`. Tester snapshot `8673775` includes that exact production slice: typecheck passed; 26/29 focused checks passed. The three failing assertions are declared pending slice B (pump/battery report detail and persisted economic scale), not acceptance. Catalog/asset/engine/persistence/solver ownership was released to the fixer; builder continues UI/report/scene only.
+
+| ID | Requirement / evidence | Expected versus observed | Owner / disposition |
+| --- | --- | --- | --- |
+| PH2-B-01 | Report propagation, tested `8673775` | Installed pump/battery specification details must appear; baseline report omitted them | Builder `c7e27c3`; passing in tester `19d7310`, final retest pending |
+| PH2-B-02 | Saved economics, tested `8673775` | Scale 1.25 must change included total from 14,707,500 to 18,384,375 USD; baseline report kept 14,707,500 | Builder `c7e27c3`; passing in tester `19d7310`, including unit-price/worker-state check |
+| PH2-001 (P1) | Authoritative import/worker boundary, `36542a5`; verifier `tests/verifier-phase2.test.ts` | Changing saved root transformer efficiency .98→.5 while immutable spec remains .98 must reject or use spec; worker accepted and grid draw changed 57,393.69216776267→112,491.63664881483 W | Fixer `73dc4ae`; rejected after repair; independent integrated retest pending |
+| PH2-002 (P2) | Fingerprint excludes presentation, `36542a5`; same verifier test | Changing only `shore/grid.name` must leave physics identity unchanged; identity changed | Fixer `73dc4ae`; display projection repaired; independent integrated retest pending |
+| PH2-003 | Existing comparison/config paths, code review of B | A scenario/control comparison must retain selected equipment; `buildDesign(config)` rebuilt defaults | Builder `f669ed3`; new `reconfigureDesign` coverage added, integrated retest pending |
+| PH2-004 | Generated telemetry examples and calibration display | Old sample mapping is incompatible with the new design identity; calibration baseline must use installed HX | Builder `6536429`; deterministic fresh synthetic samples and two installed-HX consumers, 4 focused checks passed |
+| PH2-005 (P1) | Previous-run recovery, independent Chromium review at `d072d37` | Replacement-created history names exceeded the existing 60-character reader limit, so saved history could not reload | Fixer `8aaa1fe`; maximum name 29 characters, reader recovers unchanged checkpoint; three-browser retest pending |
+| PH2-006 (P2) | Price-only observations, independent Chromium review at `d072d37` | Full physics checkpoint stayed equal, but price edit cleared retained observations from 16 to 8 and disconnected stream | Fixer `0a0ad85`; Chromium retains all 16 records/checkpoint and stream session; hardware revision clears incompatible mappings; final gate pending |
+
+Every confirmed defect must name severity/requirement, tested SHA, reproduction, expected/actual behavior, owner and disposition. Evidence is invalidated when its affected production inputs change. Final acceptance requires one frozen integrated candidate and fresh testing/independent review.
 
 ## Recovery and release rules
 
 Preserve the compiled baseline commit above and every existing `v2-preview/` byte. Publish using the established normal-commit `codex/pages` mechanism after exact-candidate acceptance and PR merge. Rebuild from actual resulting main, package the existing manifest format, compare every deployed file (do not hardcode a file count), and exercise the public root in Chromium, Firefox and WebKit.
 
 For a confirmed production regression, start at current `codex/pages`, restore tracked files from `ccc99111eb1541fd95f7e9d14ac8fe15899cfab5`, then make and push a new ordinary commit. Never force-push/reset shared history. Verify the restored release marker, all bytes and public smoke. Keep source/checkpoints available; older code must not claim compatibility with new physical hardware histories.
+
+The release gate runs typecheck, lint, the production build, the complete unit suite with both telemetry flags, and `prototype.spec.ts` plus `phase2.spec.ts` in Chromium/Firefox/WebKit against an immutable source. The existing Firefox campus step must advance actual time to 10 s. Required PR CI repeats the repository's configured prototype gate. Final local receipts bind source commit and results; the PR records the tested candidate, actual merge and CI; the [public release marker](https://arhaan2.github.io/neptune-2035/release.json) records deployed source and artifact hash. `scripts/phase-2/verify-public.mjs` compares every published production/preview file with the actual committed Pages artifact and existing manifest; dotfile markers are verified from Git. Final delivery retains raw browser/unit/review/integrity evidence under `artifacts/phase-2/` and a durable copy in the original project workspace.
