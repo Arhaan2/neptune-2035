@@ -35,6 +35,18 @@ jobs:
           path: artifacts/phase-1-firefox
           if-no-files-found: error
           retention-days: 14
+      - name: Observe Chromium rendering environment
+        if: ${{ !cancelled() }}
+        timeout-minutes: 2
+        run: xvfb-run -a -s '-screen 0 1920x1200x24' node scripts/phase-1/diagnose-firefox.mjs --browser=chromium --out=artifacts/phase-1-chromium
+      - name: Retain bounded Chromium diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1-chromium-${{ github.sha }}
+          path: artifacts/phase-1-chromium
+          if-no-files-found: error
+          retention-days: 14
       # A diagnostic failure remains a failed job and cannot suppress acceptance.
       - if: ${{ !cancelled() }}
         run: env -u MOZ_HEADLESS xvfb-run -a -s '-screen 0 1920x1200x24' node scripts/phase-1/verify.mjs --out=artifacts/phase-1-ci

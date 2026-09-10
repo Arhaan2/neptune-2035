@@ -30,7 +30,13 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1600, height: 1050 },
-        launchOptions: { args: process.platform === 'darwin' ? ['--use-angle=metal'] : [] },
+        // Linux uses the installed Mesa GL stack through the CI Xvfb display.
+        headless: process.platform !== 'linux',
+        launchOptions: {
+          args: process.platform === 'darwin'
+            ? ['--use-angle=metal']
+            : process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl'] : [],
+        },
       },
     },
     {

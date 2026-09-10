@@ -24,7 +24,7 @@ Immediately before writes, recheck source/main/Pages refs, workflow diff and pro
 
 The final PR/final report and machine-readable integration record identify the actual tested head, pre-merge main, PR URL, merge SHA and observed remote main. Post-merge records can live alongside the final report/PR evidence rather than causing self-referential SHA-only commits. Until these records confirm completion, the integration status remains **NOT MERGED**.
 
-[Integration PR #1](https://github.com/Arhaan2/neptune-2035/pull/1) targets `main` at the baseline above. The corrected source `61bf694662560d12ba398bfe598540926d11a9cb` passed the full clean local gate (256 unit, 81 browser, measurements); [ACCEPTANCE.md](ACCEPTANCE.md) and its raw evidence record the exact commands and environment. Any subsequent evidence-only head must retain all 80 executable/configuration hashes and pass normal CI before the history-preserving merge. The PR and final report provide the actual resulting remote identities and post-merge checks once observed.
+[Integration PR #1](https://github.com/Arhaan2/neptune-2035/pull/1) targets `main` at the baseline above. The corrected source `61bf694662560d12ba398bfe598540926d11a9cb` passed the full clean local gate (256 unit, 81 browser, measurements); [ACCEPTANCE.md](ACCEPTANCE.md) and its raw evidence record the exact commands and environment. Subsequent diagnostic/environment changes are separately reviewed and must pass normal CI on the exact final head before the history-preserving merge; the other 77 accepted executable/configuration hashes remain unchanged. The PR and final report provide the actual resulting remote identities and post-merge checks once observed.
 
 ## Rollback without erasing provenance
 

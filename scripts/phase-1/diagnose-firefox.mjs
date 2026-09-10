@@ -10,8 +10,9 @@ const script = fileURLToPath(import.meta.url), root = process.cwd();
 const args = process.argv.slice(2), worker = args.includes('--worker');
 const cleanupProbe = args.includes('--cleanup-probe');
 const closeFallbackProbe = args.includes('--close-fallback-probe');
-const headed = args.includes('--headed'), mode = headed ? 'headed' : 'headless';
-const out = path.resolve(args.find(a => a.startsWith('--out='))?.slice(6) ?? `artifacts/phase-1/firefox-diagnostic-${Date.now()}`);
+const browserName = args.find(a => a.startsWith('--browser='))?.slice(10) ?? 'firefox';
+const headed = args.includes('--headed'), mode = browserName === 'chromium' ? 'fixed-headless-and-headed-angle-gl' : headed ? 'headed' : 'headless';
+const out = path.resolve(args.find(a => a.startsWith('--out='))?.slice(6) ?? `artifacts/phase-1/${browserName}-diagnostic-${Date.now()}`);
 const resultFile = path.join(out, 'diagnostic.json');
 // The supervisor must never observe a truncated PID-registration snapshot.
 const writeResult = value => {
@@ -27,9 +28,9 @@ if (!worker) {
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.mkdirSync(out, { recursive: false });
   const started = performance.now();
-  // Vite runs in this worker group. Playwright detaches Firefox into its own group;
+  // Vite runs in this worker group. Playwright detaches the browser into its own group;
   // the worker registers that group before browser operations begin.
-  const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, ...(cleanupProbe ? ['--cleanup-probe'] : []), ...(closeFallbackProbe ? ['--close-fallback-probe'] : []), ...(headed ? ['--headed'] : [])], {
+  const child = spawn(process.execPath, [script, '--worker', `--out=${out}`, `--browser=${browserName}`, ...(cleanupProbe ? ['--cleanup-probe'] : []), ...(closeFallbackProbe ? ['--close-fallback-probe'] : []), ...(headed ? ['--headed'] : [])], {
     cwd: root, env: process.env, detached: true, stdio: 'ignore',
   });
   const signalGroup = (pid, signal) => {
@@ -61,7 +62,7 @@ if (!worker) {
   if (exit.budgetExpired || exit.supervisorSignal || exit.code !== 0 || !result.supervisor.registeredGroupsAbsent) result.status = 'INCOMPLETE';
   writeResult(result);
   process.removeListener('SIGINT', onInterrupt); process.removeListener('SIGTERM', onTerminate);
-  console.log(`Firefox diagnostic ${result.status}: ${path.relative(root, resultFile)}`);
+  console.log(`${browserName} diagnostic ${result.status}: ${path.relative(root, resultFile)}`);
   // Observed stalls remain data; the separate complete acceptance gate must run.
   process.exitCode = result.status === 'INCOMPLETE' ? 1 : 0;
 } else {
@@ -77,16 +78,20 @@ async function diagnose() {
     sourceStatus: clean(execFileSync('git', ['status', '--short'], { encoding: 'utf8' })),
     host: { platform: os.platform(), release: os.release(), arch: os.arch(), cpu: os.cpus()[0]?.model, logicalCpus: os.cpus().length, totalMemoryBytes: os.totalmem(), node: process.version },
     viewport: { width: 1600, height: 1050 }, deviceScaleFactor: 1,
-    mode, headless: !headed, displayEnvironmentPresent: Boolean(process.env.DISPLAY),
+    browser: browserName, mode, headless: browserName === 'chromium' ? null : !headed, displayEnvironmentPresent: Boolean(process.env.DISPLAY),
     limitations: [
       'Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.',
-      'Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.',
+      ...(browserName === 'firefox' ? ['Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.'] : ['The fixed Chromium comparison changes executable/display mode and ANGLE backend together; it cannot isolate one causal factor or prove the selected backend is faster.']),
       'Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.',
       'No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected.',
       'The blank-page WebGL probe runs after the native frame observation; successful native readback does not establish app 3D rendering.',
       'The native WebGL probe may warm graphics initialization before the app pages.',
     ],
-    preferenceSources: [
+    preferenceSources: browserName === 'chromium' ? [
+      'https://playwright.dev/docs/browsers#chromium-headless-shell',
+      'https://playwright.dev/docs/ci#running-headed',
+      'https://chromium.googlesource.com/angle/angle/+/HEAD/doc/DebuggingTips.md#usage',
+    ] : [
       'https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123',
       'https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169',
       'https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396',
@@ -114,8 +119,10 @@ async function diagnose() {
   }
   let vite, browser, browserServer, stopping = false;
   try {
-    if (headed && process.env.MOZ_HEADLESS !== undefined) throw Error('--headed requires MOZ_HEADLESS to be unset; run with env -u MOZ_HEADLESS');
-    if (headed && process.platform === 'linux') {
+    if (!['firefox', 'chromium'].includes(browserName)) throw Error('--browser must be firefox or chromium');
+    if (browserName === 'chromium' && headed) throw Error('--browser=chromium uses fixed headless and headed ANGLE GL variants; omit --headed');
+    if (browserName === 'firefox' && headed && process.env.MOZ_HEADLESS !== undefined) throw Error('--headed requires MOZ_HEADLESS to be unset; run with env -u MOZ_HEADLESS');
+    if ((headed || browserName === 'chromium') && process.platform === 'linux') {
       await stage('linux-graphics-environment', () => {
         const observe = (command, commandArgs) => {
           try {
@@ -158,24 +165,27 @@ async function diagnose() {
       }, 8000);
     }
     result.server = { owned: !supplied, port: Number(url.port) || 80 };
-    const { firefox } = await import('playwright');
-    const variants = [
-      { name: `${mode}-software-clock-60`, prefs: { 'layout.frame_rate': 60 } },
-      { name: `${mode}-software-clock-60-software-webrender`, prefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true } },
-      { name: `${mode}-default-clock`, prefs: {} },
+    const browserType = (await import('playwright'))[browserName];
+    const variants = browserName === 'chromium' ? [
+      { name: 'headless-default', headless: true, args: [] },
+      { name: 'headed-angle-gl', headless: false, args: ['--use-gl=angle', '--use-angle=gl'] },
+    ] : [
+      { name: `${mode}-software-clock-60`, headless: !headed, prefs: { 'layout.frame_rate': 60 } },
+      { name: `${mode}-software-clock-60-software-webrender`, headless: !headed, prefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true } },
+      { name: `${mode}-default-clock`, headless: !headed, prefs: {} },
     ];
     for (const variant of variants) {
       if (performance.now() - started > activeBudgetMs - 10_000) break;
       const data = { ...variant, stages: [], pages: [] }; result.variants.push(data); save();
       try {
-        await stage('launch-firefox', async () => {
-          browserServer = await firefox.launchServer({ host: '127.0.0.1', headless: !headed, firefoxUserPrefs: variant.prefs, timeout: 5000 });
+        await stage(`launch-${browserName}`, async () => {
+          browserServer = await browserType.launchServer({ host: '127.0.0.1', headless: variant.headless, ...(browserName === 'firefox' ? { firefoxUserPrefs: variant.prefs } : { args: variant.args }), timeout: 5000 });
           result.activeBrowserGroups.push(browserServer.process().pid); save();
-          browser = await firefox.connect(browserServer.wsEndpoint(), { timeout: 2000 });
-          return { browserVersion: browser.version(), mode, headless: !headed };
+          browser = await browserType.connect(browserServer.wsEndpoint(), { timeout: 2000 });
+          return { browserVersion: browser.version(), mode: variant.headless ? 'headless' : 'headed', headless: variant.headless };
         }, 7500, data.stages);
         if (cleanupProbe) {
-          result.intentionalCleanupProbe = 'A real launched Firefox is left open until the supervisor deadline.'; save();
+          result.intentionalCleanupProbe = `A real launched ${browserName} is left open until the supervisor deadline.`; save();
           await new Promise(() => {});
         }
         for (const scene of ['blank', 'legacy', 'twin']) {
@@ -226,7 +236,7 @@ async function diagnose() {
           const ownedServer = browserServer, pid = ownedServer.process().pid;
           try {
             if (closeFallbackProbe && result.variants.length === 1) {
-              data.intentionalCloseFallbackProbe = 'Only the first graceful-close operation is stalled; the real Firefox remains open for public BrowserServer.kill().';
+              data.intentionalCloseFallbackProbe = `Only the first graceful-close operation is stalled; the real ${browserName} remains open for public BrowserServer.kill().`;
               save();
             }
             await stage('close-browser', () => closeFallbackProbe && result.variants.length === 1 ? new Promise(() => {}) : ownedServer.close(), 2000, data.stages);
@@ -253,7 +263,7 @@ async function diagnose() {
         save();
       }
     }
-    result.status = result.variants.length === 3 && result.variants.every(v => v.pages.length === 3) ? 'COLLECTED' : 'INCOMPLETE';
+    result.status = result.variants.length === variants.length && result.variants.every(v => v.pages.length === 3) ? 'COLLECTED' : 'INCOMPLETE';
   } catch (error) { result.error = clean(error); }
   finally {
     stopping = true;
