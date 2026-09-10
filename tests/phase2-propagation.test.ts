@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { allAssets, buildDesign, DEFAULT_CONFIG, replaceEquipment, resolveAsset, withDefaultSpecification } from '../src/twin/assets/design';
+import { allAssets, buildDesign, DEFAULT_CONFIG, replaceEquipment, reconfigureDesign, resolveAsset, withDefaultSpecification } from '../src/twin/assets/design';
 import { economicIdentity, engineeringIdentity, installedEquipmentIdentity, resolveSpecification, updateEconomicAssumptions } from '../src/twin/catalog/equipment';
 import { advance, initialize } from '../src/twin/engine/simulation';
 import { createWorkerHandler } from '../src/twin/engine/worker';
-import { billOfEquipment, constraints, engineeringReport, inventoryCSV } from '../src/twin/analysis/reports';
+import { billOfEquipment, compareRedundancy, constraints, engineeringReport, inventoryCSV } from '../src/twin/analysis/reports';
 import { footprintBounds, presentedPosition } from '../src/scene/twinGeometry';
 import { projectFile } from '../src/twin/persistence/project';
 import type { Design, SimulationState, WorkerResponse } from '../src/twin/types';
@@ -186,5 +186,38 @@ describe('PH2-06 equipment-associated price changes', () => {
     expect(engineeringIdentity(priced)).toBe(engineeringIdentity(design));
     expect(projectFile(priced, state).checkpoint).toEqual(projectFile(design, state).checkpoint);
     expect(billOfEquipment(priced).totalUSD - billOfEquipment(design).totalUSD).toBeCloseTo(3 * 2500 * 1.2 * 1.25, 6);
+  });
+});
+
+
+describe('PH2 installed specifications survive existing configuration and comparison workflows', () => {
+  const variant = () => updateEconomicAssumptions(
+    withDefaultSpecification(withDefaultSpecification(replaceEquipment(replaceEquipment(replaceEquipment(small(), duty, 'pump-efficient'), standby, 'pump-physical'), battery, 'battery-extended'), 'compute', 'compute-efficient'), 'distribution', 'distribution-efficient'),
+    { unitCostScale: 1.3 },
+  );
+  it('retains installed pump/battery/compute/conversion and economics across ordinary workload, environment and HX config changes', () => {
+    const original = variant(), before = structuredClone(original);
+    const changed = reconfigureDesign(original, { workload: 0.7, seawaterK: 292.15, exchangerUAWPerK: 400000 });
+    for (const slot of [duty, standby, battery, 'compute', 'distribution']) expect(resolveSpecification(changed, slot)).toEqual(resolveSpecification(original, slot));
+    expect(changed.equipment!.economics).toEqual(original.equipment!.economics);
+    expect(resolveSpecification(changed, 'exchanger').ratings.UAWPerK).toBe(400000);
+    const state = initialize(changed);
+    expect(state.modules[0].itW).toBeCloseTo(10000 * (0.3 + 0.7 * 0.7), 8);
+    expect(state.modules[0].batteryWh).toBe(600000);
+    expect(original).toEqual(before);
+  });
+  it('rejects silent removal of an installed override and makes bounded derived redundancy removal explicit', () => {
+    const original = variant(), before = structuredClone(original);
+    expect(() => reconfigureDesign(original, { standbyPumps: 0 })).toThrow(/removed|slot|override|installed/i);
+    const rows = compareRedundancy(original, 1);
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      for (const slot of [duty, battery, 'compute', 'distribution']) expect(resolveSpecification(row.design, slot)).toEqual(resolveSpecification(original, slot));
+      expect(row.design.equipment!.economics).toEqual(original.equipment!.economics);
+      expect(row.state.modules[0].itW).toBeCloseTo(10000, 8);
+    }
+    expect(rows[0].design.equipment!.overrides[standby]).toBeUndefined();
+    expect(rows[1].design.equipment!.overrides[standby]).toEqual(original.equipment!.overrides[standby]);
+    expect(original).toEqual(before);
   });
 });
