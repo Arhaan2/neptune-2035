@@ -139,8 +139,15 @@ test('camera return preserves a manually selected exterior pose with normal moti
   const home = await resetCamera(page);
   await page.locator('canvas').focus();
   await page.keyboard.press('+');
-  await expect.poll(() => readScene(page).then(s => s.camera)).not.toEqual(home.camera);
-  const prior = await readScene(page);
+  let prior = home;
+  // A neighboring frame can differ by floating-point noise before the key's
+  // zoom is visible. Capture the same new frame that proves material movement.
+  await expect.poll(async () => {
+    prior = await readScene(page);
+    return prior.frame > home.frame && !prior.transitioning && !prior.inside
+      ? Math.hypot(...prior.camera.map((v, i) => v - home.camera[i]))
+      : 0;
+  }).toBeGreaterThan(1);
   await page.getByRole('button', { name: 'Inside', exact: true }).click();
   const interior = await waitForCameraTransition(() => readScene(page), prior, true);
   expect(Math.hypot(...interior.camera.map((v, i) => v - prior.camera[i]))).toBeGreaterThan(1);
