@@ -15,7 +15,7 @@
         "fixture-generated",
         "simulated-clock"
       ],
-      "mappingVersion": "reference-v2-aa6189d9"
+      "mappingVersion": "reference-v2-neptune-ed7f6208ff42776a"
     },
     {
       "assetId": "platform-001/module-01",
@@ -31,7 +31,7 @@
         "fixture-generated",
         "simulated-clock"
       ],
-      "mappingVersion": "reference-v2-aa6189d9"
+      "mappingVersion": "reference-v2-neptune-ed7f6208ff42776a"
     },
     {
       "assetId": "platform-001/module-01",
@@ -47,7 +47,7 @@
         "fixture-generated",
         "simulated-clock"
       ],
-      "mappingVersion": "reference-v2-aa6189d9"
+      "mappingVersion": "reference-v2-neptune-ed7f6208ff42776a"
     },
     {
       "assetId": "platform-001/module-01",
@@ -63,7 +63,7 @@
         "fixture-generated",
         "simulated-clock"
       ],
-      "mappingVersion": "reference-v2-aa6189d9"
+      "mappingVersion": "reference-v2-neptune-ed7f6208ff42776a"
     },
     {
       "assetId": "platform-001/module-01",
@@ -79,7 +79,7 @@
         "fixture-generated",
         "simulated-clock"
       ],
-      "mappingVersion": "reference-v2-aa6189d9"
+      "mappingVersion": "reference-v2-neptune-ed7f6208ff42776a"
     }
   ]
 }

@@ -1,5 +1,7 @@
 # Release record
 
+The Phase 2 starting baseline was independently verified on 2026-09-10: source `06899f0668a05c6ba7f0a1bc0c96d33304eef580`, compiled Pages commit `ccc99111eb1541fd95f7e9d14ac8fe15899cfab5`. The historical release below is retained for provenance. [Phase 2 equipment authority and release evidence](phase-2/RELEASE.md) records the bounded implementation and preserved rollback; the [served release marker](https://arhaan2.github.io/neptune-2035/release.json) identifies current production. Full Phase 1 acceptance, performance/stability campaigns and physical validation remain deferred.
+
 ## Accepted application · 2026-09-08
 
 - Source repository: https://github.com/Arhaan2/neptune-2035 (new, public; default branch `codex/neptune`).

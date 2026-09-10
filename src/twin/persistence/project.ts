@@ -1,4 +1,5 @@
-import { buildDesign, validateConfig } from '../assets/design';
+import { engineeringIdentity } from '../catalog/equipment';
+import { buildDesign, migrateLegacyDesign, validateConfig } from '../assets/design';
 import { failure, finiteNumber, SimulationError } from '../safety';
 import { SOLVER_VERSION, type Design, type SimulationState } from '../types';
 import { validateDesign } from './design';
@@ -43,7 +44,7 @@ function validateProject(value: unknown): asserts value is ProjectFile {
   if (identity(value.provenance.sourceIds) !== identity(value.designSnapshot.sourceIds)) failure('invalid-input', 'PROJECT_SOURCE_BINDING', 'Source provenance disagrees with the saved design.');
   if (value.checkpoint !== null) {
     record(value.checkpoint, 'checkpoint'); keys(value.checkpoint, ['boundary', 'configIdentity', 'state'], 'checkpoint');
-    if (value.checkpoint.boundary !== 'after-events-and-controller' || value.checkpoint.configIdentity !== identity(value.designSnapshot)) failure('invalid-input', 'CHECKPOINT_BINDING', 'Checkpoint boundary or design identity mismatch.');
+    if (value.checkpoint.boundary !== 'after-events-and-controller' || value.checkpoint.configIdentity !== engineeringIdentity(value.designSnapshot)) failure('invalid-input', 'CHECKPOINT_BINDING', 'Checkpoint boundary or design identity mismatch.');
     validateState(value.designSnapshot, value.checkpoint.state, { allowDifferentSolver: true });
     if (value.checkpoint.state.timeS !== value.timeS || value.checkpoint.state.solverVersion !== value.solverVersion || identity(value.checkpoint.state.events) !== identity(value.events)) failure('invalid-input', 'CHECKPOINT_HISTORY', 'Checkpoint clock, solver or event history mismatch; explicit migration cannot repair inconsistent data.');
   }
@@ -59,7 +60,7 @@ export function projectFile(design: Design, state: SimulationState, options: { p
     schemaVersion: CONTRACT.projectSchema, kind: 'neptune-project', design: design.config, designSnapshot: design,
     events: state.events, timeS: state.timeS, sourceMode: 'simulated', solverVersion: state.solverVersion,
     modelId: MODEL_ID, algorithmId: ALGORITHM_ID,
-    checkpoint: { boundary: 'after-events-and-controller', configIdentity: identity(design), state: { ...state, solverMs: 0 } },
+    checkpoint: { boundary: 'after-events-and-controller', configIdentity: engineeringIdentity(design), state: { ...state, solverMs: 0 } },
     provenance: options.provenance ?? { origin: 'simulated', sourceIds: design.sourceIds, assumptions: 'design-stage-reference' },
     ...(options.execution ? { execution: options.execution } : {}),
   };
@@ -96,7 +97,7 @@ export function restoreProject(project: ProjectFile): { design: Design; state: S
 export function recalculateProject(project: ProjectFile): CurrentProject {
   validateProject(project);
   // Existing representation remains unchanged; a numerical recalculation does not redesign equipment.
-  const design = project.schemaVersion === 3 ? structuredClone(project.designSnapshot) : buildDesign(project.design);
+  const design = project.schemaVersion === 3 ? migrateLegacyDesign(project.designSnapshot) : buildDesign(project.design);
   const events = project.events.map((e, i) => ({ ...e, sequence: project.schemaVersion === 2 ? i : e.sequence! })).sort(eventOrder);
   const derived: CurrentProject = {
     schemaVersion: 3, kind: 'neptune-project', design: design.config, designSnapshot: design, events, timeS: project.timeS,

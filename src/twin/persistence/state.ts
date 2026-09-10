@@ -1,9 +1,10 @@
+import { engineeringIdentity, resolveSpecification, equipmentFor } from '../catalog/equipment';
 import { moduleAssets } from '../assets/design';
 import { failure, finiteNumber } from '../safety';
 import { SOLVER_VERSION, type Design, type SimulationState } from '../types';
 import { validateEvents } from './events';
 import { CONTRACT, INTEGRATION_STEPS } from './limits';
-import { array, identity, keys, record, string, validateStructure } from './structure';
+import { array, keys, record, string, validateStructure } from './structure';
 
 const equipmentStates = ['available', 'starting', 'running', 'standby', 'isolated', 'failed', 'maintenance', 'unknown'];
 const nonnegative = ['technicalFlowM3S', 'seawaterFlowM3S', 'pumpPowerW', 'itW', 'facilityW', 'gridW', 'batteryDischargeW', 'batteryChargeW', 'pressurePa'];
@@ -13,7 +14,7 @@ export function validateState(design: Design, value: unknown, options: { allowDi
   keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs'], 'state');
   string(value.solverVersion, 'state.solverVersion', 100);
   if (value.schemaVersion !== CONTRACT.stateSchema || value.designRevision !== design.revision || (!options.allowDifferentSolver && value.solverVersion !== SOLVER_VERSION)) failure('invalid-input', 'STATE_REVISION', 'Simulation revision mismatch; explicit model migration/recalculation required.');
-  if (value.designIdentity !== identity(design)) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
+  if (value.designIdentity !== engineeringIdentity(design)) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
   finiteNumber(value.timeS, 'state.timeS', { min: 0, max: CONTRACT.horizonS, integer: true, unit: 's' });
   if (!INTEGRATION_STEPS.includes(value.integrationStepS as never)) failure('invalid-input', 'INTEGRATION_STEP', 'Integration step must be 1, 0.5, 0.25, or 0.125 seconds.');
   finiteNumber(value.stepIndex, 'state.stepIndex', { min: 0, max: CONTRACT.horizonS / INTEGRATION_STEPS.at(-1)!, integer: true });
@@ -59,7 +60,7 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     if (m.id !== spec.id) failure('invalid-input', 'STATE_INVENTORY', 'Simulation module identity/order mismatch.');
     finiteNumber(m.coolantK, 'module.coolantK', { min: 273.15, max: 373.15, unit: 'K' });
     finiteNumber(m.airK, 'module.airK', { min: 250, max: 373.15, unit: 'K' });
-    finiteNumber(m.batteryWh, 'module.batteryWh', { min: 0, max: design.config.batteryWhPerModule, unit: 'Wh' });
+    finiteNumber(m.batteryWh, 'module.batteryWh', { min: 0, max: resolveSpecification(design,`${spec.id}/battery`).ratings.energyWh, unit: 'Wh' });
     if (![0, 0.5, 1].includes(m.throttle as number)) failure('invalid-input', 'STATE_THROTTLE', 'Invalid thermal hysteresis state.', { assetId: spec.id });
     for (const key of nonnegative) finiteNumber(m[key], `module.${key}`, { min: 0 });
     for (const key of signed) finiteNumber(m[key], `module.${key}`, { unit: 'W' });
@@ -85,7 +86,7 @@ export function validateState(design: Design, value: unknown, options: { allowDi
       if ((m.startAtS[id] as number) <= value.timeS) failure('invalid-input', 'STATE_STARTUP_EXPIRED', 'An expired startup must be resolved before a checkpoint is committed.', { assetId: id });
       if (id === `${spec.id}/pump-duty`) {
         const last = due.findLast(e => e.assetId === id && ['trip', 'restore', 'maintenance'].includes(e.kind));
-        if (last?.kind !== 'restore' || m.startAtS[id] !== last.timeS + 3) failure('invalid-input', 'STATE_DUTY_DEADLINE', 'Duty startup must retain the three-second deadline of its latest recorded restore.', { assetId: id, unit: 's' });
+        if (last?.kind !== 'restore' || m.startAtS[id] !== last.timeS + equipmentFor(design).controlPolicy.dutyRestartS) failure('invalid-input', 'STATE_DUTY_DEADLINE', 'Duty startup must retain the three-second deadline of its latest recorded restore.', { assetId: id, unit: 's' });
       }
     }
     array(m.warnings, 'module.warnings', CONTRACT.maxLogEntries); m.warnings.forEach(w => string(w, 'module warning'));

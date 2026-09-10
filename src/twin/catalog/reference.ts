@@ -1,10 +1,13 @@
+import { catalogSpecification } from './equipment';
+const computeReference=catalogSpecification('compute-reference');
+const pipeReference=catalogSpecification('pipe-reference');
 export const HARDWARE = Object.freeze({
   acceleratorsPerNode: 8, nodesPerRack: 4, nodeHeightU: 10, rackHeightU: 48,
-  racksPerModule: 40, modulesPerPlatform: 4, nodePeakW: 12_000,
-  nodeMassKg: 120, rackMassKg: 150, liquidCaptureFraction: 0.9,
+  racksPerModule: 40, modulesPerPlatform: 4, nodePeakW: computeReference.ratings.capacityW,
+  nodeMassKg: computeReference.operationalMassKg!, rackMassKg: 150, liquidCaptureFraction: computeReference.ratings.liquidCaptureFraction,
   technicalDensityKgM3: 997, technicalCpJKgK: 4180,
   seawaterDensityKgM3: 1025, seawaterCpJKgK: 3990,
-  pipeDiameterM: 0.18, pipeRoughnessM: 0.000045,
+  pipeDiameterM: pipeReference.ratings.diameterM, pipeRoughnessM: pipeReference.ratings.roughnessM,
 });
 export const REFERENCE_SOURCES = [
   { id: 'generic-hardware-v2', evidence: 'assumed', title: 'Illustrative DLC-12 whole-server envelope', url: '', checked: '2026-09-08', claim: '8 accelerators, 10U, 12 kW whole-server peak, 120 kg, 90% liquid capture. Generic co-designed envelope, not a commercial product.', limit: 'Power, mass, cooling compatibility and performance require manufacturer evidence before procurement.' },

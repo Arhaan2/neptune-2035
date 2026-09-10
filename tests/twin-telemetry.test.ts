@@ -291,8 +291,13 @@ describe('running DataPanel acceptance', () => {
       await page.goto('http://127.0.0.1:5173');
       await page.getByRole('button', { name: 'Data & replay', exact: true }).click();
       await page.getByRole('heading', { name: 'Observations & synchronization' }).waitFor();
-      const revision = (await page.locator('.twin-mode').innerText()).match(/reference-v2-[a-f0-9]{8}/)?.[0];
-      expect(revision).toBeTruthy();
+      const downloadPending = page.waitForEvent('download');
+      await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
+      const exported = await downloadPending;
+      expect(await exported.failure()).toBeNull();
+      const revision = JSON.parse(readFileSync((await exported.path())!, 'utf8')).designSnapshot.revision;
+      expect(typeof revision).toBe('string');
+      expect(await page.locator('.twin-mode').innerText()).toContain(revision);
       await page.getByLabel('Drop generated observations', { exact: true }).check();
       await page.getByRole('button', { name: 'Step 10s', exact: true }).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="sim-time"]')?.textContent === '10s');

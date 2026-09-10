@@ -1,3 +1,4 @@
+import { engineeringIdentity } from '../twin/catalog/equipment';
 import {
   Component,
   useEffect,
@@ -1200,6 +1201,7 @@ function CameraRig({
         geometries: gl.info.memory.geometries,
         textures: gl.info.memory.textures,
         selectedId: props.selectedId,
+        selectedSpecification: active?{id:active.catalogId,version:active.revision,dimensionsM:[...active.dimensionsM],operationalMassKg:active.operationalMassKg}:null,
         renderedModules: props.design.modules.length,
         totalModules: props.design.modules.length,
         renderedPlatforms: props.design.assets.filter(
@@ -1243,6 +1245,7 @@ declare global {
       geometries: number;
       textures: number;
       selectedId: string;
+      selectedSpecification: {id:string;version:string;dimensionsM:number[];operationalMassKg:number|null}|null;
       renderedModules: number;
       totalModules: number;
       renderedPlatforms: number;
@@ -1559,6 +1562,7 @@ export async function geometryGLTF(design: Design): Promise<object> {
   group.name = 'NEPTUNE design-stage dimensioned geometry';
   group.userData = {
     designRevision: design.revision,
+    engineeringIdentity: engineeringIdentity(design),
     schemaVersion: 2,
     units: 'meters',
     evidence: 'assumed design geometry',
@@ -1581,6 +1585,8 @@ export async function geometryGLTF(design: Design): Promise<object> {
           parentId: asset.parentId,
           catalogId: asset.catalogId,
           assetRevision: asset.revision,
+      operationalMassKg: asset.operationalMassKg,
+      ratings: asset.ratings,
           dimensionsM: asset.dimensionsM,
           positionM: asset.positionM,
         };
@@ -1615,6 +1621,8 @@ export async function geometryGLTF(design: Design): Promise<object> {
       parentId: asset.parentId,
       catalogId: asset.catalogId,
       assetRevision: asset.revision,
+      operationalMassKg: asset.operationalMassKg,
+      ratings: asset.ratings,
       dimensionsM: asset.dimensionsM,
       positionM: asset.positionM,
     };

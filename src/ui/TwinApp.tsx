@@ -1,3 +1,4 @@
+import { REFERENCE_CATALOG, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity } from '../twin/catalog/equipment';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Waves,
@@ -14,6 +15,8 @@ import {
 } from 'lucide-react';
 import {
   buildDesign,
+  replaceEquipment,
+  reconfigureDesign,
   DEFAULT_CONFIG,
   moduleAssets,
   resolveAsset,
@@ -214,10 +217,12 @@ export default function TwinApp() {
     [inspectionProject, setInspectionProject] = useState<ProjectFile | null>(
       null,
     ),
-    [costScale, setCostScale] = useState(1),
+    [replacementSpec, setReplacementSpec] = useState('pump-efficient'),
     [replayTimeS, setReplayTimeS] = useState(0),
     [maxPlatforms, setMaxPlatforms] = useState(8),
     [sizing, setSizing] = useState('');
+  const costScale=equipmentFor(design).economics.unitCostScale;
+  const setCostScale=(value:number)=>setDesignOverride(updateEconomicAssumptions(design,{unitCostScale:value}));
   const reducedMotion = useMemo(
     () => matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
@@ -229,6 +234,9 @@ export default function TwinApp() {
       ) ?? design.modules[0],
     selectedState = state?.modules.find((m) => m.id === selectedModule.id);
   const selectedModuleId = selectedModule.id;
+  const computeSpec=resolveSpecification(design,'compute');
+  const installedSpec=asset&&roleForAsset(asset.id)?resolveSpecification(design,asset.id):null;
+  const proposedSpec=REFERENCE_CATALOG.find(spec=>spec.id===replacementSpec)!;
   const details = useMemo(
       () => moduleAssets(design, selectedModuleId),
       [design, selectedModuleId],
@@ -260,10 +268,13 @@ export default function TwinApp() {
   const setDesign = (patch: Partial<DesignConfig>) => {
     try {
       const next = { ...config, ...patch };
-      const nextDesign = buildDesign(next);
+      if(Object.keys(patch).every(key=>key==='budgetUSD')) {
+        setConfig(next);setDesignOverride({...design,config:next});setNotice('Economic budget updated. Physical state and engineering identity retained.');return;
+      }
+      const nextDesign = reconfigureDesign(design,patch);
       if (!resolveAsset(nextDesign, selectedId))
         setSelectedId(`${nextDesign.modules[0].id}/pump-duty`);
-      setDesignOverride(null);
+      setDesignOverride(nextDesign);
       setConfig(next);
       setInside(false);
       setDemo(false);
@@ -408,6 +419,21 @@ export default function TwinApp() {
       );
     }
   };
+  const applyReplacement = () => {
+    if(!state||sim.busy||!asset||asset.type!=='pump')return;
+    try {
+      const nextDesign=replaceEquipment(design,asset.id,replacementSpec);
+      const oldProject=sim.captureProject();
+      const history=[...saved.slice(-(CONTRACT.maxSavedScenarios-1)),{name:`Before replacement · ${state.timeS}s`,project:oldProject}];
+      const serialized=JSON.stringify(history.map(item=>({name:item.name,project:JSON.parse(serializeProject(item.project))})));
+      preflightJSON(serialized);validateStructure(history);
+      localStorage.setItem('neptune-v2-scenarios',serialized);
+      sim.cancel();setSaved(history);setDesignOverride(nextDesign);setDemo(false);setPendingProject(null);
+      setNotice('Replacement applied as a new physical design revision. Simulation paused and reset to declared initial conditions. The prior project and its event history are saved in Compare. Observation mappings from the old revision are incompatible and have been cleared.');
+    } catch(problem) {
+      setNotice(`Replacement was not applied; current run retained. ${String(problem)} Export the current project if local history storage is unavailable.`);
+    }
+  };
   const makeComparison = async () => {
     setCompareBusy(true);
     setComparison([]);
@@ -415,12 +441,12 @@ export default function TwinApp() {
       'Full load at 0s → selected duty pump trip at 30s → restore at 180s. Both runs use the same parameters through 240s.',
     );
     setNotice(
-      'Running the same pump trip and restoration with zero and one standby pump.',
+      'Running the same pump trip and restoration with zero and one standby pump. Installed specifications are preserved; the separate no-standby design omits any removed standby slot override.',
     );
     try {
       const result: Compared[] = [];
       for (const standbyPumps of [0, 1] as const) {
-        const d = buildDesign({ ...config, standbyPumps });
+        const d = reconfigureDesign(design,{standbyPumps},{removedOverrides:'omit-in-derived-design'});
         const s = await runWorkerExperiment(
           d,
           signatureEvents(d, selectedModule.id),
@@ -500,7 +526,7 @@ export default function TwinApp() {
                     ),
                   }
                 : { generation: (variant + 1) as 1 | 2 };
-          const d = buildDesign({ ...config, ...patch });
+          const d = reconfigureDesign(design,patch);
           const label =
             mode === 'idle'
               ? `Idle ${num(d.config.idleFraction * 100, 0)}%`
@@ -554,7 +580,7 @@ export default function TwinApp() {
     try {
       let best: Compared | undefined;
       const rows: string[] = [];
-      for (const d of sizingCandidates(config, maxPlatforms)) {
+      for (const d of sizingCandidates(config, maxPlatforms,design)) {
         const s = await runWorkerExperiment(d, signatureEvents(d), 180),
           sum = summarize(d, s);
         const assessment = sizingAssessment(d, s, config.budgetUSD, costScale);
@@ -784,8 +810,7 @@ export default function TwinApp() {
               Workload requires cluster connectivity
             </label>
             <p>
-              Changing design reinitializes operation. Whole-server 12 kW /
-              8-accelerator proxy; all hardware envelopes assumed.
+              Changing physical design reinitializes operation. Installed whole-server reference: {num(computeSpec.ratings.capacityW/1000)} kW / {computeSpec.ratings.accelerators} accelerators, {computeSpec.name} v{computeSpec.version}; hardware envelopes are assumed.
             </p>
           </details>
           <div className="twin-tree">
@@ -1139,6 +1164,7 @@ export default function TwinApp() {
               after that saved checkpoint may have been lost. Recovery is
               paused.
               <button
+                disabled={sim.busy}
                 onClick={() => {
                   try {
                     inspectOrRestore(sim.recovery!);
@@ -1486,7 +1512,7 @@ export default function TwinApp() {
                   : `${num(asset.operationalMassKg)} kg`}
               </dd>
               <dt>Catalog / evidence</dt>
-              <dd>{asset.catalogId} · assumed</dd>
+              <dd data-testid="installed-spec">{installedSpec?`${installedSpec.name} · ${installedSpec.id} · v${installedSpec.version}`:`${asset.catalogId} · v${asset.revision}`} · assumed</dd>
               <dt>Failure domain</dt>
               <dd>
                 <button
@@ -1506,6 +1532,25 @@ export default function TwinApp() {
                 </>
               )}
             </dl>
+          )}
+          {asset?.type==='pump'&&installedSpec&&(
+            <section aria-label="Replace installed pump">
+              <h3>Replace installed pump</h3>
+              <label className="twin-preset">Replacement specification
+                <select aria-label="Replacement specification" value={replacementSpec} onChange={event=>setReplacementSpec(event.target.value)}>
+                  {REFERENCE_CATALOG.filter(spec=>spec.type==='pump'&&spec.compatibility===installedSpec.compatibility).map(spec=><option key={spec.id} value={spec.id}>{spec.name} · v{spec.version}</option>)}
+                </select>
+              </label>
+              <div data-testid="proposed-spec-details">
+                <p><strong>{proposedSpec.name} · v{proposedSpec.version}</strong></p>
+                <p>Compatible reference water-loop interfaces. Shutoff {num(proposedSpec.ratings.shutoffPa/1000)} kPa; free flow {num(proposedSpec.ratings.freeFlowM3S*1000)} L/s; efficiency {num(proposedSpec.ratings.efficiency*100)}%; motor rating {num(proposedSpec.ratings.capacityW/1000)} kW.</p>
+                <p>Envelope {proposedSpec.dimensionsM?.map(v=>num(v,3)).join(' × ')} m; declared mass {num(proposedSpec.operationalMassKg??NaN)} kg. Included assumed price USD {num(equipmentFor(design).economics.specificationUnitUSD[`${proposedSpec.id}@${proposedSpec.version}`]??NaN,0)}.</p>
+                <p>{proposedSpec.assumptions}</p>
+                <p>Applying creates a new physical design revision and resets the clock, temperatures, stored energy, controller state and event history to declared initial conditions. The old project stays in saved scenarios; old telemetry mappings are incompatible.</p>
+                <button disabled={sim.busy||!state||installedSpec.id===replacementSpec} onClick={applyReplacement}>Apply and reset</button>
+              </div>
+              <details><summary>Installed equipment identity</summary><code className="twin-id">{installedEquipmentIdentity(design,asset.id)}</code><p>The asset ID remains the logical slot. The specification and design revision identify this installation.</p></details>
+            </section>
           )}
           {asset && (
             <details>

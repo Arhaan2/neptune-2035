@@ -1,6 +1,7 @@
 /** NEPTUNE design-stage contract v2. SI throughout; temperatures are kelvin. */
 export const TWIN_SCHEMA = 2 as const;
-export const SOLVER_VERSION = '2.1.0';
+export const SOLVER_VERSION = '2.2.0';
+import type { EquipmentConfiguration } from './catalog/equipment';
 import type { IntegrationStep } from './persistence/limits';
 import type { FailureDiagnostic } from './safety';
 export type Vec3 = [number, number, number];
@@ -27,6 +28,7 @@ export interface Design {
   schemaVersion: 2; revision: string; config: DesignConfig; assets: Asset[]; connections: Connection[];
   modules: ModuleSpec[]; nodeCount: number; rackCount: number; provisionedAccelerators: number;
   installedPeakITW: number; sourceIds: string[];
+  equipment?: EquipmentConfiguration;
 }
 export interface ModuleState {
   id: string; coolantK: number; airK: number; batteryWh: number; throttle: number;

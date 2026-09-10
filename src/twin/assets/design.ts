@@ -1,3 +1,4 @@
+import { createEquipmentConfiguration, resolveAssetSpecification, resolveSpecification, engineeringIdentity, validateEquipment, catalogSpecification, equipmentFor, type EquipmentConfiguration, type EquipmentRole } from '../catalog/equipment';
 import { HARDWARE as H } from '../catalog/reference';
 import type { Asset, AssetType, Connection, Design, DesignConfig, Medium, ModuleSpec, Vec3 } from '../types';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
@@ -37,7 +38,7 @@ function connect(a:Asset,b:Asset,medium:Medium,capacity:number,allowanceM=0):Con
   const [x,y,z]=a.positionM,[xx,yy,zz]=b.positionM;
   return {id:`${a.id}>${b.id}:${medium}`,from:a.id,to:b.id,fromPort:`${medium}-out`,toPort:`${medium}-in`,medium,capacity:Math.min(capacity,a.ports.find(p=>p.id===`${medium}-out`)?.capacity??capacity,b.ports.find(p=>p.id===`${medium}-in`)?.capacity??capacity),enabled:true,routeM:[[x,y,z],[xx,y,z],[xx,yy,z],[xx,yy,zz]],allowanceM};
 }
-export function buildDesign(input:DesignConfig):Design {
+export function buildDesign(input:DesignConfig,equipment?:EquipmentConfiguration):Design {
   const config=validateConfig(input), nodeCount=Math.ceil(config.requestedAccelerators/H.acceleratorsPerNode),rackCount=Math.ceil(nodeCount/H.nodesPerRack);
   const moduleCount=Math.ceil(rackCount/H.racksPerModule),platformCount=Math.ceil(moduleCount/H.modulesPerPlatform);
   const assets:Asset[]=[],connections:Connection[]=[],modules:ModuleSpec[]=[];
@@ -76,7 +77,16 @@ export function buildDesign(input:DesignConfig):Design {
       assets.push(asset(mid,'module',pid,[...positionM],[24,4,10],50_000,{nodeCount:n,rackCount:m.rackCount,capacityW:1.92e6},powerId));
     }
   }
-  const design:Design={schemaVersion:2,revision:revisionFor(config),config,assets,connections,modules,nodeCount,rackCount,provisionedAccelerators:nodeCount*8,installedPeakITW:nodeCount*H.nodePeakW,sourceIds:['generic-hardware-v2','layout-v2','equipment-v2','entu','seawater']};
+  const design:Design={schemaVersion:2,revision:revisionFor(config),config,assets,connections,modules,nodeCount,rackCount,provisionedAccelerators:nodeCount*8,installedPeakITW:nodeCount*H.nodePeakW,sourceIds:['generic-hardware-v2','layout-v2','equipment-v2','entu','seawater'],equipment:equipment?structuredClone(equipment):createEquipmentConfiguration(config)};
+  refreshDesign(design);
+  return design;
+}
+/** Refresh engineering summary and hydrostatic placement only at a design revision boundary. */
+function refreshDesign(design:Design) {
+  if(design.equipment)design.assets=design.assets.map(a=>a.type==='transformer'?resolveAssetSpecification(design,a):a);
+  const {assets,modules,connections}=design;
+  design.installedPeakITW=design.nodeCount*resolveSpecification(design,'compute').ratings.capacityW;
+  validateEquipment(design);
   // Water surface is y=0. Float each complete inventory using its true two-pontoon waterplane.
   // Pipe water mass depends weakly on intake lift; four fixed-point updates resolve that geometry coupling.
   for(let iteration=0;iteration<4;iteration++){
@@ -91,32 +101,69 @@ export function buildDesign(input:DesignConfig):Design {
     }
   }
   for(const edge of connections){const a=assets.find(a=>a.id===edge.from)!,b=assets.find(a=>a.id===edge.to)!;edge.routeM=connect(a,b,edge.medium,edge.capacity,edge.allowanceM).routeM;}
-  return design;
+  design.revision=`reference-v2-${engineeringIdentity(design)}`;
+}
+export function replaceEquipment(design:Design,assetId:string,specificationId:string):Design {
+  if(!resolveAsset(design,assetId))failure('invalid-input','SPECIFICATION_SLOT','Replacement requires an existing installed slot.',{assetId});
+  const next=structuredClone(design),equipment=next.equipment??createEquipmentConfiguration(next.config),replacement=catalogSpecification(specificationId);
+  next.equipment=equipment;equipment.overrides[assetId]={id:replacement.id,version:replacement.version};
+  refreshDesign(next);return next;
+}
+export function withDefaultSpecification(design:Design,role:EquipmentRole,specificationId:string):Design {
+  const next=structuredClone(design),equipment=next.equipment??createEquipmentConfiguration(next.config),replacement=catalogSpecification(specificationId);
+  next.equipment=equipment;equipment.defaults[role]={id:replacement.id,version:replacement.version};refreshDesign(next);return next;
+}
+/** Legacy scenario re-calculation installs deterministic, explicit versioned reference records. */
+export function migrateLegacyDesign(design:Design):Design {
+  if(design.equipment)return structuredClone(design);const next=structuredClone(design);next.equipment=createEquipmentConfiguration(design.config);refreshDesign(next);return next;
+}
+/** Carry installed references through the existing scenario/configuration workflows.
+ * Removing a slot is rejected unless a separate derived-design comparison explicitly opts in.
+ * Neither case changes the source design or its recorded event/telemetry history.
+ */
+export function reconfigureDesign(design:Design,patch:Partial<DesignConfig>,options:{removedOverrides?:'reject'|'omit-in-derived-design'}={}):Design {
+  const config=validateConfig({...design.config,...patch}),reference=createEquipmentConfiguration(config),previous=equipmentFor(design);
+  const equipment:EquipmentConfiguration={...reference,defaults:{...previous.defaults},overrides:{...previous.overrides},controlPolicy:structuredClone(previous.controlPolicy),workloadProfile:structuredClone(previous.workloadProfile),economics:structuredClone(previous.economics)};
+  if(patch.supplyW!==undefined)equipment.defaults.shoreTransformer=reference.defaults.shoreTransformer;
+  if(patch.batteryWhPerModule!==undefined||patch.batteryMaxWPerModule!==undefined)equipment.defaults.battery=reference.defaults.battery;
+  if(patch.exchangerUAWPerK!==undefined)equipment.defaults.exchanger=reference.defaults.exchanger;
+  // The new reference provides immutable catalog alternatives plus current legacy adapter records.
+  // Retain any installed saved reference explicitly; never reinterpret it as a newer catalog entry.
+  const required=new Set([...Object.values(equipment.defaults),...Object.values(equipment.overrides)].map(r=>`${r.id}@${r.version}`));
+  for(const spec of previous.specifications)if(required.has(`${spec.id}@${spec.version}`)&&!equipment.specifications.some(s=>s.id===spec.id&&s.version===spec.version))equipment.specifications.push(structuredClone(spec));
+  if(options.removedOverrides==='omit-in-derived-design'){
+    const slots=buildDesign(config);
+    equipment.overrides=Object.fromEntries(Object.entries(equipment.overrides).filter(([slot])=>resolveAsset(slots,slot)!==undefined));
+  }
+  return buildDesign(config,equipment);
 }
 export function moduleAssets(design:Design,moduleId:string):Asset[]{
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
   const [x,,z]=m.positionM, id=m.id,dy=m.positionM[1]-4;
   const a=(suffix:string,t:AssetType,offset:Vec3,size:Vec3,mass:number|null,ratings:Record<string,number>={})=>asset(`${id}/${suffix}`,t,id,[x+offset[0],offset[1]+dy,z+offset[2]],size,mass,ratings,m.powerDomainId);
+  const installed=(suffix:string,t:AssetType,offset:Vec3)=>{const spec=resolveSpecification(design,`${id}/${suffix}`);return a(suffix,t,offset,spec.dimensionsM!,spec.operationalMassKg,spec.ratings);};
+  const pipe=resolveSpecification(design,'pipe').ratings;
   const support=[
-    a('pump-duty','pump',[9,2.6,-3.5],[1.2,1.2,0.8],180,{capacityW:45_000,shutoffPa:250_000,freeFlowM3S:0.1,efficiency:0.72}),
-    a('pump-sea','pump',[10.5,2.6,-3.5],[1.2,1.2,0.8],180,{capacityW:45_000,shutoffPa:250_000,freeFlowM3S:0.1,efficiency:0.72}),
-    a('hx','exchanger',[10,3.1,1.5],[2,2.2,1.4],1800,{UAWPerK:design.config.exchangerUAWPerK}),
-    a('cdu','cdu',[9,3,-1.5],[1.2,2,1.1],500,{capacityW:3000}),
+    installed('pump-duty','pump',[9,2.6,-3.5]),
+    installed('pump-sea','pump',[10.5,2.6,-3.5]),
+    installed('hx','exchanger',[10,3.1,1.5]),
+    installed('cdu','cdu',[9,3,-1.5]),
     a('valve-tech','valve',[8,2.3,-1.5],[0.3,0.4,0.3],15,{opening:1}),
     a('valve-sea','valve',[11,2.3,-1.5],[0.3,0.4,0.3],15,{opening:1}),
-    a('pipe-tech','pipe',[-0.5,2.2,0],[19.18,0.18,9.18],400+(routeLengthM(loopRouteM(m))+loopGeometry(design,m).rackBranchesM)*Math.PI*0.09**2*997,{diameterM:0.18,lengthM:loopGeometry(design,m).technicalLengthM,roughnessM:0.000045}),
-    a('pipe-sea','pipe',[11.4,2.2,0],[0.18,0.18,8],120+loopGeometry(design,m).seawaterLengthM*Math.PI*0.09**2*1025,{diameterM:0.18,lengthM:loopGeometry(design,m).seawaterLengthM,roughnessM:0.000045}),
-    a('battery','battery',[10,3,3.6],[2.2,2,1.4],design.config.batteryWhPerModule/130+300,{energyWh:design.config.batteryWhPerModule,capacityW:2.2e6,storageMaxW:design.config.batteryMaxWPerModule,efficiency:0.95}),
-    a('distribution','switchboard',[7.5,3,3.6],[1.4,2,1.4],500,{capacityW:2.2e6}),
+    a('pipe-tech','pipe',[-0.5,2.2,0],[19.18,0.18,9.18],400+(routeLengthM(loopRouteM(m))+loopGeometry(design,m).rackBranchesM)*Math.PI*(pipe.diameterM/2)**2*997,{diameterM:pipe.diameterM,lengthM:loopGeometry(design,m).technicalLengthM,roughnessM:pipe.roughnessM}),
+    a('pipe-sea','pipe',[11.4,2.2,0],[0.18,0.18,8],120+loopGeometry(design,m).seawaterLengthM*Math.PI*(pipe.diameterM/2)**2*1025,{diameterM:pipe.diameterM,lengthM:loopGeometry(design,m).seawaterLengthM,roughnessM:pipe.roughnessM}),
+    installed('battery','battery',[10,3,3.6]),
+    installed('distribution','switchboard',[7.5,3,3.6]),
     a('rack-network','network',[7.5,3,-3.6],[1.1,1.5,0.6],100,{capacityBitS:400e9,capacityW:3000}),
   ];
-  if(design.config.standbyPumps)support.push(a('pump-standby','pump',[9,2.6,-2.5],[1.2,1.2,0.8],180,{capacityW:45_000,shutoffPa:250_000,freeFlowM3S:0.1,efficiency:0.72}));
+  if(design.config.standbyPumps)support.push(installed('pump-standby','pump',[9,2.6,-2.5]));
   for(let r=0;r<m.rackCount;r++){
     const rid=`${id}/rack-${pad(r+1)}`,nx=Math.min(4,m.nodeCount-r*4),pos:Vec3=[x-9.1+(r%20)*0.8,3.1+dy,z+(r<20?-2.3:2.3)];
     const rack=asset(rid,'rack',id,pos,[0.6,2.2,1.2],150,{capacityW:48_000,slotsU:48,occupiedU:nx*10,nodes:nx},m.powerDomainId);support.push(rack);
-    for(let n=0;n<nx;n++)support.push(asset(`${rid}/node-${pad(n+1)}`,'compute',rid,[pos[0],2.25+dy+n*0.445,pos[2]],[0.48,0.4445,0.95],120,{capacityW:12_000,accelerators:8,heightU:10,liquidCaptureFraction:0.9},m.powerDomainId));
+    const nodeSpec=resolveSpecification(design,'compute');
+    for(let n=0;n<nx;n++)support.push(asset(`${rid}/node-${pad(n+1)}`,'compute',rid,[pos[0],2.25+dy+n*0.445,pos[2]],nodeSpec.dimensionsM!,nodeSpec.operationalMassKg,nodeSpec.ratings,m.powerDomainId));
   }
-  return support;
+  return support.map(a=>resolveAssetSpecification(design,a));
 }
 export function resolveAsset(design:Design,id:string):Asset|undefined {
   const existing=design.assets.find(a=>a.id===id);if(existing)return existing;
@@ -127,12 +174,12 @@ export function connectionsForModule(design:Design,moduleId:string):Connection[]
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
   const list=moduleAssets(design,moduleId),get=(suffix:string)=>list.find(a=>a.id===`${moduleId}/${suffix}`)!;
   const bus=resolveAsset(design,m.powerDomainId)!,net=resolveAsset(design,m.networkDomainId)!;
-  const c:Connection[]=[connect(bus,get('battery'),'power',2.2e6,4),connect(get('battery'),get('distribution'),'power',2.2e6,2),connect(net,get('rack-network'),'cluster',400e9,4)];
+  const c:Connection[]=[connect(bus,get('battery'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),4),connect(get('battery'),get('distribution'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),2),connect(net,get('rack-network'),'cluster',400e9,4)];
   for(const p of list.filter(a=>a.type==='pump'||a.type==='cdu'||a.type==='network'))c.push(connect(get('distribution'),p,'power',p.ratings.capacityW??3000,2));
   for(const rack of list.filter(a=>a.type==='rack')){
     c.push(connect(get('distribution'),rack,'power',48_000,2),connect(get('rack-network'),rack,'cluster',100e9,1));
     c.push(connect(get('cdu'),rack,'technical',0.005,1.2),connect(rack,get('hx'),'technical',0.005,1.2));
-    for(const n of list.filter(a=>a.parentId===rack.id))c.push(connect(rack,n,'power',12_000,0.5),connect(rack,n,'cluster',100e9,0.5));
+    for(const n of list.filter(a=>a.parentId===rack.id))c.push(connect(rack,n,'power',n.ratings.capacityW,0.5),connect(rack,n,'cluster',100e9,0.5));
   }
   for(const pump of list.filter(a=>a.id.endsWith('pump-duty')||a.id.endsWith('pump-standby'))){c.push(connect(get('pipe-tech'),pump,'technical',0.1),connect(pump,get('valve-tech'),'technical',0.1));}
   c.push(connect(get('valve-tech'),get('cdu'),'technical',0.2),connect(get('cdu'),get('hx'),'technical',0.2),connect(get('hx'),get('pipe-tech'),'technical',0.2));

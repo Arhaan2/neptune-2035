@@ -1,0 +1,9 @@
+{
+  "sourceCommit": "06899f0668a05c6ba7f0a1bc0c96d33304eef580",
+  "legacyOriginal": "docs/phase-0/evidence/clean-final/diagnostics/PH0-002-minimal-project.json",
+  "files": {
+    "phase1-schema3-checkpoint.json": "7eb29d0a0b4fc94ccb8102e1136b21c2efda147576da29e4dd67adaffc2da4e8",
+    "phase1-baseline-values.json": "043bbe13cb90d2d846a6b43669f624bfd265ba188b4ebdb83771e5ab35a28edd",
+    "phase0-schema2-project.json": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87"
+  }
+}

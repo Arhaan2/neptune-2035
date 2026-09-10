@@ -1,3 +1,4 @@
+import { engineeringIdentity } from '../twin/catalog/equipment';
 import { diagnosticEvent, diagnosticsEnabled } from '../twin/diagnostics';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
@@ -337,7 +338,17 @@ export function useTwin(design: Design) {
   }, [workerGeneration, accept, persist, invalidate, stopClock]);
   useEffect(() => {
     diagnosticEvent('ui.design-selected', { revision: design.revision });
+    const sameEngineering = current.current !== null && engineeringIdentity(designRef.current) === engineeringIdentity(design);
     designRef.current = design;
+    if (sameEngineering && restoredDesign.current !== design) {
+      // Economic/report edits update the saved assumptions without touching any operating field.
+      committedProject.current = projectFile(design, current.current!, {
+        ...(provenance.current ? { provenance: provenance.current } : {}),
+        ...(committedProject.current?.execution ? { execution: committedProject.current.execution } : {}),
+      });
+      persist();
+      return;
+    }
     if (restoredDesign.current === design) {
       restoredDesign.current = null;
       return;
@@ -349,7 +360,7 @@ export function useTwin(design: Design) {
     setResumeTarget(null);
     setProgress(undefined);
     send('initialize');
-  }, [design, invalidate, send]);
+  }, [design, invalidate, send, persist]);
   useEffect(() => {
     if (
       !running ||
