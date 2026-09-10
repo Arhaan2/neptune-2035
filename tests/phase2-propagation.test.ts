@@ -171,3 +171,13 @@ describe('PH2-04/05 installed ratings constrain real allocation', () => {
     expect(m.batteryWh).toBeGreaterThan(590000);
   });
 });
+
+describe('PH2-06 equipment-associated price changes', () => {
+  it('updates all three installed pump unit prices once without changing physical identity or state', () => {
+    const design = small(), state = advance(design, initialize(design), 3);
+    const priced = updateEconomicAssumptions(design, { specificationUnitUSD: { ...design.equipment!.economics.specificationUnitUSD, 'pump-reference@1.0.0': 27500 } });
+    expect(engineeringIdentity(priced)).toBe(engineeringIdentity(design));
+    expect(projectFile(priced, state).checkpoint).toEqual(projectFile(design, state).checkpoint);
+    expect(billOfEquipment(priced).totalUSD - billOfEquipment(design).totalUSD).toBeCloseTo(3 * 2500 * 1.2 * 1.25, 6);
+  });
+});
