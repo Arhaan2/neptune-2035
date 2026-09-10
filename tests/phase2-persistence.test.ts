@@ -161,9 +161,15 @@ describe('PH2-08 installed asset presentation is excluded from physics identity'
 });
 
 describe('PH2-11 cached asset values cannot override installed authoritative transformer', () => {
-  it.each(['efficiency', 'capacityW', 'dimensionsM'] as const)('rejects stored transformer %s drift at direct/worker/import boundaries', async field => {
+  it.each(['efficiency', 'capacityW', 'dimensionsM', 'mass', 'catalogId', 'version', 'type', 'powerPort', 'portShape'] as const)('rejects stored transformer %s drift at direct/worker/import boundaries', async field => {
     const design = small(), bad = structuredClone(design), transformer = bad.assets.find(a => a.id === 'shore/transformer')!;
     if (field === 'dimensionsM') transformer.dimensionsM = [40, 40, 60];
+    else if (field === 'mass') transformer.operationalMassKg = 123;
+    else if (field === 'catalogId') transformer.catalogId = 'transformer-reference';
+    else if (field === 'version') transformer.revision = '99.0.0';
+    else if (field === 'type') transformer.type = 'switchboard';
+    else if (field === 'powerPort') transformer.ports[0].capacity = 1000;
+    else if (field === 'portShape') transformer.ports.pop();
     else transformer.ratings[field] = field === 'efficiency' ? 0.5 : 1000;
     // No dynamic checkpoint: this must be rejected by design/spec admission itself.
     expect(() => initialize(bad)).toThrow(/specification|installed|rating|envelope|design|immutable/i);

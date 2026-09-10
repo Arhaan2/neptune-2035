@@ -11,6 +11,10 @@ import type { Design, SimulationState, WorkerResponse } from '../src/twin/types'
 const moduleId = 'platform-001/module-01';
 const duty = `${moduleId}/pump-duty`, standby = `${moduleId}/pump-standby`, battery = `${moduleId}/battery`;
 const small = () => buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 });
+function reportEquipment(report: string) {
+  const sections = [...report.matchAll(/```json\n([\s\S]*?)\n```/g)].map(match => JSON.parse(match[1]));
+  return sections.find(section => section.schemaVersion === 1 && section.defaults && section.overrides);
+}
 const physicalState = (state: SimulationState) => ({ ...state, solverMs: 0 });
 async function worker(design: Design, state?: SimulationState, durationS = 0) {
   const responses: WorkerResponse[] = [];
@@ -73,6 +77,7 @@ describe('PH2-03 physical replacement propagation', () => {
     const report = engineeringReport(replaced, state);
     expect(report).toContain('pump-physical'); expect(report).toContain('1.0.0');
     expect(report).toContain('280000'); expect(report).toContain('240');
+    expect(reportEquipment(report).overrides[duty]).toEqual({ id: 'pump-physical', version: '1.0.0' });
     expect(billOfEquipment(replaced).totalUSD - billOfEquipment(original).totalUSD).toBeCloseTo(7000 * 1.2 * 1.25, 6);
   });
 });
@@ -86,7 +91,9 @@ describe('PH2-04 compute and conversion actual electrical linkage', () => {
     expect(threaded.modules[0].itW).toBeCloseTo(8600, 8);
     expect(physicalState(threaded)).toEqual(physicalState(main));
     expect(resolveAsset(design, `${moduleId}/rack-01/node-01`)!.ratings.capacityW).toBe(10000);
-    expect(engineeringReport(design, main)).toContain('10000');
+    const report = engineeringReport(design, main);
+    expect(reportEquipment(report).defaults.compute).toEqual({ id: 'compute-efficient', version: '1.0.0' });
+    expect(report).not.toContain('energized units × 12000 W');
   });
   it('uses installed conversion efficiency and its declared rating in actual grid demand', async () => {
     const design = withDefaultSpecification(small(), 'distribution', 'distribution-efficient');
@@ -115,7 +122,7 @@ describe('PH2-05 battery declared consistency', () => {
     expect(billOfEquipment(design).totalUSD - billOfEquipment(original).totalUSD).toBeCloseTo(100000 * 1.2 * 1.25, 6);
     const row = inventoryCSV(design).split('\n').find(line => line.startsWith(`"${battery}"`))!;
     expect(row).toContain('"4600"'); expect(row).toContain('"2.4"');
-    expect(engineeringReport(design, state)).toContain('battery-extended');
+    expect(reportEquipment(engineeringReport(design, state)).overrides[battery]).toEqual({ id: 'battery-extended', version: '1.0.0' });
   });
 });
 
