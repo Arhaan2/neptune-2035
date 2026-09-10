@@ -1,0 +1,306 @@
+{
+  "evidence": "generated",
+  "designRevision": "reference-v2-bcb507c9",
+  "solverVersion": "2.0.0-rc.1",
+  "trace": [
+    {
+      "timeS": 0,
+      "coolantK": 303.15,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 10,
+      "coolantK": 303.13081058727073,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 20,
+      "coolantK": 303.1127759801274,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 30,
+      "coolantK": 303.09582668316847,
+      "technicalFlowM3S": 0,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "starting"
+    },
+    {
+      "timeS": 40,
+      "coolantK": 303.6614554137076,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 50,
+      "coolantK": 303.6114869679266,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 60,
+      "coolantK": 303.5645255886523,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 70,
+      "coolantK": 303.5203903127022,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 80,
+      "coolantK": 303.47891106713286,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 90,
+      "coolantK": 303.4399280138731,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 100,
+      "coolantK": 303.40329093379603,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 110,
+      "coolantK": 303.36885864785825,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 120,
+      "coolantK": 303.33649847307316,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 130,
+      "coolantK": 303.30608571122497,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 140,
+      "coolantK": 303.27750316835005,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 150,
+      "coolantK": 303.25064070313636,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 160,
+      "coolantK": 303.2253948024999,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 170,
+      "coolantK": 303.20166818270275,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "failed",
+      "standby": "running"
+    },
+    {
+      "timeS": 180,
+      "coolantK": 303.1793694144746,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "starting",
+      "standby": "running"
+    },
+    {
+      "timeS": 190,
+      "coolantK": 303.15841257069553,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 200,
+      "coolantK": 303.1387168952805,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 210,
+      "coolantK": 303.12020649198945,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 220,
+      "coolantK": 303.1028100319659,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 230,
+      "coolantK": 303.08646047887436,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    },
+    {
+      "timeS": 240,
+      "coolantK": 303.0710948305798,
+      "technicalFlowM3S": 0.05968751283253368,
+      "itW": 1920000,
+      "availableAccelerators": 1280,
+      "pump": "running",
+      "standby": "standby"
+    }
+  ],
+  "log": [
+    {
+      "timeS": 0,
+      "assetId": "shore/grid",
+      "message": "workload = 1 fraction; 1 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "trip; 1 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01/pump-standby",
+      "message": "Duty unavailable; standby startup scheduled after 8 seconds",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 30,
+      "assetId": "platform-001/module-01",
+      "message": "Technical coolant flow lost; heat accumulating in bulk thermal node",
+      "kind": "warning",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 38,
+      "assetId": "platform-001/module-01/pump-standby",
+      "message": "Standby startup delay elapsed; parallel branch enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 180,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "restore; 1 module(s) in dependency scope",
+      "kind": "command",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 183,
+      "assetId": "platform-001/module-01/pump-duty",
+      "message": "Duty pump enabled",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    },
+    {
+      "timeS": 183,
+      "assetId": "platform-001/module-01/pump-standby",
+      "message": "Duty restored; redundant pump held in standby",
+      "kind": "controller",
+      "affectedIds": [
+        "platform-001/module-01"
+      ]
+    }
+  ]
+}

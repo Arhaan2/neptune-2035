@@ -1,7 +1,15 @@
 {
-  "name": "NEPTUNE",
-  "sourceCommit": "127a2fade93112d58f8edd9f6fc6e9e02b12b57c",
-  "sourceRepository": "https://github.com/Arhaan2/neptune-2035",
-  "builtAt": "2026-09-08",
-  "kind": "static concept simulator"
+  "product": "NEPTUNE",
+  "version": "2.0.0-rc.1",
+  "channel": "production",
+  "sourceSha": "06899f0668a05c6ba7f0a1bc0c96d33304eef580",
+  "validatedFeatureSha": "a90c4456950439dff0e968ee66f60ba6d46a231d",
+  "builtAt": "2026-09-10T22:02:10.021378+00:00",
+  "artifactSha256": "0e46d18a7295fea9cc677fa0efece7580ab3dac1642643df141fa223080a6df7",
+  "artifactIdentity": "SHA-256 of build-manifest.json; every payload file is hashed except release.json and build-manifest.json. The release receipt separately hashes both identity files.",
+  "qualifier": "Public prototype \u2014 simulated, design-stage model",
+  "releaseScope": "public prototype; full Phase 1 acceptance and performance certification deferred",
+  "physicalValidation": "pending",
+  "publicURL": "https://arhaan2.github.io/neptune-2035/",
+  "lockSha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9"
 }

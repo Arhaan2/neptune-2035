@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 2,
+  "observations": [
+    {
+      "assetId": "platform-001/module-01",
+      "metric": "temperatureK",
+      "value": 37,
+      "unit": "C",
+      "sourceId": "generated:import-fixture",
+      "evidence": "generated",
+      "observedAt": "2026-01-01T00:00:00.000Z",
+      "receivedAt": "2026-01-01T00:00:00.050Z",
+      "sequence": 0,
+      "quality": [
+        "fixture-generated",
+        "simulated-clock"
+      ],
+      "mappingVersion": "reference-v2-aa6189d9"
+    },
+    {
+      "assetId": "platform-001/module-01",
+      "metric": "temperatureK",
+      "value": 37.1,
+      "unit": "C",
+      "sourceId": "generated:import-fixture",
+      "evidence": "generated",
+      "observedAt": "2026-01-01T00:00:01.000Z",
+      "receivedAt": "2026-01-01T00:00:01.050Z",
+      "sequence": 1,
+      "quality": [
+        "fixture-generated",
+        "simulated-clock"
+      ],
+      "mappingVersion": "reference-v2-aa6189d9"
+    },
+    {
+      "assetId": "platform-001/module-01",
+      "metric": "temperatureK",
+      "value": 37.2,
+      "unit": "C",
+      "sourceId": "generated:import-fixture",
+      "evidence": "generated",
+      "observedAt": "2026-01-01T00:00:02.000Z",
+      "receivedAt": "2026-01-01T00:00:02.050Z",
+      "sequence": 2,
+      "quality": [
+        "fixture-generated",
+        "simulated-clock"
+      ],
+      "mappingVersion": "reference-v2-aa6189d9"
+    },
+    {
+      "assetId": "platform-001/module-01",
+      "metric": "temperatureK",
+      "value": 37.4,
+      "unit": "C",
+      "sourceId": "generated:import-fixture",
+      "evidence": "generated",
+      "observedAt": "2026-01-01T00:00:04.000Z",
+      "receivedAt": "2026-01-01T00:00:04.050Z",
+      "sequence": 4,
+      "quality": [
+        "fixture-generated",
+        "simulated-clock"
+      ],
+      "mappingVersion": "reference-v2-aa6189d9"
+    },
+    {
+      "assetId": "platform-001/module-01",
+      "metric": "temperatureK",
+      "value": 37.5,
+      "unit": "C",
+      "sourceId": "generated:import-fixture",
+      "evidence": "generated",
+      "observedAt": "2026-01-01T00:00:05.000Z",
+      "receivedAt": "2026-01-01T00:00:05.050Z",
+      "sequence": 5,
+      "quality": [
+        "fixture-generated",
+        "simulated-clock"
+      ],
+      "mappingVersion": "reference-v2-aa6189d9"
+    }
+  ]
+}
