@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync, execFileSync } from 'node:child_process';
 const root = process.cwd(), out = path.resolve('artifacts/campus-batch');
+await fs.mkdir(path.dirname(out), { recursive: true });
 await fs.mkdir(out, { recursive: false });
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
 const stability = process.argv.includes('--stability');
