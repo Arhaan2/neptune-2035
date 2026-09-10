@@ -1,10 +1,11 @@
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 const observing = process.env.NEPTUNE_CAMPUS_OBSERVE === '1';
+const capturing = observing || process.env.NEPTUNE_CAMPUS_DIAGNOSTICS === '1';
 const logs = new WeakMap<Page, string[]>();
 export function installStepDiagnostics() {
   test.beforeEach(async ({ page }) => {
-    if (!observing) return;
-    test.setTimeout(120_000); // Diagnostic observation only, never normal acceptance.
+    if (!capturing) return;
+    if (observing) test.setTimeout(120_000); // Diagnostic observation only, never normal acceptance.
     const events: string[] = []; logs.set(page, events);
     const add = (text: string) => { if (events.length < 1500) events.push(text.slice(0, 2000)); };
     page.on('console', message => { if (message.text().startsWith('[neptune-step]') || message.type() === 'error') add(message.text()); });
@@ -22,12 +23,12 @@ export function installStepDiagnostics() {
     });
   });
   test.afterEach(async ({ page }, info) => {
-    if (!observing) return;
+    if (!capturing) return;
     await info.attach('step-lifecycle', { body: (logs.get(page) ?? []).join('\n'), contentType: 'text/plain' });
   });
 }
 export function diagnosticURL(url: string) {
-  return observing ? url + (url.includes('?') ? '&' : '?') + 'phase1Diagnostics=1' : url;
+  return capturing ? url + (url.includes('?') ? '&' : '?') + 'phase1Diagnostics=1' : url;
 }
 export async function campusStep(page: Page, info: TestInfo) {
   const main = page.locator('main.twin-app'), button = page.getByRole('button', { name: 'Step 10s', exact: true });

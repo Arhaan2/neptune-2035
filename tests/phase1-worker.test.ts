@@ -498,7 +498,13 @@ it.each([127, 128, 129])('PH1-PER-02 validates %i events with the declared bound
 it.each([249, 250, 251])('PH1-REP-01 %ims progress cadence does not alter the numerical trajectory', async intervalMs => {
   let elapsed = 0; const responses: WorkerResponse[] = [];
   const handler = createWorkerHandler(r => responses.push(r), async () => { elapsed += intervalMs; }, () => elapsed);
-  await handler(request({ events: [], durationS: 20, chunkS: 10 }));
+  await handler(request({ events: [], durationS: 30, chunkS: 10 }));
   expect(responses.filter(r => r.status === 'progress')).toHaveLength(intervalMs < CONTRACT.progressIntervalMs ? 1 : 2);
-  expect({ ...responses.at(-1)!.state!, solverMs: 0 }).toEqual(advance(design, initialize(design), 20));
+  expect({ ...responses.at(-1)!.state!, solverMs: 0 }).toEqual(advance(design, initialize(design), 30));
+});
+
+it('PH1-REP-01 a completed chunk publishes its terminal checkpoint once', async () => {
+  const responses = await run({ events: [], durationS: 10, kind: 'advance', state: initialize(design) });
+  expect(responses.map(r => r.status)).toEqual(['complete']);
+  expect({ ...responses[0].state!, solverMs: 0 }).toEqual(advance(design, initialize(design), 10));
 });

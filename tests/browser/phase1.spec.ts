@@ -12,6 +12,7 @@ type PauseProbe = {
 declare global {
   interface Window {
     phase1PauseProbe: PauseProbe;
+    checkpointWrites: number;
   }
 }
 
@@ -604,4 +605,37 @@ test('PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewr
   await expect(
     page.getByRole('button', { name: 'Overflow fixture', exact: true }),
   ).toHaveCount(0);
+});
+
+test('PH1-UI-01 a manual step clears stale progress and commits its real terminal checkpoint once', async ({ page }) => {
+  await installWorkerReplyProbe(page);
+  await load(page);
+  await page.evaluate(() => {
+    const probe = window.phase1PauseProbe;
+    probe.requests = []; probe.hold = true;
+    const instrumented = window;
+    instrumented.checkpointWrites = 0;
+    const write = Object.getOwnPropertyDescriptor(Storage.prototype, 'setItem')!.value as Storage['setItem'];
+    Storage.prototype.setItem = function(key, value) {
+      if (key === 'neptune-checkpoint-v3') instrumented.checkpointWrites++;
+      write.call(this, key, value);
+    };
+  });
+  await page.getByRole('button', { name: 'Step 10s', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.phase1PauseProbe.replies.some(r => r.response.status === 'complete'))).toBe(true);
+  await expect(main(page)).toHaveAttribute('data-time', '0');
+  await expect(page.getByRole('button', { name: 'Step 10s', exact: true })).toBeDisabled();
+  await expect(page.getByText(/Replay progress:/)).toHaveCount(0);
+  expect(await page.evaluate(() => {
+    const advances = window.phase1PauseProbe.requests.filter(r => r.kind === 'advance');
+    return { count: advances.length, revisionMatches: advances[0]?.state?.designRevision === advances[0]?.design?.revision };
+  })).toEqual({ count: 1, revisionMatches: true });
+  await page.evaluate(() => window.phase1PauseProbe.release());
+  await expect(main(page)).toHaveAttribute('data-time', '10');
+  await expect(page.getByRole('button', { name: 'Step 10s', exact: true })).toBeEnabled();
+  await expect(page.getByTestId('checkpoint-storage')).toContainText('Checkpoint saved locally at 10s');
+  expect(await page.evaluate(() => window.checkpointWrites)).toBe(1);
+  const project = JSON.parse(await projectText(page));
+  expect(project.checkpoint.state.timeS).toBe(10);
+  expect(project.execution).toBeUndefined();
 });

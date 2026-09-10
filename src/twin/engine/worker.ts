@@ -342,7 +342,10 @@ export function createWorkerHandler(
           completedWork,
           totalWork,
         };
-        if (firstChunk || now() - lastPost >= CONTRACT.progressIntervalMs) {
+        // A terminal boundary is validated and published below. Sending it as
+        // progress as well forces the UI to construct/persist/render it twice.
+        if (committed.timeS < targetTimeS &&
+          (firstChunk || now() - lastPost >= CONTRACT.progressIntervalMs)) {
           publish('progress');
           firstChunk = false;
         }

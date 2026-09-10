@@ -254,6 +254,8 @@ export function useTwin(design: Design) {
         return;
       }
       pending.current = true;
+      // Previous initialization/replay progress does not describe this request.
+      setProgress(undefined);
       setBusy(true);
       setError('');
       diagnosticEvent('ui.dispatch-start', { kind, requestId: requestId.current + 1, epoch: epoch.current, durationS, targetTimeS: target.current });
@@ -315,7 +317,7 @@ export function useTwin(design: Design) {
         if (r.status === 'complete') {
           target.current = null;
           setResumeTarget(null);
-          persist();
+          // accept() already persisted this terminal state without a future target.
         }
         if (r.error) {
           setError(r.error);
