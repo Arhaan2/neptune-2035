@@ -1,0 +1,23 @@
+{
+  "scope": "CI=true local environment comparison only; not a hosted-runner or clean-install acceptance substitute",
+  "startedAt": "2026-09-09T19:52:42.930Z",
+  "completedAt": "2026-09-09T19:53:00.056Z",
+  "exitCode": 0,
+  "passed": 256,
+  "failed": 0,
+  "skipped": 0,
+  "success": true,
+  "command": "CI=true NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 npm test -- --reporter=default --reporter=json --outputFile=<evidence>/unit.json",
+  "viteConfigSha256": "d5049d93190b29791631f350906479be8b2bbe456f96dce86dc6b1b80030df17",
+  "sourceSha": "264de666fac69c575e17186ec1b7342fcf6fd28e",
+  "sourceStatus": "Working tree differs only in reviewed test-file scheduling and CI evidence documentation",
+  "toolchain": {
+    "node": "v24.18.0",
+    "os": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "totalMemoryBytes": 25769803776
+  }
+}

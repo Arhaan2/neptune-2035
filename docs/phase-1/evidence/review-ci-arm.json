@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09T20:09:05.412Z",
+  "status": "PASS_REVIEW_ONLY",
+  "baselineCommit": "21404e192d13e41f60a7f48488c29592d35b1b81",
+  "scope": "One-line standard-runner selection and final 18 new/changed public evidence files; read-only review except this record and ignored scan outputs.",
+  "workflow": {
+    "path": ".github/workflows/phase-1.yml",
+    "oldRunner": "macos-26-intel",
+    "newRunner": "macos-26",
+    "oldSha256": "b6c160119b32dfa6c0e45b3f44476bf2d698bde5839128f7ec07bb359b2c78d4",
+    "newSha256": "c44faf291979bb06835b3f96264c5edf9d8fb449b2f3f6e9b02b6dca69c6c079",
+    "onlyRunnerLineChanged": true,
+    "contentsPermission": "read",
+    "jobTimeoutMinutes": 45
+  },
+  "preservation": {
+    "otherSourceHashesChecked": 78,
+    "otherSourceMismatches": [],
+    "sourceComparisonSha256": "bec3bc8c1058ffbda998b31e8aaa2c4d48417b30079caeb8acec204055e08170",
+    "testFileSchedulingSha256": "d5049d93190b29791631f350906479be8b2bbe456f96dce86dc6b1b80030df17",
+    "serialTestFilesRetained": true,
+    "assertionsTimeoutsIsolationTelemetryAndBrowserConfigurationUnchanged": true,
+    "productAndDependencyLockUnchanged": true,
+    "protectedFiles": 73,
+    "protectedMismatches": [],
+    "phase0PackageLockPublicDiff": [],
+    "sourceOnlyDeploymentSeparationUnchanged": true
+  },
+  "observedSerialIntelAttempts": [
+    {
+      "kind": "push",
+      "runId": 34398209413,
+      "source": "21404e192d13e41f60a7f48488c29592d35b1b81",
+      "status": "FAIL",
+      "passed": 254,
+      "failed": 2,
+      "skipped": 0,
+      "failedCases": [
+        {
+          "file": "tests/twin-integration.test.ts",
+          "durationMs": 11434.729029
+        },
+        {
+          "file": "tests/twin-telemetry.test.ts",
+          "durationMs": 40002.359738
+        }
+      ],
+      "browserExecuted": false,
+      "measurementsExecuted": false,
+      "sourceMismatches": []
+    },
+    {
+      "kind": "pr",
+      "runId": 34398216144,
+      "source": "889c5cd2e65f6790722dfcec9c1a005f18bd8714",
+      "status": "FAIL",
+      "passed": 255,
+      "failed": 1,
+      "skipped": 0,
+      "failedCases": [
+        {
+          "file": "tests/twin-integration.test.ts",
+          "durationMs": 5842.673895
+        }
+      ],
+      "browserExecuted": false,
+      "measurementsExecuted": false,
+      "sourceMismatches": []
+    }
+  ],
+  "rationale": {
+    "originalMac14Units": [
+      {
+        "kind": "push",
+        "passed": 256,
+        "total": 256,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "kind": "pr",
+        "passed": 256,
+        "total": 256,
+        "failed": 0,
+        "skipped": 0
+      }
+    ],
+    "reference": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+    "referenceCheckedInThisSession": "2026-09-09",
+    "officialRunnerDescription": "Standard macos-26 uses Apple Silicon M1, three CPUs and 7 GB nominal RAM; standard hosted runners are free for public repositories.",
+    "assessment": "The change combines the architecture where both original hosted unit suites passed with a current OS that avoids the locked Playwright mac14 frozen-WebKit override. Sequential files remain bounded. Serial Intel failures show that file scheduling alone did not establish hosted acceptance or prove contention. Neither Firefox correction nor future hosted success is claimed."
+  },
+  "publication": {
+    "scannedAt": "2026-09-09T20:07:34.161Z",
+    "files": 18,
+    "inventory": [
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "bytes": 11544,
+        "sha256": "28a0d3f1ce3fe0f8e927d9f78be9b0b4f24756ffe5f56f6e365b57d9c120a592"
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "bytes": 8182,
+        "sha256": "f23ac8da57b3b0815d0a501863ab58623499bed68947e3d3b40085034d73eada"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/build.log",
+        "bytes": 787,
+        "sha256": "23befb7ebe2dd87468514ad543b1e540044204ed48f29ac04d73b4a282807de3"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/execution.json",
+        "bytes": 10609,
+        "sha256": "51f8e8fe7bc9b6f1ffe379acd2a7e1736fc9d5c5de0b8751786fdf4267b4f974"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/lint.log",
+        "bytes": 175,
+        "sha256": "56491aecdad9073953b7085fac274435d7e9ef32cf23dd77337940cb567783ee"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/npm-ci.log",
+        "bytes": 456,
+        "sha256": "67eb62285afd9c1147001d0f3463df7440816727704c1eb3ae8ddd196db90789"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/server.log",
+        "bytes": 445,
+        "sha256": "29fff0c02eac5e49fe0459355ea16b32fbc8132fd3b8c7edd39456c9bceb0bdb"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/typecheck.log",
+        "bytes": 48,
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/unit-full.log",
+        "bytes": 9358,
+        "sha256": "dbabdd61fe51732f7404e94166060ae012c969116c8269d37849a601d892a85f"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-pr/unit-summary.json",
+        "bytes": 58795,
+        "sha256": "91369473e83675ec5f4a1ae3066c69d3b43896399e1527afe9ef92ad0a07857d"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/build.log",
+        "bytes": 787,
+        "sha256": "8f5ae59616faf9013b36a6d58a3c3980a3b46762a8e2b5589d6912e1e4762e12"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/execution.json",
+        "bytes": 10605,
+        "sha256": "102676966facad7d928c179fc3d30dfb75c34851e32b48d02bad6df0ce9ede9b"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/lint.log",
+        "bytes": 175,
+        "sha256": "2b4b85380247edc3fbdeb3a7fb0dddada873a74893aed585d491ddaa3283c439"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/npm-ci.log",
+        "bytes": 456,
+        "sha256": "28c2d1fe78543ef8708b41577316ae100afdf3c4b33be8e4880321cd14d8b110"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/server.log",
+        "bytes": 445,
+        "sha256": "ec3647d37396f616b0d1ea359577037d30d0e859c45dc673bb28b35e5e010708"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/typecheck.log",
+        "bytes": 48,
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/unit-full.log",
+        "bytes": 16148,
+        "sha256": "ad838616b3ed41c56556a88c655aeedf3845adc6d5d0b45530eb310f937944cd"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-macos26-intel-serial-push/unit-summary.json",
+        "bytes": 58752,
+        "sha256": "5b25562db63448a678927286d871a73f47aa89d6f54686018deb9479679385c5"
+      }
+    ],
+    "downloadedEvidenceCopiesByteIdentical": 16,
+    "credentialOrPrivateObservationMaterialDetected": false,
+    "recordingsDetected": false,
+    "unclassifiedHits": [],
+    "hitDisposition": "URI hits match unchanged synthetic telemetry rejection fixtures. The credential-query marker is ANSI formatting around the existing short sentinel; after ANSI removal no long credential-query marker remains. Other hits are telemetry test/metadata descriptions.",
+    "reportExcludedFromOwnHashInventory": true,
+    "documentationAssessment": "Final CI note and acceptance accurately record push campus 11.43s, PR campus 5.84s, 254/256 and 255/256 passes, unchanged deadlines, no browser/measurement execution and pending full acceptance."
+  },
+  "commands": [
+    "Inspect git diff against 21404e19; reverse only the runner label and require exact previous workflow bytes.",
+    "SHA-256 compare all 78 other recorded source/config files; verify 73 protected hashes and unchanged Phase 0/package/lock/public diff.",
+    "Inspect both hosted execution/unit summaries and compare all 16 extracted evidence files byte-for-byte with downloads.",
+    "Scan all final new/changed text files; classify synthetic URI/ANSI hits without printing candidate values."
+  ],
+  "findings": [],
+  "limitations": [
+    "No new test/browser execution or remote operation was performed by this reviewer.",
+    "The official runner table was already read earlier in this session; this review does not independently poll runner availability or CI status.",
+    "Review is bound to these bytes. The next exact committed head still requires successful full push/PR CI and later actual merge/post-merge verification."
+  ],
+  "outcome": "No review findings or publication blocker. The minimal runner change preserves acceptance checks and deployment separation; hosted acceptance remains pending."
+}

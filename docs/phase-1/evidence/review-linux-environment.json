@@ -1,0 +1,99 @@
+{
+  "reviewedAt": "2026-09-09T23:22:37.780Z",
+  "status": "PASS",
+  "findings": [],
+  "scope": "Independent bounded review of four modified tracked files and three new evidence files; no application or test changes.",
+  "headBeforeCommit": "a1c81c264f28adfde3290b17f3746b974f333f49",
+  "acceptedLocalSource": "61bf694662560d12ba398bfe598540926d11a9cb",
+  "preservation": {
+    "acceptedSourceHashes": 80,
+    "unchanged": 77,
+    "reviewedDifferences": {
+      ".github/workflows/phase-1.yml": "3204aee95224af2927b3e60776257f503942b8648b3171741ad974be3cd79f16",
+      "playwright.config.ts": "8c6f72605b22d076176ce89fdb8f1c970637c2ca23b1a44e0174956b5ac7f03c",
+      "scripts/phase-1/diagnose-firefox.mjs": "8c50071b4a1766f5c90370dfbc101857911b63ceff43f9cc25e56bdf3f828228"
+    },
+    "protectedHashesMatched": 73,
+    "applicationAndAllTestBodiesUnchanged": true
+  },
+  "assessment": [
+    "Exact three-line executable delta matches the pre-reviewed patch: ubuntu-24.04 runner, Playwright --with-deps for all three engines, and Darwin-only Chromium Metal argument.",
+    "All 256 unit cases with both telemetry flags, 81 browser cases, measurements, real WebGL assertions, headless mode, viewport/DPR, workers, retries, deadlines and numerical tolerances are preserved.",
+    "Workflow contents:read permissions, existing triggers, diagnostic failure semantics and complete verification remain. No deployment/release step or environment was added.",
+    "Installed Playwright supports Ubuntu 24.04 x64 and lists dependencies for Chromium, Firefox and WebKit; --with-deps supplies OS libraries/fonts. No headed/Xvfb execution prerequisite is introduced.",
+    "Two raw diagnostics and the independent interpretation match ignored originals byte-for-byte. PR COLLECTED includes failed observations; push INCOMPLETE exhausted its watchdog. Late PR WebGL contexts are retained. Neither result establishes application acceptance or a root cause.",
+    "Final documentation distinguishes retained complete local macOS acceptance from the pending exact-head Linux gate. Future final/cancelled artifact retention is correctly pending observation."
+  ],
+  "references": [
+    "https://playwright.dev/docs/ci",
+    "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+    "node_modules/playwright-core/lib/coreBundle.js:8534",
+    "node_modules/playwright-core/lib/coreBundle.js:31213"
+  ],
+  "publication": {
+    "inventory": [
+      {
+        "path": ".github/workflows/phase-1.yml",
+        "bytes": 1506,
+        "sha256": "3204aee95224af2927b3e60776257f503942b8648b3171741ad974be3cd79f16"
+      },
+      {
+        "path": "playwright.config.ts",
+        "bytes": 1659,
+        "sha256": "8c6f72605b22d076176ce89fdb8f1c970637c2ca23b1a44e0174956b5ac7f03c"
+      },
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "bytes": 15876,
+        "sha256": "1d3c3106b3813fc780fe12dd11ea5b75c37313be7da5da06ec60802f58919805"
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "bytes": 29800,
+        "sha256": "d46892157c5af4a5fecd76d7f4428026cdd717d290373e722382f5de877c5377"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-software-diagnostic-push/diagnostic.json",
+        "bytes": 30162,
+        "sha256": "12a847c622dc86839f5abf8d54fd59b35e81a66bff37818774884b0adcc70f98"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-software-diagnostic-pr/diagnostic.json",
+        "bytes": 36339,
+        "sha256": "04891c9717e6d7a02cb70cea6d2732e3aeaec60e580ba916faac5c203d6fcd9d"
+      },
+      {
+        "path": "docs/phase-1/evidence/review-ci-software-diagnostic.json",
+        "bytes": 6291,
+        "sha256": "7b5e023a8a787f12aff6b298ff32bdd7a23cfbf7dc27d315bbb845c790736cb3"
+      }
+    ],
+    "scan": "All seven files were checked as regular UTF-8 text, JSON parsed, and credential/payload/recording patterns evaluated without printing matched values.",
+    "hitDisposition": [
+      {
+        "paths": [
+          "docs/phase-1/ACCEPTANCE.md",
+          "docs/phase-1/CI-INVESTIGATION.md"
+        ],
+        "category": "private-observation-terms",
+        "assessment": "Explanatory documentation only."
+      },
+      {
+        "path": "docs/phase-1/evidence/review-ci-software-diagnostic.json",
+        "category": "observation-payload-key",
+        "assessment": "The observations object contains exact synthetic app/browser diagnostic summaries already reviewed against the raw reports, not imported/private observations."
+      }
+    ],
+    "assessment": "No credentials, private observation payloads, recordings or embedded media found."
+  },
+  "checks": [
+    "Programmatically compared workflow/config bytes to the pre-reviewed three-line replacements.",
+    "Recomputed 80 accepted source hashes and all 73 protected hashes.",
+    "Verified three evidence copies byte-for-byte and read final documentation changes."
+  ],
+  "limitations": [
+    "No Linux runtime execution or complete acceptance claim in this review; local macOS acceptance is not Linux acceptance.",
+    "Current ordinary macOS CI outcomes are not inferred; final or cancelled status and available partial evidence must be retained once observed.",
+    "No tests, browsers, servers, remote writes or commits performed. Exact-head normal Linux CI must pass before integration."
+  ]
+}

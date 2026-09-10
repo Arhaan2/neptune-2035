@@ -1,0 +1,57 @@
+
+> neptune@2.0.0-rc.1 test
+> vitest run --reporter=default --reporter=json --outputFile=artifacts/phase1-unit.json
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.0 [39m[90m<verified-checkout>[39m
+
+ [32m✓[39m tests/twin-physics.test.ts [2m([22m[2m28 tests[22m[2m)[22m[33m 2456[2mms[22m[39m
+   [32m✓[39m coupled deterministic operation [2m(14)[22m
+     [33m[2m✓[22m[39m honors upstream transformer and generation failure-domain differences[33m 302[2mms[22m[39m
+     [33m[2m✓[22m[39m replays exactly across different integer chunk schedules and keeps original state immutable[33m 629[2mms[22m[39m
+ [32m✓[39m tests/twin-telemetry.test.ts [2m([22m[2m47 tests[22m[2m)[22m[33m 12388[2mms[22m[39m
+   [32m✓[39m actual localhost SSE transport [2m(2)[22m
+     [33m[2m✓[22m[39m uses the production adapter with native browser reconnect/Last-Event-ID and source validation[33m 2264[2mms[22m[39m
+   [32m✓[39m running DataPanel acceptance [2m(1)[22m
+     [33m[2m✓[22m[39m operates mapping, raw inspection, simulated dropout, calibration, and actual streaming in the app[33m 9693[2mms[22m[39m
+ [32m✓[39m tests/phase1-numerical.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+ [32m✓[39m tests/phase1-worker.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 2291[2mms[22m[39m
+   [32m✓[39m PH1-PER-02 worker admission boundaries [2m(12)[22m
+     [33m[2m✓[22m[39m bounds an atomic same-time event batch at 7999 module steps[33m 449[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds an atomic same-time event batch at 8000 module steps[33m 388[2mms[22m[39m
+ [32m✓[39m tests/phase1-persistence.test.ts [2m([22m[2m16 tests[22m[2m)[22m[33m 18383[2mms[22m[39m
+   [32m✓[39m PH1-PER-01 real historical thresholds [2m(2)[22m
+     [33m[2m✓[22m[39m round-trips real engine-generated 999, 1000, 1001-event applied histories and continues[33m 2577[2mms[22m[39m
+     [33m[2m✓[22m[39m advances a real one-node run through 86399, 86400 and 86401 seconds, preserving continuation[33m 4512[2mms[22m[39m
+   [32m✓[39m PH1-PER-02 declared boundaries [2m(6)[22m
+     [33m[2m✓[22m[39m admits 9999/10000 future events through engine/export/import, rejects 10001 atomically[33m 3234[2mms[22m[39m
+     [33m[2m✓[22m[39m checks actual UTF-8 bytes below/at/above 64 MiB including multibyte input[33m 2792[2mms[22m[39m
+     [33m[2m✓[22m[39m bounds nesting before parse and exact value/key item allocation[33m 3936[2mms[22m[39m
+   [32m✓[39m PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints [2m(5)[22m
+     [33m[2m✓[22m[39m compares intermediate continuous/chunked/fresh restored trajectories around event and startup boundaries[33m 843[2mms[22m[39m
+ [32m✓[39m tests/twin-integration.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 5241[2mms[22m[39m
+   [32m✓[39m canonical graph, geometry and operating-state integration [2m(10)[22m
+     [33m[2m✓[22m[39m bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption[33m 3738[2mms[22m[39m
+     [33m[2m✓[22m[39m proves typed cluster reachability through the shore core and observes upstream or disabled link failure[33m 320[2mms[22m[39m
+     [33m[2m✓[22m[39m shows real generation isolation differences for equivalent power-domain loss[33m 497[2mms[22m[39m
+ [32m✓[39m tests/model.test.ts [2m([22m[2m38 tests[22m[2m)[22m[32m 109[2mms[22m[39m
+ [32m✓[39m tests/phase1-deferred.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 2077[2mms[22m[39m
+   [32m✓[39m PH1-REG-01 deferred Phase 0 findings remain explicit [2m(4)[22m
+     [33m[2m✓[22m[39m PH0-003 retains the 4000-node shared port boundary and reports the 4001-node design shortfall[33m 983[2mms[22m[39m
+     [33m[2m✓[22m[39m PH0-006 preserves radial II/III fault behavior without inventing an automatic transfer benefit[33m 821[2mms[22m[39m
+ [32m✓[39m tests/twin-network.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3143[2mms[22m[39m
+   [32m✓[39m declared network offered-demand and whole-job admission [2m(7)[22m
+     [33m[2m✓[22m[39m detects a shared-core port bottleneck even when every individual platform link fits[33m 1873[2mms[22m[39m
+     [33m[2m✓[22m[39m couples idle draw to dispatch without committing trial battery energy, and never masks installed peak shortage[33m 500[2mms[22m[39m
+ [32m✓[39m tests/scenario.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m tests/phase1-work-budget.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 248[2mms[22m[39m
+ [32m✓[39m tests/twin-geometry.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 930[2mms[22m[39m
+   [32m✓[39m dimensioned rendering contract [2m(7)[22m
+     [33m[2m✓[22m[39m all platforms are included in physical campus footprint above the old visual cap[33m 765[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[32m256 passed[39m[22m[90m (256)[39m
+[2m   Start at [22m 18:52:56
+[2m   Duration [22m 26.19s[2m (tests 95%, import 3%, transform 2%)[22m
+
+JSON report written to <verified-checkout>/artifacts/phase1-unit.json

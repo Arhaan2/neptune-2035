@@ -1,0 +1,7 @@
+PH0-001: PASS; REPRODUCED; 2 desired regressions
+PH0-002: PASS; REPRODUCED; 4 desired regressions
+PH0-003: PASS; DOCUMENTED LIMITATION — undersized presets reproduced; shortfall correctly reported; 0 desired regressions
+PH0-004: PASS; DOCUMENTED LIMITATION — structural ownership risk, no supported rating edit/runtime mismatch demonstrated; 0 desired regressions
+PH0-005: PASS; REPRODUCED — terminal acceptance omits whole-run service continuity; events/log/energy history remain; 0 desired regressions
+PH0-006: PASS; DOCUMENTED LIMITATION — no automatic transfer benefit demonstrated in supported radial operation; 0 desired regressions
+Phase 0 diagnostic evidence: PASS. Known defects are NOT fixed; this is not the complete preservation gate.

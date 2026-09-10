@@ -1,0 +1,1537 @@
+{
+  "kind": "diagnostic-only",
+  "status": "COLLECTED",
+  "startedAt": "2026-09-10T00:13:47.149Z",
+  "sourceSha": "7dcecd3dec202621d1ed0442aee64f36335bfde1",
+  "scriptSha256": "fcc5bf5d993c12e365ea5e28ed61b72a6fc94152333c37dbc1202ef3bea95a1d",
+  "sourceStatus": " M .github/workflows/phase-1.yml\n M docs/phase-1/ACCEPTANCE.md\n M docs/phase-1/CI-INVESTIGATION.md\n M docs/phase-1/MERGE-AND-ROLLBACK.md\n M playwright.config.ts\n M scripts/phase-1/diagnose-firefox.mjs\n?? \".github/workflows/phase-1 2.yml\"\n?? docs/phase-1/evidence/ci-linux-display-pr/\n?? docs/phase-1/evidence/ci-linux-display-push/\n?? docs/phase-1/evidence/review-ci-linux-display.json\n?? \"playwright.config 2.ts\"\n",
+  "host": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "totalMemoryBytes": 25769803776,
+    "node": "v24.18.0"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1050
+  },
+  "deviceScaleFactor": 1,
+  "browser": "chromium",
+  "mode": "fixed-headless-and-headed-angle-gl",
+  "headless": null,
+  "displayEnvironmentPresent": false,
+  "limitations": [
+    "Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.",
+    "The fixed Chromium comparison changes executable/display mode and ANGLE backend together; it cannot isolate one causal factor or prove the selected backend is faster.",
+    "Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.",
+    "No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected.",
+    "The blank-page WebGL probe runs after the native frame observation; successful native readback does not establish app 3D rendering.",
+    "The native WebGL probe may warm graphics initialization before the app pages."
+  ],
+  "preferenceSources": [
+    "https://playwright.dev/docs/browsers#chromium-headless-shell",
+    "https://playwright.dev/docs/ci#running-headed",
+    "https://chromium.googlesource.com/angle/angle/+/HEAD/doc/DebuggingTips.md#usage"
+  ],
+  "stages": [
+    {
+      "name": "owned-vite-ready",
+      "startedAfterMs": 18.496666,
+      "value": {
+        "port": 5183,
+        "address": "127.0.0.1",
+        "listening": true,
+        "httpStatus": 200,
+        "readiness": "owned-vite-api"
+      },
+      "outcome": "completed",
+      "elapsedMs": 213.870625
+    },
+    {
+      "name": "close-owned-vite",
+      "startedAfterMs": 32528.139208,
+      "outcome": "completed",
+      "elapsedMs": 3.8147920000010345
+    }
+  ],
+  "variants": [
+    {
+      "name": "headless-default",
+      "headless": true,
+      "args": [],
+      "stages": [
+        {
+          "name": "launch-chromium",
+          "startedAfterMs": 348.364333,
+          "value": {
+            "browserVersion": "153.0.8010.12",
+            "mode": "headless",
+            "headless": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 301.329333
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 14895.46775,
+          "outcome": "completed",
+          "elapsedMs": 16.06158300000061
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 14911.83075,
+          "value": {
+            "pid": 75207,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.2387909999997646
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 650.082916,
+              "outcome": "completed",
+              "elapsedMs": 109.41500000000008
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 759.869166,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 8.537459000000013
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 768.707583,
+              "outcome": "completed",
+              "elapsedMs": 1.0561249999999518
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 770.054875,
+              "value": {
+                "native": {
+                  "elapsedMs": 7.5,
+                  "rafCount": 1,
+                  "timerCount": 0,
+                  "maxRafGapMs": 0,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 9.700000005960465,
+                  "sinceLastTimerMs": 7.5,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 0,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 7.702457999999979
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 778.0460410000001,
+              "outcome": "completed",
+              "elapsedMs": 0.8947089999999207
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 779.083791,
+              "outcome": "completed",
+              "elapsedMs": 3000.437084
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 3780.437375,
+              "value": {
+                "native": {
+                  "elapsedMs": 3003,
+                  "rafCount": 180,
+                  "timerCount": 30,
+                  "maxRafGapMs": 16.80000000000001,
+                  "maxTimerGapMs": 100.20000000298023,
+                  "sinceLastRafMs": 16.70000001192102,
+                  "sinceLastTimerMs": 13.5,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 0,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.0251250000001164
+            },
+            {
+              "name": "native-webgl2-probe",
+              "startedAfterMs": 3782.740416,
+              "value": {
+                "available": true,
+                "creationErrors": [],
+                "cleanup": {
+                  "contextLossRequested": true
+                },
+                "attributes": {
+                  "alpha": true,
+                  "antialias": true,
+                  "depth": true,
+                  "desynchronized": false,
+                  "failIfMajorPerformanceCaveat": false,
+                  "powerPreference": "default",
+                  "premultipliedAlpha": true,
+                  "preserveDrawingBuffer": false,
+                  "stencil": false,
+                  "xrCompatible": false
+                },
+                "renderer": "WebKit WebGL",
+                "vendor": "WebKit",
+                "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                "unmaskedVendor": "Google Inc. (Google)",
+                "redPixel": [
+                  255,
+                  0,
+                  0,
+                  255
+                ],
+                "redPixelMatches": true,
+                "glError": 0,
+                "contextLost": false
+              },
+              "outcome": "completed",
+              "elapsedMs": 71.43491700000004
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 3854.502416,
+              "outcome": "completed",
+              "elapsedMs": 3.831500000000233
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 3859.553125,
+              "outcome": "completed",
+              "elapsedMs": 27.7465830000001
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 3887.68575,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 102.76187499999969
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 3990.911541,
+              "outcome": "completed",
+              "elapsedMs": 0.9277500000002874
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 3992.163083,
+              "outcome": "completed",
+              "elapsedMs": 1396.7182920000005
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 5389.300625,
+              "value": {
+                "native": {
+                  "elapsedMs": 1643.9000000059605,
+                  "rafCount": 29,
+                  "timerCount": 7,
+                  "maxRafGapMs": 633.3,
+                  "maxTimerGapMs": 813.2000000029802,
+                  "sinceLastRafMs": 161.69999999403944,
+                  "sinceLastTimerMs": 0.20000000298023224,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094917
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 155.13341599999967
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 5544.822166,
+              "outcome": "completed",
+              "elapsedMs": 212.32129199999963
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 5757.5746659999995,
+              "outcome": "completed",
+              "elapsedMs": 3001.0481250000003
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 8759.045,
+              "value": {
+                "native": {
+                  "elapsedMs": 3013.4000000059605,
+                  "rafCount": 20,
+                  "timerCount": 10,
+                  "maxRafGapMs": 166.60000000000036,
+                  "maxTimerGapMs": 311.09999999403954,
+                  "sinceLastRafMs": 155.49999999403917,
+                  "sinceLastTimerMs": 152.29999999701977,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094917
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 12.099749999999403
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 8771.78675,
+              "outcome": "completed",
+              "elapsedMs": 2214.0697500000006
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 10986.444916,
+              "value": {
+                "native": {
+                  "elapsedMs": 5230.9000000059605,
+                  "rafCount": 33,
+                  "timerCount": 17,
+                  "maxRafGapMs": 433.3000000000002,
+                  "maxTimerGapMs": 735,
+                  "sinceLastRafMs": 139.79999999403935,
+                  "sinceLastTimerMs": 2.5,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094917
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 37,
+                  "geometries": 24,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 2.121624999999767
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 10988.895958,
+              "outcome": "completed",
+              "elapsedMs": 2.7535420000003796
+            }
+          ],
+          "cameraChangeAfterClick": {
+            "status": "observed",
+            "changed": false
+          }
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 10992.61725,
+              "outcome": "completed",
+              "elapsedMs": 31.913166000000274
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 11024.927958,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 78.71749999999884
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 11104.055290999999,
+              "outcome": "completed",
+              "elapsedMs": 0.7532500000015716
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 11105.177249999999,
+              "outcome": "completed",
+              "elapsedMs": 222.6442500000012
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 11328.277583,
+              "value": {
+                "native": {
+                  "elapsedMs": 298.70000000298023,
+                  "rafCount": 15,
+                  "timerCount": 2,
+                  "maxRafGapMs": 50,
+                  "maxTimerGapMs": 138.20000000298023,
+                  "sinceLastRafMs": 14.800000008940685,
+                  "sinceLastTimerMs": 74.20000000298023,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": "false",
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 0,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 1.7614580000008573
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 11330.34125,
+              "outcome": "completed",
+              "elapsedMs": 1.0256250000002183
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 11331.655832999999,
+              "outcome": "completed",
+              "elapsedMs": 3000.946333
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 14333.034749999999,
+              "value": {
+                "native": {
+                  "elapsedMs": 3006.8999999910593,
+                  "rafCount": 112,
+                  "timerCount": 20,
+                  "maxRafGapMs": 566.6999999999999,
+                  "maxTimerGapMs": 675.9000000059605,
+                  "sinceLastRafMs": 23.69999999701986,
+                  "sinceLastTimerMs": 106,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": "true",
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787558,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 6.2459580000013375
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 14339.755458,
+              "outcome": "completed",
+              "elapsedMs": 526.5848330000008
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 14866.778416,
+              "value": {
+                "native": {
+                  "elapsedMs": 3558.2999999970198,
+                  "rafCount": 125,
+                  "timerCount": 23,
+                  "maxRafGapMs": 566.6999999999999,
+                  "maxTimerGapMs": 675.9000000059605,
+                  "sinceLastRafMs": 25.19999999701986,
+                  "sinceLastTimerMs": 24,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": "true",
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    -10.999999999999984,
+                    10.025775333456815,
+                    -4.800000000000011
+                  ],
+                  "target": [
+                    -3.5,
+                    5.225775333456813,
+                    -6
+                  ],
+                  "drawCalls": 53,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "cooling",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 23.90204199999971
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 14891.196208,
+              "outcome": "completed",
+              "elapsedMs": 3.7084169999998267
+            }
+          ],
+          "cameraChangeAfterClick": {
+            "status": "observed",
+            "changed": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "headed-angle-gl",
+      "headless": false,
+      "args": [
+        "--use-gl=angle",
+        "--use-angle=gl"
+      ],
+      "stages": [
+        {
+          "name": "launch-chromium",
+          "startedAfterMs": 14912.605540999999,
+          "value": {
+            "browserVersion": "153.0.8010.12",
+            "mode": "headed",
+            "headless": false
+          },
+          "outcome": "completed",
+          "elapsedMs": 2307.372625
+        },
+        {
+          "name": "close-browser",
+          "startedAfterMs": 32457.538958,
+          "outcome": "completed",
+          "elapsedMs": 69.22400000000198
+        },
+        {
+          "name": "verify-browser-group-absent",
+          "startedAfterMs": 32527.217208000002,
+          "value": {
+            "pid": 75281,
+            "groupAbsent": true
+          },
+          "outcome": "completed",
+          "elapsedMs": 0.3964169999999285
+        }
+      ],
+      "pages": [
+        {
+          "scene": "blank",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 17220.476625000003,
+              "outcome": "completed",
+              "elapsedMs": 782.8160409999982
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 18003.688625000003,
+              "value": {
+                "httpStatus": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 20.45916600000055
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 18024.526666,
+              "outcome": "completed",
+              "elapsedMs": 4.99750000000131
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 18029.971125,
+              "value": {
+                "native": {
+                  "elapsedMs": 12.400000005960464,
+                  "rafCount": 0,
+                  "timerCount": 0,
+                  "maxRafGapMs": 0,
+                  "maxTimerGapMs": 0,
+                  "sinceLastRafMs": 12.400000005960464,
+                  "sinceLastTimerMs": 12.400000005960464,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 0,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 3.4118750000016007
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 18033.944583,
+              "outcome": "completed",
+              "elapsedMs": 1.4509170000019367
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 18035.723958000002,
+              "outcome": "completed",
+              "elapsedMs": 3000.8297920000005
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 21037.715208,
+              "value": {
+                "native": {
+                  "elapsedMs": 3003.9000000059605,
+                  "rafCount": 354,
+                  "timerCount": 30,
+                  "maxRafGapMs": 38.7,
+                  "maxTimerGapMs": 100.70000000298023,
+                  "sinceLastRafMs": 5.4000000059604645,
+                  "sinceLastTimerMs": 18.400000005960464,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": null,
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 0,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 1.8017079999990528
+            },
+            {
+              "name": "native-webgl2-probe",
+              "startedAfterMs": 21039.885625000003,
+              "value": {
+                "available": true,
+                "creationErrors": [],
+                "cleanup": {
+                  "contextLossRequested": true
+                },
+                "attributes": {
+                  "alpha": true,
+                  "antialias": true,
+                  "depth": true,
+                  "desynchronized": false,
+                  "failIfMajorPerformanceCaveat": false,
+                  "powerPreference": "default",
+                  "premultipliedAlpha": true,
+                  "preserveDrawingBuffer": false,
+                  "stencil": false,
+                  "xrCompatible": false
+                },
+                "renderer": "WebKit WebGL",
+                "vendor": "WebKit",
+                "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                "unmaskedVendor": "Google Inc. (Google)",
+                "redPixel": [
+                  255,
+                  0,
+                  0,
+                  255
+                ],
+                "redPixelMatches": true,
+                "glError": 0,
+                "contextLost": false
+              },
+              "outcome": "completed",
+              "elapsedMs": 49.38987499999712
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 21089.695541,
+              "outcome": "completed",
+              "elapsedMs": 8.795459000000847
+            }
+          ]
+        },
+        {
+          "scene": "legacy",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 21099.385958000003,
+              "outcome": "completed",
+              "elapsedMs": 129.54954199999702
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 21229.411125000002,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 131.13733299999876
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 21360.973250000003,
+              "outcome": "completed",
+              "elapsedMs": 1.825290999997378
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 21363.219541000002,
+              "outcome": "completed",
+              "elapsedMs": 1459.1694590000006
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 22822.844500000003,
+              "value": {
+                "native": {
+                  "elapsedMs": 1788.4000000059605,
+                  "rafCount": 53,
+                  "timerCount": 7,
+                  "maxRafGapMs": 583.6000000000001,
+                  "maxTimerGapMs": 798.9000000059605,
+                  "sinceLastRafMs": 209.50000000596037,
+                  "sinceLastTimerMs": 205.6000000089407,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094917
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 205.0753749999967
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 23028.33475,
+              "outcome": "completed",
+              "elapsedMs": 143.33749999999782
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 23172.109458000003,
+              "outcome": "completed",
+              "elapsedMs": 3000.3528750000005
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 26173.877625,
+              "value": {
+                "native": {
+                  "elapsedMs": 3039.5999999940395,
+                  "rafCount": 21,
+                  "timerCount": 10,
+                  "maxRafGapMs": 150,
+                  "maxTimerGapMs": 301.69999998807907,
+                  "sinceLastRafMs": 160.59999999701995,
+                  "sinceLastTimerMs": 152.59999999403954,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094917
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 27,
+                  "geometries": 12,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 38.06537500000195
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 26212.479750000002,
+              "outcome": "completed",
+              "elapsedMs": 2183.0360409999994
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 28395.997625,
+              "value": {
+                "native": {
+                  "elapsedMs": 5225.5999999940395,
+                  "rafCount": 34,
+                  "timerCount": 17,
+                  "maxRafGapMs": 416.7000000000007,
+                  "maxTimerGapMs": 708.7000000029802,
+                  "sinceLastRafMs": 138.1999999970194,
+                  "sinceLastTimerMs": 1.7999999970197678,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": null,
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1060,
+                  "height": 729,
+                  "cssWidth": 1060,
+                  "cssHeight": 729
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1060,
+                  "drawingBufferHeight": 729
+                },
+                "scene": {
+                  "camera": [
+                    76.622423221137,
+                    44.205244166040565,
+                    89.88399647094917
+                  ],
+                  "target": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "calls": 37,
+                  "geometries": 24,
+                  "textures": 3,
+                  "objects": 7
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 1.664875000002212
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 28397.963750000003,
+              "outcome": "completed",
+              "elapsedMs": 4.877832999998645
+            }
+          ],
+          "cameraChangeAfterClick": {
+            "status": "observed",
+            "changed": false
+          }
+        },
+        {
+          "scene": "twin",
+          "stages": [
+            {
+              "name": "create-isolated-page",
+              "startedAfterMs": 28404.006791,
+              "outcome": "completed",
+              "elapsedMs": 109.34383400000297
+            },
+            {
+              "name": "navigate",
+              "startedAfterMs": 28513.874916,
+              "value": {
+                "httpStatus": 200
+              },
+              "outcome": "completed",
+              "elapsedMs": 92.95712500000081
+            },
+            {
+              "name": "bring-to-front",
+              "startedAfterMs": 28607.375291,
+              "outcome": "completed",
+              "elapsedMs": 2.391125000001921
+            },
+            {
+              "name": "dom-ready",
+              "startedAfterMs": 28610.215916,
+              "outcome": "completed",
+              "elapsedMs": 233.7827920000018
+            },
+            {
+              "name": "evaluate-before",
+              "startedAfterMs": 28844.534333,
+              "value": {
+                "native": {
+                  "elapsedMs": 322.90000000596046,
+                  "rafCount": 29,
+                  "timerCount": 3,
+                  "maxRafGapMs": 66.6,
+                  "maxTimerGapMs": 151.1000000089407,
+                  "sinceLastRafMs": 3.699999997019745,
+                  "sinceLastTimerMs": 22.100000008940697,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": "false",
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 0,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": null,
+                "webgl": null,
+                "scene": null
+              },
+              "outcome": "completed",
+              "elapsedMs": 1.8415830000012647
+            },
+            {
+              "name": "reset-native-counters",
+              "startedAfterMs": 28846.777250000003,
+              "outcome": "completed",
+              "elapsedMs": 1.1171659999999974
+            },
+            {
+              "name": "native-observation-3000ms",
+              "startedAfterMs": 28848.285750000003,
+              "outcome": "completed",
+              "elapsedMs": 3001.302249999997
+            },
+            {
+              "name": "evaluate-after",
+              "startedAfterMs": 31851.164958,
+              "value": {
+                "native": {
+                  "elapsedMs": 3010.2000000029802,
+                  "rafCount": 127,
+                  "timerCount": 21,
+                  "maxRafGapMs": 557.5999999999999,
+                  "maxTimerGapMs": 1004.3999999910593,
+                  "sinceLastRafMs": 15.799999991059394,
+                  "sinceLastTimerMs": 15.299999997019768,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": "true",
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    125.08086644787558,
+                    45.85935019164577,
+                    131.0267148332736
+                  ],
+                  "target": [
+                    35,
+                    0,
+                    0
+                  ],
+                  "drawCalls": 57,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "campus",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 7.852249999999913
+            },
+            {
+              "name": "normal-locator-click",
+              "startedAfterMs": 31859.507916000002,
+              "outcome": "completed",
+              "elapsedMs": 543.6105839999982
+            },
+            {
+              "name": "evaluate-after-click",
+              "startedAfterMs": 32403.639458,
+              "value": {
+                "native": {
+                  "elapsedMs": 3580.300000011921,
+                  "rafCount": 141,
+                  "timerCount": 23,
+                  "maxRafGapMs": 557.5999999999999,
+                  "maxTimerGapMs": 1004.3999999910593,
+                  "sinceLastRafMs": 27.59999999999991,
+                  "sinceLastTimerMs": 50.400000005960464,
+                  "lostEvents": 0,
+                  "restoredEvents": 0
+                },
+                "domReady": "true",
+                "sceneReady": "true",
+                "fallback": {
+                  "twin": false,
+                  "legacy": false
+                },
+                "totalCanvases": 1,
+                "documentReadyState": "complete",
+                "visibility": "visible",
+                "focused": true,
+                "dpr": 1,
+                "canvas": {
+                  "width": 1046,
+                  "height": 640,
+                  "cssWidth": 1046,
+                  "cssHeight": 641
+                },
+                "webgl": {
+                  "renderer": "WebKit WebGL",
+                  "vendor": "WebKit",
+                  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+                  "unmaskedRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+                  "unmaskedVendor": "Google Inc. (Google)",
+                  "attributes": {
+                    "alpha": true,
+                    "antialias": true,
+                    "depth": true,
+                    "desynchronized": false,
+                    "failIfMajorPerformanceCaveat": false,
+                    "powerPreference": "high-performance",
+                    "premultipliedAlpha": true,
+                    "preserveDrawingBuffer": true,
+                    "stencil": false,
+                    "xrCompatible": false
+                  },
+                  "contextLost": false,
+                  "drawingBufferWidth": 1046,
+                  "drawingBufferHeight": 640
+                },
+                "scene": {
+                  "camera": [
+                    -10.999999999999984,
+                    10.025775333456815,
+                    -4.800000000000011
+                  ],
+                  "target": [
+                    -3.5,
+                    5.225775333456813,
+                    -6
+                  ],
+                  "drawCalls": 53,
+                  "geometries": 57,
+                  "textures": 1,
+                  "renderedModules": 8,
+                  "totalModules": 8,
+                  "renderedPlatforms": 2,
+                  "renderedRacks": 40,
+                  "renderedNodes": 160,
+                  "inside": false,
+                  "focus": "cooling",
+                  "exploded": false,
+                  "simulationTimeS": 0
+                }
+              },
+              "outcome": "completed",
+              "elapsedMs": 25.30279199999859
+            },
+            {
+              "name": "close-context",
+              "startedAfterMs": 32429.402458,
+              "outcome": "completed",
+              "elapsedMs": 27.446083000002545
+            }
+          ],
+          "cameraChangeAfterClick": {
+            "status": "observed",
+            "changed": true
+          }
+        }
+      ]
+    }
+  ],
+  "activeBrowserGroups": [],
+  "cleanupProbe": false,
+  "closeFallbackProbe": false,
+  "server": {
+    "owned": true,
+    "port": 5183
+  },
+  "completedAt": "2026-09-10T00:14:19.682Z",
+  "elapsedMs": 32532.361791000003,
+  "supervisor": {
+    "code": 0,
+    "signal": null,
+    "elapsedMs": 32984.325084,
+    "budgetMs": 89000,
+    "cleanup": [
+      {
+        "pid": 75200,
+        "term": "absent",
+        "kill": "absent",
+        "finalCheck": "absent"
+      }
+    ],
+    "registeredGroupsAbsent": true
+  }
+}

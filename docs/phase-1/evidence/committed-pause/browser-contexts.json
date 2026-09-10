@@ -1,0 +1,17 @@
+[
+  {
+    "path": "browser-contexts/twin-seek-backward-and-for-313ff--boundary-numerical-results-firefox--error-context.md",
+    "bytes": 31483,
+    "sha256": "fcd98febc493e5c30832fd66edafb3c4ca9acd9590dd18bdaa1cecdbd2388def"
+  },
+  {
+    "path": "browser-contexts/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox--error-context.md",
+    "bytes": 15128,
+    "sha256": "3d8318c230c8912b8b804e8a808d1c6a67bb92c2a5d965aa33641311cd57be2a"
+  },
+  {
+    "path": "browser-contexts/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-firefox--error-context.md",
+    "bytes": 12880,
+    "sha256": "7900341fe2a0775f91bb45acac31a208003b85deed9e7dcb9c3a4051cebffe04"
+  }
+]

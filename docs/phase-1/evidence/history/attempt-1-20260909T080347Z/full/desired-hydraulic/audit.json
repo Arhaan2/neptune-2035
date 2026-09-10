@@ -1,0 +1,113 @@
+{
+  "startedAt": "2026-09-09T08:29:53.032Z",
+  "baselineSourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "scope": "Evidence checks only; known defects remain open. No physics validation or physical connection.",
+  "environment": {
+    "node": "v24.18.0",
+    "os": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro"
+  },
+  "sourceHashes": {
+    "src/twin/assets/design.ts": "5554530d61c1d720b78436fba2061ad77875d50bb5e172a5ec39b8c96841357b",
+    "src/twin/types.ts": "d64626837a29f5136f2d40df1f47bc832212ad388a4b421f0b3163c6c9cc4ee7",
+    "src/twin/engine/simulation.ts": "6a91ab2be00db1685f24b24c0d8559a8893d3c414c73e01594a0effe87f629f2",
+    "src/twin/analysis/reports.ts": "4fbafaeccef292177729c9f10923b4a6d32bd8f667e01b1aea7c1516e94bf42d",
+    "src/twin/solvers/hydraulic.ts": "1f0c2a9a90348ee061214d67785b555338f8a10b42b834949c8d709efff285ee",
+    "src/twin/solvers/network.ts": "bfcfccf10e056ffa8d82be49144028468eba82191e8e1b89bbc391c964d30ce1",
+    "src/twin/catalog/reference.ts": "615eab81d7728269e568a7037cdb42afce757ac1c924788207b9f28bc9c260b2"
+  },
+  "harnessHashes": {
+    "scripts/phase-0/audit.mjs": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4",
+    "tests/fixtures/phase-0/scenarios.json": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094"
+  },
+  "findings": [
+    {
+      "id": "PH0-001",
+      "classification": "correctness defect",
+      "disposition": "REPRODUCED",
+      "desiredRegressions": [
+        {
+          "name": "reject nonfinite shutoffPa explicitly at pump-rating validation",
+          "outcome": "EXPECTED SEMANTIC FAILURE",
+          "message": "shutoffPa=Infinity must be explicitly rejected as an invalid pump rating\n+ actual - expected\n\n+ 'returned'\n- 'explicit-rating-rejection'\n",
+          "actual": "returned",
+          "expected": "explicit-rating-rejection"
+        },
+        {
+          "name": "reject nonfinite freeFlowM3S explicitly at pump-rating validation",
+          "outcome": "EXPECTED SEMANTIC FAILURE",
+          "message": "freeFlowM3S=Infinity must be explicitly rejected as an invalid pump rating\n+ actual - expected\n\n+ 'numerical-or-unrelated-error'\n- 'explicit-rating-rejection'\n",
+          "actual": "numerical-or-unrelated-error",
+          "expected": "explicit-rating-rejection"
+        }
+      ],
+      "control": {
+        "input": {
+          "lengthM": 58,
+          "diameterM": 0.18,
+          "roughnessM": 0.000045,
+          "densityKgM3": 997,
+          "dynamicViscosityPaS": 0.000855,
+          "fittingsK": 12,
+          "equipmentDropPaAtReference": 80000,
+          "referenceFlowM3S": 0.05,
+          "pumpCount": 1,
+          "pumpSpeed": 1,
+          "shutoffPa": 250000,
+          "freeFlowM3S": 0.1,
+          "efficiency": 0.72
+        },
+        "result": {
+          "flowM3S": 0.0596990034191549,
+          "pressurePa": 160900.72477053275,
+          "electricalW": 13341.129053084076,
+          "reynolds": 492417.7942738406,
+          "darcyFactor": 0.01575649139861,
+          "headResidualPa": -0.0000015394471120089293,
+          "massResidualKgS": 0,
+          "iterations": 37
+        }
+      },
+      "observations": [
+        {
+          "field": "shutoffPa",
+          "value": "Infinity (constructed directly)",
+          "kind": "returned",
+          "result": {
+            "flowM3S": 0.09999999999963621,
+            "pressurePa": 450242.5612997924,
+            "electricalW": 62533.68906918812,
+            "reynolds": 824834.1949943725,
+            "darcyFactor": 0.015263789647400737,
+            "headResidualPa": "Infinity",
+            "massResidualKgS": 0,
+            "iterations": 37
+          }
+        },
+        {
+          "field": "freeFlowM3S",
+          "value": "Infinity (constructed directly)",
+          "kind": "numerical-or-unrelated-error",
+          "message": "Reynolds number must be finite and non-negative"
+        },
+        {
+          "field": "efficiency",
+          "value": "Infinity (constructed directly)",
+          "kind": "explicit-rating-rejection",
+          "message": "Invalid pump rating"
+        }
+      ],
+      "evidenceCheck": "PASS",
+      "elapsedMs": 0.6198329999999999
+    }
+  ],
+  "sourceBaselineVerification": {
+    "checkedFiles": 216,
+    "mismatches": []
+  },
+  "completedAt": "2026-09-09T08:29:53.103Z",
+  "evidenceGate": "PASS",
+  "mode": "desired behavior: known semantic failures return exit 1"
+}

@@ -1,0 +1,1186 @@
+{
+  "id": "PH0-006",
+  "classification": "capability/evaluation gap",
+  "disposition": "DOCUMENTED LIMITATION — no automatic transfer benefit demonstrated in supported radial operation",
+  "desiredRegressions": [],
+  "experiment": [
+    {
+      "generation": 2,
+      "config": {
+        "schemaVersion": 2,
+        "generation": 2,
+        "requestedAccelerators": 5128,
+        "supplyW": 30000000,
+        "standbyPumps": 1,
+        "seawaterK": 291.15,
+        "workload": 0.8,
+        "idleFraction": 0.3,
+        "exchangerUAWPerK": 350000,
+        "foulingResistanceKPerW": 0,
+        "batteryWhPerModule": 0,
+        "batteryMaxWPerModule": 2200000,
+        "pumpSpeed": 1,
+        "requireExternalNetwork": false,
+        "requireClusterNetwork": true,
+        "budgetUSD": null
+      },
+      "designRevision": "reference-v2-709708e3",
+      "events": [
+        {
+          "id": "feeder-loss",
+          "timeS": 5,
+          "kind": "trip",
+          "assetId": "platform-001/switchboard"
+        },
+        {
+          "id": "feeder-recovery",
+          "timeS": 10,
+          "kind": "restore",
+          "assetId": "platform-001/switchboard"
+        }
+      ],
+      "timestepS": 1,
+      "durationS": 15,
+      "failedAsset": {
+        "id": "platform-001/switchboard",
+        "type": "switchboard",
+        "name": "switchboard",
+        "parentId": "platform-001",
+        "catalogId": "equipment-v2",
+        "revision": "2.0.0",
+        "dimensionsM": [
+          2,
+          2,
+          4
+        ],
+        "positionM": [
+          27,
+          5.129289433596213,
+          0
+        ],
+        "operationalMassKg": 1800,
+        "ratings": {
+          "capacityW": 8800000
+        },
+        "failureDomain": "platform-001/switchboard",
+        "provenance": [
+          "equipment-v2"
+        ],
+        "ports": [
+          {
+            "id": "power-in",
+            "medium": "power",
+            "direction": "in",
+            "capacity": 8800000,
+            "unit": "W"
+          },
+          {
+            "id": "power-out",
+            "medium": "power",
+            "direction": "out",
+            "capacity": 8800000,
+            "unit": "W"
+          }
+        ]
+      },
+      "affectedModules": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ],
+      "powerDomains": [
+        {
+          "id": "platform-001/module-01",
+          "powerDomainId": "platform-001/switchboard"
+        },
+        {
+          "id": "platform-001/module-02",
+          "powerDomainId": "platform-001/switchboard"
+        },
+        {
+          "id": "platform-001/module-03",
+          "powerDomainId": "platform-001/switchboard"
+        },
+        {
+          "id": "platform-001/module-04",
+          "powerDomainId": "platform-001/switchboard"
+        },
+        {
+          "id": "platform-002/module-01",
+          "powerDomainId": "platform-002/switchboard"
+        }
+      ],
+      "openTies": [],
+      "powerConnections": [
+        {
+          "id": "shore/grid>platform-001/transformer:power",
+          "from": "shore/grid",
+          "to": "platform-001/transformer",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              -65,
+              3,
+              0
+            ],
+            [
+              -27,
+              3,
+              0
+            ],
+            [
+              -27,
+              5.129289433596213,
+              0
+            ],
+            [
+              -27,
+              5.129289433596213,
+              0
+            ]
+          ],
+          "allowanceM": 8
+        },
+        {
+          "id": "platform-001/transformer>platform-001/switchboard:power",
+          "from": "platform-001/transformer",
+          "to": "platform-001/switchboard",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              -27,
+              5.129289433596213,
+              0
+            ],
+            [
+              27,
+              5.129289433596213,
+              0
+            ],
+            [
+              27,
+              5.129289433596213,
+              0
+            ],
+            [
+              27,
+              5.129289433596213,
+              0
+            ]
+          ],
+          "allowanceM": 4
+        },
+        {
+          "id": "shore/grid>platform-002/transformer:power",
+          "from": "shore/grid",
+          "to": "platform-002/transformer",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              -65,
+              3,
+              0
+            ],
+            [
+              43,
+              3,
+              0
+            ],
+            [
+              43,
+              5.520904157341764,
+              0
+            ],
+            [
+              43,
+              5.520904157341764,
+              0
+            ]
+          ],
+          "allowanceM": 8
+        },
+        {
+          "id": "platform-002/transformer>platform-002/switchboard:power",
+          "from": "platform-002/transformer",
+          "to": "platform-002/switchboard",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              43,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ]
+          ],
+          "allowanceM": 4
+        }
+      ],
+      "trace": [
+        {
+          "timeS": 0,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.15,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": null,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 1,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.1379694964934,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0871398586518202,
+          "electricalResidualW": 0,
+          "thermalResidualW": 1.8189894035458565e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 2,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.12601343922034,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.08713985865182,
+          "electricalResidualW": 0,
+          "thermalResidualW": 3.8562575355172157e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 3,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.11413136749843,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0871398586518197,
+          "electricalResidualW": 0,
+          "thermalResidualW": 1.382431946694851e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 4,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.10232282349597,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0871398586518195,
+          "electricalResidualW": 0,
+          "thermalResidualW": 5.748006515204906e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 5,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0871398586518195,
+          "electricalResidualW": 0,
+          "thermalResidualW": 0,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 6,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0885354468297022,
+          "electricalResidualW": 0,
+          "thermalResidualW": 0,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 7,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0899301646688395,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 8,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0913240129831396,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 9,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0927169925854956,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 10,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0941091042877877,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.1100277081131935e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 11,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.07892450147074,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0929490714514714,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.473825588822365e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 12,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.06733382188014,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0921201076481373,
+          "electricalResidualW": 0,
+          "thermalResidualW": 1.7462298274040222e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 13,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.0558148668387,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0914981829244592,
+          "electricalResidualW": 0,
+          "thermalResidualW": 4.4019543565809727e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 14,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.0443671925061,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0910143440157725,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.4010660126805305e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 15,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.03299035778855,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.090627197465766,
+          "electricalResidualW": 0,
+          "thermalResidualW": 3.310560714453459e-10,
+          "warnings": []
+        }
+      ],
+      "terminalSummary": {
+        "timeS": 15,
+        "itW": 6615119.999999999,
+        "facilityW": 7191560.6217648275,
+        "gridW": 7191560.6217648275,
+        "pumpPowerW": 131177.5270496467,
+        "availableAccelerators": 5128,
+        "energizedAccelerators": 5128,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 303.03299035778855,
+        "batteryWh": 0,
+        "instantaneousPUE": 1.0871398586518202,
+        "energyPUE": 1.090627197465766,
+        "electricalResidualW": 0,
+        "thermalResidualW": 3.310560714453459e-10,
+        "warnings": []
+      }
+    },
+    {
+      "generation": 3,
+      "config": {
+        "schemaVersion": 2,
+        "generation": 3,
+        "requestedAccelerators": 5128,
+        "supplyW": 30000000,
+        "standbyPumps": 1,
+        "seawaterK": 291.15,
+        "workload": 0.8,
+        "idleFraction": 0.3,
+        "exchangerUAWPerK": 350000,
+        "foulingResistanceKPerW": 0,
+        "batteryWhPerModule": 0,
+        "batteryMaxWPerModule": 2200000,
+        "pumpSpeed": 1,
+        "requireExternalNetwork": false,
+        "requireClusterNetwork": true,
+        "budgetUSD": null
+      },
+      "designRevision": "reference-v2-d9dffd2e",
+      "events": [
+        {
+          "id": "feeder-loss",
+          "timeS": 5,
+          "kind": "trip",
+          "assetId": "platform-001/segment-feeder"
+        },
+        {
+          "id": "feeder-recovery",
+          "timeS": 10,
+          "kind": "restore",
+          "assetId": "platform-001/segment-feeder"
+        }
+      ],
+      "timestepS": 1,
+      "durationS": 15,
+      "failedAsset": {
+        "id": "platform-001/segment-feeder",
+        "type": "switchboard",
+        "name": "segment feeder",
+        "parentId": "platform-001",
+        "catalogId": "equipment-v2",
+        "revision": "2.0.0",
+        "dimensionsM": [
+          2,
+          2,
+          4
+        ],
+        "positionM": [
+          27,
+          5.129289433596213,
+          0
+        ],
+        "operationalMassKg": 1800,
+        "ratings": {
+          "capacityW": 8800000
+        },
+        "failureDomain": "platform-001/segment-feeder",
+        "provenance": [
+          "equipment-v2"
+        ],
+        "ports": [
+          {
+            "id": "power-in",
+            "medium": "power",
+            "direction": "in",
+            "capacity": 8800000,
+            "unit": "W"
+          },
+          {
+            "id": "power-out",
+            "medium": "power",
+            "direction": "out",
+            "capacity": 8800000,
+            "unit": "W"
+          }
+        ]
+      },
+      "affectedModules": [
+        "platform-001/module-01",
+        "platform-001/module-02",
+        "platform-001/module-03",
+        "platform-001/module-04"
+      ],
+      "powerDomains": [
+        {
+          "id": "platform-001/module-01",
+          "powerDomainId": "platform-001/segment-feeder"
+        },
+        {
+          "id": "platform-001/module-02",
+          "powerDomainId": "platform-001/segment-feeder"
+        },
+        {
+          "id": "platform-001/module-03",
+          "powerDomainId": "platform-001/segment-feeder"
+        },
+        {
+          "id": "platform-001/module-04",
+          "powerDomainId": "platform-001/segment-feeder"
+        },
+        {
+          "id": "platform-002/module-01",
+          "powerDomainId": "platform-002/segment-feeder"
+        }
+      ],
+      "openTies": [
+        {
+          "id": "platform-001/segment-feeder>platform-002/segment-feeder:power",
+          "from": "platform-001/segment-feeder",
+          "to": "platform-002/segment-feeder",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 2200000,
+          "enabled": false,
+          "routeM": [
+            [
+              27,
+              5.129289433596213,
+              0
+            ],
+            [
+              97,
+              5.129289433596213,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ]
+          ],
+          "allowanceM": 10
+        }
+      ],
+      "powerConnections": [
+        {
+          "id": "shore/grid>platform-001/transformer:power",
+          "from": "shore/grid",
+          "to": "platform-001/transformer",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              -65,
+              3,
+              0
+            ],
+            [
+              -27,
+              3,
+              0
+            ],
+            [
+              -27,
+              5.129289433596213,
+              0
+            ],
+            [
+              -27,
+              5.129289433596213,
+              0
+            ]
+          ],
+          "allowanceM": 8
+        },
+        {
+          "id": "platform-001/transformer>platform-001/segment-feeder:power",
+          "from": "platform-001/transformer",
+          "to": "platform-001/segment-feeder",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              -27,
+              5.129289433596213,
+              0
+            ],
+            [
+              27,
+              5.129289433596213,
+              0
+            ],
+            [
+              27,
+              5.129289433596213,
+              0
+            ],
+            [
+              27,
+              5.129289433596213,
+              0
+            ]
+          ],
+          "allowanceM": 4
+        },
+        {
+          "id": "shore/grid>platform-002/transformer:power",
+          "from": "shore/grid",
+          "to": "platform-002/transformer",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              -65,
+              3,
+              0
+            ],
+            [
+              43,
+              3,
+              0
+            ],
+            [
+              43,
+              5.520904157341764,
+              0
+            ],
+            [
+              43,
+              5.520904157341764,
+              0
+            ]
+          ],
+          "allowanceM": 8
+        },
+        {
+          "id": "platform-002/transformer>platform-002/segment-feeder:power",
+          "from": "platform-002/transformer",
+          "to": "platform-002/segment-feeder",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 8800000,
+          "enabled": true,
+          "routeM": [
+            [
+              43,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ]
+          ],
+          "allowanceM": 4
+        },
+        {
+          "id": "platform-001/segment-feeder>platform-002/segment-feeder:power",
+          "from": "platform-001/segment-feeder",
+          "to": "platform-002/segment-feeder",
+          "fromPort": "power-out",
+          "toPort": "power-in",
+          "medium": "power",
+          "capacity": 2200000,
+          "enabled": false,
+          "routeM": [
+            [
+              27,
+              5.129289433596213,
+              0
+            ],
+            [
+              97,
+              5.129289433596213,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ],
+            [
+              97,
+              5.520904157341764,
+              0
+            ]
+          ],
+          "allowanceM": 10
+        }
+      ],
+      "trace": [
+        {
+          "timeS": 0,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.15,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": null,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 1,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.1379694964934,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0871398586518202,
+          "electricalResidualW": 0,
+          "thermalResidualW": 1.8189894035458565e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 2,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.12601343922034,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.08713985865182,
+          "electricalResidualW": 0,
+          "thermalResidualW": 3.8562575355172157e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 3,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.11413136749843,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0871398586518197,
+          "electricalResidualW": 0,
+          "thermalResidualW": 1.382431946694851e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 4,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.10232282349597,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0871398586518195,
+          "electricalResidualW": 0,
+          "thermalResidualW": 5.748006515204906e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 5,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0871398586518195,
+          "electricalResidualW": 0,
+          "thermalResidualW": 0,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 6,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0885354468297022,
+          "electricalResidualW": 0,
+          "thermalResidualW": 0,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 7,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0899301646688395,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 8,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0913240129831396,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 9,
+          "itW": 10319.999999999998,
+          "facilityW": 57393.6021476592,
+          "gridW": 57393.6021476592,
+          "pumpPowerW": 26238.358201564835,
+          "availableAccelerators": 8,
+          "energizedAccelerators": 8,
+          "curtailedAccelerators": 5120,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 5.5613955569437215,
+          "energyPUE": 1.0927169925854956,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.3283064365386963e-10,
+          "warnings": [
+            "160 whole compute nodes curtailed or isolated",
+            "UPS cannot support the minimum critical load at its remaining power/energy limit",
+            "UPS reserve reached; no guaranteed ride-through"
+          ]
+        },
+        {
+          "timeS": 10,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.0905873522144,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0941091042877877,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.1100277081131935e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 11,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.07892450147074,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0929490714514714,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.473825588822365e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 12,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.06733382188014,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0921201076481373,
+          "electricalResidualW": 0,
+          "thermalResidualW": 1.7462298274040222e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 13,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.0558148668387,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0914981829244592,
+          "electricalResidualW": 0,
+          "thermalResidualW": 4.4019543565809727e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 14,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.0443671925061,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.0910143440157725,
+          "electricalResidualW": 0,
+          "thermalResidualW": 2.4010660126805305e-10,
+          "warnings": []
+        },
+        {
+          "timeS": 15,
+          "itW": 6615119.999999999,
+          "facilityW": 7191560.6217648275,
+          "gridW": 7191560.6217648275,
+          "pumpPowerW": 131177.5270496467,
+          "availableAccelerators": 5128,
+          "energizedAccelerators": 5128,
+          "curtailedAccelerators": 0,
+          "maxCoolantK": 303.03299035778855,
+          "batteryWh": 0,
+          "instantaneousPUE": 1.0871398586518202,
+          "energyPUE": 1.090627197465766,
+          "electricalResidualW": 0,
+          "thermalResidualW": 3.310560714453459e-10,
+          "warnings": []
+        }
+      ],
+      "terminalSummary": {
+        "timeS": 15,
+        "itW": 6615119.999999999,
+        "facilityW": 7191560.6217648275,
+        "gridW": 7191560.6217648275,
+        "pumpPowerW": 131177.5270496467,
+        "availableAccelerators": 5128,
+        "energizedAccelerators": 5128,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 303.03299035778855,
+        "batteryWh": 0,
+        "instantaneousPUE": 1.0871398586518202,
+        "energyPUE": 1.090627197465766,
+        "electricalResidualW": 0,
+        "thermalResidualW": 3.310560714453459e-10,
+        "warnings": []
+      }
+    }
+  ],
+  "limit": "Same declared 5128 accelerators, workload and disturbance timing; Gen II switchboards versus Gen III segment feeders, different second-platform geometry/routing and a 2.2 MW normally-open tie. Both share shore/grid. This case does not imply all outputs are identical or that III can never differ. Manually enabling all ties was only a test-local unsupported-topology characterization.",
+  "evidenceCheck": "PASS",
+  "elapsedMs": 99.731041
+}

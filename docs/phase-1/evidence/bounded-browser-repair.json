@@ -1,0 +1,863 @@
+{
+  "scope": "Bounded browser repair; not Phase1 acceptance or merge authorization",
+  "baselineImplementation": "bdff4a80cc12dfa70ecbe99b1c787a523503efa2",
+  "handoffOnly": "31b3787e11b61e4909cdad245e3be7a2bd5b1539",
+  "previousComparison": "7dcecd3dec202621d1ed0442aee64f36335bfde1",
+  "experimentsUsed": 2,
+  "experiment1": {
+    "outcome": "INCOMPLETE before any app page",
+    "error": "Browser.getBrowserCommandLine: Command line not returned because --enable-automation not set.",
+    "logSha256": "50213e57c059ab5d34248d00cecb260ba798aa98883e8b057381c7f3bd1badc2"
+  },
+  "experiment2": {
+    "hypothesis": "Chromium blocks WebGL on the selected Mesa software adapter; ignoring only its GPU blocklist restores real rendering. Width and comparison selector observations are separate.",
+    "host": {
+      "platform": "linux",
+      "arch": "arm64",
+      "release": "6.10.14-linuxkit",
+      "node": "v24.20.0"
+    },
+    "image": "mcr.microsoft.com/playwright:v1.63.0-noble",
+    "imageDigest": "sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27",
+    "containerLimits": {
+      "logicalCpus": 4,
+      "memoryGiB": 6,
+      "sharedMemoryGiB": 1
+    },
+    "mesa": "25.2.8-0ubuntu0.24.04.2",
+    "variants": [
+      {
+        "name": "bdff",
+        "executable": "/ms-playwright/chromium-1243/chrome-linux-arm64/chrome",
+        "args": [
+          "--use-gl=angle",
+          "--use-angle=gl"
+        ],
+        "headless": false,
+        "browserVersion": "153.0.8010.12",
+        "featureStatus": {
+          "2d_canvas": "unavailable_software",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "disabled_software",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "unavailable_off",
+          "rasterization": "unavailable_off",
+          "raw_draw": "disabled_off_ok",
+          "skia_graphite": "unavailable_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "unavailable_off",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "unavailable_off",
+          "webgpu": "unavailable_software",
+          "webgpu_on_vk_via_gl_interop": "disabled_off",
+          "webnn": "disabled_off"
+        },
+        "pages": [
+          {
+            "scene": "legacy",
+            "ready": false,
+            "readyElapsedMs": 12882.904423,
+            "native": {
+              "available": false,
+              "errors": [
+                "Could not create a WebGL context, VENDOR = 0xffff, DEVICE = 0xffff, GL_VENDOR = Google Inc. (Mesa), GL_RENDERER = ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2), GL_VERSION = 25.2.8, Sandboxed = no, Optimus = no, AMD switchable = no, Reset notification strategy = 0x8261, ErrorMessage = BindToCurrentSequence failed: ."
+              ]
+            },
+            "snapshot": {
+              "innerWidth": 1600,
+              "clientWidth": 1600,
+              "scrollWidth": 1600,
+              "viewportHeight": 1050,
+              "dpr": 1,
+              "ready": "false",
+              "fallback": {
+                "legacy": true,
+                "twin": false
+              },
+              "canvas": null
+            },
+            "errors": [],
+            "console": []
+          },
+          {
+            "scene": "twin",
+            "ready": false,
+            "readyElapsedMs": 12993.615298,
+            "native": {
+              "available": false,
+              "errors": [
+                "Could not create a WebGL context, VENDOR = 0xffff, DEVICE = 0xffff, GL_VENDOR = Google Inc. (Mesa), GL_RENDERER = ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2), GL_VERSION = 25.2.8, Sandboxed = no, Optimus = no, AMD switchable = no, Reset notification strategy = 0x8261, ErrorMessage = BindToCurrentSequence failed: ."
+              ]
+            },
+            "snapshot": {
+              "innerWidth": 1600,
+              "clientWidth": 1585,
+              "scrollWidth": 1585,
+              "viewportHeight": 1050,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": true
+              },
+              "canvas": null
+            },
+            "errors": [],
+            "console": []
+          },
+          {
+            "scene": "mobile-fallback",
+            "ready": true,
+            "readyElapsedMs": 549.9570419999982,
+            "native": {
+              "available": false,
+              "errors": [
+                "Could not create a WebGL context, VENDOR = 0xffff, DEVICE = 0xffff, GL_VENDOR = Google Inc. (Mesa), GL_RENDERER = ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2), GL_VERSION = 25.2.8, Sandboxed = no, Optimus = no, AMD switchable = no, Reset notification strategy = 0x8261, ErrorMessage = BindToCurrentSequence failed: ."
+              ]
+            },
+            "snapshot": {
+              "innerWidth": 390,
+              "clientWidth": 375,
+              "scrollWidth": 375,
+              "viewportHeight": 844,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": false
+              },
+              "canvas": null
+            },
+            "errors": [],
+            "console": []
+          },
+          {
+            "scene": "comparison-fallback",
+            "ready": true,
+            "readyElapsedMs": 588.4293749999997,
+            "native": {
+              "available": false,
+              "errors": [
+                "Could not create a WebGL context, VENDOR = 0xffff, DEVICE = 0xffff, GL_VENDOR = Google Inc. (Mesa), GL_RENDERER = ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2), GL_VERSION = 25.2.8, Sandboxed = no, Optimus = no, AMD switchable = no, Reset notification strategy = 0x8261, ErrorMessage = BindToCurrentSequence failed: ."
+              ]
+            },
+            "snapshot": {
+              "innerWidth": 1600,
+              "clientWidth": 1585,
+              "scrollWidth": 1585,
+              "viewportHeight": 1050,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": false
+              },
+              "canvas": null
+            },
+            "cards": [
+              {
+                "heading": "No standby pump",
+                "firstDescendantParagraph": "One coordinate unit = one meter. Select equipment in the plan or asset tree.",
+                "directParagraphs": [
+                  "37.6 \u00b0C \u00b7 59.69 L/s",
+                  "1,280 available / 1,280",
+                  "2.07 MW \u00b7 1 controller actions",
+                  "2.07 MW grid import \u00b7 400 kWh stored"
+                ],
+                "oldParsedValue": "NaN",
+                "oldParsedFinite": false
+              },
+              {
+                "heading": "One standby pump",
+                "firstDescendantParagraph": "One coordinate unit = one meter. Select equipment in the plan or asset tree.",
+                "directParagraphs": [
+                  "29.92 \u00b0C \u00b7 59.69 L/s",
+                  "1,280 available / 1,280",
+                  "2.07 MW \u00b7 4 controller actions",
+                  "2.07 MW grid import \u00b7 400 kWh stored"
+                ],
+                "oldParsedValue": "NaN",
+                "oldParsedFinite": false
+              }
+            ],
+            "errors": [],
+            "console": []
+          }
+        ]
+      },
+      {
+        "name": "allow-mesa",
+        "executable": "/ms-playwright/chromium-1243/chrome-linux-arm64/chrome",
+        "args": [
+          "--use-gl=angle",
+          "--use-angle=gl",
+          "--ignore-gpu-blocklist"
+        ],
+        "headless": false,
+        "browserVersion": "153.0.8010.12",
+        "featureStatus": {
+          "2d_canvas": "enabled",
+          "direct_rendering_display_compositor": "disabled_off_ok",
+          "gpu_compositing": "enabled",
+          "multiple_raster_threads": "enabled_on",
+          "opengl": "enabled_on",
+          "rasterization": "enabled",
+          "raw_draw": "disabled_off_ok",
+          "skia_graphite": "disabled_off",
+          "trees_in_viz": "disabled_off",
+          "video_decode": "enabled",
+          "video_encode": "disabled_software",
+          "vulkan": "disabled_off",
+          "webgl": "enabled",
+          "webgpu": "enabled",
+          "webgpu_on_vk_via_gl_interop": "enabled",
+          "webnn": "disabled_off"
+        },
+        "pages": [
+          {
+            "scene": "legacy",
+            "ready": true,
+            "readyElapsedMs": 4287.950335000001,
+            "native": {
+              "available": true,
+              "renderer": "ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5)",
+              "errors": [],
+              "pixel": [
+                255,
+                0,
+                0,
+                255
+              ],
+              "glError": 0
+            },
+            "snapshot": {
+              "innerWidth": 1600,
+              "clientWidth": 1600,
+              "scrollWidth": 1600,
+              "viewportHeight": 1050,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": false
+              },
+              "canvas": {
+                "width": 1060,
+                "height": 729
+              },
+              "renderer": "ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5)",
+              "legacyScene": {
+                "camera": [
+                  76.622423221137,
+                  44.205244166040565,
+                  89.88399647094917
+                ],
+                "target": [
+                  0,
+                  0,
+                  0
+                ],
+                "calls": 27,
+                "geometries": 12,
+                "textures": 3,
+                "objects": 7
+              }
+            },
+            "errors": [],
+            "console": [
+              {
+                "type": "warning",
+                "text": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."
+              },
+              {
+                "type": "warning",
+                "text": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."
+              },
+              {
+                "type": "warning",
+                "text": "THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead."
+              }
+            ]
+          },
+          {
+            "scene": "twin",
+            "ready": true,
+            "readyElapsedMs": 3742.2215859999997,
+            "native": {
+              "available": true,
+              "renderer": "ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5)",
+              "errors": [],
+              "pixel": [
+                255,
+                0,
+                0,
+                255
+              ],
+              "glError": 0
+            },
+            "snapshot": {
+              "innerWidth": 1600,
+              "clientWidth": 1585,
+              "scrollWidth": 1585,
+              "viewportHeight": 1050,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": false
+              },
+              "canvas": {
+                "width": 1031,
+                "height": 640
+              },
+              "renderer": "ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5)",
+              "twinScene": {
+                "camera": [
+                  125.08086644787558,
+                  45.85935019164577,
+                  131.0267148332736
+                ],
+                "target": [
+                  35,
+                  0,
+                  0
+                ],
+                "drawCalls": 57,
+                "geometries": 57,
+                "textures": 1,
+                "selectedId": "platform-001/module-01/pump-duty",
+                "renderedModules": 8,
+                "totalModules": 8,
+                "renderedPlatforms": 2,
+                "detailModuleId": "platform-001/module-01",
+                "renderedRacks": 40,
+                "renderedNodes": 160,
+                "worldUnitsPerMeter": 1,
+                "inside": false,
+                "focus": "campus",
+                "exploded": false,
+                "simulationTimeS": 0
+              }
+            },
+            "errors": [],
+            "console": [
+              {
+                "type": "warning",
+                "text": "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."
+              }
+            ]
+          },
+          {
+            "scene": "mobile-fallback",
+            "ready": true,
+            "readyElapsedMs": 650.055124999999,
+            "native": {
+              "available": true,
+              "renderer": "ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5)",
+              "errors": [],
+              "pixel": [
+                255,
+                0,
+                0,
+                255
+              ],
+              "glError": 0
+            },
+            "snapshot": {
+              "innerWidth": 390,
+              "clientWidth": 375,
+              "scrollWidth": 375,
+              "viewportHeight": 844,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": false
+              },
+              "canvas": null
+            },
+            "errors": [],
+            "console": []
+          },
+          {
+            "scene": "comparison-fallback",
+            "ready": true,
+            "readyElapsedMs": 741.7326249999969,
+            "native": {
+              "available": true,
+              "renderer": "ANGLE (Mesa, llvmpipe (LLVM 20.1.2 128 bits), OpenGL 4.5)",
+              "errors": [],
+              "pixel": [
+                255,
+                0,
+                0,
+                255
+              ],
+              "glError": 0
+            },
+            "snapshot": {
+              "innerWidth": 1600,
+              "clientWidth": 1585,
+              "scrollWidth": 1585,
+              "viewportHeight": 1050,
+              "dpr": 1,
+              "ready": "true",
+              "fallback": {
+                "legacy": false,
+                "twin": false
+              },
+              "canvas": null
+            },
+            "cards": [
+              {
+                "heading": "No standby pump",
+                "firstDescendantParagraph": "One coordinate unit = one meter. Select equipment in the plan or asset tree.",
+                "directParagraphs": [
+                  "37.6 \u00b0C \u00b7 59.69 L/s",
+                  "1,280 available / 1,280",
+                  "2.07 MW \u00b7 1 controller actions",
+                  "2.07 MW grid import \u00b7 400 kWh stored"
+                ],
+                "oldParsedValue": "NaN",
+                "oldParsedFinite": false
+              },
+              {
+                "heading": "One standby pump",
+                "firstDescendantParagraph": "One coordinate unit = one meter. Select equipment in the plan or asset tree.",
+                "directParagraphs": [
+                  "29.92 \u00b0C \u00b7 59.69 L/s",
+                  "1,280 available / 1,280",
+                  "2.07 MW \u00b7 4 controller actions",
+                  "2.07 MW grid import \u00b7 400 kWh stored"
+                ],
+                "oldParsedValue": "NaN",
+                "oldParsedFinite": false
+              }
+            ],
+            "errors": [],
+            "console": []
+          }
+        ]
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-comparison-fallback-trace.zip",
+      "bytes": 719790,
+      "sha256": "76a10ec5249e7b119368df9fbc10cbdf91c3dc2b6cb1ea7a16122fc30d704f92",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-comparison-fallback.png",
+      "bytes": 705214,
+      "sha256": "4571e967ec5b10bedc50ef69edfa0336f52ec523b430168e8c4fb20c21fb63c9",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-legacy-trace.zip",
+      "bytes": 632469,
+      "sha256": "1db0e332dfc7a9a2bfbac72fb734dfa7cbdbb470f63e273b353ea3a16443b146",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-legacy.png",
+      "bytes": 848374,
+      "sha256": "c24f251292e04ed078fe8162f5ea1537f6bc28337b497ee4a7117c0824ae4886",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-mobile-fallback-trace.zip",
+      "bytes": 328255,
+      "sha256": "6b7d15ea688a5cd2b838e9974a04f641468d49974b682a2193b1dd132bfefca6",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-mobile-fallback.png",
+      "bytes": 400977,
+      "sha256": "b3cef48728a2c64ec093ef6c7a475f9c27f2fb7ecc49350c7307de8f457d1377",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-twin-trace.zip",
+      "bytes": 671680,
+      "sha256": "bfe7b1a8ea28e8c606feead7a0ebe0274e8ea76b3b4439f175fda787f550f5be",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/allow-mesa-twin.png",
+      "bytes": 704171,
+      "sha256": "64af28d53fa40eadd19f022754eb1b0d70e4e392adf24c3434985f831bd0edcf",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-comparison-fallback-trace.zip",
+      "bytes": 887804,
+      "sha256": "62a7f592b66e555f9c70f44fc60b35a038e1dd157ddc83752483d22ae6e7b393",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-comparison-fallback.png",
+      "bytes": 802422,
+      "sha256": "be5af5eaf0f8420c162e8d41d356734e77361b45004c677c2f0ca71e298da667",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-legacy-trace.zip",
+      "bytes": 328180,
+      "sha256": "c6eaf76d32501d617fcfe3d6ee3b96d5dd98668c19906ad7e99a4569caca49d0",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-legacy.png",
+      "bytes": 714847,
+      "sha256": "0cf6d13d6d644ecb0e23ecf3bc440478b70212cc9cd9083d40d862f026570d5d",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-mobile-fallback-trace.zip",
+      "bytes": 356596,
+      "sha256": "f3eddd5ac760286c49f55b8b0fe1115edd6e9c3491613cea3f61f927a1334bcb",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-mobile-fallback.png",
+      "bytes": 448748,
+      "sha256": "3376b02065901adc6521c0a5ee3d1c39040672aec6521d05e510b3c299a03be2",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-twin-trace.zip",
+      "bytes": 441874,
+      "sha256": "efaa0c330acba57104312261ac7d218594af8669e830d609ed724003b44aa7bb",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/bdff-twin.png",
+      "bytes": 660259,
+      "sha256": "6162862d0586fbdb09eec7465c7d2fe22de45b8cc349f4dc11eae81144cd8d14",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/experiment-2/observations.json",
+      "bytes": 34773,
+      "sha256": "76246e85a856f9fd283edf36482a1cd3acbf082c03316cc47d9544e7fe46093d",
+      "retention": "local only; recordings/screenshots excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/existing-results-summary.json",
+      "bytes": 12023,
+      "sha256": "cf6ad034dabb8134888221ebadf4c56d2cb6758a36776ca2c7d78174f12d484c",
+      "retention": "local only"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/reproduce.mjs",
+      "bytes": 6666,
+      "sha256": "20f827d49a253f891ad108813da9dd7cdd09ee252d150e3adda7ffae71b1d8f4",
+      "retention": "local only"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/reproduce-2.mjs",
+      "bytes": 6930,
+      "sha256": "b46998458c52d71d91a44f024b5105557da534b491a4ce876da6e4cc5e311148",
+      "retention": "local only"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/review.json",
+      "bytes": 5289,
+      "sha256": "cc90ecd8d28a3d7f7f23b01520a5bab744b4e62cf802ef52a4e21edf469c078f",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/npm-ci.log",
+      "bytes": 354,
+      "sha256": "7f0a9a4ead37878b3cef9d494f69cf03019addb2ab5d248c5ce4bf93477ba413",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/affected-chromium.log",
+      "bytes": 4503,
+      "sha256": "8a06a3429da5f7362c8e6a3de261666b9a9d913a0a099f9ab9214e060ff1af82",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/affected-chromium-results.json",
+      "bytes": 21158,
+      "sha256": "489cae987bd48743e0362cc98fda295b015ab348e69f0a87922e8a80246b3048",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/affected-chromium/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-chromium/test-failed-1.png",
+      "bytes": 186876,
+      "sha256": "c92e0a2161550769c680792eeb7f29847d9f3e088bc44e90b11e637e4caf2420",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/affected-chromium/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-chromium/trace.zip",
+      "bytes": 816204,
+      "sha256": "ad27d1a0e9bcc947a655a281793837a5666273042d6a7c9a03e7f81211dfee4b",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    },
+    {
+      "path": "artifacts/phase-1/bounded-repair-bdff/linux/affected-chromium/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-chromium/error-context.md",
+      "bytes": 4280,
+      "sha256": "5b8f58c6300534571f8993461cbb326bd35c1180565ed940969c36a7f0f852c1",
+      "retention": "local only; raw report, trace and screenshot excluded from Git"
+    }
+  ],
+  "validation": {
+    "status": "LOCAL_WIP_BLOCKED_PARTIALLY_VERIFIED",
+    "testedSource": "bdff source archive plus the current playwright.config.ts and three tests/browser repair files; no clean committed-repository verification",
+    "repairSourceSha256": {
+      "playwright.config.ts": "ea2028b3d5eb5fb341416ca48cd96de9439200258a9167a5798436b650d6efe9",
+      "scripts/phase-1/diagnose-firefox.mjs": "2fca5b0ca3cddd97a0229682f1e3a8f5947dd3b1588aecb1ce742c33168f1c77",
+      "tests/browser/layout.ts": "0acdf63474e2321adda2c9277a018fe4d478476671de156a9abc025d4792a7c3",
+      "tests/browser/acceptance.spec.ts": "76663ef3695ecdfeb6eef430670d436d1dea39397d6eba54198938fc1b7703e5",
+      "tests/browser/twin.spec.ts": "25e0044831ec6d5cd4897b4170ac05decf1dbb3e4eb5f80f211fd43869d65120"
+    },
+    "localChecks": {
+      "typecheck": "PASS",
+      "lint": "PASS",
+      "diagnosticScriptSyntax": "PASS",
+      "diffCheckBeforeRegression": "PASS",
+      "evidence": "observed terminal results; no separate logs retained"
+    },
+    "affectedChromium": {
+      "reportPath": "artifacts/phase-1/bounded-repair-bdff/linux/affected-chromium-results.json",
+      "stats": {
+        "startTime": "2026-09-10T01:01:37.457Z",
+        "duration": 179337.01599999997,
+        "expected": 10,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "rendered modes, connected exploded paths, interior and bounded resources",
+          "file": "acceptance.spec.ts",
+          "line": 29,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 27224,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "presets, engineering controls, validation and fresh-context sharing",
+          "file": "acceptance.spec.ts",
+          "line": 138,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 21228,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "mobile controls, contextual inspection and explicit WebGL fallback",
+          "file": "acceptance.spec.ts",
+          "line": 216,
+          "project": "chromium",
+          "classification": "unexpected",
+          "results": [
+            {
+              "status": "failed",
+              "retry": 0,
+              "durationMs": 3590,
+              "errors": [
+                "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 375\nReceived: 390\n\n   at layout.ts:13\n\n  11 |   expect(dimensions.clientWidth).toBeLessThanOrEqual(viewportWidth);\n  12 |   // A classic vertical scrollbar consumes layout width without horizontal overflow.\n> 13 |   expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);\n     |                                  ^\n  14 | }\n  15 |\n    at expectNoHorizontalOverflow (/work/tests/browser/layout.ts:13:34)\n    at /work/tests/browser/acceptance.spec.ts:221:3"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "demo runs through real state, cancels, restores and restarts; keyboard dialog access",
+          "file": "acceptance.spec.ts",
+          "line": 278,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 44374,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "comparison renders two computed 240-second runs and exports identical disturbance histories",
+          "file": "twin.spec.ts",
+          "line": 205,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 7176,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "comparison renders two computed 240-second runs and exports identical disturbance histories with explicit fallback",
+          "file": "twin.spec.ts",
+          "line": 205,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 3646,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "mobile keyboard and explicit fallback retain asset inspection, operation and exports",
+          "file": "twin.spec.ts",
+          "line": 256,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 1990,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "context cameras, keyboard interior, distinct families and bounded large-scene diagnostics",
+          "file": "twin.spec.ts",
+          "line": 269,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 38461,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "legacy saved scenario links retain the explicit aggregate model",
+          "file": "twin.spec.ts",
+          "line": 311,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 4901,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "touch waypoints and keyboard exit preserve exact selected asset and physical state",
+          "file": "twin.spec.ts",
+          "line": 177,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 5093,
+              "errors": []
+            }
+          ]
+        },
+        {
+          "title": "capture the first coherent 3D slice",
+          "file": "visual.spec.ts",
+          "line": 3,
+          "project": "chromium",
+          "classification": "expected",
+          "results": [
+            {
+              "status": "passed",
+              "retry": 0,
+              "durationMs": 19303,
+              "errors": []
+            }
+          ]
+        }
+      ],
+      "workers": 1,
+      "retries": 0,
+      "unchangedTestDeadlineMs": 60000,
+      "unchangedExpectDeadlineMs": 12000
+    },
+    "unresolvedBlocker": {
+      "test": "mobile controls, contextual inspection and explicit WebGL fallback",
+      "assertion": "tests/browser/layout.ts:13 via tests/browser/acceptance.spec.ts:221",
+      "innerWidth": 390,
+      "clientWidth": 375,
+      "scrollWidth": 390,
+      "demonstrated": "15px root layout mismatch at the assertion in the rendered legacy mobile view",
+      "unknown": [
+        "element-level cause",
+        "persistence of the mismatch"
+      ],
+      "unexecuted": "later controls and explicit-fallback assertions in this journey",
+      "traceInspected": false,
+      "screenshotInspected": false
+    },
+    "fullCleanVerification": {
+      "used": 0,
+      "maximum": 1,
+      "status": "NOT_RUN_AFTER_AFFECTED_FAILURE"
+    },
+    "currentCandidateIncomplete": [
+      "full unit tests with both telemetry flags",
+      "full 84-case browser suite",
+      "build",
+      "measurements",
+      "clean committed source-integrity and protected-file verification",
+      "hosted validation"
+    ],
+    "featurePush": {
+      "used": 0,
+      "maximum": 1,
+      "publishedHead": "bdff4a80cc12dfa70ecbe99b1c787a523503efa2",
+      "newRunIds": []
+    },
+    "lastHistoricalFullLocalPass": "61bf694662560d12ba398bfe598540926d11a9cb",
+    "mergePerformed": false,
+    "deploymentPerformed": false,
+    "focusedReview": {
+      "path": "artifacts/phase-1/bounded-repair-bdff/review.json",
+      "status": "REVIEWED_NO_ACTIONABLE_FINDINGS",
+      "sourceHashesMatch": true,
+      "limitations": "Static review before regression completion; does not establish acceptance"
+    },
+    "cleanup": {
+      "taskContainer": "neptune-phase1-bounded-bdff",
+      "containerId": "c22447bcdab54beabb4ca3f8eca030c3dcf42e823e5ba77ac459a195e33272f6",
+      "status": "STOPPED",
+      "filesystemPreserved": true,
+      "unrelatedContainer": "one-web-1",
+      "unrelatedContainerId": "e0989652a9b5",
+      "unrelatedContainerAndDockerDesktop": "left running and otherwise untouched"
+    }
+  }
+}

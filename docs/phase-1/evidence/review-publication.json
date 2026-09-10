@@ -1,0 +1,2237 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09T18:49:38.631Z",
+  "scannedAt": "2026-09-09T18:48:29.622Z",
+  "headAtReview": "76cdbcc7c62762c3464b289f97e75bfb6baa6850",
+  "role": "Bounded publication review of local documentation and evidence; read-only except this report and ignored review artifacts.",
+  "status": "PASS",
+  "scope": {
+    "selection": "All 72 original Phase 0 prerequisite additions between 23de38a and f676c1f, plus every tracked or non-ignored untracked file under docs/phase-1 present at the final scan. Includes finalized ACCEPTANCE.md, local-acceptance.json, complete committed-final gate evidence, full raw logs, all historical diagnostic outputs, public response copies and preserved failed attempts.",
+    "baselineCommit": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+    "phase0Checkpoint": "f676c1f9902008a7096e5e8122a5701953b7c772",
+    "phase0Files": 72,
+    "phase1Files": 146,
+    "totalFiles": 218,
+    "totalBytes": 3952321,
+    "extensionCounts": {
+      ".md": 14,
+      ".json": 108,
+      ".log": 87,
+      ".csv": 3,
+      ".txt": 1,
+      ".mjs": 5
+    },
+    "excluded": [
+      "Ignored artifacts/, test-results/ and dist/; browser recordings/traces remain outside the intended publication set.",
+      "This review report is excluded from its own hash inventory."
+    ],
+    "nontextFilesDetected": 0,
+    "nonregularFilesDetected": 0
+  },
+  "assessment": {
+    "credentialMaterialDetected": false,
+    "privateObservationPayloadsDetected": false,
+    "recordingFilesDetected": false,
+    "highRiskPatternHits": [],
+    "remainingUnclassifiedHits": [],
+    "note": "Pattern absence alone is not proof of all possible secret absence. Broad hits were classified using the original generated fixtures, existing test source, metadata shapes, immutable capture helper and text log structure."
+  },
+  "method": {
+    "command": "node artifacts/phase-1-review/publication-scan.mjs",
+    "exitCode": 0,
+    "scannerSha256": "831d91ba7fdc85acbfa411115760dca7d41db63eb190fbe102135d1e6979b27d",
+    "operations": [
+      "Enumerate the exact Git-based candidate paths and original prerequisite diff.",
+      "Read every candidate byte; hash SHA-256, verify regular UTF-8 text/no NUL, inspect filename/extension, and parse every JSON file.",
+      "Scan key/token/header/query/URL patterns and observation/media payload markers without printing match values.",
+      "Classify broad positives by repository fixture/capture provenance; outputs contain filenames and categories only.",
+      "Compare all 73 protected-file hashes and verify no Phase 0, package/package-lock or public working-tree differences against the original checkpoint.",
+      "Verify artifacts, test-results and dist remain ignored. Recheck file hashes after scan."
+    ],
+    "patternCategories": [
+      "private-key-material",
+      "github-token-shape",
+      "api-token-shape",
+      "cloud-access-key-shape",
+      "bearer-credential",
+      "jwt-shape",
+      "credential-assignment",
+      "credential-url-query",
+      "url-userinfo",
+      "observation-payload-key",
+      "measured-source-label",
+      "embedded-recording",
+      "binary-recording-file-reference",
+      "private-observation-terms"
+    ],
+    "classificationSources": [
+      {
+        "path": "scripts/phase-0/audit.mjs",
+        "sha256": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4"
+      },
+      {
+        "path": "scripts/phase-0/capture-hosted.mjs",
+        "sha256": "9923c31b6e480be7f9bd42346f0c0cf99842774397f9e0f29a4dcb3aff1a70fb"
+      },
+      {
+        "path": "tests/twin-telemetry.test.ts",
+        "sha256": "f09b956896fb9e02c3399faf4116bd903abb87942af62d9fcdb89668deba6ee6",
+        "userinfoFixtureMatchesPublicBaseline": true
+      }
+    ]
+  },
+  "preservation": {
+    "phase0PrerequisiteFiles": 72,
+    "phase0SourceStatuses": [
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A"
+    ],
+    "protectedFileCount": 73,
+    "protectedHashMismatches": [],
+    "immutableWorkingTreeChanges": [],
+    "lockSha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9"
+  },
+  "jsonParseFailures": [],
+  "sourceChangesDuringScan": [],
+  "changedBeforeReport": [],
+  "classifiedHits": [
+    {
+      "path": "docs/phase-0/ACCEPTANCE.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/BASELINE.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/baseline-manifest.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-hydraulic/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005-engineering-report.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-hydraulic/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/diagnostics/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-hydraulic/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/diagnostics/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/hosted-observation.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/protected-after.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/protected-before.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/published/production-build-manifest-probe.txt",
+      "decisions": [
+        {
+          "category": "embedded-recording",
+          "disposition": "public-error-page-ui-assets",
+          "basis": "Immutable captured public GitHub Pages File-not-found HTML contains 32x32 and 64x64 PNG UI assets. These are page resources, not screenshots or observation recordings. scripts/phase-0/capture-hosted.mjs records the unauthenticated public response."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/published/v2-preview--build-manifest.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-0/evidence/recovery-receipt.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/ACCEPTANCE.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/PLAN.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/REQUIREMENT-TEST-MATRIX.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/execution.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Completed source verification execution metadata contains telemetry enablement flags and telemetry source/test filenames with hashes. No private sensor payload or measured-source data is present."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/unit-full.log",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/unit-summary.json",
+      "decisions": [
+        {
+          "category": "url-userinfo",
+          "disposition": "synthetic-test-fixture",
+          "basis": "The entire URI matches the unchanged unsafe-URL fixture in tests/twin-telemetry.test.ts at public baseline 23de38a. It appears only in generated unit test case names; no credential values are reproduced in this review."
+        },
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/execution.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/unit-full.log",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/unit-summary.json",
+      "decisions": [
+        {
+          "category": "url-userinfo",
+          "disposition": "synthetic-test-fixture",
+          "basis": "The entire URI matches the unchanged unsafe-URL fixture in tests/twin-telemetry.test.ts at public baseline 23de38a. It appears only in generated unit test case names; no credential values are reproduced in this review."
+        },
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full/execution.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/browser.log",
+      "decisions": [
+        {
+          "category": "binary-recording-file-reference",
+          "disposition": "text-reference-only",
+          "basis": "Playwright failure logs refer to local trace ZIP attachments/show-trace usage. The archive bytes and recordings are absent from this publish inventory."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-hydraulic/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-hydraulic/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-005-engineering-report.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001-desired/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001-desired/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-hydraulic/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-hydraulic/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-001.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-005-engineering-report.md",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/audit.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated PH0-001 numerical fixtures. Every observations array has the three known pump parameter fields and explicitly constructed in-memory Infinity inputs; source is scripts/phase-0/audit.mjs."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/recovery.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/browser.log",
+      "decisions": [
+        {
+          "category": "binary-recording-file-reference",
+          "disposition": "text-reference-only",
+          "basis": "Playwright failure logs refer to local trace ZIP attachments/show-trace usage. The archive bytes and recordings are absent from this publish inventory."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/execution.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/unit-full.log",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/unit-summary.json",
+      "decisions": [
+        {
+          "category": "url-userinfo",
+          "disposition": "synthetic-test-fixture",
+          "basis": "The entire URI matches the unchanged unsafe-URL fixture in tests/twin-telemetry.test.ts at public baseline 23de38a. It appears only in generated unit test case names; no credential values are reproduced in this review."
+        },
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/remote-preflight.json",
+      "decisions": [
+        {
+          "category": "private-observation-terms",
+          "disposition": "documentation-or-test-metadata",
+          "basis": "Terms occur in test names, telemetry source filenames and checksum inventories, scope/provenance descriptions, or statements excluding raw observations. No measured/private stream label or raw sensor payload shape was detected."
+        }
+      ]
+    },
+    {
+      "path": "docs/phase-1/evidence/review-persistence.json",
+      "decisions": [
+        {
+          "category": "observation-payload-key",
+          "disposition": "not-private-observation-data",
+          "basis": "Generated independent persistence probes: numerical differences, state identities and validation diagnostics."
+        }
+      ]
+    }
+  ],
+  "inventory": [
+    {
+      "path": "docs/phase-0/ACCEPTANCE.md",
+      "bytes": 9420,
+      "sha256": "152f0d7fd04662ac7fcf583ac6172ebaddc0e8f75efc84c9c19b21b026801ee3",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/BASELINE.md",
+      "bytes": 12157,
+      "sha256": "a313a446adc2c8a9d29d337d2233290c7dbe6da17e0d10b7059cccfa14678b09",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/ISSUES.md",
+      "bytes": 13805,
+      "sha256": "ed318720f4f4fcca5860749f580d5b6858754285393a6fea9b09d07ee4809b47",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/REFERENCE-SCENARIOS.md",
+      "bytes": 6517,
+      "sha256": "d425e5341db27d1c9ceaa5fc207b818368736c256098fb2911498001c4de2de1",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/REQUIREMENT-TEST-MATRIX.md",
+      "bytes": 6839,
+      "sha256": "91d6554f4ede1106db2e631e1ffb7ccb92c67c2b01d67c3a7882ab1843778fb4",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/baseline-manifest.json",
+      "bytes": 7446,
+      "sha256": "9ee5f2c834b922faa422ef389e6dbc6d250be64ed60069da5065695a5662895b",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/build.log",
+      "bytes": 757,
+      "sha256": "4e8f7be535a7697b8f8d572ba50770bbd2fc123412678d3446c3af5f17fd4b57",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/execution.json",
+      "bytes": 2280,
+      "sha256": "9b6fd56e121441cf4e34ea842b458416661a200d22e9ad23f2af63125e0a6fd3",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/npm-ci.log",
+      "bytes": 455,
+      "sha256": "f1934b8baebc1c5c6eca45f8e9bb861e27e53fd01ae83a53e61715a6e29ee09c",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/baseline-first/unit.log",
+      "bytes": 231,
+      "sha256": "e75627d23f5b09efbb3195ea54775bfde83f23d41fc5bb4c05396233b714e29e",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/browser-summary.json",
+      "bytes": 184,
+      "sha256": "de5525bdf3d869b22ae1a8d018e13e8d116e4ad73de4992fc9ba51c247bdb16a",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/browser.log",
+      "bytes": 7717,
+      "sha256": "f7021e6eb55ef40765db87fe9f5ffcd0ca8b361b00e93a1ddc6a13c5c2b58b97",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/build.log",
+      "bytes": 757,
+      "sha256": "99185066124b10fd98eca8993dd11ab0ecd00050c0e431757eb1e78f0c04e61a",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-hydraulic.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-hydraulic/audit.json",
+      "bytes": 4455,
+      "sha256": "b53dd9b7789e8192ba7d5928bf33287bbbe46a753eb25741fa47a0e195c8080b",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-persistence.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/desired-persistence/audit.json",
+      "bytes": 7580,
+      "sha256": "f33c53005816e9fe9ecfd19ba48068a40c996caeb3a3e58fd5d5c397233e1f2e",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-001.json",
+      "bytes": 2553,
+      "sha256": "57962e64d78540f044d454e8c4d01fdbfb317044c25885226c51793fa432d00d",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-002.json",
+      "bytes": 5153,
+      "sha256": "714b8a747d1193a2602107e0a5318176cb5b8f659f8b060fda73bc39099109ac",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-003.json",
+      "bytes": 117648,
+      "sha256": "81e50e5e7cd475a76d5204a3b95674a5a0f952e85a93cb8b62b35ed9c0dbd021",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-004.json",
+      "bytes": 1060,
+      "sha256": "2db0dc8cacdd66f153b796e816d0e164af88669e62a2c31438c9fa335f303f88",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005-engineering-report.md",
+      "bytes": 9023,
+      "sha256": "4a41c9f0d2d73a9d644094fa76a03ec9e8a73bfcfd91b1c009ebdc8ad61fb9d0",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005-terminal-results.csv",
+      "bytes": 381,
+      "sha256": "409341eed2a12cb462da772b2d40e253553dd2e1220ccf61086617250d67c869",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-005.json",
+      "bytes": 25634,
+      "sha256": "e9952867d1d5db51059c0822e8b2af2ea88a81af02fafbff07fd13bec3964a1a",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/PH0-006.json",
+      "bytes": 36663,
+      "sha256": "39cce26376f76b08f9c07d68e705b3e657c69e3420479bcf41a15739796bfd52",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/diagnostics/audit.json",
+      "bytes": 206786,
+      "sha256": "fa7d42122925544ef55dabee3a6902a94d0d11eb8551cbc9ee90755b86dea4fd",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/execution.json",
+      "bytes": 4466,
+      "sha256": "8e4ee91da3fdae8fc2c7c11bb48970ba19b38771f11dd7cda06cd1d8d06fe15d",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/npm-ci.log",
+      "bytes": 455,
+      "sha256": "f1934b8baebc1c5c6eca45f8e9bb861e27e53fd01ae83a53e61715a6e29ee09c",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/phase-0.log",
+      "bytes": 1353,
+      "sha256": "3ef8b72bef1e2e6f1f1ee009193d8796d0fb32a3fc5b7301e8ef645377156a93",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/server.log",
+      "bytes": 33139,
+      "sha256": "6ce201ff9acc1eedec7b2a1c86bdd435e0cf3f6422b559891857b9b3aaa9c7fd",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/clean-final/unit-full.log",
+      "bytes": 217,
+      "sha256": "ffc70946aebf97aa587501ded4d1e24075cf0189c274155c2a7191b73026da5a",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-hydraulic.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-hydraulic/audit.json",
+      "bytes": 4456,
+      "sha256": "a89e23fa6fffa22a5817418707e6363ed17b889b8a60f9f01a15f2b235b1a1d0",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-persistence.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/desired-persistence/audit.json",
+      "bytes": 7580,
+      "sha256": "0af036e608568956d35c67249bbde6c8ca05080a6034266d31494c1275175ccb",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/diagnostics/audit.json",
+      "bytes": 206794,
+      "sha256": "128a8bbc73c56fc1ff39f085976a14ca1491f0165f39740b70fa8a76b4f9f991",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/execution.json",
+      "bytes": 2709,
+      "sha256": "7a3b44d217b9067c96cd3ec6928fef918c02590be2ea171fedbc0c4920d549f2",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-final/phase-0.log",
+      "bytes": 1266,
+      "sha256": "21f4f0cfa5be00cbac776e8441295a85377bc99461d710b5e1ba61d04a6b2cec",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-hydraulic.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-hydraulic/audit.json",
+      "bytes": 4456,
+      "sha256": "9f018bbe3245b9cdc6e93f54a72507549dd9f2818f21913f4d9d701cdb5ea081",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-persistence.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/desired-persistence/audit.json",
+      "bytes": 7588,
+      "sha256": "4523ebb4441671df920b1767ec442ef006ef6d2c9240fb26fda429f36350e3ab",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/diagnostics/audit.json",
+      "bytes": 206805,
+      "sha256": "3c5d2e8f92bc79ab14c917c6b0c381ae963849ae95db8f565c66be993893cde9",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/execution.json",
+      "bytes": 2719,
+      "sha256": "b96d4036903b61504e2d922a4ffcee465bee508402e6ba2e42b1908ce8f820d7",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/diagnostic-verified/phase-0.log",
+      "bytes": 755,
+      "sha256": "7cee3f34665c275819c31c584beb6d2ddd4bab2d6f045f86c2d57bc3c86d05f3",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/evidence-manifest.json",
+      "bytes": 12193,
+      "sha256": "d61656bfc574368d541bf93d38e3749e971ba4b917acd9f28692dd7ea4d60d32",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/gate.json",
+      "bytes": 1328,
+      "sha256": "5b14c84969154f19085260d1eb7fd46ec6ebc0ba9bfccba9936ef304ff7ae86c",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/harness-manifest.json",
+      "bytes": 1423,
+      "sha256": "438302b1092555b92b93931664593629a8deba8cabdfacc2e850d51d364a13cd",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/hosted-observation.json",
+      "bytes": 29056,
+      "sha256": "74fcc3c0662f24096269cc3464ab3f85d123b7ee3acf2488ecf7983dcb6087b6",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/protected-after.json",
+      "bytes": 55334,
+      "sha256": "e1a71cc54ee7e17fd6be760f3bda9bdc44cde0e09a89a28ca16a803f6be0c14e",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/protected-before.json",
+      "bytes": 49309,
+      "sha256": "3deae1f52268f1cbc146293f9f49b3886940ef63e4fa16cae4a49a20ca64d8aa",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/published/pages-api.json",
+      "bytes": 126,
+      "sha256": "563d97060c2459a0ff950c9fdf8d97e70237ccbc433002dd0c4bd5be7680f166",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/published/production-build-manifest-probe.txt",
+      "bytes": 9379,
+      "sha256": "b620507312c5e97566a3c6cfaf99144fefc18a0da7d941401dfa0f5f58fb0368",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/published/release.json",
+      "bytes": 216,
+      "sha256": "27401a4d6bf63f08a9e24e6f4e19b5fc56e30ffe65d1979d2d60be5cc2b7dfad",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/published/v2-preview--build-manifest.json",
+      "bytes": 7285,
+      "sha256": "2f957728135fa8b98b4b55aecc96f8ccebee4e6beadd9a0e29bfa954b0bb3fd1",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/published/v2-preview--release.json",
+      "bytes": 610,
+      "sha256": "0efe8be9da33ecaba72eb8cd3eb00f3558d9b0bba5c61bd98e65b1f51c5fb5c0",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/recovery-receipt.json",
+      "bytes": 9591,
+      "sha256": "0e6936fdc3660c63a8935e0fa19bf16458503b40fe91410bfdf512763ea476de",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/remote-settings.json",
+      "bytes": 2048,
+      "sha256": "80b87ff1951df76ba40dd4edade988e184e223291a3aa950b8e2436d658b01eb",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-0/evidence/tooling-notes.json",
+      "bytes": 3730,
+      "sha256": "68bd89a8e4232e90c705a71a31295bc6b05a187e070618de2edf22e38ceb3f16",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-1/ACCEPTANCE.md",
+      "bytes": 9667,
+      "sha256": "beadb31021900cb571c9024673c8d29e83c252bbb90c5dfdf849e7450a30a869",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/CONTRACT.md",
+      "bytes": 10093,
+      "sha256": "2a93b41b9da3a069d2b6a1e58e2888856e700c7c9c12a6c9e9ff901a7f7f5a5f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-1/MERGE-AND-ROLLBACK.md",
+      "bytes": 4731,
+      "sha256": "2a2ec0e584f500c70e7e30c6cdfa57e8155396c83bd16b52a1737ef63aa50e17",
+      "group": "phase-1-documentation-evidence",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-1/NUMERICAL-AUDIT.md",
+      "bytes": 15996,
+      "sha256": "a420ee1dfe3460464025c3a6a8b4f8b8147139197a44655a29958df3c1adb52f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-1/PLAN.md",
+      "bytes": 4594,
+      "sha256": "774fb94a954da4123a05bc5f9003cbb4ea4d167bd42a1af8dfdf8933427eb446",
+      "group": "phase-1-documentation-evidence",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-1/REQUIREMENT-TEST-MATRIX.md",
+      "bytes": 5450,
+      "sha256": "074c65612d1a80e3d34b0635ca96b1792c799ec4290b86e50ee4633d65281002",
+      "group": "phase-1-documentation-evidence",
+      "tracked": true
+    },
+    {
+      "path": "docs/phase-1/evidence/browser-focused.json",
+      "bytes": 10833,
+      "sha256": "553d6ff5fddd3e34a459208555bc4aca214ab559f28fcf5d15a620130a72d870",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/browser-summary.json",
+      "bytes": 23213,
+      "sha256": "3ddc43d338f99233d4aa3f47ea9c40e78ca5e1e34849b827077fc3cbc5f5cae9",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/browser-versions.json",
+      "bytes": 76,
+      "sha256": "0edbc5210d04f5294d98e701ab288f623df1bb7514062e5f7edbdfff35785c93",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/browser.log",
+      "bytes": 12164,
+      "sha256": "d0fef4a66ebbb561e3738ca547f92e8edf6b4611517697d91c74a49ae1180c2d",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/build.log",
+      "bytes": 757,
+      "sha256": "75874a7c60278b70be9884d50b122a5d510494557c09310e898b5e7173132aa9",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/execution.json",
+      "bytes": 11860,
+      "sha256": "d8191eeaa9594b8c38470cb9e75e8bea0303cfc484d9b95b572acad1699a2b06",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/measurements.json",
+      "bytes": 62892,
+      "sha256": "54b34adc7203c51d98282961cd2787e2dfa8dbdc673c5ecd34a09ca36991b548",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/measurements.log",
+      "bytes": 191,
+      "sha256": "98fd151c07682c4939ecb1ad6f0f0eda0738fa840f4cf5277eb6faeb864da3d2",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/server.log",
+      "bytes": 32946,
+      "sha256": "3d0ed5b26d90a79b6e61197b5b235388745558fd33d2d21d72d330499cb8f455",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/unit-full.log",
+      "bytes": 2500,
+      "sha256": "06d8bd5ba553dd85c7ca58aad762c374178a46b7bd4c377d493253eabfcf9e01",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-final/unit-summary.json",
+      "bytes": 58905,
+      "sha256": "73d085c8acd936fd42e34a13814aee33893bf9d450ace4f229e23dfcfb3e1672",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/browser-summary.json",
+      "bytes": 23205,
+      "sha256": "a5264941892875867c3a1e9b0e67d8b1d98a0bfb64c808ce970edcbf9b80c616",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/browser-versions.json",
+      "bytes": 76,
+      "sha256": "0edbc5210d04f5294d98e701ab288f623df1bb7514062e5f7edbdfff35785c93",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/browser.log",
+      "bytes": 12164,
+      "sha256": "1e190345f9979ba07144be4c00818e91c12fcdc021fa0be146a53c2707234a1f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/build.log",
+      "bytes": 757,
+      "sha256": "50d4ec8557653ab93ddfbdc6e1136affee1118c8c98a64ebc61b47e63b82586b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/execution.json",
+      "bytes": 11783,
+      "sha256": "6e587c9537757847e055b2272f601a2300c647fd6173de0272cd8ffddaf81ad4",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/measurements.json",
+      "bytes": 62857,
+      "sha256": "82b4714cd4c9402a1f33d30a9531a131d46c439986c09b6c9d520a0b6e099650",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/measurements.log",
+      "bytes": 192,
+      "sha256": "13adb62a4f688ffe2e73ff58b2397f683461dd4120a4ce4e8506f44160736dcd",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/server.log",
+      "bytes": 33331,
+      "sha256": "99a42c38e3520652fe077a29cfbe3fab1be4d6627f69afa725ac15d3fce8701f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/unit-full.log",
+      "bytes": 2500,
+      "sha256": "2a5b1431276e9124bfce4dbba1fb57f9b450ea9e86d101f22f8f5f7f1d389400",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full-2/unit-summary.json",
+      "bytes": 58891,
+      "sha256": "f8cc3691159521626d32738d84010db1bda88ebf386c63ed2c6cc0244ae0cb22",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full/execution.json",
+      "bytes": 10076,
+      "sha256": "bfaf953f474f0a548b2df17c1af3387a6fe027b5a03def6e975404ad594cfce8",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full/lint.log",
+      "bytes": 342,
+      "sha256": "a8dcdf25f8d20af32ce9a75dca9f5fe4c8fbe3e99e724154966a810daccbdd1e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full/server.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/committed-full/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/execution.json",
+      "bytes": 1261,
+      "sha256": "70414ab2470e32f7f8058701490590deb73d610b575096bafbc115812aab4e88",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/browser-summary.json",
+      "bytes": 192,
+      "sha256": "ee3d0530f806503aeb117d11616e272bf85e9c4edb2ea4335c1fc7dcc4b632bf",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/browser.log",
+      "bytes": 14543,
+      "sha256": "6b23ef249ef93d601d78d4a8c4bf51652c9553954210db2d14a3d9ce8177e8ef",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/build.log",
+      "bytes": 757,
+      "sha256": "403e3db342d0b56e9ea7cb7b164b3c9165a87b0c6757d26b4fc54255602beec4",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-hydraulic.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-hydraulic/PH0-001.json",
+      "bytes": 2553,
+      "sha256": "3d1d5b610056ce6835e3748e157c5fbeec8885046eb309fef4c9a0735f3d27f4",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-hydraulic/audit.json",
+      "bytes": 4456,
+      "sha256": "c7aec8cfe4570b35a9868b538a7113340f70b5f5ec2bc80b30803f77b9e88c6f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-persistence.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-persistence/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-persistence/PH0-002.json",
+      "bytes": 5151,
+      "sha256": "1d113de5111ef5612a3a8801d31d51678d181771321464bc2a9ec0c8f360a599",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/desired-persistence/audit.json",
+      "bytes": 7578,
+      "sha256": "c57a441b9e56d2268c8a0af3ccecc75d1731f75aff9899e51133a197469557cb",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-001.json",
+      "bytes": 2552,
+      "sha256": "782dd89923b63da3be82546464e04467ed4e0cb9c44fed8255c4bd9ca13935a2",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-002.json",
+      "bytes": 5161,
+      "sha256": "7c57165f871d57d39f4bde0202a58dd97e6bba8f3efb05b1cfcf67b7e35a3627",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-003.json",
+      "bytes": 117662,
+      "sha256": "6fa35ccf5598417226044e1e009abcbcc9134e0b87d5204869e689cee1386926",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-004.json",
+      "bytes": 1060,
+      "sha256": "8805789a0f13ad3123b966cfcbad0671cc8cb30f3586e5302b21cc968feb8d33",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-005-engineering-report.md",
+      "bytes": 9023,
+      "sha256": "4a41c9f0d2d73a9d644094fa76a03ec9e8a73bfcfd91b1c009ebdc8ad61fb9d0",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-005-terminal-results.csv",
+      "bytes": 381,
+      "sha256": "409341eed2a12cb462da772b2d40e253553dd2e1220ccf61086617250d67c869",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-005.json",
+      "bytes": 25634,
+      "sha256": "879f9d3123f74bf30c34daf8cd889ff42c18f0971c8b1ca351f57283185d6bbb",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/PH0-006.json",
+      "bytes": 36654,
+      "sha256": "1ceb9c4b9abaa4e78b632d61e764e255c58db0cc77d0d2acaf71435c8a2893d7",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/diagnostics/audit.json",
+      "bytes": 206798,
+      "sha256": "59ea5ca1ad568bd1d5a0ff705bc0c9f96e47393e979b6cd0f65dc1bf7ba2d231",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/execution.json",
+      "bytes": 4581,
+      "sha256": "5a4239058de78a8daf69fcc25051a6dbfa069017013f2bab91a4684121308d39",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/phase-0.log",
+      "bytes": 755,
+      "sha256": "7cee3f34665c275819c31c584beb6d2ddd4bab2d6f045f86c2d57bc3c86d05f3",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/server.log",
+      "bytes": 32122,
+      "sha256": "1a79a52c8677712686d0da858205a15927bf510412afdc2178dfae8074eaad04",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/full/unit-full.log",
+      "bytes": 217,
+      "sha256": "014acae458adbc6260b1ee9f97b9abc49eb6aa9e24360598ea89477aaf96a411",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/phase0-full.log",
+      "bytes": 204,
+      "sha256": "d1d4c94bf09f2ac05d4d1e9ab06d845074a1abfcfc78cffb380b094293a3d5b8",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-1-20260909T080347Z/phase0-gate.log",
+      "bytes": 756,
+      "sha256": "3979e06dcecfef0f9c166d66a8766c049259fc95c5fc0cf031f7abc729c41f76",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174738576Z-webkit/browser-summary.json",
+      "bytes": 191,
+      "sha256": "f24b159e148bb5cb292694cab70fb679c586164dbf0cf6e81c07e47b2c3b5701",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174738576Z-webkit/execution.json",
+      "bytes": 942,
+      "sha256": "ce6cb8e8ce58f8b418754a664d394a505b2a3a4e5420bb272bdbecfaba10b6e9",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174738576Z-webkit/npm-ci.log",
+      "bytes": 455,
+      "sha256": "26a3e68b285ae114d11d5ed0e40a951dcbc48501893f9685463196d9b454e8ec",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174738576Z-webkit/selected-webkit.log",
+      "bytes": 671,
+      "sha256": "1d974fa26a5d14b4cb6ce593e2fee776e542d5ffd3f6c210151e08c6ffc2a014",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174738576Z-webkit/server.log",
+      "bytes": 2605,
+      "sha256": "8a248641f939e3703789bd27515c3911e62d7b6571995478e27d6c2ec24a289b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001-desired.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001-desired/PH0-001.json",
+      "bytes": 2553,
+      "sha256": "460f5fbd60eb75c98bf0b71e03d7bb7e72701bbe4851cbbdf0e69d0ea9ea4329",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001-desired/audit.json",
+      "bytes": 4456,
+      "sha256": "fb5c68424c7fc1033307978a870e1287288efdd95bbb8386f8740a3e9e29c81c",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001/PH0-001.json",
+      "bytes": 2551,
+      "sha256": "3ca4f74ea235c3c638692e32aa94319eb64ffcce01dea564926346a5d1bbd5dd",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-001/audit.json",
+      "bytes": 4493,
+      "sha256": "47f277bc49b46dfb81829703453a90149a7382279fed5afd444ce6ac21799534",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002-desired.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002-desired/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002-desired/PH0-002.json",
+      "bytes": 5153,
+      "sha256": "f7c6a52eb95e8e12b10148ceb841e687e62988781e82d1850c674277b3cced66",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002-desired/audit.json",
+      "bytes": 7580,
+      "sha256": "9e87d490804f50f5cf655ff62faae68c847fca8801c9c5bf1269513da5ba6986",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002/PH0-002.json",
+      "bytes": 5153,
+      "sha256": "4f130c4ca715f3fd562351ce1f677927d5f46c86678a149b0d08bc5d260de89c",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/PH0-002/audit.json",
+      "bytes": 7619,
+      "sha256": "9bffe1f4daede0db2bd0e40ec5b7fa5a2e6642caed1858f31ff224331b3e151f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/execution.json",
+      "bytes": 3233,
+      "sha256": "36c5baf02b56e0785c82484faf971bfd0379a63bf5d841a45761e64640da8398",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/browser-summary.json",
+      "bytes": 184,
+      "sha256": "64d7f5832cb4f31064558afea07934943f69cc96a26ac896aa771023930fd96d",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/browser.log",
+      "bytes": 7720,
+      "sha256": "9860df1135b6eadfa689aa98a6012c122ec559352fee9a75e365002b0dac1166",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/build.log",
+      "bytes": 757,
+      "sha256": "3ef61b597ff64c1d2747223653ce378f499f5c8c8e0067dd812044feb999d72a",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-hydraulic.log",
+      "bytes": 157,
+      "sha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-hydraulic/PH0-001.json",
+      "bytes": 2553,
+      "sha256": "7a4e290daa85c7b81ccf9c81da0fee9b3d5ea23557e4a996843de8269586dbae",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-hydraulic/audit.json",
+      "bytes": 4456,
+      "sha256": "f0423e181ba586dc9c93fcf676f3372ce841436a9daeb1924de7ae864da8d446",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-persistence.log",
+      "bytes": 157,
+      "sha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-persistence/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-persistence/PH0-002.json",
+      "bytes": 5153,
+      "sha256": "e61711c8d452d28fe8c43f6858556ab8dee0d952b81ba20f9db9c3822542a377",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/desired-persistence/audit.json",
+      "bytes": 7580,
+      "sha256": "10bf70952133480e06f2e7759cde9ed2b8ff687d70dac781a2d0f42a071a1869",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-001.json",
+      "bytes": 2552,
+      "sha256": "1814c56d65aaf27231688d7e5305db0a96779efceb8d7a0b38a1ba4938a939e4",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-002-minimal-project.json",
+      "bytes": 132742,
+      "sha256": "670e2f6331f755e3eb9abde0905fb0c4d5512ba3022ebf380caea80402a67a87",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-002.json",
+      "bytes": 5152,
+      "sha256": "2ab159a86aeaa84e45309a827eec6a870fbdb0e2e52cb5d84e5c071780136da7",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-003.json",
+      "bytes": 117642,
+      "sha256": "a83812f1c3d2bddd0d419b8f31716dcb69f1dec7fb27303133ad0903602e3696",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-004.json",
+      "bytes": 1059,
+      "sha256": "9db7d31b80c44f3987dbfd304f1cd04cee61226f038a9db1391af7ab04bb7f57",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-005-engineering-report.md",
+      "bytes": 9023,
+      "sha256": "4a41c9f0d2d73a9d644094fa76a03ec9e8a73bfcfd91b1c009ebdc8ad61fb9d0",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-005-terminal-results.csv",
+      "bytes": 381,
+      "sha256": "409341eed2a12cb462da772b2d40e253553dd2e1220ccf61086617250d67c869",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-005.json",
+      "bytes": 25634,
+      "sha256": "8c17a5bd758271d194e536451be1312e8d5d3b4fcf5b36286ef98b52b5cd976d",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/PH0-006.json",
+      "bytes": 36663,
+      "sha256": "9b5271faaa842707de6d13d92511ac660286233cf0714aed1a528a11de5993d4",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/diagnostics/audit.json",
+      "bytes": 206777,
+      "sha256": "5173d7e4108fad391b48b715babfe91471bf0ac2de157555784b31378788f4b6",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/execution.json",
+      "bytes": 4612,
+      "sha256": "38005dfd8f504710973a5a15de23c1224cb61951de03969df7a944b200e06f1e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/phase-0.log",
+      "bytes": 755,
+      "sha256": "7cee3f34665c275819c31c584beb6d2ddd4bab2d6f045f86c2d57bc3c86d05f3",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/server.log",
+      "bytes": 33267,
+      "sha256": "5f4999bb2388c2ec5c297cd8e80ec670bc97fc1cb9308bfc2ec1a17677633fdd",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/full/unit-full.log",
+      "bytes": 217,
+      "sha256": "be2d214995ec2fcc5216b31a814e4d29ebeffe56e0894af21ae26b888e77b777",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/npm-ci.log",
+      "bytes": 455,
+      "sha256": "4c3a2190b09a9b39ed09f6b70d2e544df9e04a6cd3bdda0d6fe87c4b0a70f66f",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/phase0-full.log",
+      "bytes": 224,
+      "sha256": "38f198300c3e1e1222ea6e5ac687144904e42c681b8f0594fd41a4fab0100d7a",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/phase0-gate.log",
+      "bytes": 756,
+      "sha256": "caea579a5f5d451a4a6c6c95f783c57b9349f3cc8b856713e9149c8d899be462",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/recovery.json",
+      "bytes": 9591,
+      "sha256": "905c23f9c5f760260d4268e91477c73f6300cb8d0e9c10e37040033f561df7f9",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/attempt-20260909T174902816Z-full/recovery.log",
+      "bytes": 162,
+      "sha256": "55508a2edc7701bdb9f0aae6dcadaa362114a555d1d907b213e1f96d9e72649e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/execution.json",
+      "bytes": 1261,
+      "sha256": "70414ab2470e32f7f8058701490590deb73d610b575096bafbc115812aab4e88",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/investigation.json",
+      "bytes": 5944,
+      "sha256": "64faf37456e1665d3633578956e3e5bca49c6f732a06e38c58d5920fcca1f064",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/latest.json",
+      "bytes": 99,
+      "sha256": "e4d9e71443712dc8956afc53b05f3841d55928c833254b8af060ad42e64b08ed",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/phase0-full.log",
+      "bytes": 204,
+      "sha256": "d1d4c94bf09f2ac05d4d1e9ab06d845074a1abfcfc78cffb380b094293a3d5b8",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/history/phase0-gate.log",
+      "bytes": 756,
+      "sha256": "3979e06dcecfef0f9c166d66a8766c049259fc95c5fc0cf031f7abc729c41f76",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-acceptance.json",
+      "bytes": 3332,
+      "sha256": "39c218fd76e3c7ddef1bbce59843e20a6007cb11b46e5405d2e758630ff1b7bc",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/browser.log",
+      "bytes": 21417,
+      "sha256": "0c14d13ba79aabd28fc32febfd529bc14a2b34666283cb633ed6076a59c9ffe7",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/build.log",
+      "bytes": 757,
+      "sha256": "911844b4f566b531e870d39caa8111b289439bdc59150a4e37a249ca4fd6707b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/execution.json",
+      "bytes": 11482,
+      "sha256": "c9326f827960322878a3e0ab2e2e1b73a2da895325f5f32ac99fd2176128aaf8",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/lint.log",
+      "bytes": 83,
+      "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/npm-ci.log",
+      "bytes": 455,
+      "sha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/server.log",
+      "bytes": 33074,
+      "sha256": "8da594aaae02111b7a51c2313df46c95e6bbffeb82cd895b02fc4d99bd499d01",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/typecheck.log",
+      "bytes": 48,
+      "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/unit-full.log",
+      "bytes": 2461,
+      "sha256": "1b1138b8065e3ec76ae7ceb847277b4888db5d98443e55bb8ed07387d71c20e1",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/local-full-1/unit-summary.json",
+      "bytes": 57989,
+      "sha256": "1a9258edaec4406be0ddd2271d083f6cc25ab382f975c56007f6f15940ed3dd4",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/measurements.json",
+      "bytes": 62854,
+      "sha256": "9847612d7a6e611b2fbb99176f23dabe502a14ec3375a8aa2fd97746290e2aee",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/publication-review.json",
+      "bytes": 819,
+      "sha256": "3716b08f50e83b0a87648b7961ab99407a63810904f41fbb2cfab0bf889dc6dc",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/remote-before-publication.json",
+      "bytes": 3565,
+      "sha256": "1272461079fde177b9ce092ebd69ebe1dd138a92deb6a6096f32ad5b447dd024",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/remote-preflight.json",
+      "bytes": 12247,
+      "sha256": "87d84e331c28898fc5719d4c38909030c292c8fb36c4eed92f5cb3b737c612dd",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/review-committed.json",
+      "bytes": 37076,
+      "sha256": "9ab5e989ebec8e5b2b9e564a9853dee72f101ce27d12e379d990b809adf8e252",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/review-independent.json",
+      "bytes": 21310,
+      "sha256": "b84ba8e42dd714317170bb2053e01bd96f1a4436e619468feb0bfc0d292ea21c",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/review-persistence.json",
+      "bytes": 10710,
+      "sha256": "4d49aff54f9979650cb5dfaf6e0d46eb9eba189a336a5aac4457eb58fbb4ee89",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/review-scope-optimization.json",
+      "bytes": 13646,
+      "sha256": "1523b085a2f065eab8afbb33299eaf8e03cac5c655570b81798918155987022c",
+      "group": "phase-1-documentation-evidence",
+      "tracked": false
+    },
+    {
+      "path": "docs/phase-1/evidence/start.json",
+      "bytes": 13472,
+      "sha256": "0572b858072ad520ec26ba6a681c1f9ca2ee6b2592c5f44820d1ff0bb8c95460",
+      "group": "phase-1-documentation-evidence",
+      "tracked": true
+    },
+    {
+      "path": "scripts/phase-0/audit.mjs",
+      "bytes": 21795,
+      "sha256": "5166245e862d7250fa4aab00f75965bd9f38ab0baeadc0d0524fe270c0df4ad4",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "scripts/phase-0/capture-hosted.mjs",
+      "bytes": 3177,
+      "sha256": "9923c31b6e480be7f9bd42346f0c0cf99842774397f9e0f29a4dcb3aff1a70fb",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "scripts/phase-0/clean-check.mjs",
+      "bytes": 7725,
+      "sha256": "e9b529983d2a5a3e85ee9e946ed1f3ab2578bb4ba417f8f129863dfac8a64bbe",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "scripts/phase-0/recover-artifacts.mjs",
+      "bytes": 1730,
+      "sha256": "27de702007bdaff9a66ac2c2d151b31df93ce8ecd402690160305817b421d140",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "scripts/phase-0/verify.mjs",
+      "bytes": 10265,
+      "sha256": "ed23978c6a960e707308ffde97d193c5f85c62e6f8d14b5a1793c5f64b9efb4b",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    },
+    {
+      "path": "tests/fixtures/phase-0/scenarios.json",
+      "bytes": 10287,
+      "sha256": "45bf4dbe4730a79f6679541acda75a68d13d55d8316a29c50da0377bd9852094",
+      "group": "immutable-phase-0-prerequisite",
+      "tracked": true
+    }
+  ],
+  "limitations": [
+    "This PASS is bound to the exact final file list and hashes below. Any later changed or added publication material requires its own scan; a later evidence-only commit must preserve these bytes.",
+    "This is a publication-material hygiene review, not a new numerical correctness, browser, security-vulnerability, credential-validity or deployment audit.",
+    "No credentials were tested, no private observations were fetched, and no remote write, commit, deployment or source/historical edit was performed.",
+    "The preserved public HTML response contains embedded small PNG page assets; the report does not claim an absolute absence of image bytes. No screenshots, video/audio recordings, trace archives or private recording payloads were present in the scanned publish inventory."
+  ],
+  "outcome": "PASS: no publication blocker found in the completed intended documentation/evidence set. Original Phase 0 prerequisites, package/lockfile and public artifacts remain unchanged.",
+  "snapshotHistory": [
+    {
+      "scannedAt": "2026-09-09T18:44:32.396Z",
+      "reviewedAt": "2026-09-09T18:47:35.450Z",
+      "status": "PASS_FOR_HASHED_SNAPSHOT",
+      "files": 210,
+      "bytes": 3799518,
+      "inventorySha256": "3e611ae3ddfecf8af87c441c93b396949f80de90192f6ee8b5bc423c1ce10b10",
+      "reason": "Initial scan while the final browser gate and acceptance record were still being completed."
+    }
+  ],
+  "refresh": {
+    "addedFiles": [
+      "docs/phase-1/evidence/committed-final/browser-summary.json",
+      "docs/phase-1/evidence/committed-final/browser-versions.json",
+      "docs/phase-1/evidence/committed-final/browser.log",
+      "docs/phase-1/evidence/committed-final/execution.json",
+      "docs/phase-1/evidence/committed-final/measurements.json",
+      "docs/phase-1/evidence/committed-final/measurements.log",
+      "docs/phase-1/evidence/committed-final/server.log",
+      "docs/phase-1/evidence/local-acceptance.json"
+    ],
+    "changedFiles": [
+      "docs/phase-1/ACCEPTANCE.md"
+    ],
+    "removedFiles": [],
+    "review": "Re-scanned every byte of the final 218-file set, read finalized acceptance and machine-readable local acceptance, and classified the new completed execution metadata hit. All previously classified files were hash-compared; no credential or private-observation values were printed."
+  }
+}

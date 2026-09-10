@@ -1,0 +1,575 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUTC": "2026-09-09T22:11:38.386Z",
+  "reviewer": "numerical_safety independent agent",
+  "baseCommit": "9007948acc1a695a5a174743e927dd7cb9997044",
+  "scope": "Independent review of the UI Cancel checkpoint-freeze repair, preserved Pause assertions, real-worker before/after reports, and final related 18-case browser result. No production edits or browser runs were performed by reviewer.",
+  "sourceHashes": [
+    {
+      "path": "src/ui/useTwin.ts",
+      "priorCommitSha256": "af1dc65ae996c54cb08ffe8cf6e047c4cad93707eaa416b5c23499a68e336593",
+      "currentSha256": "2f021e03d5079fbf293ae3aa94241660807b95d2fc7433f04a49fdd9dd5ba349"
+    },
+    {
+      "path": "tests/browser/phase1.spec.ts",
+      "priorCommitSha256": "af6b563899215e612bf4a385a5f33b1df4819bab87cdbda87b4dc247c7d5d35e",
+      "currentSha256": "ad0ad6c94a73f662d8c94eea58a2dccc614a5d052f1076e5b9370c6a8976fc9a"
+    }
+  ],
+  "expectedSemantics": [
+    "UI Cancel immediately stops the live clock and unlocks controls while retaining the last fully validated state already committed by the UI.",
+    "Messages queued from the superseded run, including progress, completion and the cancellation acknowledgement, cannot move that state or overwrite its durable/exportable checkpoint.",
+    "The existing UI resume target remains available after Cancel; a new explicit operation may replace it. The next manual 10-second step uses the frozen 10-second checkpoint and reaches 20 seconds.",
+    "Direct worker cancellation continues to return its latest validated worker checkpoint. The UI is intentionally free to discard that later acknowledgement under its separately documented freeze contract."
+  ],
+  "implementationAssessment": {
+    "result": "PASS_REVIEW_ONLY",
+    "reason": "invalidate now always advances request identity once beyond its cancellation request. Prior run replies fail the epoch check; a cancellation acknowledgement in the new epoch fails the request-ID check before accept/persist executes. Removing invalidate(true) makes Cancel use the already-established Pause invalidation semantics. Real worker delivery is asynchronous, so invalidation finishes before an acknowledgement handler runs.",
+    "sourceScope": "Only useTwin.ts cancel/invalidation behavior changed. The new test reuses an extracted native Worker message-hold fixture; it does not fabricate simulated output or replace the real solver.",
+    "testScope": {
+      "priorTests": 10,
+      "currentTests": 11,
+      "addedTests": [
+        "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step"
+      ],
+      "assertionPreservation": [
+        {
+          "title": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+          "remainingStatementsIdentical": true,
+          "probeExtractionIdentical": true,
+          "remainingStatementsSha256": "51214ec1e453e42df5fbc1e39bd3f40462fe99153ef18bf6c83b25c69ac025c5",
+          "probeSha256": "81a7ad51f975ff3ac236acd2968c24d4528d3292311e4046fbd38a6509a95a3b"
+        },
+        {
+          "title": "PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally",
+          "bodyIdentical": true,
+          "bodySha256": "51a2c18985461d7f06918e20632591a1853fe725a6d3bfc00fdc187df2080827"
+        },
+        {
+          "title": "PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export",
+          "bodyIdentical": true,
+          "bodySha256": "4a24a99569a22e00e47e7255a24262a585575a461c3165cfdc0ac5ae2c21cd49"
+        },
+        {
+          "title": "PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity",
+          "bodyIdentical": true,
+          "bodySha256": "a44db6ad6e159e50b163e37cc5f6cf8dac32f5ba625dc7827ab1ed7ff6a99023"
+        },
+        {
+          "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+          "bodyIdentical": true,
+          "bodySha256": "6ce1c915a7bbe8dd02bad4f9931d1099428094bcff3e070cf1299be53b357053"
+        },
+        {
+          "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+          "bodyIdentical": true,
+          "bodySha256": "f58a2b3ebc5aa01bfad7a38edd67065cca84215fa92d9c1a803ec0f1f0fcd162"
+        },
+        {
+          "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+          "bodyIdentical": true,
+          "bodySha256": "5fe777202e44f7212f991b3473ba38ca9e918ceee9f8d5ad4234b218846443a3"
+        },
+        {
+          "title": "PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available",
+          "bodyIdentical": true,
+          "bodySha256": "0e3182aee5cd5329b3bc6242c64639d947c592145bb043a969bb44e00c4b491f"
+        },
+        {
+          "title": "PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid",
+          "bodyIdentical": true,
+          "bodySha256": "8b96b3def265eaa115e708cba414f1afe6d2dc674722baed844aca4a1f2d3b2c"
+        },
+        {
+          "title": "PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null",
+          "bodyIdentical": true,
+          "bodySha256": "04df3974ca9b91c67f96be696d9632a9ffc367461b692bfe81014f18e6eb28c3"
+        }
+      ]
+    },
+    "newTestChecks": [
+      "Native worker genuinely completes 100 seconds while replies are held and UI stays at 10 seconds.",
+      "A genuine cancelled reply carrying the worker 100-second checkpoint is observed before the hold is released.",
+      "Old progress/completion/cancel replies are delivered before the next manual request, exposing the former admission window.",
+      "Display/export checkpoint stays at 10 seconds; local storage is still 10 seconds and Resume to 100s remains present; next manual step and saved/exported checkpoint reach exactly 20 seconds."
+    ],
+    "directWorkerAndNumericalFilesUnchanged": [
+      {
+        "path": "src/twin/analysis/reports.ts",
+        "sha256": "47a1706b3a9875f2d5a935e2143fa5c69d9f2158e4adb283d711368c876c88cc"
+      },
+      {
+        "path": "src/twin/assets/design.ts",
+        "sha256": "26246f28049cde4bae0010797e8986f17531fcd86079c0057e95bfb3793d4a95"
+      },
+      {
+        "path": "src/twin/catalog/reference.ts",
+        "sha256": "615eab81d7728269e568a7037cdb42afce757ac1c924788207b9f28bc9c260b2"
+      },
+      {
+        "path": "src/twin/engine/simulation.ts",
+        "sha256": "33d297e5f722b627fab035988ad292e494ff8ddea8eb4456b36517890b5a20d4"
+      },
+      {
+        "path": "src/twin/engine/worker.ts",
+        "sha256": "4c32b24def61a53309737783310504ad82073bbfe4e0e194c5bdbfe022bd8944"
+      },
+      {
+        "path": "src/twin/persistence/design.ts",
+        "sha256": "1f96f4d035d2c828e399a6dc87cdd03eb633466710c7498f1af0e4c5ed0ad931"
+      },
+      {
+        "path": "src/twin/persistence/events.ts",
+        "sha256": "cf983d9b892ee8ef038970968d922197cc0e2e708aaeb6800f55bb8bfb8a49af"
+      },
+      {
+        "path": "src/twin/persistence/limits.ts",
+        "sha256": "1b7aa54f1f6c300dff0ec789a3b50406e424bd7e74672534c84bc5aa44333dc9"
+      },
+      {
+        "path": "src/twin/persistence/project.ts",
+        "sha256": "3642328a00f87325b3763aba111d5daee585033d6f925064dbbbc19635d3674d"
+      },
+      {
+        "path": "src/twin/persistence/state.ts",
+        "sha256": "887e1e2b72d04f881aa76e0e48d5f10b2a3f3cead2f6aebec2a40d854757916c"
+      },
+      {
+        "path": "src/twin/persistence/storage.ts",
+        "sha256": "54d08ec4f6fb883e1c3902c93d9ec0474ae10de3efc6d5ab47ae88d35e91ff1f"
+      },
+      {
+        "path": "src/twin/persistence/structure.ts",
+        "sha256": "6b3ea847e8dfa4996d83867957b3dbd596665407450ed3ea4bee3acdda056382"
+      },
+      {
+        "path": "src/twin/persistence/types.ts",
+        "sha256": "ae89c81aa6cbc9a66e8a0717708ec1e684f831d69c8bc1657b8131454a0c4dcd"
+      },
+      {
+        "path": "src/twin/safety.ts",
+        "sha256": "0235a70ab20f7ae5a93fb20c59c9faa4671022421cd96a476e5a48f34d52464b"
+      },
+      {
+        "path": "src/twin/solvers/electrical.ts",
+        "sha256": "e50bb0fa53992ec4aa10c4f869ce555d00a520046dd166fbbdd9cf8d318653b3"
+      },
+      {
+        "path": "src/twin/solvers/hydraulic.ts",
+        "sha256": "9bd60a39d19e157b089d1adf2c8bbf5173c2ba618a681dff1a7106c0e1b3818c"
+      },
+      {
+        "path": "src/twin/solvers/network.ts",
+        "sha256": "30e959287d0798c39c39583e2ddb8d6255f9ec503da0ca80d52822f950ccaada"
+      },
+      {
+        "path": "src/twin/solvers/thermal.ts",
+        "sha256": "91fc68d2f63ec71d48e3ea699432d239143c2666ddeb0dbb57a7967c541816df"
+      },
+      {
+        "path": "src/twin/telemetry/calibration.ts",
+        "sha256": "ef0fe64d91619652a29297fc98f83e234c03f2d76994b219eda5e1927b016a86"
+      },
+      {
+        "path": "src/twin/telemetry/generated.ts",
+        "sha256": "e9b4aa635b57f331aadae08199bcf0d9550949454477a0502883acddfee218b0"
+      },
+      {
+        "path": "src/twin/telemetry/index.ts",
+        "sha256": "39ad1ea5be8616c730cf2b5c69b235838dfc556a66709934946086b595ec0061"
+      },
+      {
+        "path": "src/twin/telemetry/normalize.ts",
+        "sha256": "f45f3c4cc9d4472887ca1395ee09a19764a66107028b24945acccd4698a56d81"
+      },
+      {
+        "path": "src/twin/telemetry/residuals.ts",
+        "sha256": "c2ec87b18937cbdb0a5d689ef72d74a58f9e469edb9a7abc3f1613b738527e44"
+      },
+      {
+        "path": "src/twin/telemetry/store.ts",
+        "sha256": "0771317bd5a5b403e32542b55d33f0f5a4ea09764cd1e224f2d669b647e33c29"
+      },
+      {
+        "path": "src/twin/telemetry/stream.ts",
+        "sha256": "9fd614ed0e792a9b9234ae3e404992eae255ad85e8c6cd2f382dea491afe847a"
+      },
+      {
+        "path": "src/twin/types.ts",
+        "sha256": "64c62405447feeb23b80d3e6928195b7ae3062edde59a63c33873ed6aa8ea4d7"
+      },
+      {
+        "path": "tests/phase1-worker.test.ts",
+        "sha256": "91f68ff26d196714190c90925c9c4081acc6a8d656d36a36c72ddb16bd87e641"
+      },
+      {
+        "path": "tests/twin-physics.test.ts",
+        "sha256": "3e3e397b173e1e90d7237d0c390e3d0da862ca2921abfc8828f4db9b8da14ae1"
+      },
+      {
+        "path": "tests/browser/twin.spec.ts",
+        "sha256": "cd171046755f4a08d0836e7d531d143c8dd647348ae9a80692136c7262f5855e"
+      },
+      {
+        "path": "playwright.config.ts",
+        "sha256": "0dc23bdb98c7413e6120d76cbc249943b123709f5a4234a1b3b1f8ddb5a8cb66"
+      }
+    ],
+    "playwrightTimeouts": "Unchanged configuration: 60,000ms test timeout and 12,000ms assertion timeout; no retries/skips or relaxed expectations added."
+  },
+  "evidence": {
+    "implementationSummary": {
+      "path": "artifacts/phase-1/cancel-ack-focused/summary.json",
+      "sha256": "4c90cd3b3fec192e8662567533ba5c4149d45cbc867663480cada07583834f42"
+    },
+    "reports": [
+      {
+        "stage": "before",
+        "path": "artifacts/phase-1/cancel-ack-before/browser-results.json",
+        "sha256": "fb5da140ac1d2b7a1eafefae1d43edfa815e68d2d3c1cfe2728c276bef798b2d",
+        "stats": {
+          "startTime": "2026-09-09T22:00:21.635Z",
+          "duration": 16640.665,
+          "expected": 0,
+          "skipped": 0,
+          "unexpected": 1,
+          "flaky": 0
+        },
+        "testCount": 1,
+        "tests": [
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "chromium",
+            "status": "unexpected",
+            "results": [
+              {
+                "status": "failed",
+                "durationMs": 16130,
+                "errorMessages": [
+                  "Error: expect(locator).toHaveAttribute(expected) failed\n\nLocator:  locator('main.twin-app')\nExpected: \"20\"\nReceived: \"110\"\nTimeout:  12000ms\n\nCall log:\n  - Expect \"toHaveAttribute\" locator('main.twin-app') with timeout 12000ms\n  - waiting for locator('main.twin-app')\n    27 × locator resolved to <main data-time=\"110\" class=\"twin-app\" data-ready=\"true\" data-scene-ready=\"true\" data-workspace=\"Explore\" data-selected=\"platform-001/module-01/pump-duty\">…</main>\n       - unexpected value \"110\"\n\n\n  240 |     .count();\n  241 |   await page.getByRole('button', { name: 'Step 10s', exact: true }).click();\n> 242 |   await expect(main(page)).toHaveAttribute('data-time', '20');\n      |                            ^\n  243 |   expect(durableBeforeStep).toBe(10);\n  244 |   expect(resumeBeforeStep).toBe(1);\n  245 |   await expect(page.getByTestId('checkpoint-storage')).toContainText(\n    at <source-checkout>/tests/browser/phase1.spec.ts:242:28"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stage": "after",
+        "path": "artifacts/phase-1/cancel-ack-after/browser-results.json",
+        "sha256": "c683507fd38c8266414dd4e87202491b509ae95036accb86215f94688b1362fc",
+        "stats": {
+          "startTime": "2026-09-09T22:01:14.842Z",
+          "duration": 6642.179,
+          "expected": 3,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "testCount": 3,
+        "tests": [
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1780,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1489,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1515,
+                "errorMessages": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stage": "focused",
+        "path": "artifacts/phase-1/cancel-ack-focused/browser-results.json",
+        "sha256": "7853311d134b05dd33245290cbedcb13f3cab453e9b1562d6c9f50a7dea2798d",
+        "stats": {
+          "startTime": "2026-09-09T22:02:09.063Z",
+          "duration": 54799.154,
+          "expected": 18,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        },
+        "testCount": 18,
+        "tests": [
+          {
+            "title": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 4691,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1506,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 6129,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1331,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1871,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 4587,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1050,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 6228,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 840,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1267,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 4531,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 Cancel freezes the committed checkpoint before a delayed acknowledgement and the next manual step",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1325,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 5775,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1074,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 1495,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "cancel run retains completed state and superseding work rejects stale updates",
+            "browser": "chromium",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 3357,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "cancel run retains completed state and superseding work rejects stale updates",
+            "browser": "firefox",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 2901,
+                "errorMessages": []
+              }
+            ]
+          },
+          {
+            "title": "cancel run retains completed state and superseding work rejects stale updates",
+            "browser": "webkit",
+            "status": "expected",
+            "results": [
+              {
+                "status": "passed",
+                "durationMs": 3088,
+                "errorMessages": []
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "checkLogs": [
+      {
+        "name": "typecheck",
+        "result": "passed",
+        "path": "artifacts/phase-1/cancel-ack-after/typecheck.log",
+        "sha256": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+        "resultAttribution": "Executed and reported by implementation agent; reviewer verified exact log bytes."
+      },
+      {
+        "name": "lint",
+        "result": "passed",
+        "path": "artifacts/phase-1/cancel-ack-after/lint.log",
+        "sha256": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+        "resultAttribution": "Executed and reported by implementation agent; reviewer verified exact log bytes."
+      }
+    ],
+    "reviewerDiffCheck": {
+      "command": "git diff --check -- src/ui/useTwin.ts tests/browser/phase1.spec.ts",
+      "exitCode": 0
+    },
+    "reportedSourceHashesMatchCurrent": true
+  },
+  "findings": [],
+  "openFindings": [],
+  "publication": {
+    "rawBrowserReportsCopied": false,
+    "rawImageOrTraceFilesCopied": false,
+    "localPathsInErrorText": "Replaced current checkout path with <source-checkout> in the newly authored summary; raw reports remain ignored and unchanged."
+  },
+  "limitations": [
+    "This verifies a bounded Cancel fix and the implementation agent’s 18-case local result. It is not a full 81-case browser/CI acceptance claim.",
+    "Before-run artifact proves the 20-versus-110 failure. Its baseline hook identity is attributed to the implementation agent; the baseline code is independently compared from git, but that run did not record a separate full source hash manifest.",
+    "No numerical, protocol, worker, integration-budget, deployment or release change is approved by this report. Later changes to the reviewed source hashes require renewed review."
+  ]
+}

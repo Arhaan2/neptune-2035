@@ -1,0 +1,10 @@
+PASS: source checkpoint and unchanged original tag
+PASS: 216 baseline tracked files equal pinned Git source and current checkout
+PASS: recorded before/after preservation of every application and publication file
+PASS: raw evidence content hashes and executed harness identity
+PASS: final diagnostic helper revision rechecked with fresh baseline npm ci
+PASS: observed identities, complete compiled recovery and published manifest
+PASS: read-only Pages publication trigger evidence
+PASS: fresh install/build/existing tests and semantic desired failures
+PASS: all six findings reproduce now with a fresh baseline source and npm ci
+Phase 0 status: PASS. Evidence preservation only; known defects remain. Receipt: artifacts/phase-0/gate-1788941019733/gate.json

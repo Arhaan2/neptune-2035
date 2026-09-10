@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_REVIEW_ONLY",
+  "reviewedAt": "2026-09-09T22:43:23.422Z",
+  "base": "87de1f5571c254353c2450176331af221c1f595e",
+  "scope": "Independent review of worker_recovery-authored diagnostic startup/cleanup correction and its actual colored-environment reproduction. This reviewer authored the earlier diagnostic, but made no executable change or browser/server launch for this correction. No runtime suite was rerun for this observational-script-only edit.",
+  "findings": [],
+  "source": {
+    "path": "scripts/phase-1/diagnose-firefox.mjs",
+    "priorSha256": "a9d8c6cce2a6b494af8ed56365cb9936ccdf4df1b508f0d8ce9374a6a9ff22a0",
+    "reviewedSha256": "04a612861257e58070570684a1b6a9f917d88aaf0d9e6c503503a16d852cb16b",
+    "diffSha256": "3d507ca1baa22048a381d85cbc4550e142b35031ce27f4537914912a56c828ca",
+    "otherAcceptedExecutableHashesUnchanged": 79,
+    "protectedHashesUnchanged": 73,
+    "productTestsWorkflowBrowserSettingsDeadlinesUnchanged": true
+  },
+  "diagnosis": {
+    "result": "Confirmed diagnostic readiness defect",
+    "evidence": "Installed Vite printServerUrls inserts ANSI bold sequences around the port within the URL. Installed picocolors enables color when CI is truthy unless NO_COLOR is truthy. The old plain substring therefore fails in the reproduced colored-CI environment.",
+    "installedSourceReferences": [
+      "node_modules/vite/dist/node/chunks/node.js:3299",
+      "node_modules/picocolors/picocolors.js:2"
+    ],
+    "limits": "This explains missing diagnostic observations before Firefox launch; it does not explain the original hosted Firefox scene/input stalls."
+  },
+  "repair": {
+    "assessment": "Vite public createServer/listen binds the actual owned127.0.0.1:5183 socket with strictPort and open:false. Readiness checks its listening/address state before the existing bounded HTTP probe. No CLI stdout parsing, temporary bind/rebind or reusable external server is involved.",
+    "preserved": {
+      "startupMs": 8000,
+      "httpAttemptMs": 500,
+      "httpRetryDelayMs": 100,
+      "normalSupervisorMs": 88000,
+      "cleanupProbeMs": 20000,
+      "viewport": {
+        "width": 1600,
+        "height": 1050
+      },
+      "nativeObservationMs": 3000
+    },
+    "cleanup": "Late create/listen operations observe stopping and close. Normal Vite API close is bounded to2s; atomic registered-PGID publication and supervisor group TERM/KILL/absence checks remain. Actual forced cleanup independently left both registered groups absent.",
+    "resolvedReviewComment": "Preserved500ms HTTP retries within the8s stage rather than narrowing readiness to one500ms request."
+  },
+  "actualVerification": {
+    "workerReportedEnvironment": {
+      "CI": "true",
+      "FORCE_COLOR": "1",
+      "NO_COLOR": "unset",
+      "host": {
+        "platform": "darwin",
+        "release": "25.6.0",
+        "arch": "arm64",
+        "cpu": "Apple M4 Pro",
+        "logicalCpus": 14,
+        "totalMemoryBytes": 25769803776,
+        "node": "v24.18.0"
+      }
+    },
+    "workerSummary": {
+      "path": "artifacts/phase-1/firefox-diagnostic-colored-summary.json",
+      "sha256": "d16850179b9a080666d99929dcc8f43465920d0018b1160ef1930a07c18db9ae"
+    },
+    "before": {
+      "status": "INCOMPLETE",
+      "readinessElapsedMs": 8002.053167,
+      "variants": 0
+    },
+    "after": {
+      "status": "COLLECTED",
+      "pages": 9,
+      "normalClicks": 6,
+      "stageErrors": 0,
+      "readinessElapsedMs": 142.720459,
+      "totalElapsedMs": 34783.763333,
+      "apiCloseMs": 2.7832500000004075
+    },
+    "forcedCleanup": {
+      "status": "INCOMPLETE",
+      "expectedIncomplete": true,
+      "totalElapsedMs": 20406.544707999998,
+      "registeredGroups": 2,
+      "groupsIndependentlyAbsent": true
+    },
+    "syntaxAndDiffChecks": "Passed, as recorded in worker summary; reviewer read installed API types/source and exact outputs."
+  },
+  "hostedSetupFailures": [
+    {
+      "kind": "push",
+      "path": "docs/phase-1/evidence/ci-diagnostic-setup-push/diagnostic.json",
+      "sha256": "67b84a97ddf0d02a36975688452689887c0d2678dedf20fbc734e7c85794d8f3",
+      "source": "87de1f5571c254353c2450176331af221c1f595e",
+      "status": "INCOMPLETE",
+      "readinessElapsedMs": 8002.781667,
+      "variants": 0
+    },
+    {
+      "kind": "pr",
+      "path": "docs/phase-1/evidence/ci-diagnostic-setup-pr/diagnostic.json",
+      "sha256": "b1d5748bbedf47ceec6f44c92605dcd099970addb37bab1f0944d860c391dadf",
+      "source": "8cca2d4d78acf3669e7fae1b78bf8d9a75cb2368",
+      "status": "INCOMPLETE",
+      "readinessElapsedMs": 8008.789666999999,
+      "variants": 0
+    }
+  ],
+  "publication": {
+    "status": "PASS",
+    "files": [
+      {
+        "path": "scripts/phase-1/diagnose-firefox.mjs",
+        "bytes": 15883,
+        "sha256": "04a612861257e58070570684a1b6a9f917d88aaf0d9e6c503503a16d852cb16b",
+        "categories": []
+      },
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "bytes": 15450,
+        "sha256": "6767c35234d96c963845b0b8853ba722a6618f6b506ca2b2cfd83beeaa585b50",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "bytes": 24124,
+        "sha256": "0f1e24467cd9c54851206f53d39c71a88f11b0ce6e181b5d4e84edac0db30249",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-diagnostic-setup-push/diagnostic.json",
+        "bytes": 2286,
+        "sha256": "67b84a97ddf0d02a36975688452689887c0d2678dedf20fbc734e7c85794d8f3",
+        "categories": []
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-diagnostic-setup-pr/diagnostic.json",
+        "bytes": 2299,
+        "sha256": "b1d5748bbedf47ceec6f44c92605dcd099970addb37bab1f0944d860c391dadf",
+        "categories": []
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-readiness-before/diagnostic.json",
+        "bytes": 2431,
+        "sha256": "1f2c29fd32a5e40e5effc6460175d3556338a83f1d6c8bd0d362f7bc33ba962a",
+        "categories": []
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-readiness-after/diagnostic.json",
+        "bytes": 64278,
+        "sha256": "453948e0a2b6b1795aa16f412d404241381559c28c65c352b2780e0c3e2a6074",
+        "categories": []
+      },
+      {
+        "path": "docs/phase-1/evidence/firefox-diagnostic-readiness-cleanup/diagnostic.json",
+        "bytes": 3016,
+        "sha256": "f59a005ae4a39ecb0901243b950e1190fe29c3337895bcc5fc72fb0b32b130f1",
+        "categories": []
+      }
+    ],
+    "rawCopies": [
+      {
+        "kind": "before",
+        "path": "docs/phase-1/evidence/firefox-diagnostic-readiness-before/diagnostic.json",
+        "raw": "artifacts/phase-1/firefox-diagnostic-colored-before/diagnostic.json",
+        "sha256": "1f2c29fd32a5e40e5effc6460175d3556338a83f1d6c8bd0d362f7bc33ba962a",
+        "bytes": 2431,
+        "status": "INCOMPLETE"
+      },
+      {
+        "kind": "after",
+        "path": "docs/phase-1/evidence/firefox-diagnostic-readiness-after/diagnostic.json",
+        "raw": "artifacts/phase-1/firefox-diagnostic-colored-final/diagnostic.json",
+        "sha256": "453948e0a2b6b1795aa16f412d404241381559c28c65c352b2780e0c3e2a6074",
+        "bytes": 64278,
+        "status": "COLLECTED"
+      },
+      {
+        "kind": "forcedCleanup",
+        "path": "docs/phase-1/evidence/firefox-diagnostic-readiness-cleanup/diagnostic.json",
+        "raw": "artifacts/phase-1/firefox-diagnostic-colored-cleanup/diagnostic.json",
+        "sha256": "f59a005ae4a39ecb0901243b950e1190fe29c3337895bcc5fc72fb0b32b130f1",
+        "bytes": 3016,
+        "status": "INCOMPLETE"
+      }
+    ],
+    "assessment": "All8 reviewed files are regular UTF-8 text, all JSON parses, and raw copies are byte-identical. Only documentation terminology matched scans; no credentials, private observation payloads, recordings, screenshots, traces or websocket endpoints are present. The new public raw outputs contain synthetic app and selected system/render data only.",
+    "documentation": "Acceptance distinguishes the prior complete61bf694256/81 local run from this diagnostic-only correction with79 unchanged executable/configuration files. CI investigation records exact before/after outcomes, no hosted graphics observations in failed setups, pending final run status and required future normal CI.",
+    "selfExcluded": true
+  },
+  "checks": [
+    "Verify the sole accepted-source hash difference is diagnose-firefox.mjs and all73 protected hashes remain exact.",
+    "Inspect installed Vite public API signatures and CLI/picocolors formatting source.",
+    "Read all final nine-page stages, six normal-click outcomes, API readiness and close results; independently check forced-cleanup PGIDs absent.",
+    "Compare both hosted failure JSONs and three local raw outputs byte-for-byte with preserved artifacts.",
+    "Scan8 publication/source files and verify frozen documentation hashes; no new runtime tests or remote operations."
+  ],
+  "limitations": [
+    "Next exact-head normal CI must still execute all acceptance gates. No hosted Firefox cause, hosted pass or merge is established here.",
+    "Reported CI environment and process exit outcomes are from worker-run commands and their retained summary; raw diagnostic records independently verify source hashes/stages and supervisor observations.",
+    "Future PR-body/status updates and eventual hosted full-gate/cancellation results are outside this frozen tracked-file receipt."
+  ]
+}

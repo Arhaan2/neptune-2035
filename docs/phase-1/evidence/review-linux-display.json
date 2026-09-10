@@ -1,0 +1,147 @@
+{
+  "reviewedAt": "2026-09-09T23:38:58.711Z",
+  "status": "PASS",
+  "findings": [],
+  "scope": "Independent bounded review of five changed tracked files, two new hosted diagnostic JSON files, and exact local probe reports. No runtime/test implementation changes.",
+  "headBeforeCommit": "6ad545e6900452d75e2f465d68a3cbca28b2d75a",
+  "acceptedLocalSource": "61bf694662560d12ba398bfe598540926d11a9cb",
+  "preservation": {
+    "acceptedSourceHashes": 80,
+    "unchanged": 77,
+    "reviewedDifferences": {
+      ".github/workflows/phase-1.yml": "3c6340b6044d7e9bd39ca7f6db2b2128018f106223a051be95ca34f07cf7ab0a",
+      "playwright.config.ts": "f0afe915900e53623d33f42fbb3e993596544367b00bf2bd28d4879236d3fbb0",
+      "scripts/phase-1/diagnose-firefox.mjs": "8082dcc22a4ceb9a82b39a4929ac2f7488477be0ec987471609fa409938b9d2b"
+    },
+    "protectedHashesMatched": 73,
+    "applicationAndAllTestBodiesUnchanged": true
+  },
+  "configuration": [
+    "Linux Firefox uses headed mode with an actual Xvfb display; Darwin behavior remains headless. Both diagnostic and complete verification run under separate owned xvfb-run wrappers with MOZ_HEADLESS removed. Viewport remains 1600x1050 CSS pixels/DPR1 within a 1920x1200x24 display.",
+    "The scoped apt install includes xvfb, xauth, Mesa GLX/DRI/EGL and mesa-utils with --no-upgrade. Explicit xauth resolves the documented xvfb-run prerequisite absent from Playwright dependency lists.",
+    "All 256 unit cases/both telemetry flags, 81 browser cases, real WebGL/camera assertions, measurements, tolerances, timeouts, workers and retries remain unchanged. Read-only workflow permissions, triggers, full-gate failure behavior and absence of deployment/release steps remain."
+  ],
+  "diagnostic": [
+    "Mode is explicit and MOZ_HEADLESS conflict fails before server/browser startup. Default CLI mode remains headless.",
+    "Native WebGL2 context creation, red pixel readback and bounded creation errors are observed only on a separate blank canvas after the unchanged native frame sample. Context loss is requested before page cleanup. Successful native pixels are distinct from application rendering.",
+    "Snapshots add fallback markers, total canvas count and scene readiness; missing finite camera vectors remain unknown. Click completion or unchanged camera coordinates alone are not treated as rendered acceptance.",
+    "Linux glxinfo and fixed dpkg queries inherit the actual display, each bounded to 2 seconds with SIGKILL/16KiB output and sanitized 1200-character fields within a 5-second stage. Existing 82-second work/89-second supervisor budgets and registered-group cleanup remain."
+  ],
+  "localValidation": {
+    "environment": "macOS Apple M4 Pro only; Linux inventory and Xvfb were not run locally.",
+    "results": {
+      "default": {
+        "path": "artifacts/phase-1/firefox-diagnostic-headed-reviewed-default/diagnostic.json",
+        "sha256": "b43df2c54e286aa845e36365ceac2ed2fb3a28c091c8b70fa5594e742fb0419b",
+        "status": "COLLECTED",
+        "elapsedMs": 35185.815334000006,
+        "mode": "headless"
+      },
+      "headed": {
+        "path": "artifacts/phase-1/firefox-diagnostic-headed-reviewed-headed/diagnostic.json",
+        "sha256": "fc99a5be1be18567b104b6077072bce00177e36fc11c17ab9729ec8f52b8626f",
+        "status": "COLLECTED",
+        "elapsedMs": 36653.720791,
+        "mode": "headed"
+      },
+      "conflict": {
+        "path": "artifacts/phase-1/firefox-diagnostic-headed-reviewed-conflict/diagnostic.json",
+        "sha256": "a7f3cbb15ffc57b00dadabcc3d766b80abcf356b583dff624b8fc7a9eb2e6df4",
+        "status": "INCOMPLETE",
+        "elapsedMs": 443.64766599999996,
+        "mode": "headed"
+      }
+    },
+    "observed": "Default and headed reports each contain nine pages, three successful native [255,0,0,255] red readbacks with GL error zero, six app pages with actual WebGL/populated scene/positive draw calls and no fallback markers, and six completed ordinary clicks. No stage errors. Conflict report is intentionally INCOMPLETE before any stage. All nine recorded owned groups were independently absent.",
+    "cameraLimitation": "Observed unchanged immediate camera vectors are retained; no forced camera-change or 3D acceptance conclusion is inferred."
+  },
+  "hostedHeadlessObservations": {
+    "source": "6ad545e6900452d75e2f465d68a3cbca28b2d75a",
+    "pushMs": 55168.310785,
+    "prMs": 53627.191324,
+    "status": "COLLECTED in both",
+    "scope": "Six ordinary clicks per run completed while all legacy readiness waits failed and selected rendered canvas/WebGL/scene snapshots stayed null. This does not establish unsupported graphics or full application acceptance."
+  },
+  "publication": {
+    "inventory": [
+      {
+        "path": ".github/workflows/phase-1.yml",
+        "bytes": 1829,
+        "sha256": "3c6340b6044d7e9bd39ca7f6db2b2128018f106223a051be95ca34f07cf7ab0a"
+      },
+      {
+        "path": "playwright.config.ts",
+        "bytes": 1786,
+        "sha256": "f0afe915900e53623d33f42fbb3e993596544367b00bf2bd28d4879236d3fbb0"
+      },
+      {
+        "path": "scripts/phase-1/diagnose-firefox.mjs",
+        "bytes": 21630,
+        "sha256": "8082dcc22a4ceb9a82b39a4929ac2f7488477be0ec987471609fa409938b9d2b"
+      },
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "bytes": 15966,
+        "sha256": "0be59093a54775f614193a29d5cc6300897ee034113dccb65ca9098c278a694c"
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "bytes": 33957,
+        "sha256": "41392b1e4d720aeb0c767bc33dee8c6628d33139649423e4bc5180d452bbca70"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-headless-diagnostic-push/diagnostic.json",
+        "bytes": 42670,
+        "sha256": "9919be0f0991a7e0ebbea0517464597c646b576ebecb4317c620b206944a4063"
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-headless-diagnostic-pr/diagnostic.json",
+        "bytes": 42568,
+        "sha256": "0cc805dc653ef7406276f0c358eee9b6a8c6f7a596769a5d8f0c156503d033f6"
+      }
+    ],
+    "patternHits": [
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      }
+    ],
+    "assessment": "Regular UTF-8 text; JSON parsed. No credentials, private observation payloads, recordings or embedded media found. Hits are explanatory documentation terminology.",
+    "excludedUntrackedDuplicates": [
+      {
+        "path": ".github/workflows/phase-1 2.yml",
+        "sha256": "bf897ceec0a7dc235a87ba0e33f2e0c0dc62b71ad40604120eed8c9acd3c6bde",
+        "included": false
+      },
+      {
+        "path": "playwright.config 2.ts",
+        "sha256": "7cb921e320b050706fc1f7f230706333875709b33e50d7cfc79ac0810742bca8",
+        "included": false
+      }
+    ]
+  },
+  "references": [
+    "https://playwright.dev/docs/ci#running-headed",
+    "https://github.com/microsoft/playwright/blob/v1.63.0/packages/playwright-core/src/server/firefox/firefox.ts#L77-L98",
+    "https://github.com/mozilla-firefox/firefox/blob/main/dom/ipc/ContentChild.cpp#L674-L706",
+    "https://manpages.ubuntu.com/manpages/noble/man1/xvfb-run.1.html"
+  ],
+  "checks": [
+    "Reviewed exact source/configuration and final documentation changes.",
+    "Verified 80 accepted source hashes, 73 protected hashes, exact local report hashes, per-page native/app observations and process-group absence.",
+    "Scanned seven intended publication files with filename/category-only output; unknown executable duplicates are preserved in place and excluded from this candidate."
+  ],
+  "limitations": [
+    "No additional tests, browsers, servers, commits or remote writes by this reviewer.",
+    "Local macOS probe observations do not validate headed Linux Xvfb/Mesa behavior.",
+    "Diagnostic COLLECTED is not application PASS. Actual native Linux observations and complete exact-head normal CI remain mandatory before merge."
+  ]
+}

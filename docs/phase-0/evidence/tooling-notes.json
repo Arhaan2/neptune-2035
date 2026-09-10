@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-09-09T07:35:17.928922+00:00",
+  "kind": "Retrospective summaries of observed setup attempts; exact attempt timestamps not separately captured",
+  "attempts": [
+    {
+      "command": "curl -fSL --max-time 30 https://arhaan2.github.io/neptune-2035/v2-preview/release.json",
+      "exitCode": 6,
+      "observed": "Could not resolve host under restricted network sandbox",
+      "resolution": "Authorized read-only HTTP capture succeeded for all 51 public files."
+    },
+    {
+      "command": "web.open on public release/build manifests",
+      "observed": "Web retrieval tool returned safe-open/internal errors",
+      "resolution": "Used authorized direct public HTTP retrieval; saved complete metadata and hashes."
+    },
+    {
+      "command": "node scripts/phase-0/clean-check.mjs --baseline-only --out=artifacts/phase-0/baseline-first (initial tooling attempt)",
+      "exitCode": 1,
+      "observed": "ENOENT creating nested evidence directory before installation began",
+      "resolution": "Created parent directory in test-only helper; clean rerun passed."
+    },
+    {
+      "command": "node scripts/phase-0/audit.mjs --out=artifacts/phase-0/development-diagnostics",
+      "exitCode": 0,
+      "observed": "Initial Vite helper emitted WebSocket listen EPERM on 24678 while numerical diagnostics executed",
+      "resolution": "Test-only loader uses configFile:false and server.ws:false; accepted final clean diagnostics had no socket warning."
+    },
+    {
+      "command": "anonymous GET /repos/Arhaan2/neptune-2035/pages",
+      "httpStatus": 404,
+      "resolution": "Authenticated read-only gh api query succeeded; both responses retained."
+    },
+    {
+      "command": "npm ci in clean source archives",
+      "exitCode": 0,
+      "observed": "Existing fsevents install-script policy warning, zero vulnerabilities reported",
+      "resolution": "No policy/dependency/lockfile change; installation and all required checks succeeded."
+    },
+    {
+      "command": "node_modules/.bin/oxlint scripts/phase-0 (first helper lint)",
+      "exitCode": 1,
+      "observed": "unicorn(no-useless-spread) on redundant test-local hydraulic input object spread",
+      "resolution": "Removed redundant spread, lint exit 0. Also preserved infrastructure exit status when semantic defects coexist; checked final helper with new clean npm ci plus diagnostics."
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 2,
+      "observed": "Six new blank-line-at-EOF notices in verbatim npm/Vitest logs",
+      "resolution": "Preserved raw bytes/hashes. Staged whitespace check excluding only evidence/**/*.log passed for all code/JSON/document files."
+    },
+    {
+      "command": "earlier clean-final and diagnostic-final phase-0 helper runs",
+      "exitCode": 0,
+      "observed": "An unused Vite client/UI dependency scan failed to resolve @ aliases after configFile:false; actual SSR module imports and six focused checks completed",
+      "resolution": "Disabled unused optimizeDeps discovery/entries in the test-only numerical loader. Fresh diagnostic-verified npm ci and all six findings passed without that warning. Baseline Three.js deprecation console warnings remain in server.log and are not Phase 0 fixes."
+    }
+  ],
+  "selectedEvidencePolicy": "Auxiliary desired runs and the final focused recheck retain raw aggregate audit.json plus command logs; duplicate per-finding files and generated project payloads omitted. Complete raw directories remain local in artifacts/phase-0. Full complete-run per-finding evidence is retained in clean-final/diagnostics. Delivered final helper proof is diagnostic-verified; earlier diagnostic-final remains identified separately."
+}

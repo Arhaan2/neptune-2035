@@ -1,0 +1,320 @@
+
+> neptune@2.0.0-rc.1 test:browser
+> playwright test
+
+
+Running 78 tests using 1 worker
+
+  ✓   1 [chromium] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (15.8s)
+  ✓   2 [chromium] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (14.1s)
+  ✓   3 [chromium] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (12.2s)
+  ✓   4 [chromium] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (42.6s)
+  ✓   5 [chromium] › tests/browser/phase1.spec.ts:65:1 › PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint (8.9s)
+  ✓   6 [chromium] › tests/browser/phase1.spec.ts:186:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally (6.9s)
+  ✓   7 [chromium] › tests/browser/phase1.spec.ts:228:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export (3.5s)
+  ✓   8 [chromium] › tests/browser/phase1.spec.ts:262:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity (4.6s)
+  ✓   9 [chromium] › tests/browser/phase1.spec.ts:330:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target (19.9s)
+  ✓  10 [chromium] › tests/browser/phase1.spec.ts:367:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue (3.4s)
+  ✓  11 [chromium] › tests/browser/phase1.spec.ts:407:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it (4.3s)
+  ✓  12 [chromium] › tests/browser/phase1.spec.ts:460:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available (3.5s)
+  ✓  13 [chromium] › tests/browser/phase1.spec.ts:491:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid (3.9s)
+  ✓  14 [chromium] › tests/browser/phase1.spec.ts:519:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null (4.0s)
+  ✓  15 [chromium] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (7.7s)
+  ✓  16 [chromium] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition (5.1s)
+  ✓  17 [chromium] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls (7.4s)
+  ✓  18 [chromium] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results (8.2s)
+  ✓  19 [chromium] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates (8.3s)
+  ✓  20 [chromium] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (6.0s)
+  ✓  21 [chromium] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (6.7s)
+  ✓  22 [chromium] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (5.4s)
+  ✓  23 [chromium] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (3.9s)
+  ✓  24 [chromium] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (33.7s)
+  ✓  25 [chromium] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model (5.9s)
+  ✓  26 [chromium] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (9.8s)
+  ✘  27 [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (24.3s)
+  ✘  28 [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (1.2m)
+  ✓  29 [firefox] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (1.0m)
+  ✘  30 [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (44.7s)
+  ✓  31 [firefox] › tests/browser/phase1.spec.ts:65:1 › PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint (9.6s)
+  ✓  32 [firefox] › tests/browser/phase1.spec.ts:186:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally (8.0s)
+  ✓  33 [firefox] › tests/browser/phase1.spec.ts:228:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export (3.3s)
+  ✓  34 [firefox] › tests/browser/phase1.spec.ts:262:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity (6.0s)
+  ✓  35 [firefox] › tests/browser/phase1.spec.ts:330:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target (24.5s)
+  ✓  36 [firefox] › tests/browser/phase1.spec.ts:367:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue (4.2s)
+  ✓  37 [firefox] › tests/browser/phase1.spec.ts:407:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it (5.4s)
+  ✓  38 [firefox] › tests/browser/phase1.spec.ts:460:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available (3.7s)
+  ✓  39 [firefox] › tests/browser/phase1.spec.ts:491:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid (3.5s)
+  ✓  40 [firefox] › tests/browser/phase1.spec.ts:519:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null (4.5s)
+  ✘  41 [firefox] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (1.2m)
+  ✓  42 [firefox] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition (45.0s)
+  ✓  43 [firefox] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls (22.9s)
+  ✓  44 [firefox] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results (35.5s)
+  ✓  45 [firefox] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates (28.0s)
+  ✘  46 [firefox] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (16.0s)
+  ✓  47 [firefox] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (1.1m)
+  ✓  48 [firefox] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (17.4s)
+  ✓  49 [firefox] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (3.6s)
+  ✘  50 [firefox] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (1.2m)
+  ✓  51 [firefox] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model (34.3s)
+  ✘  52 [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (1.1m)
+  ✓  53 [webkit] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources (17.5s)
+  ✓  54 [webkit] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing (13.4s)
+  ✓  55 [webkit] › tests/browser/acceptance.spec.ts:215:1 › mobile controls, contextual inspection and explicit WebGL fallback (10.9s)
+  ✓  56 [webkit] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access (40.7s)
+  ✓  57 [webkit] › tests/browser/phase1.spec.ts:65:1 › PH1-REP-02 Pause remains available during an advance and delayed real worker replies cannot move its checkpoint (7.9s)
+  ✓  58 [webkit] › tests/browser/phase1.spec.ts:186:1 › PH1-UI-01 saves complete checkpoints, recovers on refresh, and rejects malformed import transactionally (6.3s)
+  ✓  59 [webkit] › tests/browser/phase1.spec.ts:228:1 › PH1-UI-01 quota failure preserves last durable checkpoint and allows current manual export (4.0s)
+  ✓  60 [webkit] › tests/browser/phase1.spec.ts:262:1 › PH1-COMP-01 legacy inspection and explicit recalculation preserve the original identity (4.8s)
+  ✓  61 [webkit] › tests/browser/phase1.spec.ts:330:1 › PH1-REP-02 replay cancellation retains a committed checkpoint and resume reaches the same target (11.8s)
+  ✓  62 [webkit] › tests/browser/phase1.spec.ts:367:1 › PH1-REP-02 an actual worker error event keeps validated state and a new worker can continue (3.7s)
+  ✓  63 [webkit] › tests/browser/phase1.spec.ts:407:1 › PH1-REP-02 import supersedes replay and a delivered stale worker response cannot overwrite it (4.1s)
+  ✓  64 [webkit] › tests/browser/phase1.spec.ts:460:1 › PH1-UI-01 unreadable recovery is retained until an explicit clear and manual export remains available (3.4s)
+  ✓  65 [webkit] › tests/browser/phase1.spec.ts:491:1 › PH1-REP-01 exact restoration and UI replay preserve a fractional integration grid (3.4s)
+  ✓  66 [webkit] › tests/browser/phase1.spec.ts:519:1 › PH1-NUM-03 a stored scenario numeric overflow is rejected before JSON rewriting can turn it into null (5.4s)
+  ✓  67 [webkit] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay (8.6s)
+  ✓  68 [webkit] › tests/browser/twin.spec.ts:86:1 › standby transfer is an actual selected-component state transition (6.1s)
+  ✓  69 [webkit] › tests/browser/twin.spec.ts:99:1 › clock pause and speed are independent of design resets and validated controls (6.6s)
+  ✓  70 [webkit] › tests/browser/twin.spec.ts:115:1 › seek backward and forward restores exact event-boundary numerical results (8.4s)
+  ✓  71 [webkit] › tests/browser/twin.spec.ts:146:1 › cancel run retains completed state and superseding work rejects stale updates (8.1s)
+  ✓  72 [webkit] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state (5.8s)
+  ✓  73 [webkit] › tests/browser/twin.spec.ts:203:1 › comparison renders two computed 240-second runs and exports identical disturbance histories (6.9s)
+  ✓  74 [webkit] › tests/browser/twin.spec.ts:220:1 › project exports and imports replay numerical state, with invalid mappings rejected visibly (5.4s)
+  ✓  75 [webkit] › tests/browser/twin.spec.ts:235:1 › mobile keyboard and explicit fallback retain asset inspection, operation and exports (5.4s)
+  ✓  76 [webkit] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics (33.7s)
+  ✓  77 [webkit] › tests/browser/twin.spec.ts:290:1 › legacy saved scenario links retain the explicit aggregate model (5.6s)
+  ✓  78 [webkit] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice (8.9s)
+
+
+  1) [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('main')
+    Expected: "true"
+    Received: "false"
+    Timeout:  12000ms
+
+    Call log:
+      - Expect "toHaveAttribute" locator('main') with timeout 12000ms
+      - waiting for locator('main')
+        2 × locator resolved to <main class="app  " data-modules="40" data-xray="false" data-demo="false" data-ready="false" data-generation="2" data-inside="false" data-exploded="false">…</main>
+          - unexpected value "false"
+
+
+       5 | async function load(page: Page) {
+       6 |   await page.goto('./?legacy=1');
+    >  7 |   await expect(root(page)).toHaveAttribute('data-ready', 'true');
+         |                            ^
+       8 |   await expect(page.locator('canvas')).toBeVisible();
+       9 |   await page.waitForTimeout(1600);
+      10 | }
+        at load (<verified-checkout>/tests/browser/acceptance.spec.ts:7:28)
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:37:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-rendered-modes--2ead5-erior-and-bounded-resources-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+
+      149 |     await imageDifference(initial, await page.locator('canvas').screenshot()),
+      150 |   ).toBeGreaterThan(0.025);
+    > 151 |   await page.getByRole('button', { name: 'NEPTUNE I 2026' }).click();
+          |                                                              ^
+      152 |   await expect(page.getByTestId('module-total')).toHaveText('04');
+      153 |   const input = page.getByRole('spinbutton', {
+      154 |     name: 'Accelerators',
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:151:62
+
+    Error Context: test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-presets-enginee-76e84-n-and-fresh-context-sharing-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Look beneath the surface.')
+    Expected: visible
+    Timeout: 8000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Look beneath the surface.') with timeout 8000ms
+      - waiting for getByText('Look beneath the surface.')
+
+
+      284 |   await expect(root(page)).toHaveAttribute('data-demo', 'true');
+      285 |   await expect(page.getByText('Start with the ocean.')).toBeVisible();
+    > 286 |   await expect(page.getByText('Look beneath the surface.')).toBeVisible({
+          |                                                             ^
+      287 |     timeout: 8000,
+      288 |   });
+      289 |   await expect(root(page)).toHaveAttribute('data-xray', 'true');
+        at <verified-checkout>/tests/browser/acceptance.spec.ts:286:61
+
+    Error Context: test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/acceptance-demo-runs-throu-0fa6d-arts-keyboard-dialog-access-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [firefox] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Full load', exact: true })
+        - locator resolved to <button>Full load</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+        - performing click action
+
+
+      60 |   await expect(page.locator('.twin-connections')).toContainText('technical');
+      61 |   await page.getByRole('button',{name:'Operate',exact:true}).click();
+    > 62 |   await page.getByRole('button',{name:'Full load',exact:true}).click();
+         |                                                                ^
+      63 |   await page.getByRole('button',{name:'Trip selected asset',exact:true}).click();
+      64 |   await expect.poll(()=>inspectorStatus(page)).toContain('failed');
+      65 |   await expect.poll(async()=>technicalFlow(await page.getByTestId('selected-flow').innerText())).toBe(0);
+        at <verified-checkout>/tests/browser/twin.spec.ts:62:64
+
+    Error Context: test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-specific-pump-failure-a5e36-ration-and-numerical-replay-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [firefox] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "cooling"
+    Received: undefined
+
+    Call Log:
+    - Timeout 12000ms exceeded while waiting on the predicate
+
+      179 |     const before=await exportArtifact(page,'results'),selected=await main(page).getAttribute('data-selected');
+      180 |     await page.getByRole('button',{name:'Cooling close-up',exact:true}).tap();
+    > 181 |     await expect.poll(async()=>(await diagnostics(page))?.focus).toBe('cooling');
+          |                                                                  ^
+      182 |     await page.getByRole('button',{name:'Inside module',exact:true}).tap();
+      183 |     await expect.poll(async()=>(await diagnostics(page))?.inside).toBe(true);
+      184 |     const entrance=(await diagnostics(page))?.camera;
+        at <verified-checkout>/tests/browser/twin.spec.ts:181:66
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-reduced-motion-touch--0a9b1-ed-asset-and-physical-state-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [firefox] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+
+      256 |   await expect.poll(async()=>(await diagnostics(page))?.focus).toBe('cooling');
+      257 |   await screenshot(page,info,'cooling-close-up');
+    > 258 |   await page.getByRole('button',{name:'Inside module',exact:true}).click();await expect.poll(async()=>(await diagnostics(page))?.inside).toBe(true);
+          |                                                                    ^
+      259 |   const inside=(await diagnostics(page))?.camera;await canvas.focus();await page.keyboard.down('w');await page.waitForTimeout(300);await page.keyboard.up('w');
+      260 |   await expect.poll(async()=>(await diagnostics(page))?.camera).not.toEqual(inside);
+      261 |   await page.keyboard.press('Escape');await expect.poll(async()=>(await diagnostics(page))?.inside).toBe(false);
+        at <verified-checkout>/tests/browser/twin.spec.ts:258:68
+
+    attachment #1: cooling-close-up (image/png) ────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/attachments/cooling-close-up-96b0685c2bfc529dc46bbb614868bf9b550e5bcb.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/twin-context-cameras-keybo-728ab-ded-large-scene-diagnostics-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice ────────────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: page.evaluate: Test timeout of 60000ms exceeded.
+
+      19 |     fullPage: true,
+      20 |   });
+    > 21 |   const timing = await page.evaluate(async () => {
+         |                             ^
+      22 |     const intervals: number[] = [];
+      23 |     let last = window.performance.now();
+      24 |     await new Promise<void>((resolve) => {
+        at <verified-checkout>/tests/browser/visual.spec.ts:21:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/visual-capture-the-first-coherent-3D-slice-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/visual-capture-the-first-coherent-3D-slice-firefox/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/visual-capture-the-first-coherent-3D-slice-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/visual-capture-the-first-coherent-3D-slice-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    [firefox] › tests/browser/acceptance.spec.ts:28:1 › rendered modes, connected exploded paths, interior and bounded resources 
+    [firefox] › tests/browser/acceptance.spec.ts:137:1 › presets, engineering controls, validation and fresh-context sharing 
+    [firefox] › tests/browser/acceptance.spec.ts:279:1 › demo runs through real state, cancels, restores and restarts; keyboard dialog access 
+    [firefox] › tests/browser/twin.spec.ts:50:1 › specific pump failure propagates to flow, clock, thermal state, restoration and numerical replay 
+    [firefox] › tests/browser/twin.spec.ts:176:3 › reduced-motion touch acceptance › touch waypoints and keyboard exit preserve exact selected asset and physical state 
+    [firefox] › tests/browser/twin.spec.ts:248:1 › context cameras, keyboard interior, distinct families and bounded large-scene diagnostics 
+    [firefox] › tests/browser/visual.spec.ts:3:1 › capture the first coherent 3D slice ─────────────
+  71 passed (21.6m)

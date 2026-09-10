@@ -233,7 +233,7 @@ describe('versioned asynchronous worker',()=>{
     expect(waiters).toHaveLength(1);
     await handler({version:2,requestId:2,epoch:1,kind:'cancel'});
     waiters.shift()!();await running;
-    expect(responses).toHaveLength(1);expect(responses[0].state).toBeUndefined();
+    expect(responses).toHaveLength(1);expect(responses[0].status).toBe('cancelled');expect(responses[0].state).toEqual(initialize(d));
     await handler({version:2,requestId:1,epoch:0,kind:'initialize',design:d});expect(responses).toHaveLength(1);
     await handler({version:2,requestId:3,epoch:2,kind:'initialize',design:d});expect(responses.at(-1)?.state?.timeS).toBe(0);
   });

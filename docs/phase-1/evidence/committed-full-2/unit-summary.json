@@ -1,0 +1,1361 @@
+{
+  "success": true,
+  "total": 256,
+  "passed": 256,
+  "failed": 0,
+  "skipped": 0,
+  "files": [
+    {
+      "name": "tests/model.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "deterministic electrical model matches an independently hand-calculated 8-GPU node",
+          "status": "passed",
+          "durationMs": 1.0512500000000102
+        },
+        {
+          "name": "deterministic electrical model is deterministic and does not mutate input",
+          "status": "passed",
+          "durationMs": 0.40937500000001137
+        },
+        {
+          "name": "deterministic electrical model rounds 8 GPUs into whole nodes",
+          "status": "passed",
+          "durationMs": 0.1129579999999919
+        },
+        {
+          "name": "deterministic electrical model rounds 9 GPUs into whole nodes",
+          "status": "passed",
+          "durationMs": 0.06645800000001145
+        },
+        {
+          "name": "deterministic electrical model rounds 31 GPUs into whole nodes",
+          "status": "passed",
+          "durationMs": 0.07675000000000409
+        },
+        {
+          "name": "deterministic electrical model rounds 32 GPUs into whole nodes",
+          "status": "passed",
+          "durationMs": 0.06537500000001728
+        },
+        {
+          "name": "deterministic electrical model rounds 33 GPUs into whole nodes",
+          "status": "passed",
+          "durationMs": 0.08191600000000676
+        },
+        {
+          "name": "deterministic electrical model crosses rack and module boundaries at 2560",
+          "status": "passed",
+          "durationMs": 0.09200000000001296
+        },
+        {
+          "name": "deterministic electrical model crosses rack and module boundaries at 2561",
+          "status": "passed",
+          "durationMs": 0.0816250000000025
+        },
+        {
+          "name": "deterministic electrical model crosses rack and module boundaries at 20480",
+          "status": "passed",
+          "durationMs": 0.0903329999999869
+        },
+        {
+          "name": "deterministic electrical model crosses rack and module boundaries at 20481",
+          "status": "passed",
+          "durationMs": 0.05133300000002805
+        },
+        {
+          "name": "deterministic electrical model preserves idle draw and installed peak at zero utilization",
+          "status": "passed",
+          "durationMs": 0.10541700000001697
+        },
+        {
+          "name": "deterministic electrical model uses peak demand for supply warnings even at idle",
+          "status": "passed",
+          "durationMs": 8.603332999999992
+        },
+        {
+          "name": "deterministic electrical model increases facility demand with PUE without changing IT capacity or heat boundary",
+          "status": "passed",
+          "durationMs": 0.1279999999999859
+        },
+        {
+          "name": "deterministic electrical model rack space and power allocations fit the declared supported envelope",
+          "status": "passed",
+          "durationMs": 0.07675000000000409
+        },
+        {
+          "name": "thermal accounting conserves heat in watts through seawater density, heat capacity and rise",
+          "status": "passed",
+          "durationMs": 0.049374999999997726
+        },
+        {
+          "name": "thermal accounting halves flow when assumed discharge rise doubles",
+          "status": "passed",
+          "durationMs": 0.038375000000002046
+        },
+        {
+          "name": "thermal accounting warmer water reduces headroom without secretly changing PUE or flow",
+          "status": "passed",
+          "durationMs": 0.043707999999980984
+        },
+        {
+          "name": "thermal accounting warns at zero/negative headroom with 27 °C inlet",
+          "status": "passed",
+          "durationMs": 0.03754199999997354
+        },
+        {
+          "name": "thermal accounting warns at zero/negative headroom with 28 °C inlet",
+          "status": "passed",
+          "durationMs": 0.029958999999990965
+        },
+        {
+          "name": "thermal accounting warns at zero/negative headroom with 38 °C inlet",
+          "status": "passed",
+          "durationMs": 0.019541000000003805
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count NaN",
+          "status": "passed",
+          "durationMs": 0.09766700000000128
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count Infinity",
+          "status": "passed",
+          "durationMs": 0.023791999999986047
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count -Infinity",
+          "status": "passed",
+          "durationMs": 0.019874999999984766
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count -1",
+          "status": "passed",
+          "durationMs": 0.01887499999997999
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count 0",
+          "status": "passed",
+          "durationMs": 0.019874999999984766
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count 7",
+          "status": "passed",
+          "durationMs": 0.02054100000000858
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count 1000000000",
+          "status": "passed",
+          "durationMs": 0.018666000000024496
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects invalid GPU count 10.5",
+          "status": "passed",
+          "durationMs": 0.36033299999999713
+        },
+        {
+          "name": "validated domain and extreme scenarios rejects missing fields, arrays, strings, non-numeric inputs and invalid generations",
+          "status": "passed",
+          "durationMs": 0.08591599999999744
+        },
+        {
+          "name": "validated domain and extreme scenarios every supported bound returns finite nonnegative demands",
+          "status": "passed",
+          "durationMs": 1.2172920000000147
+        },
+        {
+          "name": "validated domain and extreme scenarios presets give a pilot, campus, and actual gigawatt peak",
+          "status": "passed",
+          "durationMs": 0.08545899999998596
+        },
+        {
+          "name": "validated domain and extreme scenarios layout conserves actual platform and module counts at 8 GPUs",
+          "status": "passed",
+          "durationMs": 0.17770799999999554
+        },
+        {
+          "name": "validated domain and extreme scenarios layout conserves actual platform and module counts at 2561 GPUs",
+          "status": "passed",
+          "durationMs": 0.056000000000011596
+        },
+        {
+          "name": "validated domain and extreme scenarios layout conserves actual platform and module counts at 100000 GPUs",
+          "status": "passed",
+          "durationMs": 0.0730829999999969
+        },
+        {
+          "name": "validated domain and extreme scenarios layout conserves actual platform and module counts at 500000 GPUs",
+          "status": "passed",
+          "durationMs": 0.12254099999998402
+        },
+        {
+          "name": "validated domain and extreme scenarios layout conserves actual platform and module counts at 1000000 GPUs",
+          "status": "passed",
+          "durationMs": 0.12033299999998803
+        },
+        {
+          "name": "validated domain and extreme scenarios generation changes canonical arrangement and exploded offsets do not mutate it",
+          "status": "passed",
+          "durationMs": 0.8477919999999983
+        }
+      ]
+    },
+    {
+      "name": "tests/phase1-deferred.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "PH1-REG-01 deferred Phase 0 findings remain explicit PH0-003 retains the 4000-node shared port boundary and reports the 4001-node design shortfall",
+          "status": "passed",
+          "durationMs": 447.179583
+        },
+        {
+          "name": "PH1-REG-01 deferred Phase 0 findings remain explicit PH0-004 retains matching reference defaults and the documented ownership risk without claiming a runtime mismatch",
+          "status": "passed",
+          "durationMs": 5.077249999999935
+        },
+        {
+          "name": "PH1-REG-01 deferred Phase 0 findings remain explicit PH0-005 retains the genuine five-second outage and terminal-only passing assessment",
+          "status": "passed",
+          "durationMs": 110.0257499999999
+        },
+        {
+          "name": "PH1-REG-01 deferred Phase 0 findings remain explicit PH0-006 preserves radial II/III fault behavior without inventing an automatic transfer benefit",
+          "status": "passed",
+          "durationMs": 298.56958399999996
+        }
+      ]
+    },
+    {
+      "name": "tests/phase1-numerical.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings retains omitted defaults exactly, including an absent own property",
+          "status": "passed",
+          "durationMs": 1.821458000000007
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings rejects each explicit invalid shutoffPa, even with a disabled circuit",
+          "status": "passed",
+          "durationMs": 2.503667000000007
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings rejects each explicit invalid freeFlowM3S, even with a disabled circuit",
+          "status": "passed",
+          "durationMs": 1.3174999999999955
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings rejects each explicit invalid efficiency, even with a disabled circuit",
+          "status": "passed",
+          "durationMs": 1.1202499999999986
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings accepts finite positive ratings and inclusive unit efficiency but rejects efficiency above one",
+          "status": "passed",
+          "durationMs": 0.2760409999999922
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings keeps nonfinite diagnostics safely serializable with exact affected field and SI unit",
+          "status": "passed",
+          "durationMs": 0.14808300000001395
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings validates every required hydraulic scalar and standalone flow before calculating a zero",
+          "status": "passed",
+          "durationMs": 8.601540999999997
+        },
+        {
+          "name": "PH1-NUM-01 / PH1-NUM-02: pump boundary rejects explicit malformed ratings separates unsupported topology/affinity range from valid stopped pumps and small capacity",
+          "status": "passed",
+          "durationMs": 0.9597920000000215
+        },
+        {
+          "name": "PH1-NUM-03: actual numerical guard failures do not masquerade as success reports overflow, underflow and Darcy singular arithmetic as numerical failures",
+          "status": "passed",
+          "durationMs": 0.3553750000000093
+        },
+        {
+          "name": "PH1-NUM-03: actual numerical guard failures do not masquerade as success uses a real finite poorly resolved bracket to exercise bounded nonconvergence",
+          "status": "passed",
+          "durationMs": 0.3324169999999924
+        },
+        {
+          "name": "PH1-NUM-03: actual numerical guard failures do not masquerade as success rejects overflow before battery power limits or allocation scaling can hide it",
+          "status": "passed",
+          "durationMs": 0.8408329999999751
+        },
+        {
+          "name": "PH1-NUM-03: actual numerical guard failures do not masquerade as success rejects finite exchanger and bulk-thermal combinations that overflow",
+          "status": "passed",
+          "durationMs": 0.8752920000000017
+        },
+        {
+          "name": "PH1-NUM-03: actual numerical guard failures do not masquerade as success never mutates standalone input objects when solving or rejecting",
+          "status": "passed",
+          "durationMs": 0.5747089999999844
+        },
+        {
+          "name": "PH1-NUM-02: electrical, thermal and network standalone input audit rejects missing, nonfinite, mistyped and out-of-range electrical fields",
+          "status": "passed",
+          "durationMs": 3.3619170000000054
+        },
+        {
+          "name": "PH1-NUM-02: electrical, thermal and network standalone input audit validates each grid allocation branch and preserves real zero supply/capacity",
+          "status": "passed",
+          "durationMs": 0.34474999999997635
+        },
+        {
+          "name": "PH1-NUM-02: electrical, thermal and network standalone input audit checks all required exchanger/bulk-thermal scalars and supplied optional properties",
+          "status": "passed",
+          "durationMs": 9.779041999999976
+        },
+        {
+          "name": "PH1-NUM-02: electrical, thermal and network standalone input audit retains equal-temperature, zero-flow, zero-UA and signed heat transfer",
+          "status": "passed",
+          "durationMs": 0.16275000000001683
+        },
+        {
+          "name": "PH1-NUM-02: electrical, thermal and network standalone input audit reports zero/very small network capacity as violated with an explicit unavailable ratio",
+          "status": "passed",
+          "durationMs": 4.8672909999999945
+        },
+        {
+          "name": "PH1-NUM-02: electrical, thermal and network standalone input audit rejects malformed capacity even on a disabled path or before zero-demand early return",
+          "status": "passed",
+          "durationMs": 2.514542000000006
+        },
+        {
+          "name": "PH1-NUM-02/03 geometry, allocation and report boundaries rejects sparse allocation and bounds actual allocation work at shared limits",
+          "status": "passed",
+          "durationMs": 16.325041999999996
+        },
+        {
+          "name": "PH1-NUM-02/03 geometry, allocation and report boundaries preserves zero and signed routes but rejects invalid coordinates and actual finite overflow",
+          "status": "passed",
+          "durationMs": 0.3252079999999751
+        },
+        {
+          "name": "PH1-NUM-02/03 geometry, allocation and report boundaries actual engine numerical failure leaves its input intact and report overflow cannot masquerade as a number",
+          "status": "passed",
+          "durationMs": 13.837834000000043
+        }
+      ]
+    },
+    {
+      "name": "tests/phase1-persistence.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "PH1-PER-01 real historical thresholds round-trips real engine-generated 999, 1000, 1001-event applied histories and continues",
+          "status": "passed",
+          "durationMs": 840.2344579999999
+        },
+        {
+          "name": "PH1-PER-01 real historical thresholds advances a real one-node run through 86399, 86400 and 86401 seconds, preserving continuation",
+          "status": "passed",
+          "durationMs": 1554.1343339999999
+        },
+        {
+          "name": "PH1-PER-02 declared boundaries admits 9999/10000 future events through engine/export/import, rejects 10001 atomically",
+          "status": "passed",
+          "durationMs": 1337.4022089999999
+        },
+        {
+          "name": "PH1-PER-02 declared boundaries checks project and event horizon at one-second increments without claiming maximum-duration replay",
+          "status": "passed",
+          "durationMs": 11.82629199999974
+        },
+        {
+          "name": "PH1-PER-02 declared boundaries checks actual UTF-8 bytes below/at/above 64 MiB including multibyte input",
+          "status": "passed",
+          "durationMs": 1036.2958330000001
+        },
+        {
+          "name": "PH1-PER-02 declared boundaries bounds nesting before parse and exact value/key item allocation",
+          "status": "passed",
+          "durationMs": 1407.0715410000003
+        },
+        {
+          "name": "PH1-PER-02 declared boundaries checks each shared allocation maximum independently of semantic shape",
+          "status": "passed",
+          "durationMs": 0.9713339999998425
+        },
+        {
+          "name": "PH1-PER-02 declared boundaries rejects overflow, duplicate keys, non-JSON values and unsafe fields before serialization",
+          "status": "passed",
+          "durationMs": 4.993333000000348
+        },
+        {
+          "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints compares intermediate continuous/chunked/fresh restored trajectories around event and startup boundaries",
+          "status": "passed",
+          "durationMs": 290.15658299999996
+        },
+        {
+          "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints same-time interactive admissions equal replay order and duplicate submissions apply exactly once",
+          "status": "passed",
+          "durationMs": 10.740749999999935
+        },
+        {
+          "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints persists every allowed integration setting and rejects changing a continuation sequence",
+          "status": "passed",
+          "durationMs": 64.97720899999968
+        },
+        {
+          "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints rejects incoherent/missing state without mutating the active checkpoint",
+          "status": "passed",
+          "durationMs": 18.96654099999978
+        },
+        {
+          "name": "PH1-CHK-01 / PH1-REP-01 complete boundary checkpoints preserves actual graph changes in the existing design representation",
+          "status": "passed",
+          "durationMs": 11.934417000000394
+        },
+        {
+          "name": "PH1-COMP-01 compatibility and provenance legacy long histories are scenario-only; explicit recalculation preserves parent and original",
+          "status": "passed",
+          "durationMs": 25.612583000000086
+        },
+        {
+          "name": "PH1-COMP-01 compatibility and provenance unknown numerical versions remain inspectable but cannot silently resume",
+          "status": "passed",
+          "durationMs": 7.9846669999997175
+        },
+        {
+          "name": "PH1-NUM-03 candidate publication rejects nonfinite and inconsistent direct engine inputs without changing last valid state",
+          "status": "passed",
+          "durationMs": 3.4251249999997526
+        }
+      ]
+    },
+    {
+      "name": "tests/phase1-work-budget.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "PH1-PER-02 worker work budget one-unit boundaries replay at 2,000,000 %+d module steps retains the correct completed boundary",
+          "status": "passed",
+          "durationMs": 55.99308399999998
+        },
+        {
+          "name": "PH1-PER-02 worker work budget one-unit boundaries replay at 2,000,000 %+d module steps retains the correct completed boundary",
+          "status": "passed",
+          "durationMs": 37.905624999999986
+        },
+        {
+          "name": "PH1-PER-02 worker work budget one-unit boundaries replay at 2,000,000 %+d module steps retains the correct completed boundary",
+          "status": "passed",
+          "durationMs": 48.625917000000015
+        }
+      ]
+    },
+    {
+      "name": "tests/phase1-worker.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "PH1-REP-01 committed worker stepping chunk size 1s reproduces the same battery, startup and same-time event trajectory",
+          "status": "passed",
+          "durationMs": 76.81187499999999
+        },
+        {
+          "name": "PH1-REP-01 committed worker stepping chunk size 2s reproduces the same battery, startup and same-time event trajectory",
+          "status": "passed",
+          "durationMs": 32.93679199999997
+        },
+        {
+          "name": "PH1-REP-01 committed worker stepping chunk size 3s reproduces the same battery, startup and same-time event trajectory",
+          "status": "passed",
+          "durationMs": 23.058791999999983
+        },
+        {
+          "name": "PH1-REP-01 committed worker stepping chunk size 9s reproduces the same battery, startup and same-time event trajectory",
+          "status": "passed",
+          "durationMs": 23.26995800000003
+        },
+        {
+          "name": "PH1-REP-01 committed worker stepping chunk size 10s reproduces the same battery, startup and same-time event trajectory",
+          "status": "passed",
+          "durationMs": 22.33583299999998
+        },
+        {
+          "name": "PH1-REP-01 committed worker stepping resumes a fresh worker from a checkpoint during battery discharge and pending startup",
+          "status": "passed",
+          "durationMs": 20.852374999999995
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure cancel acknowledges the latest complete chunk and a fresh worker resumes it",
+          "status": "passed",
+          "durationMs": 26.19425000000001
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure observes cancellation between event-validation batches without partially admitting history",
+          "status": "passed",
+          "durationMs": 1.9791250000000105
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure ignores old epoch and duplicate request IDs after supersession",
+          "status": "passed",
+          "durationMs": 2.844583
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure wall budget at limit %+d ms has an explicit resource outcome",
+          "status": "passed",
+          "durationMs": 4.018957999999998
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure wall budget at limit %+d ms has an explicit resource outcome",
+          "status": "passed",
+          "durationMs": 2.6558749999999804
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure wall budget at limit %+d ms has an explicit resource outcome",
+          "status": "passed",
+          "durationMs": 2.065125000000023
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure invalid event and failed state admission do not publish replacement state",
+          "status": "passed",
+          "durationMs": 1.5966249999999604
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 0s",
+          "status": "passed",
+          "durationMs": 0.21445899999997664
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 1s",
+          "status": "passed",
+          "durationMs": 2.4039169999999785
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 2s",
+          "status": "passed",
+          "durationMs": 2.2137919999999554
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 9s",
+          "status": "passed",
+          "durationMs": 2.087874999999997
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 10s",
+          "status": "passed",
+          "durationMs": 4.698167000000012
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure checks inclusive chunk limit for 11s",
+          "status": "passed",
+          "durationMs": 0.1818749999999909
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration NaN",
+          "status": "passed",
+          "durationMs": 0.17191700000000765
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration Infinity",
+          "status": "passed",
+          "durationMs": 0.11491700000004812
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration -Infinity",
+          "status": "passed",
+          "durationMs": 0.10800000000000409
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration null",
+          "status": "passed",
+          "durationMs": 0.11862500000000864
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration 1",
+          "status": "passed",
+          "durationMs": 0.12095799999997325
+        },
+        {
+          "name": "PH1-REP-02 operational cancellation, stale identity and resource failure does not coerce a supplied invalid duration undefined",
+          "status": "passed",
+          "durationMs": 0.12191699999999628
+        },
+        {
+          "name": "PH1-UI-01 atomic browser-storage boundary only reports success after a successful replacement and retains old durable data after quota failure",
+          "status": "passed",
+          "durationMs": 8.436916999999994
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries advance duration 86399s is distinct from execution budget",
+          "status": "passed",
+          "durationMs": 2.5147499999999923
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries advance duration 86400s is distinct from execution budget",
+          "status": "passed",
+          "durationMs": 2.0967079999999783
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries advance duration 86401s is distinct from execution budget",
+          "status": "passed",
+          "durationMs": 0.9847499999999627
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries replay horizon 2591999s is distinct from execution budget",
+          "status": "passed",
+          "durationMs": 2.1059999999999945
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries replay horizon 2592000s is distinct from execution budget",
+          "status": "passed",
+          "durationMs": 1.8877919999999904
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries replay horizon 2592001s is distinct from execution budget",
+          "status": "passed",
+          "durationMs": 0.12045799999998508
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries preserves or rejects all 9999 events without truncation",
+          "status": "passed",
+          "durationMs": 158.52520900000002
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries preserves or rejects all 10000 events without truncation",
+          "status": "passed",
+          "durationMs": 113.40916700000002
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries preserves or rejects all 10001 events without truncation",
+          "status": "passed",
+          "durationMs": 1.9385829999999942
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries bounds an atomic same-time event batch at 7999 module steps",
+          "status": "passed",
+          "durationMs": 197.24595799999997
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries bounds an atomic same-time event batch at 8000 module steps",
+          "status": "passed",
+          "durationMs": 179.16500000000008
+        },
+        {
+          "name": "PH1-PER-02 worker admission boundaries bounds an atomic same-time event batch at 8001 module steps",
+          "status": "passed",
+          "durationMs": 3.844583000000057
+        },
+        {
+          "name": "PH1-NUM-03 a failed worker timing calculation cannot corrupt the last validated physical checkpoint",
+          "status": "passed",
+          "durationMs": 8.388541000000032
+        },
+        {
+          "name": "PH1-REP-01 replay and restored continuation retain the 0s integration grid",
+          "status": "passed",
+          "durationMs": 29.915458999999828
+        },
+        {
+          "name": "PH1-REP-01 replay and restored continuation retain the 0s integration grid",
+          "status": "passed",
+          "durationMs": 30.674125000000004
+        },
+        {
+          "name": "PH1-REP-01 replay and restored continuation retain the 0s integration grid",
+          "status": "passed",
+          "durationMs": 34.08837500000004
+        },
+        {
+          "name": "PH1-NUM-02 exact worker restoration validates the full design before publishing state",
+          "status": "passed",
+          "durationMs": 1.3268749999999727
+        },
+        {
+          "name": "PH1-PER-02 validates 127 events with the declared bounded yielding cadence",
+          "status": "passed",
+          "durationMs": 4.295291000000134
+        },
+        {
+          "name": "PH1-PER-02 validates 128 events with the declared bounded yielding cadence",
+          "status": "passed",
+          "durationMs": 3.6069579999998496
+        },
+        {
+          "name": "PH1-PER-02 validates 129 events with the declared bounded yielding cadence",
+          "status": "passed",
+          "durationMs": 3.292291999999861
+        },
+        {
+          "name": "PH1-REP-01 249ms progress cadence does not alter the numerical trajectory",
+          "status": "passed",
+          "durationMs": 7.397625000000062
+        },
+        {
+          "name": "PH1-REP-01 250ms progress cadence does not alter the numerical trajectory",
+          "status": "passed",
+          "durationMs": 7.091499999999996
+        },
+        {
+          "name": "PH1-REP-01 251ms progress cadence does not alter the numerical trajectory",
+          "status": "passed",
+          "durationMs": 7.272292000000107
+        }
+      ]
+    },
+    {
+      "name": "tests/scenario.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "bounded schema-v1 sharing round-trips generation 1",
+          "status": "passed",
+          "durationMs": 1.0069169999999872
+        },
+        {
+          "name": "bounded schema-v1 sharing round-trips generation 2",
+          "status": "passed",
+          "durationMs": 0.12212500000001114
+        },
+        {
+          "name": "bounded schema-v1 sharing round-trips generation 3",
+          "status": "passed",
+          "durationMs": 0.08791700000000446
+        },
+        {
+          "name": "bounded schema-v1 sharing round-trips all field boundaries without losing units",
+          "status": "passed",
+          "durationMs": 0.7148750000000064
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.19387499999999136
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.12929200000002083
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.07529199999999037
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.06008299999999167
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.06516700000000242
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.15962500000000546
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.09670900000000415
+        },
+        {
+          "name": "bounded schema-v1 sharing restores safe defaults for malformed state",
+          "status": "passed",
+          "durationMs": 0.06225000000000591
+        },
+        {
+          "name": "bounded schema-v1 sharing empty hash uses defaults without warning",
+          "status": "passed",
+          "durationMs": 0.09195800000000531
+        },
+        {
+          "name": "bounded schema-v1 sharing discards unexpected keys including markup/URLs",
+          "status": "passed",
+          "durationMs": 0.3022499999999866
+        },
+        {
+          "name": "bounded schema-v1 sharing refuses serializing invalid input",
+          "status": "passed",
+          "durationMs": 0.35462499999999864
+        }
+      ]
+    },
+    {
+      "name": "tests/twin-geometry.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "dimensioned rendering contract hydrostatic translations keep each module floor on its own platform deck",
+          "status": "passed",
+          "durationMs": 14.597542000000004
+        },
+        {
+          "name": "dimensioned rendering contract all exact module and rack inventories reconcile, including a partial last rack",
+          "status": "passed",
+          "durationMs": 11.461958999999979
+        },
+        {
+          "name": "dimensioned rendering contract all platforms are included in physical campus footprint above the old visual cap",
+          "status": "passed",
+          "durationMs": 323.19100000000003
+        },
+        {
+          "name": "dimensioned rendering contract exploding is a pure presentation operation and preserves canonical hydraulic input",
+          "status": "passed",
+          "durationMs": 17.085249999999974
+        },
+        {
+          "name": "dimensioned rendering contract interior camera remains in the canonical obstacle-free aisle at every waypoint and boundary",
+          "status": "passed",
+          "durationMs": 6.532249999999976
+        },
+        {
+          "name": "dimensioned rendering contract upstream rendered paths include the shared source rather than stopping at the local bus",
+          "status": "passed",
+          "durationMs": 6.2352919999999585
+        },
+        {
+          "name": "dimensioned rendering contract asset selection resolves the actual enclosing module and engineering path lengths use meters",
+          "status": "passed",
+          "durationMs": 6.28712500000006
+        }
+      ]
+    },
+    {
+      "name": "tests/twin-integration.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "canonical graph, geometry and operating-state integration reconciles exact inventory and stable identity independently of family and transform",
+          "status": "passed",
+          "durationMs": 40.678
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption",
+          "status": "passed",
+          "durationMs": 1791.712084
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration accepts graph integrity including zero-grid and storage-power limits, and rejects wrong directions/capacities",
+          "status": "passed",
+          "durationMs": 11.279999999999973
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration links every rack to its exchanger and keeps technical and sea media separate",
+          "status": "passed",
+          "durationMs": 3.7577500000002146
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration uses physical routed lengths for resistance but all wetted branches for coolant mass",
+          "status": "passed",
+          "durationMs": 1.6773330000000897
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration matches actual floated hull displacement and adds battery mass to draft, preserving equipment/deck attachment",
+          "status": "passed",
+          "durationMs": 3.001832999999806
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration proves typed cluster reachability through the shore core and observes upstream or disabled link failure",
+          "status": "passed",
+          "durationMs": 132.363875
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration external-only jobs still depend on the actual carrying platform network; isolated local jobs do not",
+          "status": "passed",
+          "durationMs": 10.275041999999758
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration shows real generation isolation differences for equivalent power-domain loss",
+          "status": "passed",
+          "durationMs": 174.8865420000002
+        },
+        {
+          "name": "canonical graph, geometry and operating-state integration compares 0 versus 1 standby with identical recorded disturbance and computed 240s results",
+          "status": "passed",
+          "durationMs": 51.41479100000015
+        },
+        {
+          "name": "constraint and project truthfulness integration does not green an IT-only source limit when UPS hides pump and conversion demand",
+          "status": "passed",
+          "durationMs": 20.270624999999654
+        },
+        {
+          "name": "constraint and project truthfulness integration flags latent peak cooling shortfall before the initially cool bulk state heats up",
+          "status": "passed",
+          "durationMs": 20.5637499999998
+        },
+        {
+          "name": "constraint and project truthfulness integration reports missing mass/geometry as unassessed instead of zero or an accidental passing NaN comparison",
+          "status": "passed",
+          "durationMs": 44.73108400000001
+        },
+        {
+          "name": "constraint and project truthfulness integration uses actual hull/deck dimensions for load screen and enforces included-scope budget",
+          "status": "passed",
+          "durationMs": 8.85633400000006
+        },
+        {
+          "name": "constraint and project truthfulness integration validates imported events through the same asset/value/solver contract as operation",
+          "status": "passed",
+          "durationMs": 9.082957999999962
+        },
+        {
+          "name": "independent Python-generated numerical fixtures matches independent exchanger and closed-form pump benchmarks",
+          "status": "passed",
+          "durationMs": 0.24758299999984956
+        },
+        {
+          "name": "independent Python-generated numerical fixtures matches an independently rational battery-energy benchmark",
+          "status": "passed",
+          "durationMs": 0.14587500000016007
+        },
+        {
+          "name": "independent Python-generated numerical fixtures matches the independent rectangular two-pontoon hydrostatic benchmark",
+          "status": "passed",
+          "durationMs": 1.2067919999999503
+        },
+        {
+          "name": "independent Python-generated numerical fixtures agrees with independent 0.01s RK4 transient rather than importing the production analytical update",
+          "status": "passed",
+          "durationMs": 0.5081660000000738
+        }
+      ]
+    },
+    {
+      "name": "tests/twin-network.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "declared network offered-demand and whole-job admission admits the default 125 Gbit/s profile and sums external plus cluster on their shared downstream port",
+          "status": "passed",
+          "durationMs": 65.97841699999998
+        },
+        {
+          "name": "declared network offered-demand and whole-job admission detects a shared-core port bottleneck even when every individual platform link fits",
+          "status": "passed",
+          "durationMs": 727.386166
+        },
+        {
+          "name": "declared network offered-demand and whole-job admission blocks the whole platform job domain on its link overload and leaves an unrelated platform working",
+          "status": "passed",
+          "durationMs": 28.360250000000065
+        },
+        {
+          "name": "declared network offered-demand and whole-job admission ignores optional external demand, but enforces the shared external port when the job requires it",
+          "status": "passed",
+          "durationMs": 57.297874999999976
+        },
+        {
+          "name": "declared network offered-demand and whole-job admission has zero demand with no energized nodes and rejects invalid profile/allocation inputs",
+          "status": "passed",
+          "durationMs": 53.22262500000011
+        },
+        {
+          "name": "declared network offered-demand and whole-job admission resolves actual failed/disabled path causes, rejects multipath, and restores reproducibly",
+          "status": "passed",
+          "durationMs": 85.23283400000014
+        },
+        {
+          "name": "declared network offered-demand and whole-job admission couples idle draw to dispatch without committing trial battery energy, and never masks installed peak shortage",
+          "status": "passed",
+          "durationMs": 140.17129099999988
+        },
+        {
+          "name": "inventory-dependent assumed cost and report boundary counts optional pumps and installed storage independently, with monotone cost and one multiplier",
+          "status": "passed",
+          "durationMs": 25.144042000000127
+        }
+      ]
+    },
+    {
+      "name": "tests/twin-physics.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "hydraulic numerical verification uses Darcy laminar 64/Re, finite continuous transition, and zero-flow boundary",
+          "status": "passed",
+          "durationMs": 0.9967080000000124
+        },
+        {
+          "name": "hydraulic numerical verification brackets the pump/system crossing with head <0.01 Pa and mass residual zero",
+          "status": "passed",
+          "durationMs": 0.748958000000016
+        },
+        {
+          "name": "hydraulic numerical verification parallel pumps see shared head; total flow is less than two standalone flows",
+          "status": "passed",
+          "durationMs": 3.071666999999991
+        },
+        {
+          "name": "hydraulic numerical verification matches an independently solved quadratic frictionless benchmark",
+          "status": "passed",
+          "durationMs": 0.26454100000000835
+        },
+        {
+          "name": "hydraulic numerical verification rejects unsupported topology and invalid properties",
+          "status": "passed",
+          "durationMs": 0.5392079999999737
+        },
+        {
+          "name": "heat exchanger and bulk thermal verification matches independently hand-derived equal-capacity NTU=1 benchmark",
+          "status": "passed",
+          "durationMs": 0.24312499999999204
+        },
+        {
+          "name": "heat exchanger and bulk thermal verification conserves both streams, including zero flow, no UA, reversal and large NTU",
+          "status": "passed",
+          "durationMs": 0.23075000000000045
+        },
+        {
+          "name": "heat exchanger and bulk thermal verification adds fouling in K/W to thermal resistance",
+          "status": "passed",
+          "durationMs": 0.08291699999998059
+        },
+        {
+          "name": "heat exchanger and bulk thermal verification accounts for every end-use/loss heat source and exact insulated temperature rise",
+          "status": "passed",
+          "durationMs": 0.29770899999999756
+        },
+        {
+          "name": "electrical boundary verification preserves installed whole-server idle draw and whole-node cuts",
+          "status": "passed",
+          "durationMs": 0.3664589999999919
+        },
+        {
+          "name": "electrical boundary verification limits discharge by terminal power, stored energy and reserve with conversion loss",
+          "status": "passed",
+          "durationMs": 0.11391599999998903
+        },
+        {
+          "name": "electrical boundary verification charges within power/capacity without double-counting stored energy as facility use",
+          "status": "passed",
+          "durationMs": 0.08020899999999642
+        },
+        {
+          "name": "coupled deterministic operation initializes exact inventory, no transient energy, and bottom-up PUE",
+          "status": "passed",
+          "durationMs": 15.626499999999993
+        },
+        {
+          "name": "coupled deterministic operation trips the selected pump, starts standby after 8s and preserves full capacity when adequate",
+          "status": "passed",
+          "durationMs": 55.635875
+        },
+        {
+          "name": "coupled deterministic operation without standby loses flow, heats the bulk node, and curtails by actual hysteresis",
+          "status": "passed",
+          "durationMs": 46.454583999999954
+        },
+        {
+          "name": "coupled deterministic operation exhausts finite UPS energy following shared source loss and does not use grid/IT as PUE",
+          "status": "passed",
+          "durationMs": 13.586957999999981
+        },
+        {
+          "name": "coupled deterministic operation logs actual pump power loss and recovery once through a 1800s feeder outage without dropping the original event",
+          "status": "passed",
+          "durationMs": 101.25074999999998
+        },
+        {
+          "name": "coupled deterministic operation honors upstream transformer and generation failure-domain differences",
+          "status": "passed",
+          "durationMs": 86.21995900000002
+        },
+        {
+          "name": "coupled deterministic operation isolates exact node/rack assets and module maintenance; required network failure leaves idle power",
+          "status": "passed",
+          "durationMs": 41.063790999999924
+        },
+        {
+          "name": "coupled deterministic operation replays exactly across different integer chunk schedules and keeps original state immutable",
+          "status": "passed",
+          "durationMs": 185.30733399999997
+        },
+        {
+          "name": "coupled deterministic operation converges across 1s, 0.5s and 0.25s constant-load integration without threshold crossings",
+          "status": "passed",
+          "durationMs": 29.682833000000073
+        },
+        {
+          "name": "coupled deterministic operation responds causally to warmer seawater, fouling and speed with conservation",
+          "status": "passed",
+          "durationMs": 38.49487499999998
+        },
+        {
+          "name": "coupled deterministic operation conserves cumulative grid-plus-storage energy through loss and recharge",
+          "status": "passed",
+          "durationMs": 9.691875000000095
+        },
+        {
+          "name": "coupled deterministic operation interlocks a closed loop and never reports its motor running without achieved circulation",
+          "status": "passed",
+          "durationMs": 10.521583000000078
+        },
+        {
+          "name": "coupled deterministic operation respects shared supply cuts under simultaneous module and battery demand",
+          "status": "passed",
+          "durationMs": 39.816959
+        },
+        {
+          "name": "coupled deterministic operation rejects unknown assets, non-SI/out-of-range commands, obsolete states and fractional clock advances",
+          "status": "passed",
+          "durationMs": 6.219000000000051
+        },
+        {
+          "name": "versioned asynchronous worker cancels an in-flight chunked replay and suppresses stale epochs/requests",
+          "status": "passed",
+          "durationMs": 13.078709000000003
+        },
+        {
+          "name": "versioned asynchronous worker surfaces revision mismatch as a typed error",
+          "status": "passed",
+          "durationMs": 3.065582999999947
+        }
+      ]
+    },
+    {
+      "name": "tests/twin-telemetry.test.ts",
+      "status": "passed",
+      "tests": [
+        {
+          "name": "telemetry normalization and explicit mappings normalizes temperatureK from 37 C",
+          "status": "passed",
+          "durationMs": 3.7153339999999844
+        },
+        {
+          "name": "telemetry normalization and explicit mappings normalizes temperatureK from 98.6 F",
+          "status": "passed",
+          "durationMs": 0.5859169999999949
+        },
+        {
+          "name": "telemetry normalization and explicit mappings normalizes flowM3S from 1200 L/min",
+          "status": "passed",
+          "durationMs": 0.2948750000000473
+        },
+        {
+          "name": "telemetry normalization and explicit mappings normalizes powerW from 1.2 MW",
+          "status": "passed",
+          "durationMs": 0.23412499999994907
+        },
+        {
+          "name": "telemetry normalization and explicit mappings normalizes batteryWh from 3600000 J",
+          "status": "passed",
+          "durationMs": 0.22254099999997834
+        },
+        {
+          "name": "telemetry normalization and explicit mappings normalizes pressurePa from 2 bar",
+          "status": "passed",
+          "durationMs": 0.19304200000010496
+        },
+        {
+          "name": "telemetry normalization and explicit mappings normalizes workloadFraction from 80 %",
+          "status": "passed",
+          "durationMs": 0.15937499999995453
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 0",
+          "status": "passed",
+          "durationMs": 0.8535419999999476
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 1",
+          "status": "passed",
+          "durationMs": 0.13533299999994597
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 2",
+          "status": "passed",
+          "durationMs": 0.16045900000005986
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 3",
+          "status": "passed",
+          "durationMs": 0.31070899999997437
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 4",
+          "status": "passed",
+          "durationMs": 0.22079099999996288
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 5",
+          "status": "passed",
+          "durationMs": 0.22691699999995762
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 6",
+          "status": "passed",
+          "durationMs": 0.0861250000000382
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 7",
+          "status": "passed",
+          "durationMs": 0.052207999999950516
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 8",
+          "status": "passed",
+          "durationMs": 0.039874999999938154
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 9",
+          "status": "passed",
+          "durationMs": 0.04491700000005494
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 10",
+          "status": "passed",
+          "durationMs": 0.04245800000001054
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 11",
+          "status": "passed",
+          "durationMs": 0.03979200000003402
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 12",
+          "status": "passed",
+          "durationMs": 0.040792000000010376
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects invalid records 13",
+          "status": "passed",
+          "durationMs": 0.0870830000000069
+        },
+        {
+          "name": "telemetry normalization and explicit mappings validates lazy exact asset addresses",
+          "status": "passed",
+          "durationMs": 0.7186669999999822
+        },
+        {
+          "name": "telemetry normalization and explicit mappings imports CSV with field/asset/metric mapping and preserves original cells separately",
+          "status": "passed",
+          "durationMs": 3.3926250000000664
+        },
+        {
+          "name": "telemetry normalization and explicit mappings rejects unversioned envelopes, absent evidence, incompatible mappings and malformed bounded inputs visibly",
+          "status": "passed",
+          "durationMs": 4.34212500000001
+        },
+        {
+          "name": "telemetry normalization and explicit mappings accepts good rows while preserving rejected raw rows",
+          "status": "passed",
+          "durationMs": 0.6169170000000577
+        },
+        {
+          "name": "telemetry normalization and explicit mappings keeps generated evidence from being promoted and rejects inherited mapping keys",
+          "status": "passed",
+          "durationMs": 0.11141699999996035
+        },
+        {
+          "name": "telemetry normalization and explicit mappings validates the shipped sample pack against its declared default design",
+          "status": "passed",
+          "durationMs": 27.26333299999999
+        },
+        {
+          "name": "generated telemetry is solver-derived and deterministic samples the real evolving state and is idempotent across renders",
+          "status": "passed",
+          "durationMs": 19.629957999999988
+        },
+        {
+          "name": "generated telemetry is solver-derived and deterministic seeded noise/dropout are reproducible and never touch simulation truth",
+          "status": "passed",
+          "durationMs": 3.782291999999984
+        },
+        {
+          "name": "source-separated synchronization, staleness, and historical replay rejects duplicate/conflicting/out-of-order records and flags actual sequence gaps",
+          "status": "passed",
+          "durationMs": 0.4381670000000213
+        },
+        {
+          "name": "source-separated synchronization, staleness, and historical replay does not treat simulated milliseconds as missing packet counts",
+          "status": "passed",
+          "durationMs": 18.11020899999994
+        },
+        {
+          "name": "source-separated synchronization, staleness, and historical replay enforces skew and configurable age thresholds without inventing healthy values",
+          "status": "passed",
+          "durationMs": 0.4750420000000304
+        },
+        {
+          "name": "source-separated synchronization, staleness, and historical replay keeps measured and generated values separate, and requires explicit restart boundaries",
+          "status": "passed",
+          "durationMs": 0.21433300000001054
+        },
+        {
+          "name": "source-separated synchronization, staleness, and historical replay replays in observation order through the selected time and bounds retained memory",
+          "status": "passed",
+          "durationMs": 0.3036250000000109
+        },
+        {
+          "name": "residuals and bounded calibration are evidence-aware pairs only compatible versions/units/times and handles zero predictions",
+          "status": "passed",
+          "durationMs": 0.3416669999999158
+        },
+        {
+          "name": "residuals and bounded calibration are evidence-aware recovers a generated UA with chronological held-out evaluation but no physical-validation claim",
+          "status": "passed",
+          "durationMs": 5.203624999999988
+        },
+        {
+          "name": "residuals and bounded calibration are evidence-aware flags bounds and held-out deterioration; rejects unidentifiable fitting",
+          "status": "passed",
+          "durationMs": 4.4500000000000455
+        },
+        {
+          "name": "read-only SSE adapter rejects unsafe/unsupported URL http://example.com/events",
+          "status": "passed",
+          "durationMs": 0.17979200000002038
+        },
+        {
+          "name": "read-only SSE adapter rejects unsafe/unsupported URL file:///etc/passwd",
+          "status": "passed",
+          "durationMs": 0.052416999999991276
+        },
+        {
+          "name": "read-only SSE adapter rejects unsafe/unsupported URL https://user:pass@example.com/events",
+          "status": "passed",
+          "durationMs": 0.04991700000005039
+        },
+        {
+          "name": "read-only SSE adapter rejects unsafe/unsupported URL https://example.com/events?api_key=secret",
+          "status": "passed",
+          "durationMs": 0.15949999999998
+        },
+        {
+          "name": "read-only SSE adapter rejects unsafe/unsupported URL https://example.com/events#secret",
+          "status": "passed",
+          "durationMs": 0.05004200000007586
+        },
+        {
+          "name": "read-only SSE adapter allows explicit loopback development and credential-free HTTPS",
+          "status": "passed",
+          "durationMs": 0.0684160000000702
+        },
+        {
+          "name": "read-only SSE adapter passes actual reception metadata, observes reconnect/staleness, and closes the transport",
+          "status": "passed",
+          "durationMs": 1.9102909999999156
+        },
+        {
+          "name": "actual localhost SSE transport connects over HTTP, replays Last-Event-ID, validates mappings, and enforces exact CORS",
+          "status": "passed",
+          "durationMs": 48.11070799999993
+        },
+        {
+          "name": "actual localhost SSE transport uses the production adapter with native browser reconnect/Last-Event-ID and source validation",
+          "status": "passed",
+          "durationMs": 734.881875
+        },
+        {
+          "name": "running DataPanel acceptance operates mapping, raw inspection, simulated dropout, calibration, and actual streaming in the app",
+          "status": "passed",
+          "durationMs": 2973.393417
+        }
+      ]
+    }
+  ]
+}

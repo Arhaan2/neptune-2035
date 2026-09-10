@@ -1,0 +1,346 @@
+{
+  "checkedAt": "2026-09-09T17:48:36.815Z",
+  "mode": "read-only",
+  "workingDirectory": "/Users/arhaan/Documents/ChatGPT/Neptune",
+  "remote": "https://github.com/Arhaan2/neptune-2035.git",
+  "head": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "checks": {
+    "repository": {
+      "endpoint": "repos/Arhaan2/neptune-2035",
+      "status": "read",
+      "value": {
+        "fullName": "Arhaan2/neptune-2035",
+        "private": false,
+        "defaultBranch": "codex/neptune",
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "push": true,
+          "triage": true,
+          "pull": true
+        },
+        "allowMergeCommit": true,
+        "allowSquashMerge": true,
+        "allowRebaseMerge": true,
+        "archived": false
+      }
+    },
+    "branches": {
+      "endpoint": "repos/Arhaan2/neptune-2035/branches?per_page=100",
+      "status": "read",
+      "value": [
+        {
+          "name": "codex/neptune",
+          "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+          "protected": false
+        },
+        {
+          "name": "codex/neptune-digital-twin-v2",
+          "sha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+          "protected": false
+        },
+        {
+          "name": "codex/pages",
+          "sha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+          "protected": false
+        }
+      ]
+    },
+    "workflows": {
+      "endpoint": "repos/Arhaan2/neptune-2035/actions/workflows?per_page=100",
+      "status": "read",
+      "value": {
+        "totalCount": 1,
+        "workflows": [
+          {
+            "id": 353551315,
+            "name": "pages-build-deployment",
+            "path": "dynamic/pages/pages-build-deployment",
+            "state": "active"
+          }
+        ]
+      }
+    },
+    "pages": {
+      "endpoint": "repos/Arhaan2/neptune-2035/pages",
+      "status": "read",
+      "value": {
+        "status": "built",
+        "url": "https://arhaan2.github.io/neptune-2035/",
+        "buildType": "legacy",
+        "source": {
+          "branch": "codex/pages",
+          "path": "/"
+        },
+        "cname": null,
+        "httpsEnforced": true
+      }
+    },
+    "hooks": {
+      "endpoint": "repos/Arhaan2/neptune-2035/hooks?per_page=100",
+      "status": "read",
+      "value": []
+    },
+    "rulesets": {
+      "endpoint": "repos/Arhaan2/neptune-2035/rulesets?includes_parents=true&per_page=100",
+      "status": "read",
+      "value": []
+    },
+    "sourceProtection": {
+      "endpoint": "repos/Arhaan2/neptune-2035/branches/codex%2Fneptune/protection",
+      "status": "unavailable",
+      "exitCode": 1,
+      "error": "gh: Branch not protected (HTTP 404)\n"
+    },
+    "pagesProtection": {
+      "endpoint": "repos/Arhaan2/neptune-2035/branches/codex%2Fpages/protection",
+      "status": "unavailable",
+      "exitCode": 1,
+      "error": "gh: Branch not protected (HTTP 404)\n"
+    },
+    "environments": {
+      "endpoint": "repos/Arhaan2/neptune-2035/environments?per_page=100",
+      "status": "read",
+      "value": {
+        "totalCount": 1,
+        "environments": [
+          {
+            "id": 21519951044,
+            "name": "github-pages",
+            "protectionRules": [
+              {
+                "id": 64985854,
+                "node_id": "GA_kwDOUS4vns4D35r-",
+                "type": "branch_policy"
+              }
+            ],
+            "deploymentBranchPolicy": {
+              "protected_branches": false,
+              "custom_branch_policies": true
+            }
+          }
+        ]
+      }
+    },
+    "deployments": {
+      "endpoint": "repos/Arhaan2/neptune-2035/deployments?per_page=100",
+      "status": "read",
+      "value": [
+        {
+          "id": 6340659799,
+          "sha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+          "ref": "codex/pages",
+          "task": "deploy",
+          "environment": "github-pages",
+          "transientEnvironment": false,
+          "productionEnvironment": false,
+          "createdAt": "2026-09-09T01:35:17Z",
+          "creator": "Arhaan2",
+          "performedViaGitHubApp": {
+            "id": 34598,
+            "slug": "github-pages"
+          }
+        },
+        {
+          "id": 6338812039,
+          "sha": "672805a984feadaab375061817c919fd6849b311",
+          "ref": "codex/pages",
+          "task": "deploy",
+          "environment": "github-pages",
+          "transientEnvironment": false,
+          "productionEnvironment": false,
+          "createdAt": "2026-09-08T22:56:50Z",
+          "creator": "Arhaan2",
+          "performedViaGitHubApp": {
+            "id": 34598,
+            "slug": "github-pages"
+          }
+        }
+      ]
+    },
+    "recentRuns": {
+      "endpoint": "repos/Arhaan2/neptune-2035/actions/runs?per_page=100",
+      "status": "read",
+      "value": {
+        "totalCount": 2,
+        "runs": [
+          {
+            "id": 34299786585,
+            "name": "pages build and deployment",
+            "event": "dynamic",
+            "headBranch": "codex/pages",
+            "headSha": "019b24f93a1960fd0ca582bb0f4c3cdccfbc6711",
+            "status": "completed",
+            "conclusion": "success",
+            "path": "dynamic/pages/pages-build-deployment",
+            "createdAt": "2026-09-09T01:35:04Z",
+            "actor": "Arhaan2"
+          },
+          {
+            "id": 34288350576,
+            "name": "pages build and deployment",
+            "event": "dynamic",
+            "headBranch": "codex/pages",
+            "headSha": "672805a984feadaab375061817c919fd6849b311",
+            "status": "completed",
+            "conclusion": "success",
+            "path": "dynamic/pages/pages-build-deployment",
+            "createdAt": "2026-09-08T22:56:40Z",
+            "actor": "Arhaan2"
+          }
+        ]
+      }
+    },
+    "accountInstallations": {
+      "endpoint": "user/installations?per_page=100",
+      "status": "unavailable",
+      "exitCode": 1,
+      "error": "gh: You must authenticate with an access token authorized to a GitHub App in order to list installations (HTTP 403)\n"
+    },
+    "repoInstallation": {
+      "endpoint": "repos/Arhaan2/neptune-2035/installation",
+      "status": "unavailable",
+      "exitCode": 1,
+      "error": "gh: A JSON web token could not be decoded (HTTP 401)\n"
+    },
+    "actionPermissions": {
+      "endpoint": "repos/Arhaan2/neptune-2035/actions/permissions",
+      "status": "read",
+      "value": {
+        "enabled": true,
+        "allowed_actions": "all",
+        "sha_pinning_required": false
+      }
+    },
+    "workflowPermissions": {
+      "endpoint": "repos/Arhaan2/neptune-2035/actions/permissions/workflow",
+      "status": "read",
+      "value": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      }
+    },
+    "pagesBranchPolicy": {
+      "endpoint": "repos/Arhaan2/neptune-2035/environments/github-pages/deployment-branch-policies",
+      "status": "read",
+      "value": {
+        "total_count": 2,
+        "branch_policies": [
+          {
+            "id": 59465437,
+            "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k1OTQ2NTQzNw==",
+            "name": "codex/pages",
+            "type": "branch"
+          },
+          {
+            "id": 59465436,
+            "node_id": "MDE2OkdhdGVCcmFuY2hQb2xpY3k1OTQ2NTQzNg==",
+            "name": "gh-pages",
+            "type": "branch"
+          }
+        ]
+      }
+    },
+    "releases": {
+      "endpoint": "repos/Arhaan2/neptune-2035/releases?per_page=100",
+      "status": "read",
+      "value": [
+        {
+          "id": 385117865,
+          "name": "NEPTUNE v0.1.0 — Offshore infrastructure concept",
+          "tagName": "v0.1.0",
+          "targetCommitish": "codex/neptune",
+          "draft": false,
+          "prerelease": false,
+          "publishedAt": "2026-09-08T23:15:54Z"
+        }
+      ]
+    },
+    "sourceCheckRuns": {
+      "endpoint": "repos/Arhaan2/neptune-2035/commits/23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f/check-runs?per_page=100",
+      "status": "read",
+      "value": {
+        "totalCount": 0,
+        "checks": []
+      }
+    },
+    "sourceStatuses": {
+      "endpoint": "repos/Arhaan2/neptune-2035/commits/23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f/status",
+      "status": "read",
+      "value": {
+        "state": "pending",
+        "totalCount": 0,
+        "statuses": []
+      }
+    },
+    "localReleaseMechanisms": {
+      "status": "read",
+      "value": {
+        "sourceWorkflowPaths": [],
+        "artifactWorkflowPaths": [],
+        "hooksPathConfigured": false,
+        "activeHooks": [],
+        "packageScripts": {
+          "dev": "vite --host 127.0.0.1",
+          "build": "tsc --noEmit && vite build",
+          "start": "vite preview --host 127.0.0.1",
+          "lint": "oxlint src tests vite.config.ts playwright.config.ts",
+          "format": "oxfmt",
+          "typecheck": "tsc --noEmit",
+          "test": "vitest run",
+          "test:browser": "playwright test",
+          "evidence:twin": "node scripts/generate-twin-evidence.mjs",
+          "telemetry:publisher": "node scripts/telemetry-publisher.mjs",
+          "test:telemetry": "NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 vitest run tests/twin-telemetry.test.ts",
+          "package:preview": "node scripts/package-preview.mjs",
+          "licenses:notice": "node scripts/third-party-notices.mjs"
+        },
+        "previewPackager": "scripts/package-preview.mjs writes local dist/.nojekyll, dist/build-manifest.json, dist/release.json only; no network, Git mutation, deployment or push.",
+        "deploymentProcedure": "docs/RELEASE.md and docs/v2/RELEASE-CANDIDATE.md describe explicit normal commits/pushes to codex/pages, separate from source branches."
+      }
+    },
+    "installedAppsUI": {
+      "status": "unavailable",
+      "checkedAt": "2026-09-09T17:50:24.552Z",
+      "url": "https://github.com/Arhaan2/neptune-2035/settings/installations",
+      "observation": "In-app browser is signed out. GitHub returns Page not found with Sign in link. No authentication change attempted."
+    },
+    "connectorInstallation": {
+      "status": "read",
+      "tool": "github_list_installations",
+      "scope": "Installations available to the connected GitHub app; not an exhaustive list of all apps installed on the repository owner account.",
+      "value": [
+        {
+          "id": 98215706,
+          "account_login": "Arhaan2",
+          "events": [
+            "check_run",
+            "check_suite",
+            "commit_comment",
+            "issues",
+            "issue_comment",
+            "pull_request",
+            "pull_request_review",
+            "pull_request_review_comment",
+            "pull_request_review_thread",
+            "repository",
+            "status",
+            "sub_issues"
+          ],
+          "repository_selection": "all"
+        }
+      ]
+    }
+  },
+  "assessment": {
+    "scope": "Create main at verified codex/neptune source SHA; push source-only Phase 1 branch; open PR targeting main; merge accepted PR into main without changing default branch, Pages source or compiled artifact branch.",
+    "knownDeploymentCoupling": "Only GitHub Pages dynamic workflow observed. Legacy source is codex/pages; github-pages environment allows codex/pages and gh-pages, not main or Phase 1 feature branch.",
+    "repositoryHooks": "None",
+    "sourceWorkflows": "None at inspected baseline. Inspect newly added Phase 1 CI workflow before push; require read-only test/build steps and no Pages deployment.",
+    "externalApps": "Installed GitHub Apps cannot be enumerated with the present CLI token; browser is signed out. No external application appears in observed deployment or source-check history. This is a visibility limitation, not proof that no external service exists. The GitHub connector exposes its Arhaan2 installation (98215706), subscribed to repository/check/issue/PR/status events but not push/create; this does not enumerate other apps.",
+    "branchProtection": "No rulesets or protected current branches observed; main absent. Recheck main protection and PR status immediately before merge. No bypass is authorized.",
+    "remoteMutationsPerformed": [],
+    "observedUnsafeSideEffect": null
+  },
+  "completedAt": "2026-09-09T17:50:24.553Z"
+}

@@ -1,0 +1,64 @@
+name: Public prototype verification
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: phase-1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  acceptance:
+    name: Prototype acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
+      - name: Record tested source
+        run: |
+          mkdir -p artifacts/prototype
+          git rev-parse HEAD > artifacts/prototype/source-sha.txt
+          git show -s --format='%H %P %T' > artifacts/prototype/source-identity.txt
+      - run: npm run typecheck
+      - run: npm run lint
+      - name: Core unit and telemetry tests
+        run: |
+          npm run dev -- --strictPort > artifacts/prototype/unit-server.log 2>&1 &
+          unit_server_pid=$!
+          trap 'kill "$unit_server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          env -u MOZ_HEADLESS NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 xvfb-run -a -s '-screen 0 1920x1200x24' npm test -- --reporter=default --reporter=json --outputFile=artifacts/prototype/unit.json
+      - run: npm run build
+      - name: Production prototype smoke in three browsers
+        run: |
+          npm run start -- --port 4173 > artifacts/prototype/server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts --retries=0
+      - name: Retain actual prototype results and browser traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prototype-verification-${{ github.sha }}
+          path: |
+            artifacts/prototype
+            test-results
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

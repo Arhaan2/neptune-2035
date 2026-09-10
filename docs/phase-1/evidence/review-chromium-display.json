@@ -1,0 +1,225 @@
+{
+  "reviewedAt": "2026-09-10T00:18:54.392Z",
+  "status": "PASS",
+  "findings": [],
+  "scope": "Independent bounded review of worker-authored Chromium diagnostic extension, parent configuration/documentation changes, final failed-CI evidence and PR draft. The reviewer authored an earlier diagnostic version, not this extension.",
+  "headBeforeCommit": "7dcecd3dec202621d1ed0442aee64f36335bfde1",
+  "sourcePreservation": {
+    "acceptedLocalSource": "61bf694662560d12ba398bfe598540926d11a9cb",
+    "acceptedSourceHashes": 80,
+    "unchanged": 77,
+    "reviewedDifferences": {
+      ".github/workflows/phase-1.yml": "ba10d4e5ad49bdae8ce777aadce6d19305076bf79a595f5c2bf483d008514078",
+      "playwright.config.ts": "ee4367f0c185ae5cb1207502a3c58669d46beed281216363ed8bd05033653e22",
+      "scripts/phase-1/diagnose-firefox.mjs": "fcc5bf5d993c12e365ea5e28ed61b72a6fc94152333c37dbc1202ef3bea95a1d"
+    },
+    "protectedHashesMatched": 73,
+    "allApplicationAndTestBodiesUnchanged": true
+  },
+  "configuration": "Only Linux Chromium changes to headed mode with --use-gl=angle and --use-angle=gl. Darwin retains headless Chromium/Metal. Firefox/WebKit settings, all 81 cases, 256 units/both telemetry flags, WebGL assertions, timeouts, tolerances, workers and retries remain. A separate two-minute Chromium diagnostic runs under Xvfb, retains its own artifact, and cannot suppress full acceptance after failure; failures still leave the job failed. Permissions, triggers and source-only deployment separation are unchanged.",
+  "diagnostic": "Explicit validated --browser=chromium selects exactly two fixed variants (original headless args[] and headed ANGLE GL); Firefox remains default with its existing three variants. Existing operation/global budgets, pixel/fallback observations, atomic registration and owned-group cleanup are preserved. Invalid Chromium+--headed is rejected before startup. Mode/executable/backend changes are acknowledged as combined factors.",
+  "localProbes": {
+    "chromium": {
+      "path": "docs/phase-1/evidence/chromium-diagnostic-local/diagnostic.json",
+      "sha256": "e3266574c1876054683f02893051f247559f5188ccbb950e182eeed89989b465",
+      "status": "COLLECTED",
+      "elapsedMs": 32984.325084,
+      "pages": 6,
+      "nativeReadbacks": 2,
+      "appPages": 4,
+      "ordinaryClicks": 4,
+      "stageErrors": [],
+      "environment": {
+        "platform": "darwin",
+        "release": "25.6.0",
+        "arch": "arm64",
+        "cpu": "Apple M4 Pro",
+        "logicalCpus": 14,
+        "totalMemoryBytes": 25769803776,
+        "node": "v24.18.0"
+      },
+      "actualNativeRenderers": [
+        "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+        "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)"
+      ]
+    },
+    "firefox": {
+      "path": "docs/phase-1/evidence/chromium-diagnostic-firefox-local/diagnostic.json",
+      "sha256": "0ebec1e01acb30a3992cdcd4922e6a8611a0989642bbcc1919ca6ffa24d23c81",
+      "status": "COLLECTED",
+      "elapsedMs": 35349.093916000005,
+      "pages": 9,
+      "nativeReadbacks": 3,
+      "appPages": 6,
+      "ordinaryClicks": 6,
+      "stageErrors": [],
+      "environment": {
+        "platform": "darwin",
+        "release": "25.6.0",
+        "arch": "arm64",
+        "cpu": "Apple M4 Pro",
+        "logicalCpus": 14,
+        "totalMemoryBytes": 25769803776,
+        "node": "v24.18.0"
+      },
+      "actualNativeRenderers": [
+        "Apple M1, or similar",
+        "Apple M1, or similar",
+        "Apple M1, or similar"
+      ]
+    }
+  },
+  "invalidArguments": {
+    "path": "artifacts/phase-1/chromium-diagnostic-argument-conflict/diagnostic.json",
+    "sha256": "1121a5ed42c312d232bd6d659011ba24fe3c9636207970a4bb5610097cb4e07a",
+    "status": "INCOMPLETE",
+    "elapsedMs": 448.123666,
+    "stages": 0
+  },
+  "localLimitations": "All probes ran on macOS. Both actual Chromium renderers were SwiftShader, including the requested ANGLE GL variant. The local run validates observation/cleanup, not Linux OpenGL selection or full acceptance. Eight recorded browser/worker groups were independently absent.",
+  "failedCiEvidence": {
+    "review": "docs/phase-1/evidence/review-ci-linux-display.json",
+    "sha256": "ca2d34c6fb2306a8da011b81c66c4a5decf95d0d772dbeeca2493c6aa1813c25",
+    "allThirtyFileHashesRevalidated": true,
+    "recordedStatus": "Both complete 7d runs FAIL:256 units,77/81 browsers,Chromium23/27,Firefox27/27,WebKit27/27;four identical Chromium timeouts,zero skips/flaky/retries,measurements not executed."
+  },
+  "publication": {
+    "filesReviewed": 39,
+    "privatePrDraftAlsoReviewed": true,
+    "newOrChangedInventory": [
+      {
+        "path": ".github/workflows/phase-1.yml",
+        "sha256": "ba10d4e5ad49bdae8ce777aadce6d19305076bf79a595f5c2bf483d008514078",
+        "bytes": 2372
+      },
+      {
+        "path": "playwright.config.ts",
+        "sha256": "ee4367f0c185ae5cb1207502a3c58669d46beed281216363ed8bd05033653e22",
+        "bytes": 2026
+      },
+      {
+        "path": "scripts/phase-1/diagnose-firefox.mjs",
+        "sha256": "fcc5bf5d993c12e365ea5e28ed61b72a6fc94152333c37dbc1202ef3bea95a1d",
+        "bytes": 23101
+      },
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "sha256": "098a15c06e0684a0834e1fae801fcf267ddef53f5727d712b6a745b856616a68",
+        "bytes": 17359
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "sha256": "04c91eb883b75c7b6fadbde548119b87250c66a0f5e2fbaf9e087a691a8dc266",
+        "bytes": 38527
+      },
+      {
+        "path": "docs/phase-1/MERGE-AND-ROLLBACK.md",
+        "sha256": "80d71007f424cf0ac9abae533ff744d01bcf4097fb555607cb18f68d3bdf8211",
+        "bytes": 5399
+      },
+      {
+        "path": "docs/phase-1/evidence/chromium-diagnostic-local/diagnostic.json",
+        "sha256": "e3266574c1876054683f02893051f247559f5188ccbb950e182eeed89989b465",
+        "bytes": 53910
+      },
+      {
+        "path": "docs/phase-1/evidence/chromium-diagnostic-firefox-local/diagnostic.json",
+        "sha256": "0ebec1e01acb30a3992cdcd4922e6a8611a0989642bbcc1919ca6ffa24d23c81",
+        "bytes": 75080
+      }
+    ],
+    "failedEvidenceInventoryReference": "docs/phase-1/evidence/review-ci-linux-display.json",
+    "failedEvidenceFilesIncludingReview": 31,
+    "allFailedEvidenceHashesMatchReferencedInventory": true,
+    "prDraft": {
+      "path": "/private/tmp/neptune-phase1-pr-body.md",
+      "sha256": "b319e986e7ef31efd699ed482a246ded3c0c4b206677a49bf02d6a294dd70e92"
+    },
+    "patternHits": [
+      {
+        "path": "docs/phase-1/ACCEPTANCE.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/CI-INVESTIGATION.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/review-ci-linux-display.json",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-push/browser.log",
+        "categories": [
+          "binary-recording-file-reference"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-push/execution.json",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-push/unit-full.log",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-push/unit-summary.json",
+        "categories": [
+          "url-userinfo",
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-pr/browser.log",
+        "categories": [
+          "binary-recording-file-reference"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-pr/execution.json",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-pr/unit-full.log",
+        "categories": [
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "docs/phase-1/evidence/ci-linux-display-pr/unit-summary.json",
+        "categories": [
+          "url-userinfo",
+          "private-observation-terms"
+        ]
+      },
+      {
+        "path": "/private/tmp/neptune-phase1-pr-body.md",
+        "categories": [
+          "private-observation-terms"
+        ]
+      }
+    ],
+    "assessment": "Regular UTF-8 text/JSON only. Known URL-userinfo matches are baseline synthetic invalid-input fixtures; trace references contain no recordings. No credential material, private observation payloads or embedded media found. Two unknown untracked duplicate executable files remain preserved and excluded."
+  },
+  "references": [
+    "https://chromium.googlesource.com/angle/angle/+/HEAD/doc/DebuggingTips.md#usage",
+    "https://chromium.googlesource.com/chromium/src/+/HEAD/chrome/browser/headless/headless_mode_switches.h",
+    "https://playwright.dev/docs/browsers#chromium-headless-shell"
+  ],
+  "limits": [
+    "No full test suite, browsers, servers, commits or remote writes performed by this reviewer.",
+    "No Linux renderer, performance, complete-CI or actual-merge success claim. Exact next-head normal CI must run all gates and pass before integration."
+  ]
+}

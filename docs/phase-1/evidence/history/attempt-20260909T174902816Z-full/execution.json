@@ -1,0 +1,88 @@
+{
+  "checkedAt": "2026-09-09T17:54:46.406Z",
+  "historicalSha": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "selectedWebkit": false,
+  "records": [
+    {
+      "name": "npm-ci",
+      "command": "npm ci",
+      "environment": {},
+      "at": "2026-09-09T17:49:02.817Z",
+      "elapsedMs": 4693.334334,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "4c3a2190b09a9b39ed09f6b70d2e544df9e04a6cd3bdda0d6fe87c4b0a70f66f"
+    },
+    {
+      "name": "phase0-gate",
+      "command": "node scripts/phase-0/verify.mjs",
+      "environment": {},
+      "at": "2026-09-09T17:49:07.511Z",
+      "elapsedMs": 13330.716625000001,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "caea579a5f5d451a4a6c6c95f783c57b9349f3cc8b856713e9149c8d899be462"
+    },
+    {
+      "name": "phase0-full",
+      "command": "node scripts/phase-0/clean-check.mjs --out=artifacts/phase1-history-full-20260909T174902816Z",
+      "environment": {},
+      "at": "2026-09-09T17:49:20.841Z",
+      "elapsedMs": 323555.224167,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "38f198300c3e1e1222ea6e5ac687144904e42c681b8f0594fd41a4fab0100d7a"
+    },
+    {
+      "name": "PH0-001",
+      "command": "node scripts/phase-0/audit.mjs PH0-001 --out=artifacts/phase1-history-20260909T174902816Z/PH0-001",
+      "environment": {},
+      "at": "2026-09-09T17:54:44.396Z",
+      "elapsedMs": 729.586874999979,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "name": "PH0-001-desired",
+      "command": "node scripts/phase-0/audit.mjs PH0-001 --desired --out=artifacts/phase1-history-20260909T174902816Z/PH0-001-desired",
+      "environment": {},
+      "at": "2026-09-09T17:54:45.128Z",
+      "elapsedMs": 205.5576670000446,
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "logSha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "name": "PH0-002",
+      "command": "node scripts/phase-0/audit.mjs PH0-002 --out=artifacts/phase1-history-20260909T174902816Z/PH0-002",
+      "environment": {},
+      "at": "2026-09-09T17:54:45.335Z",
+      "elapsedMs": 489.19624999997905,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    },
+    {
+      "name": "PH0-002-desired",
+      "command": "node scripts/phase-0/audit.mjs PH0-002 --desired --out=artifacts/phase1-history-20260909T174902816Z/PH0-002-desired",
+      "environment": {},
+      "at": "2026-09-09T17:54:45.825Z",
+      "elapsedMs": 501.83291599998483,
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "logSha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    },
+    {
+      "name": "recovery",
+      "command": "node scripts/phase-0/recover-artifacts.mjs --out=artifacts/phase1-historical-recovery-20260909T174902816Z",
+      "environment": {},
+      "at": "2026-09-09T17:54:46.329Z",
+      "elapsedMs": 76.60158300003968,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "55508a2edc7701bdb9f0aae6dcadaa362114a555d1d907b213e1f96d9e72649e"
+    }
+  ],
+  "status": "PASS"
+}

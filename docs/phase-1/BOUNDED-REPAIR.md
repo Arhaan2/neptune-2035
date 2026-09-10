@@ -1,0 +1,48 @@
+# Bounded Phase 1 browser repair
+
+**Stopped with a partially verified local WIP checkpoint.** Both investigative attempts are used. The affected Chromium run passed 10/11 cases and exposed an unresolved legacy mobile layout failure. No full clean verification, push, merge or deployment followed. This record supplements the historical HANDOFF; it does not replace prior evidence or establish Phase 1 acceptance. The local commit containing this document identifies the checkpoint, without a recursive SHA-only commit.
+
+## Starting evidence
+
+Repository: `Arhaan2/neptune-2035`; branch: `codex/neptune-phase-1`. Published implementation `bdff4a80cc12dfa70ecbe99b1c787a523503efa2` is followed locally by handoff-only `31b3787e11b61e4909cdad245e3be7a2bd5b1539`, the parent of this repair checkpoint. PR #1 remains open against main `23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f`. Both existing runs completed and failed: push 34420820923 and PR 34420824576. The PR tested synthetic `15f24912837377caa519c7691fe581ffd8d04793`, whose parents are main and bdff and whose tree matches bdff; it is not an actual merge. No remote writes occurred during this repair.
+
+Each passed installation/typecheck/lint/build and all 256 units with both telemetry flags, then failed browsers 71/81 (Chromium 17/27, Firefox 27/27, WebKit 27/27). No test skips, flaky classifications or retries; measurements and final browser-version probes did not execute. All 80 recorded source hashes match bdff, no source mutation was recorded, and all 73 protected-file checks passed. Diagnostic workflow steps succeeded at collecting observations, which is not application acceptance.
+
+Unlike the four total 60-second deadlines at `7dcecd3dec202621d1ed0442aee64f36335bfde1`, bdff had ten Chromium failures: six legacy-readiness failures, missing V2 canvas, touch scene readiness, mobile 390-versus-375, and comparison text parsed as NaN. The latter is not a solver NaN: the retained snapshot displays 37.6°C and 29.92°C. Existing logs, contexts, diagnostics and compact source/log hash verification remain under `artifacts/phase-1/bounded-repair-bdff/{push,pr}` and `existing-results-summary.json`. Those downloaded artifacts contain no trace ZIPs; their log references do not establish availability.
+
+## Two experiments, then a supported repair
+
+Experiment 1 stopped before opening an app page because Chromium rejected CDP command-line introspection without `--enable-automation`. That setup failure is retained and consumes the first attempt. Experiment 2 used the public Playwright browser process to capture actual executable/arguments and completed the fixed comparison. No third investigative experiment was performed.
+
+The local environment is the official [Playwright 1.63 Ubuntu 24.04 image](https://playwright.dev/docs/docker), running on the already installed Docker Desktop: Linux aarch64, Node 24.20.0, Chromium 153.0.8010.12, Mesa 25.2.8, Xvfb 1920×1200×24, four CPUs, 6 GiB memory and 1 GiB shared memory. Image digest: `sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27`. Its Mesa version matches the hosted runner, but its architecture/hardware differ from GitHub's x86_64 environment. This does not establish hosted performance.
+
+Only one browser argument differed between the two variants: `--ignore-gpu-blocklist`, alongside the retained headed ANGLE OpenGL selection. Chromium [documents this switch](https://chromium.googlesource.com/chromium/src/+/main/gpu/config/gpu_switches.cc) as ignoring its GPU blocklist. In the bdff variant, CDP reported WebGL/OpenGL unavailable; native WebGL2 creation failed with `BindToCurrentSequence failed`, and both real scenes were absent. With the one added argument, WebGL was enabled, native red-pixel readback matched exactly with GL error 0, and actual legacy/V2 scenes rendered in 4.29/3.74 seconds with 27/57 draw calls and no fallback. This supports a test-environment blocklist cause for the rendering regression on this Linux setup; the adapter remains software llvmpipe. Runtime application behavior and numerical equations are unchanged.
+
+Separate observations established two test assumptions:
+
+- At a 390px viewport in the experiment's explicit fallback case, classic vertical scrollbars left `clientWidth=scrollWidth=375`. There was no horizontal overflow in that observation. The helper now asserts the requested innerWidth and exact equality of scrollWidth/clientWidth, preserving rejection of actual overflow while allowing the scrollbar. The later rendered legacy regression produced different dimensions, recorded below.
+- The comparison's first descendant paragraph came from its nested fallback scene. The card's direct metric paragraphs held finite 37.6/29.92°C. The test now checks the metric's units/format and finiteness, preserves its 0.5-degree comparison, and also checks finite exported checkpoint temperatures and the same delta. The original rendered case explicitly requires two visible canvases; an additional explicit-fallback counterpart exercises the selector regression. All 81 earlier cases remain, plus three fallback cases, for 84 total; the full set was not executed.
+
+[Compact observations and hashes](evidence/bounded-browser-repair.json) identify all eight retained local traces/screenshots and both scripts. The actual comparison-fallback and repaired V2 traces were opened as ZIP event streams; their corresponding screenshots were inspected. They remain outside Git. Three.js deprecation warnings occurred on real rendering; no page errors or console errors were recorded in the experiment. Snapshot-only observations taken before a lazy fallback mounted are not treated as proof that fallback was absent.
+
+## Validation and preservation
+
+The five repair files are `playwright.config.ts`, `scripts/phase-1/diagnose-firefox.mjs`, `tests/browser/layout.ts`, `tests/browser/acceptance.spec.ts`, and `tests/browser/twin.spec.ts`. This document and its compact evidence JSON are the only additional checkpoint files. Firefox/WebKit settings, Ubuntu runner, retries, deadlines, numerical tolerances, persistence behavior and package-lock remain unchanged. No application files changed.
+
+Local typecheck, lint, diagnostic-script syntax and diff checks passed before the affected run (terminal results; no separate local logs retained). One focused static review found no actionable issue and recorded exact source hashes in `artifacts/phase-1/bounded-repair-bdff/review.json`; it is not acceptance evidence.
+
+The affected Chromium batch finished in **179.337 seconds: 10 passed, 1 failed, 0 skipped, 0 flaky, 0 retries**. It ran bdff's source archive plus the four browser/config repair files; the compact evidence records the repair hashes. It was not a clean verification of a committed repository. All nine other previously failing cases passed, as did the added explicit-fallback comparison. The original 60-second test and 12-second assertion deadlines were retained.
+
+Remaining failure: `tests/browser/acceptance.spec.ts:216`, **mobile controls, contextual inspection and explicit WebGL fallback**, failed after 3.590 seconds at `tests/browser/layout.ts:13` (called at acceptance line 221). The requested inner width was 390; `clientWidth=375`, `scrollWidth=390`: `Expected: 375; Received: 390`. This records a 15px root layout mismatch in the rendered legacy view. Its element-level cause and persistence are unknown; no further diagnostic or repair was attempted. Later controls/fallback assertions within that failed journey did not execute. No numerical solver defect is demonstrated by this result.
+
+All paths below are under `artifacts/phase-1/bounded-repair-bdff/linux/`:
+
+- `affected-chromium.log` and `affected-chromium-results.json`: complete batch results.
+- `affected-chromium/acceptance-mobile-controls-e31fc-and-explicit-WebGL-fallback-chromium/error-context.md`: inspected failure context.
+- The same directory contains the actual `trace.zip` and `test-failed-1.png`, preserved locally. This new failure trace and screenshot were not opened for additional investigation.
+
+The smallest remaining reproduction selection, **not executed again**, is `xvfb-run -a -s '-screen 0 1920x1200x24' npm run test:browser -- --project=chromium --grep '^mobile controls, contextual inspection and explicit WebGL fallback$'` in the recorded Linux environment. Resolving the layout mismatch requires new authorization beyond the exhausted experiment budget.
+
+Full clean verification usage: **0/1**. Current-checkpoint unit tests, all 84 browsers, build, measurements and full source/protected-file gates were not run together. The last fully passing local source remains historical `61bf694662560d12ba398bfe598540926d11a9cb` (`docs/phase-1/evidence/committed-cancel/`: installation/typecheck/lint/build, 256 units with each telemetry flag, 81 browsers and measurements all passed). It does not validate this checkpoint. Feature push usage: **0/1**; no new hosted jobs were triggered or watched, and the published head remains bdff.
+
+The two unknown untracked copies, `.github/workflows/phase-1 2.yml` and `playwright.config 2.ts`, remain untouched. The task-owned container `neptune-phase1-bounded-bdff` (`c22447bcdab54beabb4ca3f8eca030c3dcf42e823e5ba77ac459a195e33272f6`) was stopped after copying the JSON report; its filesystem and mounted evidence are preserved. Starting the installed Docker Desktop also revealed unrelated `one-web-1` (`e0989652a9b5`); it and Docker Desktop were left running. No task-owned test/watch process remains in that stopped container. No further application repair, acceptance run, source publication audit or remote action was started after the failed batch.

@@ -16,7 +16,7 @@ export default defineConfig({
   expect: { timeout: 12_000 },
   reporter: [
     ['list'],
-    ['json', { outputFile: 'artifacts/browser-results.json' }],
+    ['json', { outputFile: process.env.NEPTUNE_BROWSER_REPORT || 'artifacts/browser-results.json' }],
   ],
   use: {
     baseURL: process.env.NEPTUNE_BASE_URL || 'http://127.0.0.1:5173',
@@ -30,13 +30,26 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1600, height: 1050 },
-        launchOptions: { args: ['--use-angle=metal'] },
+        // Linux uses the installed Mesa GL stack through the CI Xvfb display.
+        headless: process.platform !== 'linux',
+        launchOptions: {
+          args: process.platform === 'darwin'
+            ? ['--use-angle=metal']
+            // The test-only Mesa adapter is otherwise blocklisted by Chromium.
+            : process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl', '--ignore-gpu-blocklist'] : [],
+        },
       },
     },
     {
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Linux uses the CI Xvfb display so Firefox initializes GTK graphics.
+        headless: process.platform !== 'linux',
+        // Use a software compositor and 60 Hz clock on bounded CI graphics hardware.
+        launchOptions: {
+          firefoxUserPrefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true },
+        },
         viewport: { width: 1600, height: 1050 },
       },
     },
@@ -44,6 +57,8 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
+        // Match the other desktop projects' pixel density on bounded CI hardware.
+        deviceScaleFactor: 1,
         viewport: { width: 1600, height: 1050 },
       },
     },

@@ -1,0 +1,108 @@
+{
+  "status": "PASS",
+  "acceptedSource": "76cdbcc7c62762c3464b289f97e75bfb6baa6850",
+  "sourceTree": "4c9955ed3e4e82ded50902e7149bcb56b86a2359",
+  "unit": {
+    "passed": 256,
+    "failed": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "startTime": "2026-09-09T18:41:38.394Z",
+    "duration": 361152.59500000003,
+    "expected": 75,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "allGates": [
+    {
+      "name": "npm-ci",
+      "exitCode": 0,
+      "elapsedMs": 3410.5145
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "elapsedMs": 3079.285167
+    },
+    {
+      "name": "lint",
+      "exitCode": 0,
+      "elapsedMs": 1416.49075
+    },
+    {
+      "name": "build",
+      "exitCode": 0,
+      "elapsedMs": 4508.131834
+    },
+    {
+      "name": "unit-full",
+      "exitCode": 0,
+      "elapsedMs": 7053.337583999999
+    },
+    {
+      "name": "browser",
+      "exitCode": 0,
+      "elapsedMs": 361619.5385
+    },
+    {
+      "name": "measurements",
+      "exitCode": 0,
+      "elapsedMs": 22914.488292000024
+    }
+  ],
+  "protectedFiles": 73,
+  "lockSha256": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "baseline": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "originalPhase0": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "commits": [
+    "76cdbcc7c62762c3464b289f97e75bfb6baa6850 Bound causal trace scope validation with module lookup",
+    "19b1082b5277b4771dde80b0e7b12f24cac892cf Correct controlled-kernel test signature for strict lint",
+    "d710a9f54acd4742e87ca2790bb5a8d02072a084 Implement Phase 1 numerical safety, complete checkpoints and bounded replay",
+    "f676c1f9902008a7096e5e8122a5701953b7c772 Checkpoint Phase 0: preserve baseline and reproduce six review findings"
+  ],
+  "phase0PrerequisiteFiles": 72,
+  "newPhase1Changes": [
+    ".github/workflows/phase-1.yml",
+    "docs/phase-1/CONTRACT.md",
+    "docs/phase-1/MERGE-AND-ROLLBACK.md",
+    "docs/phase-1/NUMERICAL-AUDIT.md",
+    "docs/phase-1/PLAN.md",
+    "docs/phase-1/REQUIREMENT-TEST-MATRIX.md",
+    "docs/phase-1/evidence/start.json",
+    "scripts/phase-1/history.mjs",
+    "scripts/phase-1/measure.mjs",
+    "scripts/phase-1/verify.mjs",
+    "src/twin/analysis/reports.ts",
+    "src/twin/assets/design.ts",
+    "src/twin/engine/simulation.ts",
+    "src/twin/engine/worker.ts",
+    "src/twin/persistence/design.ts",
+    "src/twin/persistence/events.ts",
+    "src/twin/persistence/limits.ts",
+    "src/twin/persistence/project.ts",
+    "src/twin/persistence/state.ts",
+    "src/twin/persistence/storage.ts",
+    "src/twin/persistence/structure.ts",
+    "src/twin/persistence/types.ts",
+    "src/twin/safety.ts",
+    "src/twin/solvers/electrical.ts",
+    "src/twin/solvers/hydraulic.ts",
+    "src/twin/solvers/network.ts",
+    "src/twin/solvers/thermal.ts",
+    "src/twin/types.ts",
+    "src/ui/TwinApp.tsx",
+    "src/ui/useTwin.ts",
+    "tests/browser/phase1.spec.ts",
+    "tests/browser/twin.spec.ts",
+    "tests/phase1-deferred.test.ts",
+    "tests/phase1-numerical.test.ts",
+    "tests/phase1-persistence.test.ts",
+    "tests/phase1-work-budget.test.ts",
+    "tests/phase1-worker.test.ts",
+    "tests/twin-physics.test.ts"
+  ],
+  "integrationStatus": "NOT MERGED at local evidence creation; actual PR/CI/merge/main/post-merge record follows",
+  "recordedAt": "2026-09-09T18:48:13.773Z"
+}

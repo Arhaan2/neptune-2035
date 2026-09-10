@@ -8,3 +8,5 @@
 .twin-path>div{display:flex;flex-direction:column;gap:2px;margin-bottom:7px}
 /* Keep evidence mode visible during long inspection and cinematic scrolls. */
 .twin-mode{position:sticky;top:0;z-index:60}.twin-scene-shell,.twin-compare{scroll-margin-top:55px}
+/* Recovery actions stay within their notice when its container is narrow. */
+.twin-notice{flex-wrap:wrap}

@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-09-09T17:48:37.552Z",
+  "historicalSha": "f676c1f9902008a7096e5e8122a5701953b7c772",
+  "selectedWebkit": true,
+  "records": [
+    {
+      "name": "npm-ci",
+      "command": "npm ci",
+      "environment": {},
+      "at": "2026-09-09T17:47:38.580Z",
+      "elapsedMs": 5691.021,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "26a3e68b285ae114d11d5ed0e40a951dcbc48501893f9685463196d9b454e8ec"
+    },
+    {
+      "name": "selected-webkit",
+      "command": "npm run test:browser -- --project=webkit tests/browser/acceptance.spec.ts:279 tests/browser/twin.spec.ts:243",
+      "environment": {
+        "NEPTUNE_BASE_URL": "http://127.0.0.1:5173"
+      },
+      "at": "2026-09-09T17:47:45.487Z",
+      "elapsedMs": 52065.455707999994,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "logSha256": "1d974fa26a5d14b4cb6ce593e2fee776e542d5ffd3f6c210151e08c6ffc2a014"
+    }
+  ],
+  "status": "PASS"
+}

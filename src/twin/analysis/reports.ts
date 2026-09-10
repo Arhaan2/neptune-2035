@@ -1,15 +1,19 @@
-import { allAssets, buildDesign, connectionsForModule, moduleAssets, packingIssues, validateConfig } from '../assets/design';
+import { allAssets, buildDesign, connectionsForModule, moduleAssets, packingIssues } from '../assets/design';
 import { REFERENCE_SOURCES } from '../catalog/reference';
-import { advance, initialize, replay, summarize, validateEvent } from '../engine/simulation';
+import { advance, initialize, replay, summarize } from '../engine/simulation';
 import { ELECTRICAL_ASSUMPTIONS as E, GRID_EFFICIENCY } from '../solvers/electrical';
 import { solveExchanger, THERMAL_ASSUMPTIONS as T } from '../solvers/thermal';
 import { assessNetwork, NETWORK_ASSUMPTIONS } from '../solvers/network';
-import { SOLVER_VERSION } from '../types';
+import { finiteNumber, finiteOutputs } from '../safety';
+import { validateDesign } from '../persistence/design';
+import { validateState } from '../persistence/state';
+export { projectFile, parseProject } from '../persistence/project';
+export type { ProjectFile } from '../persistence/types';
 import type { Constraint, Design, DesignConfig, OperationEvent, SimulationState } from '../types';
 
 export const COST_ASSUMPTIONS = Object.freeze({date:'2026-09-08', computeUSD:250_000, rackUSD:5000, platformUSD:8e6, coolingPerModuleUSD:575_000, standbyPumpUSD:25_000, electricalPerModuleUSD:600_000, storagePerKWhUSD:500, networkingPerModuleUSD:150_000, installationFraction:0.2, contingencyFraction:0.25});
 export function billOfEquipment(design:Design,unitCostScale=1){
-  if(!Number.isFinite(unitCostScale)||unitCostScale<0)throw Error('Cost scale must be finite and nonnegative');
+  validateDesign(design);finiteNumber(unitCostScale,'unitCostScale',{min:0});
   const c=COST_ASSUMPTIONS,platforms=design.assets.filter(a=>a.type==='platform').length;
   let standbyPumps=0,storageKWh=0;
   for(const m of design.modules)for(const a of moduleAssets(design,m.id)){
@@ -18,7 +22,9 @@ export function billOfEquipment(design:Design,unitCostScale=1){
   }
   const rows=[['Compute',design.nodeCount,c.computeUSD],['Racks',design.rackCount,c.rackUSD],['Platform + assumed hull scope',platforms,c.platformUSD],['Cooling base (duty + seawater pumps, HX, CDU)',design.modules.length,c.coolingPerModuleUSD],['Optional standby pumps',standbyPumps,c.standbyPumpUSD],['Electrical base (excludes battery storage)',design.modules.length,c.electricalPerModuleUSD],['Installed battery storage (kWh)',storageKWh,c.storagePerKWhUSD],['Networking',design.modules.length,c.networkingPerModuleUSD]].map(([scope,count,unitUSD])=>({scope:String(scope),count:Number(count),unitUSD:Number(unitUSD)*unitCostScale,totalUSD:Number(count)*Number(unitUSD)*unitCostScale}));
   const equipment=rows.reduce((s,r)=>s+r.totalUSD,0),installation=equipment*c.installationFraction,contingency=(equipment+installation)*c.contingencyFraction;
-  return {rows,equipment,installation,contingency,totalUSD:equipment+installation+contingency,rangeUSD:[(equipment+installation+contingency)*0.7,(equipment+installation+contingency)*1.5],date:c.date,exclusions:'Land, shore/grid works, finance, permits, taxes, mooring, operations, replacement, proprietary hardware options. Illustrative assumptions; no vendor quotations.'};
+  rows.forEach(row=>finiteOutputs(row,'cost row'));
+  const rangeUSD=[(equipment+installation+contingency)*0.7,(equipment+installation+contingency)*1.5];finiteOutputs(rangeUSD,'cost range');
+  return finiteOutputs({rows,equipment,installation,contingency,totalUSD:equipment+installation+contingency,rangeUSD,date:c.date,exclusions:'Land, shore/grid works, finance, permits, taxes, mooring, operations, replacement, proprietary hardware options. Illustrative assumptions; no vendor quotations.'},'bill of equipment');
 }
 export function marineScreen(design:Design){
   const masses=new Map<string,number>(),missing:string[]=[];
@@ -35,14 +41,14 @@ export function marineScreen(design:Design){
     const depthM=supportedGeometry?Math.min(...hulls.map(a=>a.dimensionsM[1])):null;
     const draftM=waterplaneM2===null?null:massKg/(1025*waterplaneM2),freeboardM=depthM===null||draftM===null?null:depthM-draftM;
     const deckLoadKgM2=supportedGeometry?(massKg-hulls.reduce((sum,a)=>sum+(a.operationalMassKg??0),0))/(deck!.dimensionsM[0]*deck!.dimensionsM[2]):null;
-    return {platformId,massKg,waterplaneM2,draftM,freeboardM,supportedGeometry,missing:missing.filter(id=>id.startsWith(`${platformId}/`)||id===platformId),deckLoadKgM2};
+    return finiteOutputs({platformId,massKg,waterplaneM2,draftM,freeboardM,supportedGeometry,missing:missing.filter(id=>id.startsWith(`${platformId}/`)||id===platformId),deckLoadKgM2},'marine screen');
   });
 }
 /** Full installed-peak electrical check: storage reserve and local jobs prevent either battery support or network-idle draw from hiding a supply shortage. */
 function peakAllocation(design:Design){
-  const peakDesign={...design,config:{...design.config,requireClusterNetwork:false,requireExternalNetwork:false}};
+  const peakDesign={...design,config:{...design.config,requireClusterNetwork:false,requireExternalNetwork:false,workload:1}};
   const initial=initialize(peakDesign);
-  return summarize(peakDesign,advance(peakDesign,{...initial,workload:1,modules:initial.modules.map(m=>({...m,batteryWh:design.config.batteryWhPerModule*E.batteryReserveFraction}))},0));
+  return summarize(peakDesign,advance(peakDesign,{...initial,modules:initial.modules.map(m=>({...m,batteryWh:design.config.batteryWhPerModule*E.batteryReserveFraction}))},0));
 }
 function peakCooling(design:Design,state:SimulationState){
   return state.modules.map((m,index)=>{
@@ -77,33 +83,19 @@ export function constraints(design:Design,state:SimulationState):Constraint[]{
 }
 /** Bounded scenario acceptance across implemented cuts; unmodeled marine analyses remain excluded. */
 export function sizingAssessment(design:Design,state:SimulationState,budgetUSD:number|null=design.config.budgetUSD,costScale=1){
+  if(budgetUSD!==null)finiteNumber(budgetUSD,'budgetUSD',{min:0,max:1e13,unit:'USD'});
   const checks=constraints(design,state),required=new Set(['EL-01','EL-02','TH-01','TH-02','GE-01','MA-01','MA-02','NW-01','NW-02']);
   const failures=checks.filter(c=>required.has(c.id)&&c.status!=='satisfied').map(c=>`${c.id}: ${c.status}`),cost=billOfEquipment(design,costScale);
   if(budgetUSD!==null&&cost.totalUSD>budgetUSD)failures.push('Included-scope cost exceeds budget');
   return {passes:failures.length===0,failures,checks,includedCostUSD:cost.totalUSD,unassessed:checks.filter(c=>!required.has(c.id)&&c.status==='unassessed').map(c=>c.id)};
 }
-export interface ProjectFile {schemaVersion:2; kind:'neptune-project'; design:DesignConfig; events:OperationEvent[]; timeS:number; sourceMode:'simulated'; solverVersion:string}
-export function projectFile(design:Design,state:SimulationState):ProjectFile {return {schemaVersion:2,kind:'neptune-project',design:design.config,events:state.events,timeS:state.timeS,sourceMode:'simulated',solverVersion:state.solverVersion};}
-export function parseProject(text:string):ProjectFile{
-  if(text.length>2_000_000)throw Error('Project file exceeds 2 MB limit.');
-  const parsed:unknown=JSON.parse(text);
-  if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw Error('Project must be an object');
-  const v=parsed as ProjectFile;
-  if(v.schemaVersion!==2||v.kind!=='neptune-project'||v.sourceMode!=='simulated')throw Error('Unsupported project kind/version/source mode. Open v1 shared links in Legacy mode.');
-  const design=validateConfig(v.design);
-  if(v.solverVersion!==SOLVER_VERSION)throw Error(`Unsupported solver version: expected ${SOLVER_VERSION}; explicit migration/recalculation required.`);
-  if(!Number.isInteger(v.timeS)||v.timeS<0||v.timeS>86_400||!Array.isArray(v.events)||v.events.length>1000)throw Error('Time or event count exceeds replay bounds.');
-  for(const e of v.events)if(!e||typeof e.id!=='string'||e.id.length>160||typeof e.assetId!=='string'||e.assetId.length>160||!Number.isInteger(e.timeS)||e.timeS<0||e.timeS>86_400||!['trip','restore','maintenance','workload','seawater','fouling','pump-speed'].includes(e.kind)||('value'in e&&(!Number.isFinite(e.value)||typeof e.value!=='number')))throw Error('Invalid event record.');
-  if(new Set(v.events.map(e=>e.id)).size!==v.events.length)throw Error('Duplicate event IDs.');
-  const canonical=buildDesign(design);for(const event of v.events)validateEvent(canonical,event);
-  return {schemaVersion:2,kind:'neptune-project',design,events:v.events.map(e=>({id:e.id,timeS:e.timeS,kind:e.kind,assetId:e.assetId,...(e.value===undefined?{}:{value:e.value})})),timeS:v.timeS,sourceMode:'simulated',solverVersion:String(v.solverVersion).slice(0,60)};
-}
 export function csvCell(value:unknown){const s=value===null||value===undefined?'':typeof value==='string'?value:typeof value==='number'||typeof value==='boolean'||typeof value==='bigint'?`${value}`:typeof value==='object'?JSON.stringify(value):'';return `"${(/^[\s]*[=+@-]/.test(s)?"'":'')+s.replaceAll('"','""')}"`;}
 export function resultsCSV(design:Design,state:SimulationState){
+  validateDesign(design);validateState(design,state);
   const columns=['assetId','designRevision','solverVersion','simulatedTimeS','coolantK','technicalFlowM3S','seawaterFlowM3S','itW','facilityW','batteryWh','electricalResidualW','thermalResidualW'];
   return [columns,...state.modules.map(m=>[m.id,design.revision,state.solverVersion,state.timeS,m.coolantK,m.technicalFlowM3S,m.seawaterFlowM3S,m.itW,m.facilityW,m.batteryWh,m.electricalResidualW,m.thermalResidualW])].map(row=>row.map(csvCell).join(',')).join('\n');
 }
-export function inventoryCSV(design:Design){return [['assetId','type','parent','catalog','widthM','heightM','depthM','massKg','evidence'],...Array.from(allAssets(design),a=>[a.id,a.type,a.parentId??'',a.catalogId,...a.dimensionsM,a.operationalMassKg??'unknown','assumed'])].map(r=>r.map(csvCell).join(',')).join('\n');}
+export function inventoryCSV(design:Design){validateDesign(design);return [['assetId','type','parent','catalog','widthM','heightM','depthM','massKg','evidence'],...Array.from(allAssets(design),a=>[a.id,a.type,a.parentId??'',a.catalogId,...a.dimensionsM,a.operationalMassKg??'unknown','assumed'])].map(r=>r.map(csvCell).join(',')).join('\n');}
 export function conservationResiduals(design:Design,state:SimulationState){
   const s=summarize(design,state),electricalInputW=state.modules.reduce((n,m)=>n+m.gridW+m.batteryDischargeW/E.dischargeEfficiency,0);
   return {electricalResidualW:s.electricalResidualW,electricalNormalized:s.electricalResidualW/Math.max(1,electricalInputW),thermalResidualW:s.thermalResidualW,thermalNormalized:s.thermalResidualW/Math.max(1,s.facilityW),electricalDenominatorW:Math.max(1,electricalInputW),thermalDenominatorW:Math.max(1,s.facilityW)};

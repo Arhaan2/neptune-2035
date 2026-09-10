@@ -1,0 +1,99 @@
+{
+  "kind": "diagnostic-only",
+  "status": "INCOMPLETE",
+  "startedAt": "2026-09-09T22:13:58.555Z",
+  "sourceSha": "66dc59dda41f42721b0818308e26571f1d5e665b",
+  "scriptSha256": "a9d8c6cce2a6b494af8ed56365cb9936ccdf4df1b508f0d8ce9374a6a9ff22a0",
+  "sourceStatus": " M .github/workflows/phase-1.yml\n M docs/phase-1/ACCEPTANCE.md\n M docs/phase-1/CI-INVESTIGATION.md\n?? docs/phase-1/evidence/ci-software60-pr/\n?? docs/phase-1/evidence/ci-software60-push/\n?? docs/phase-1/evidence/review-ci-software60.json\n?? scripts/phase-1/diagnose-firefox.mjs\n",
+  "host": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "totalMemoryBytes": 25769803776,
+    "node": "v24.18.0"
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1050
+  },
+  "deviceScaleFactor": 1,
+  "limitations": [
+    "Native 3-second observations and ordinary actions, not acceptance tests or a causal conclusion.",
+    "Software WebRender changes browser compositing; WebGL renderer strings alone cannot establish the active compositor.",
+    "Variants run sequentially in fresh browsers; cold module compilation and host load can affect comparisons.",
+    "No screenshots, traces, recordings, observation imports, simulation steps, or external data are collected."
+  ],
+  "preferenceSources": [
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/modules/libpref/init/StaticPrefList.yaml#L8119-L8123",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/config/gfxConfigManager.cpp#L167-L169",
+    "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/gfx/thebes/gfxPlatform.cpp#L3350-L3396"
+  ],
+  "stages": [
+    {
+      "name": "reserve-owned-port-5183",
+      "startedAfterMs": 16.271958,
+      "outcome": "completed",
+      "elapsedMs": 3.252167
+    },
+    {
+      "name": "owned-vite-ready",
+      "startedAfterMs": 20.859750000000002,
+      "value": {
+        "port": 5183
+      },
+      "outcome": "completed",
+      "elapsedMs": 226.51766700000002
+    }
+  ],
+  "variants": [
+    {
+      "name": "headless-software-clock-60",
+      "prefs": {
+        "layout.frame_rate": 60
+      },
+      "stages": [
+        {
+          "name": "launch-firefox",
+          "startedAfterMs": 372.609875,
+          "value": {
+            "browserVersion": "155.0"
+          },
+          "outcome": "completed",
+          "elapsedMs": 413.29595800000004
+        }
+      ],
+      "pages": []
+    }
+  ],
+  "activeBrowserGroups": [
+    78176
+  ],
+  "cleanupProbe": true,
+  "server": {
+    "owned": true,
+    "port": 5183
+  },
+  "intentionalCleanupProbe": "A real launched Firefox is left open until the supervisor deadline.",
+  "supervisor": {
+    "budgetExpired": true,
+    "elapsedMs": 20407.462708,
+    "budgetMs": 21000,
+    "cleanup": [
+      {
+        "pid": 78168,
+        "term": "signalled",
+        "kill": "absent",
+        "finalCheck": "absent"
+      },
+      {
+        "pid": 78176,
+        "term": "signalled",
+        "kill": "absent",
+        "finalCheck": "absent"
+      }
+    ],
+    "registeredGroupsAbsent": true
+  }
+}

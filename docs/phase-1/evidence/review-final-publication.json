@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "reviewedAt": "2026-09-09T21:25:54.576Z",
+  "acceptedLocalSource": "2699e5b25710636aa69338ee75e21ebc25cf6c6e",
+  "findings": [],
+  "scope": "Independent final readback of the completed clean local archive, source/protected hashes, raw logs/results/measurements, all intended Phase0 prerequisites and Phase1 text evidence, changed acceptance/investigation/rollback documents, accepted-source remote snapshot and proposed PR body. No tests or remote actions performed by reviewer.",
+  "localGate": {
+    "status": "PASS",
+    "checkedAt": "2026-09-09T21:23:51.203Z",
+    "source": "2699e5b25710636aa69338ee75e21ebc25cf6c6e",
+    "archive": "<temporary-root>/neptune-phase1-XA6ALu",
+    "sourceHashesVerified": 79,
+    "protectedArchiveFilesVerified": 73,
+    "logsVerified": 7,
+    "unitSummaryExactToRawArchive": true,
+    "browserSummaryExactToRawArchive": true,
+    "units": 256,
+    "browsers": {
+      "chromium": 26,
+      "firefox": 26,
+      "webkit": 26
+    },
+    "browserDurationMs": 369236.056,
+    "executionStageDurationMs": {
+      "npm-ci": 3183.914542,
+      "typecheck": 3127.905542,
+      "lint": 1374.2215420000002,
+      "build": 4322.75525,
+      "unit-full": 17043.592375,
+      "browser": 369686.486042,
+      "measurements": 21465.43816599995
+    },
+    "measurementsSourceHashes": 18,
+    "longHistory": {
+      "timeS": 86401,
+      "eventCount": 1001,
+      "projectBytes": 394648,
+      "exactContinuation": true
+    },
+    "campus": {
+      "modules": 782,
+      "eventCount": 10000,
+      "projectBytes": 19613291,
+      "appliedEvents": 0,
+      "exactContinuation": true
+    },
+    "memoryMaxRSSKiB": 1489328,
+    "memoryMaxRSSGiB": 1.4203338623046875,
+    "allSourceAndProtectedMismatches": [],
+    "executionEvidence": "docs/phase-1/evidence/committed-browser-final/execution.json",
+    "originalCheckoutStatus": "clean",
+    "telemetryFlags": {
+      "NEPTUNE_TELEMETRY_BROWSER": "1",
+      "NEPTUNE_TELEMETRY_APP": "1"
+    },
+    "allSevenStageExitCodes": 0,
+    "skipped": 0,
+    "failed": 0,
+    "flaky": 0,
+    "emptyFailureContextManifest": true,
+    "browserVersions": {
+      "chromium": "153.0.8010.12",
+      "firefox": "155.0",
+      "webkit": "26.6"
+    }
+  },
+  "publication": {
+    "status": "PASS",
+    "scannedAt": "2026-09-09T21:24:17.627Z",
+    "totalPrerequisiteAndDocumentationFiles": 332,
+    "originalPhase0Files": 72,
+    "phase1TextFiles": 260,
+    "newOrChangedFiles": 19,
+    "fullInventoryPath": "artifacts/phase-1-review/final-publication-inventory.json",
+    "fullInventorySha256": "7b960a5441e74d8675ae3f6cee3b4f86d36e97e19b6d5c5b054d53ab40626149",
+    "newFileHashes": {
+      "docs/phase-1/ACCEPTANCE.md": "5942a314041fbb11d731144d56fd3568c76461e6643ec46d3ea0eee72b47102f",
+      "docs/phase-1/CI-INVESTIGATION.md": "1fbb3c7ee91273101c18b839d1195bfa8f8f02c06c5c8e688cada9a92a214192",
+      "docs/phase-1/MERGE-AND-ROLLBACK.md": "0695a71460239f1557c341cdadf11dac697dfcb8fa0b306a9fab1ad1823ca1e6",
+      "docs/phase-1/evidence/committed-browser-final/browser-contexts.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "docs/phase-1/evidence/committed-browser-final/browser-summary.json": "9906830b6e5b57cf76d12e0cb2322f324a52242b5c793b1dd49fa9eb309b294e",
+      "docs/phase-1/evidence/committed-browser-final/browser-versions.json": "0edbc5210d04f5294d98e701ab288f623df1bb7514062e5f7edbdfff35785c93",
+      "docs/phase-1/evidence/committed-browser-final/browser.log": "65b1d3e2b5281189023dd1fc98405c20bc4e0f5446b2e1590c4a59dc08f7cab9",
+      "docs/phase-1/evidence/committed-browser-final/build.log": "1f40bc26d978e496e45fd018ec58f33400b1bbbca0fe34507b1685221b01f098",
+      "docs/phase-1/evidence/committed-browser-final/execution.json": "9a2dcb71b8f8ec0c83daf3110d90c7dc7476858f2c02ace94e81a05ee3fe1fe6",
+      "docs/phase-1/evidence/committed-browser-final/lint.log": "f8cc68b6d667cb056e86211b60b1bc9c27b4bfb959cc8286f74ea9d66b5f8b5b",
+      "docs/phase-1/evidence/committed-browser-final/measurements.json": "f4354fbc8852bb5fa2aa46fbacb1f54548e60250fd17059b8bb4dac0e25ec969",
+      "docs/phase-1/evidence/committed-browser-final/measurements.log": "f6df460ce67a29c59a38a31b28898553d5f98ebb9c6255745e6f24424a74647e",
+      "docs/phase-1/evidence/committed-browser-final/npm-ci.log": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361",
+      "docs/phase-1/evidence/committed-browser-final/server.log": "eb0d8f50f1ea286a094ef897eca560666b93f16b60e245831d376ab267834879",
+      "docs/phase-1/evidence/committed-browser-final/typecheck.log": "b870ba660728c5cfecea7ed5b35590e161d4913eeaafba0f86b667cde9f9668e",
+      "docs/phase-1/evidence/committed-browser-final/unit-full.log": "93f143a45ac6acec7765ee11d803f7b895e41e55f1112c572f9993fd3ceb126e",
+      "docs/phase-1/evidence/committed-browser-final/unit-summary.json": "9cf42889f4d3d0a1dd46a3b7e944549174a7e8817d44cece33f7cdd6243c8f39",
+      "docs/phase-1/evidence/remote-before-accepted-push.json": "0da5bbbf977b7a9ec01fbcbd1f735df6d1748485f31195325511411255150a00",
+      "docs/phase-1/evidence/review-firefox-ci.json": "c0953785a84a6b190f98fdde16817fcac44d24561026ca36b939bbb473012cfd"
+    },
+    "currentReviewSelfExcluded": true,
+    "assessment": "All intended files are regular UTF-8 text and JSON parses. No credentials/private observation payloads/recording bytes found in new material. Unit userinfo is an exact baseline synthetic telemetry test fixture; other new hits are test/flag terminology. Earlier explicit synthetic numerical/browser probes and immutable Phase0 public-page UI data retain their recorded classifications. Recordings, trace archives and recovery bundles remain outside Git. All73 protected hashes match both actual archive and current checkout; Phase0, package lock/public assets remain unchanged.",
+    "noChangedDuringScan": true
+  },
+  "documentation": {
+    "assessment": "Acceptance uses exact2699 source, actual256/78 results, both telemetry flags, seven measured stage times and final measurement values. It states headless Firefox software60/DPR1 scope, failed earlier attempts, synchronous large-file limits and future-event campus limits. CI narrative distinguishes local pass from required hosted final-head acceptance; rollback note retains Phase0 and deployment separation. PR draft preserves pending integration/hosted/postmerge status.",
+    "draft": {
+      "name": "neptune-phase1-pr-body.md",
+      "sha256": "1385b937831e51390e4b318668274b9742ec38ffbce2d1b0a1fea512a216b2f8",
+      "bytes": 6273,
+      "publicationStatus": "PASS"
+    },
+    "remoteSnapshot": "Reviewed public copy is byte-identical to lead’s fresh read-only snapshot at21:22:38; main23de and Pages019b, two historical deployments, empty hooks/rulesets and source-only workflow. No new remote fetch performed by reviewer."
+  },
+  "checks": [
+    "Rebuild unit/browser summaries from raw JSON in actual clean archive; exact match,256units and26cases per browser with one passed result each",
+    "Verify79 source hashes against archived files, exact commit blobs and current checkout; verify73 protected archived/current files",
+    "Verify all seven execution-log hashes/zero exits, empty context manifest,18measurement source hashes, exact long/campus continuation flags and documented byte/time/memory values",
+    "Read final documentation and proposed PR body; compare all numerical claims to authoritative raw evidence",
+    "Pattern scan332 intended prerequisite/doc files; independently classify current hits without printing possible values; scan PR draft and old publication review; rehash snapshot before writing this record",
+    "Verify new remote snapshot copy matches lead’s read-only source snapshot"
+  ],
+  "limitations": [
+    "This accepts the completed local gate and publication bytes only. Normal hosted CI on the final evidence-only head, prospective merge review, actual merge and clean post-merge verification remain required.",
+    "Observed Firefox software-display cadence and M4 timing/memory do not establish physical validation, universal performance or every historical CI cause.",
+    "This review file is excluded from its own hash inventory; subsequent source or evidence changes require review."
+  ]
+}

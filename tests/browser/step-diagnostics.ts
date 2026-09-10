@@ -1,0 +1,48 @@
+import { test, expect, type Page, type TestInfo } from '@playwright/test';
+const observing = process.env.NEPTUNE_CAMPUS_OBSERVE === '1';
+const capturing = observing || process.env.NEPTUNE_CAMPUS_DIAGNOSTICS === '1';
+const logs = new WeakMap<Page, string[]>();
+export function installStepDiagnostics() {
+  test.beforeEach(async ({ page }) => {
+    if (!capturing) return;
+    if (observing) test.setTimeout(120_000); // Diagnostic observation only, never normal acceptance.
+    const events: string[] = []; logs.set(page, events);
+    const add = (text: string) => { if (events.length < 1500) events.push(text.slice(0, 2000)); };
+    page.on('console', message => { if (message.text().startsWith('[neptune-step]') || message.type() === 'error') add(message.text()); });
+    page.on('pageerror', error => add('pageerror: ' + error.message));
+    page.on('requestfailed', request => add('requestfailed: ' + new URL(request.url()).pathname + ' ' + request.failure()?.errorText));
+    page.on('response', response => { if (response.status() >= 400) add('HTTP ' + response.status() + ' ' + new URL(response.url()).pathname); });
+    await page.addInitScript(() => {
+      let previous = '', remaining = 100;
+      new MutationObserver(() => {
+        const main = document.querySelector('main.twin-app');
+        if (!main) return;
+        const value = JSON.stringify({ time: main.getAttribute('data-time'), ready: main.getAttribute('data-ready'), stepDisabled: [...document.querySelectorAll('button')].find(b => b.textContent === 'Step 10s')?.disabled });
+        if (value !== previous && remaining-- > 0) { previous = value; console.debug('[neptune-step] ' + JSON.stringify({ stage: 'dom', at: performance.timeOrigin + performance.now(), value })); }
+      }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-time', 'data-ready', 'disabled'] });
+    });
+  });
+  test.afterEach(async ({ page }, info) => {
+    if (!capturing) return;
+    await info.attach('step-lifecycle', { body: (logs.get(page) ?? []).join('\n'), contentType: 'text/plain' });
+  });
+}
+export function diagnosticURL(url: string) {
+  return capturing ? url + (url.includes('?') ? '&' : '?') + 'phase1Diagnostics=1' : url;
+}
+export async function campusStep(page: Page, info: TestInfo) {
+  test.setTimeout(180_000); // Setup plus one finite operation; no performance claim.
+  const main = page.locator('main.twin-app'), button = page.getByRole('button', { name: 'Step 10s', exact: true });
+  await expect(button).toBeEnabled({ timeout: 60_000 });
+  const before = Number(await main.getAttribute('data-time'));
+  const completionBudgetMs = 60_000, start = Date.now();
+  const remaining = () => Math.max(1, completionBudgetMs - (Date.now() - start));
+  try {
+    await button.click({ timeout: remaining() });
+    await expect(main).toHaveAttribute('data-time', String(before + 10), { timeout: remaining() });
+    await expect(button).toBeEnabled({ timeout: remaining() });
+    await expect(main).toHaveAttribute('data-ready', 'true', { timeout: remaining() });
+  } finally {
+    await info.attach('campus-functional-duration', { body: JSON.stringify({ elapsedMs: Date.now() - start, safetyTimeoutMs: completionBudgetMs, performanceCertification: false }), contentType: 'application/json' });
+  }
+}

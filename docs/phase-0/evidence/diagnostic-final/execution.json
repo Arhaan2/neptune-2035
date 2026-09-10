@@ -1,0 +1,70 @@
+{
+  "startedAt": "2026-09-09T07:33:49.272Z",
+  "completedAt": "2026-09-09T07:34:01.543Z",
+  "sourceSha": "23de38a50cf702bbe1e0f0bf56f61c0b5af4a78f",
+  "sourceMethod": "git archive of full pinned commit into fresh mkdtemp; no node_modules or output inherited",
+  "harnessMethod": "only scripts/phase-0, tests/fixtures/phase-0 and provenance evidence copied after requested checks",
+  "runnerSha256": "e9b529983d2a5a3e85ee9e946ed1f3ab2578bb4ba417f8f129863dfac8a64bbe",
+  "protectedSourceFiles": 216,
+  "sourceMismatches": [],
+  "toolchain": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M4 Pro",
+    "logicalCpus": 14,
+    "memoryBytes": 25769803776
+  },
+  "baselineOnly": false,
+  "diagnosticsOnly": true,
+  "beforeLock": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "afterLock": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+  "commands": [
+    {
+      "name": "npm-ci",
+      "command": "npm ci",
+      "environment": {},
+      "startedAt": "2026-09-09T07:33:49.305Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 3446.175792,
+      "log": "npm-ci.log",
+      "logSha256": "5a813008c0010158d798a4393bdcd02c3d289a84e7b5d36c2edb03379c524361"
+    },
+    {
+      "name": "phase-0",
+      "command": "node scripts/phase-0/audit.mjs --out=<audit-repository>/artifacts/phase-0/diagnostic-final/diagnostics",
+      "environment": {},
+      "startedAt": "2026-09-09T07:33:52.758Z",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "elapsedMs": 8100.285416,
+      "log": "phase-0.log",
+      "logSha256": "21f4f0cfa5be00cbac776e8441295a85377bc99461d710b5e1ba61d04a6b2cec"
+    },
+    {
+      "name": "desired-hydraulic",
+      "command": "node scripts/phase-0/audit.mjs PH0-001 --desired --out=<audit-repository>/artifacts/phase-0/diagnostic-final/desired-hydraulic",
+      "environment": {},
+      "startedAt": "2026-09-09T07:34:00.859Z",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "elapsedMs": 202.1510419999995,
+      "log": "desired-hydraulic.log",
+      "logSha256": "1de71caa4149dbdc7b1c88dbd6c27709e5ba5e984dac35b8bac47c3ecb1b12f1"
+    },
+    {
+      "name": "desired-persistence",
+      "command": "node scripts/phase-0/audit.mjs PH0-002 --desired --out=<audit-repository>/artifacts/phase-0/diagnostic-final/desired-persistence",
+      "environment": {},
+      "startedAt": "2026-09-09T07:34:01.061Z",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "elapsedMs": 461.1396670000013,
+      "log": "desired-persistence.log",
+      "logSha256": "96d4a32e5ae8f10e6c6afbf55168702a13241e6ae71d6d420f3e3ee5f0f9b30f"
+    }
+  ]
+}

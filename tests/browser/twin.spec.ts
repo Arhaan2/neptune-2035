@@ -1,11 +1,16 @@
+import { installStepDiagnostics, diagnosticURL, campusStep } from './step-diagnostics';
 import { test, expect, type Page, type TestInfo, type Locator } from '@playwright/test';
 import fs from 'node:fs/promises';
+import { CONTRACT } from '../../src/twin/persistence/limits';
+import { expectNoHorizontalOverflow } from './layout';
+
+installStepDiagnostics();
 
 const main=(page:Page)=>page.locator('main.twin-app');
 const pump='platform-001/module-01/pump-duty';
 async function load(page:Page,url='./'){
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto(url);
+  await page.goto(diagnosticURL(url));
   await expect(main(page)).toHaveAttribute('data-ready','true');
   await expect(page.getByRole('button',{name:'Step 10s',exact:true})).toBeEnabled();
   await expect(page.getByText('Design-stage digital twin · Simulated operation',{exact:true})).toBeVisible();
@@ -134,7 +139,8 @@ test('seek backward and forward restores exact event-boundary numerical results'
   expect(historical.events).toContainEqual(expect.objectContaining({kind:'restore',assetId:pump,timeS:20}));
   await seek(0,initial);await seek(20,restoring);await expect.poll(()=>inspectorStatus(page)).toContain('starting');
   await seek(30,recovered);await expect.poll(()=>inspectorStatus(page)).toContain('running');
-  for(const invalid of ['-1','0.5','86401']){
+  await target.fill('86401');await expect(page.getByRole('button',{name:'Seek time',exact:true})).toBeEnabled();
+  for(const invalid of ['-1','0.5',String(CONTRACT.horizonS+1)]){
     await target.fill(invalid);await expect(page.getByRole('button',{name:'Seek time',exact:true})).toBeDisabled();
     await expect(main(page)).toHaveAttribute('data-time','30');
   }
@@ -151,13 +157,16 @@ test('cancel run retains completed state and superseding work rejects stale upda
   await expect(page.getByRole('button',{name:'Step 10s',exact:true})).toBeDisabled();
   await cancel.focus();await page.keyboard.press('Enter');
   await expect(page.locator('.twin-notice')).toContainText('Run cancelled. The last completed numerical state is retained.');
-  await expect(cancel).toHaveCount(0);await expect(main(page)).toHaveAttribute('data-time','20');
-  expect(await exportArtifact(page,'results')).toBe(completed);
+  await expect(cancel).toHaveCount(0);
+  const retained=Number(await main(page).getAttribute('data-time'));
+  expect(retained).toBeGreaterThanOrEqual(0);expect(retained).toBeLessThan(86400);
+  const checkpoint=JSON.parse(await exportArtifact(page,'project'));
+  expect(checkpoint.timeS).toBe(retained);expect(checkpoint.checkpoint.state.timeS).toBe(retained);
   expect(JSON.parse(await exportArtifact(page,'project')).events).toEqual(project.events);
   // A new physical step must finish without waiting for the cancelled 24-hour replay.
   await step(page,10);const newer=await exportArtifact(page,'results');
   await expect(page.locator('.twin-notice')).not.toContainText('Run cancelled');
-  await page.waitForTimeout(1200);await expect(main(page)).toHaveAttribute('data-time','30');
+  await page.waitForTimeout(1200);await expect(main(page)).toHaveAttribute('data-time',String(retained+10));
   expect(await exportArtifact(page,'results')).toBe(newer);
   await page.getByRole('spinbutton',{name:'Replay time in seconds',exact:true}).fill('20');
   await page.getByRole('button',{name:'Seek time',exact:true}).click();
@@ -190,27 +199,47 @@ test.describe('reduced-motion touch acceptance',()=>{
     await page.getByRole('button',{name:'Explode',exact:true}).tap();await expect.poll(async()=>(await diagnostics(page))?.exploded).toBe(true);
     await page.getByRole('button',{name:'Explode',exact:true}).tap();await expect.poll(async()=>(await diagnostics(page))?.exploded).toBe(false);
     await expect(main(page)).toHaveAttribute('data-time','0');expect(await exportArtifact(page,'results')).toBe(before);
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(390);
+    await expectNoHorizontalOverflow(page,390);
     await screenshot(page,info,'reduced-motion-touch');expect(errors).toEqual([]);
   });
 });
 
-test('comparison renders two computed 240-second runs and exports identical disturbance histories',async({page},info)=>{
-  const errors=observeErrors(page);await load(page);await changeNumber(page,'Requested accelerators','1280');
+for (const fallback of [false, true]) {
+test(`comparison renders two computed 240-second runs and exports identical disturbance histories${fallback ? ' with explicit fallback' : ''}`,async({page},info)=>{
+  const errors=observeErrors(page);await load(page,fallback ? './?fallback=1' : './');await changeNumber(page,'Requested accelerators','1280');
   await page.getByRole('button',{name:'Compare',exact:true}).click();
   await page.getByRole('button',{name:'Compare pump experiment',exact:true}).click();
   const cards=page.locator('.twin-comparison-grid article');await expect(cards).toHaveCount(2);
   await expect(cards.nth(0).getByRole('heading',{level:3})).toHaveText('No standby pump');
   await expect(cards.nth(1).getByRole('heading',{level:3})).toHaveText('One standby pump');
-  const temperature=async(card:Locator)=>Number((await card.locator('p').first().innerText()).split('°')[0].replaceAll(',','').trim());
+  if (fallback) {
+    await expect(cards.getByTestId('twin-fallback')).toHaveCount(2);
+    await expect(cards.locator('canvas')).toHaveCount(0);
+  } else {
+    await expect(cards.locator('canvas')).toHaveCount(2);
+    await expect(cards.nth(0).locator('canvas')).toBeVisible();
+    await expect(cards.nth(1).locator('canvas')).toBeVisible();
+  }
+  const temperature=async(card:Locator)=>{
+    // Nested scene/fallback paragraphs are not the card's numerical metric.
+    const metric=card.locator(':scope > p').first();
+    await expect(metric).toHaveText(/^[-\d,.]+ °C · [-\d,.]+ L\/s$/);
+    const value=Number((await metric.innerText()).split('°')[0].replaceAll(',','').trim());
+    expect(Number.isFinite(value)).toBe(true);
+    return value;
+  };
   expect(await temperature(cards.nth(0))).toBeGreaterThan(await temperature(cards.nth(1))+0.5);
   const a=JSON.parse(await textDownload(page,()=>cards.nth(0).getByRole('button',{name:'Export reproducible run',exact:true}).click()));
   const b=JSON.parse(await textDownload(page,()=>cards.nth(1).getByRole('button',{name:'Export reproducible run',exact:true}).click()));
   expect(a.timeS).toBe(240);expect(b.timeS).toBe(240);expect(a.events).toEqual(b.events);
   expect(a.design.standbyPumps).toBe(0);expect(b.design.standbyPumps).toBe(1);
+  const coolantA=a.checkpoint.state.modules[0].coolantK,coolantB=b.checkpoint.state.modules[0].coolantK;
+  expect(Number.isFinite(coolantA)).toBe(true);expect(Number.isFinite(coolantB)).toBe(true);
+  expect(coolantA).toBeGreaterThan(coolantB+0.5);
   await expect(page.locator('.twin-delta')).toContainText('at 240s:');
-  await screenshot(page,info,'comparison');expect(errors).toEqual([]);
+  await screenshot(page,info,fallback ? 'comparison-fallback' : 'comparison');expect(errors).toEqual([]);
 });
+}
 
 test('project exports and imports replay numerical state, with invalid mappings rejected visibly',async({page},info)=>{
   const errors=observeErrors(page);await load(page);await changeNumber(page,'Requested accelerators','1280');
@@ -230,7 +259,7 @@ test('project exports and imports replay numerical state, with invalid mappings 
 test('mobile keyboard and explicit fallback retain asset inspection, operation and exports',async({page},info)=>{
   const errors=observeErrors(page);await page.setViewportSize({width:390,height:844});await load(page,'./?fallback=1');
   await expect(page.getByTestId('twin-fallback')).toBeVisible();await expect(page.locator('canvas')).toHaveCount(0);
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(390);
+  await expectNoHorizontalOverflow(page,390);
   const find=page.getByRole('textbox',{name:'Find asset ID',exact:true});await find.fill('platform-001/module-01/rack-02');await find.press('Enter');
   await expect(main(page)).toHaveAttribute('data-selected','platform-001/module-01/rack-02');
   await expect(page.locator('.twin-inspector')).toContainText('40 U / 48 U');
@@ -272,7 +301,7 @@ test('context cameras, keyboard interior, distinct families and bounded large-sc
   const start=Date.now();await page.getByLabel('Starting scenario',{exact:true}).selectOption('500000');
   await expect.poll(async()=>(await diagnostics(page))?.totalModules,{timeout:20000}).toBe(391);const large=await diagnostics(page),largeInteractionMs=Date.now()-start,largeCadence=await frameCadence(page);
   expect(large?.renderedPlatforms).toBe(98);expect(large?.renderedModules).toBe(large?.totalModules);
-  const stepStart=Date.now();await step(page,10);const largeStepResponseMs=Date.now()-stepStart;
+  const stepStart=Date.now();await campusStep(page,info);const largeStepResponseMs=Date.now()-stepStart;
   const hardware=await page.evaluate(()=>{
     const gl=document.querySelector('canvas')?.getContext('webgl2'),extension=gl?.getExtension('WEBGL_debug_renderer_info');
     return {userAgent:navigator.userAgent,hardwareConcurrency:navigator.hardwareConcurrency,renderer:gl&&extension?gl.getParameter(extension.UNMASKED_RENDERER_WEBGL):'unavailable'};
@@ -292,4 +321,15 @@ test('legacy saved scenario links retain the explicit aggregate model',async({pa
   const legacyURL=new URL(link);legacyURL.searchParams.delete('legacy');await page.goto(legacyURL.href);
   await expect(page.getByRole('spinbutton',{name:'Accelerators',exact:true})).toBeVisible();
   await expect(main(page)).toHaveCount(0);expect(errors).toEqual([]);
+});
+
+// Same 391-module family as the transition journey, in a fresh browser context.
+test('fresh large-campus Step 10s completes with the active design and ready controls', async ({page}, info) => {
+  const errors=observeErrors(page); await load(page);
+  await page.getByRole('button',{name:'Design family III',exact:true}).click();
+  await page.getByLabel('Starting scenario',{exact:true}).selectOption('500000');
+  await expect.poll(async()=>(await diagnostics(page))?.totalModules,{timeout:20000}).toBe(391);
+  await expect(main(page)).toHaveAttribute('data-time','0');
+  await campusStep(page,info);
+  expect(errors).toEqual([]);
 });

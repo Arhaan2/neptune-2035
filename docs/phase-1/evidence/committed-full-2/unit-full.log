@@ -1,0 +1,45 @@
+
+> neptune@2.0.0-rc.1 test
+> vitest run --reporter=default --reporter=json --outputFile=artifacts/phase1-unit.json
+
+
+ RUN  v5.0.0 <verified-checkout>
+
+ ✓ tests/scenario.test.ts (15 tests) 4ms
+ ✓ tests/model.test.ts (38 tests) 16ms
+ ✓ tests/phase1-numerical.test.ts (22 tests) 73ms
+ ✓ tests/phase1-work-budget.test.ts (3 tests) 143ms
+ ✓ tests/twin-geometry.test.ts (7 tests) 386ms
+   ✓ dimensioned rendering contract (7)
+     ✓ all platforms are included in physical campus footprint above the old visual cap 323ms
+ ✓ tests/twin-physics.test.ts (28 tests) 705ms
+ ✓ tests/phase1-deferred.test.ts (4 tests) 862ms
+   ✓ PH1-REG-01 deferred Phase 0 findings remain explicit (4)
+     ✓ PH0-003 retains the 4000-node shared port boundary and reports the 4001-node design shortfall 447ms
+ ✓ tests/phase1-worker.test.ts (49 tests) 1065ms
+ ✓ tests/twin-network.test.ts (8 tests) 1184ms
+   ✓ declared network offered-demand and whole-job admission (7)
+     ✓ detects a shared-core port bottleneck even when every individual platform link fits 727ms
+ ✓ tests/twin-integration.test.ts (19 tests) 2328ms
+   ✓ canonical graph, geometry and operating-state integration (10)
+     ✓ bounds the million-accelerator inventory and 10 GW supply ceiling without inventing consumption 1792ms
+ ✓ tests/twin-telemetry.test.ts (47 tests) 3858ms
+   ✓ actual localhost SSE transport (2)
+     ✓ uses the production adapter with native browser reconnect/Last-Event-ID and source validation 735ms
+   ✓ running DataPanel acceptance (1)
+     ✓ operates mapping, raw inspection, simulated dropout, calibration, and actual streaming in the app 2973ms
+ ✓ tests/phase1-persistence.test.ts (16 tests) 6629ms
+   ✓ PH1-PER-01 real historical thresholds (2)
+     ✓ round-trips real engine-generated 999, 1000, 1001-event applied histories and continues 840ms
+     ✓ advances a real one-node run through 86399, 86400 and 86401 seconds, preserving continuation 1554ms
+   ✓ PH1-PER-02 declared boundaries (6)
+     ✓ admits 9999/10000 future events through engine/export/import, rejects 10001 atomically 1337ms
+     ✓ checks actual UTF-8 bytes below/at/above 64 MiB including multibyte input 1036ms
+     ✓ bounds nesting before parse and exact value/key item allocation 1407ms
+
+ Test Files  12 passed (12)
+      Tests  256 passed (256)
+   Start at  11:29:31
+   Duration  6.85s (tests 90%, transform 7%, import 3%)
+
+JSON report written to <verified-checkout>/artifacts/phase1-unit.json

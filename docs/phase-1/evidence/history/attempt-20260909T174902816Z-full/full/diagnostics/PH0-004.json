@@ -1,0 +1,24 @@
+{
+  "id": "PH0-004",
+  "classification": "assumption/ownership risk",
+  "disposition": "DOCUMENTED LIMITATION — structural ownership risk, no supported rating edit/runtime mismatch demonstrated",
+  "desiredRegressions": [],
+  "evidence": {
+    "assetId": "platform-001/module-01/pump-duty",
+    "catalogId": "equipment-v2",
+    "assetRevision": "2.0.0",
+    "inspectorRatings": {
+      "capacityW": 45000,
+      "shutoffPa": 250000,
+      "freeFlowM3S": 0.1,
+      "efficiency": 0.72
+    },
+    "engineFlowM3S": 0.05968751283253368,
+    "directSolverWithInspectorFlowM3S": 0.05968751283253368,
+    "testLocalHalfShutoffFlowM3S": 0.046523297235762574,
+    "supportedConfigRatingEdit": false,
+    "explanation": "moduleAssets produces inspector ratings, but circuit omits those optional solver arguments and solveHydraulics owns identical defaults. The hypothetical half-rating is a test-local direct solver input only, not a supported design change or observed shipping numerical mismatch."
+  },
+  "evidenceCheck": "PASS",
+  "elapsedMs": 3.205417000000125
+}

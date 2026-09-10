@@ -1,0 +1,86 @@
+import { test, expect, type Page } from '@playwright/test';
+import fs from 'node:fs/promises';
+import { campusStep } from './step-diagnostics';
+
+function observe(page: Page) {
+  const errors: string[] = [], workers: string[] = [];
+  page.on('worker', worker => workers.push(worker.url()));
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('response', response => { if (response.status() >= 400) errors.push(`HTTP ${response.status()}: ${response.url()}`); });
+  page.on('requestfailed', request => { if (/\.(js|css|svg|png)(\?|$)/.test(request.url())) errors.push(`Asset failed: ${request.url()}`); });
+  return { errors, workers };
+}
+
+test('public prototype scene, normal operation, persistence and mobile layout', async ({ page }, info) => {
+  test.setTimeout(180_000);
+  const { errors, workers } = observe(page);
+  const main = page.locator('main.twin-app');
+  const button = (name: string) => page.getByRole('button', { name, exact: true });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  await expect(main).toHaveAttribute('data-ready', 'true');
+  await expect(button('Step 10s')).toBeEnabled();
+  await expect(page.locator('canvas')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.renderedModules)).toBeGreaterThan(0);
+  await expect(page.getByText('Public prototype — simulated, design-stage model', { exact: true })).toBeVisible();
+  expect(workers.some(url => new URL(url).pathname.includes('/assets/worker-'))).toBe(true);
+  await button('Step 10s').click();
+  await expect(main).toHaveAttribute('data-time', '10');
+  await expect(button('Step 10s')).toBeEnabled();
+  await button('Cooling close-up').click();
+  await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.focus)).toBe('cooling');
+  await page.getByRole('treeitem', { name: /module-02/ }).click();
+  await expect(main).toHaveAttribute('data-selected', /module-02/);
+  await button('Inside module').click();
+  await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.inside)).toBe(true);
+  await button('Exit interior').click();
+  await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.inside)).toBe(false);
+  const downloading = page.waitForEvent('download');
+  await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
+  const download = await downloading;
+  expect(await download.failure()).toBeNull();
+  const saved = await fs.readFile((await download.path())!, 'utf8');
+  expect(JSON.parse(saved).checkpoint.state.timeS).toBe(10);
+  await button('Start').click();
+  await expect.poll(async () => Number(await main.getAttribute('data-time'))).toBeGreaterThan(10);
+  await button('Pause').click();
+  await expect(button('Step 10s')).toBeEnabled();
+  const paused = await main.getAttribute('data-time');
+  await page.waitForTimeout(500);
+  await expect(main).toHaveAttribute('data-time', paused!);
+  await button('Reset state').click();
+  await expect(main).toHaveAttribute('data-time', '0');
+  await expect(button('Step 10s')).toBeEnabled();
+  await page.getByLabel('Import project', { exact: true }).setInputFiles({ name: 'prototype.json', mimeType: 'application/json', buffer: Buffer.from(saved) });
+  await expect(main).toHaveAttribute('data-time', '10');
+  await expect(button('Step 10s')).toBeEnabled();
+  await page.reload();
+  await expect(page.getByTestId('checkpoint-recovery')).toContainText('available at 10s');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
+  await page.screenshot({ path: info.outputPath('mobile-recovery.png'), fullPage: true });
+  await button('Recover saved checkpoint').click();
+  await expect(main).toHaveAttribute('data-time', '10');
+  await expect(button('Step 10s')).toBeEnabled();
+  await page.setViewportSize({ width: 1600, height: 1050 });
+  await page.screenshot({ path: info.outputPath('prototype-scene.png'), fullPage: true });
+  expect(errors).toEqual([]);
+  await info.attach('runtime', { body: JSON.stringify({ workers, errors }), contentType: 'application/json' });
+});
+
+test('public prototype large-campus functional Step 10s', async ({ page, browserName }, info) => {
+  test.skip(browserName !== 'firefox', 'One focused large-campus check on the previously affected browser.');
+  test.setTimeout(180_000);
+  const { errors } = observe(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  const main = page.locator('main.twin-app');
+  await expect(main).toHaveAttribute('data-ready', 'true');
+  await page.getByRole('button', { name: 'Design family III', exact: true }).click();
+  await page.getByLabel('Starting scenario', { exact: true }).selectOption('500000');
+  await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.totalModules), { timeout: 60_000 }).toBe(391);
+  await expect(main).toHaveAttribute('data-time', '0');
+  await campusStep(page, info);
+  expect(errors).toEqual([]);
+});
