@@ -137,6 +137,12 @@ test('PH2 fallback replacement and cost-only UI edit retain exact physical check
   await install(page, 'pump-efficient');
   await step(page);
   const before = await project(page), reportBefore = await artifact(page, 'report');
+  await button(page, 'Data & replay').click();
+  const observationHistory = page.getByText(/retained replay window:/);
+  await expect(observationHistory).toBeVisible();
+  const retainedBefore = await observationHistory.innerText();
+  const recordCount = Number(retainedBefore.match(/retained replay window: (\d+)/)?.[1]);
+  expect(recordCount).toBeGreaterThanOrEqual(16);
   await button(page, 'Compare').click();
   await page.getByText('Cost scope and assumption sensitivity', { exact: true }).click();
   const cost = page.getByRole('spinbutton', { name: 'Equipment cost multiplier', exact: true });
@@ -146,9 +152,10 @@ test('PH2 fallback replacement and cost-only UI edit retain exact physical check
   expect(priced.checkpoint).toEqual(before.checkpoint);
   expect(priced.designSnapshot.revision).toBe(before.designSnapshot.revision);
   expect(priced.designSnapshot.equipment.economics.unitCostScale).toBe(1.5);
+  await expect(observationHistory).toHaveText(retainedBefore);
   expect(await artifact(page, 'report')).not.toBe(reportBefore);
   await button(page, 'Operate').click();
   await step(page); await expect(main(page)).toHaveAttribute('data-time', '20');
   expect(observed.errors).toEqual([]);
-  await info.attach('phase2-fallback-cost', { body: JSON.stringify({ oldIdentity: before.checkpoint.configIdentity, pricedIdentity: priced.checkpoint.configIdentity, ...observed }), contentType: 'application/json' });
+  await info.attach('phase2-fallback-cost', { body: JSON.stringify({ oldIdentity: before.checkpoint.configIdentity, pricedIdentity: priced.checkpoint.configIdentity, retainedBefore, retainedAfter: await observationHistory.innerText(), ...observed }), contentType: 'application/json' });
 });
