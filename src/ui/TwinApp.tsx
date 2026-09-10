@@ -424,7 +424,7 @@ export default function TwinApp() {
     try {
       const nextDesign=replaceEquipment(design,asset.id,replacementSpec);
       const oldProject=sim.captureProject();
-      const history=[...saved.slice(-(CONTRACT.maxSavedScenarios-1)),{name:`Before replacement · ${design.revision} · ${state.timeS}s`,project:oldProject}];
+      const history=[...saved.slice(-(CONTRACT.maxSavedScenarios-1)),{name:`Before replacement · ${state.timeS}s`,project:oldProject}];
       const serialized=JSON.stringify(history.map(item=>({name:item.name,project:JSON.parse(serializeProject(item.project))})));
       preflightJSON(serialized);validateStructure(history);
       localStorage.setItem('neptune-v2-scenarios',serialized);
