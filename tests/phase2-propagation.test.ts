@@ -131,10 +131,10 @@ describe('PH2-06 economic edits preserve every dynamic state field', () => {
     const priced = updateEconomicAssumptions(design, { unitCostScale: 1.25 });
     expect(engineeringIdentity(priced)).toBe(engineeringIdentity(design));
     expect(priced.revision).toBe(design.revision); expect(economicIdentity(priced)).not.toBe(economicIdentity(design));
-    expect(billOfEquipment(priced).totalUSD).toBeCloseTo(billOfEquipment(design).totalUSD * 1.25, 5);
     expect(state).toEqual(before);
     expect(projectFile(priced, state).checkpoint!.state).toEqual(projectFile(design, state).checkpoint!.state);
     expect(physicalState(await worker(priced, state, 8))).toEqual(physicalState(advance(design, before, 8)));
+    expect(billOfEquipment(priced).totalUSD).toBeCloseTo(billOfEquipment(design).totalUSD * 1.25, 5);
   });
 });
 
@@ -146,5 +146,28 @@ describe('PH2-11 valid inadequate designs remain runnable', () => {
     expect(state.modules[0].gridW).toBe(0);
     expect(constraints(design, state).find(c => c.id === 'EL-01')?.status).toBe('violated');
     expect(Array.from(allAssets(design)).filter(a => a.type === 'compute')).toHaveLength(160);
+  });
+});
+
+
+describe('PH2-04/05 installed ratings constrain real allocation', () => {
+  it('honors the 2 MW conversion throughput rating in a full-workload fixture without storage assistance', () => {
+    const base = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 1280, workload: 1, batteryWhPerModule: 0, batteryMaxWPerModule: 0 });
+    const design = withDefaultSpecification(base, 'distribution', 'distribution-efficient');
+    const m = initialize(design).modules[0];
+    const expectedNodes = Math.floor((2000000 * 0.98 * 0.99 - m.pumpPowerW - 18000) / 12000);
+    expect(m.energizedNodes).toBe(expectedNodes);
+    expect(m.energizedNodes).toBeLessThan(160);
+    expect(m.gridW).toBeLessThanOrEqual(2000000);
+  });
+  it('honors the 1.8 MW battery discharge rating under loss of grid with sufficient stored energy', () => {
+    const base = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 1280, workload: 1 });
+    const design = replaceEquipment(base, battery, 'battery-extended');
+    const m = advance(design, initialize(design), 1, [{ id: 'grid-fails', timeS: 0, kind: 'trip', assetId: 'shore/grid' }]).modules[0];
+    const expectedNodes = Math.floor((1800000 - m.pumpPowerW - 18000) / 12000);
+    expect(m.energizedNodes).toBe(expectedNodes);
+    expect(m.energizedNodes).toBeLessThan(160);
+    expect(m.batteryDischargeW).toBeLessThanOrEqual(1800000);
+    expect(m.batteryWh).toBeGreaterThan(590000);
   });
 });
