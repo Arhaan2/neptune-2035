@@ -1,0 +1,438 @@
+{
+  "sourceCommit": "06899f0668a05c6ba7f0a1bc0c96d33304eef580",
+  "method": "Frozen baseline engine captures for equivalence only; Phase2 numerical equations asserted separately from independent calculations.",
+  "captures": [
+    {
+      "requestedAccelerators": 8,
+      "initial": {
+        "timeS": 0,
+        "itW": 10319.999999999998,
+        "facilityW": 57393.69216776267,
+        "gridW": 57393.69216776267,
+        "pumpPowerW": 26238.44377467519,
+        "availableAccelerators": 8,
+        "energizedAccelerators": 8,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 303.15,
+        "batteryWh": 400000,
+        "instantaneousPUE": 5.561404279821965,
+        "energyPUE": null,
+        "electricalResidualW": 0,
+        "thermalResidualW": -2.3283064365386963e-10,
+        "warnings": []
+      },
+      "stepped": {
+        "timeS": 10,
+        "itW": 10319.999999999998,
+        "facilityW": 57393.69216776267,
+        "gridW": 57393.69216776267,
+        "pumpPowerW": 26238.44377467519,
+        "availableAccelerators": 8,
+        "energizedAccelerators": 8,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 302.4364602780561,
+        "batteryWh": 400000,
+        "instantaneousPUE": 5.561404279821965,
+        "energyPUE": 5.561404279821964,
+        "electricalResidualW": 0,
+        "thermalResidualW": -2.3283064365386963e-10,
+        "warnings": []
+      },
+      "firstModuleInitial": {
+        "id": "platform-001/module-01",
+        "coolantK": 303.15,
+        "airK": 298.15,
+        "batteryWh": 400000,
+        "throttle": 1,
+        "states": {
+          "platform-001/module-01": "available",
+          "platform-001/module-01/pump-duty": "running",
+          "platform-001/module-01/pump-standby": "standby",
+          "platform-001/module-01/pump-sea": "running",
+          "platform-001/module-01/cdu": "running",
+          "platform-001/module-01/hx": "running",
+          "platform-001/module-01/battery": "running",
+          "platform-001/module-01/distribution": "running",
+          "platform-001/module-01/rack-network": "running"
+        },
+        "startAtS": {},
+        "technicalFlowM3S": 0.05968751283253368,
+        "seawaterFlowM3S": 0.06634100361443415,
+        "pumpPowerW": 26238.44377467519,
+        "itW": 10319.999999999998,
+        "facilityW": 57393.69216776267,
+        "gridW": 57393.69216776267,
+        "batteryDischargeW": 0,
+        "batteryChargeW": 0,
+        "rejectedHeatW": 1799090.9817657438,
+        "thermalResidualW": -2.3283064365386963e-10,
+        "electricalResidualW": 0,
+        "technicalOutletK": 295.9640009620599,
+        "seawaterOutletK": 297.7809282434514,
+        "pressurePa": 160935.0202994846,
+        "energizedNodes": 1,
+        "availableAccelerators": 8,
+        "warnings": []
+      },
+      "firstModuleStepped": {
+        "id": "platform-001/module-01",
+        "coolantK": 302.4364602780561,
+        "airK": 298.1702190975826,
+        "batteryWh": 400000,
+        "throttle": 1,
+        "states": {
+          "platform-001/module-01": "available",
+          "platform-001/module-01/pump-duty": "running",
+          "platform-001/module-01/pump-standby": "standby",
+          "platform-001/module-01/pump-sea": "running",
+          "platform-001/module-01/cdu": "running",
+          "platform-001/module-01/hx": "running",
+          "platform-001/module-01/battery": "running",
+          "platform-001/module-01/distribution": "running",
+          "platform-001/module-01/rack-network": "running"
+        },
+        "startAtS": {},
+        "technicalFlowM3S": 0.05968751283253368,
+        "seawaterFlowM3S": 0.06634100361443415,
+        "pumpPowerW": 26238.44377467519,
+        "itW": 10319.999999999998,
+        "facilityW": 57393.69216776267,
+        "gridW": 57393.69216776267,
+        "batteryDischargeW": 0,
+        "batteryChargeW": 0,
+        "rejectedHeatW": 1692804.2664398798,
+        "thermalResidualW": -2.3283064365386963e-10,
+        "electricalResidualW": 0,
+        "technicalOutletK": 295.67775255306776,
+        "seawaterOutletK": 297.38918619721744,
+        "pressurePa": 160935.0202994846,
+        "energizedNodes": 1,
+        "availableAccelerators": 8,
+        "warnings": []
+      },
+      "includedCostUSD": 14707500,
+      "marine": [
+        {
+          "platformId": "platform-001",
+          "massKg": 620424.3888067808,
+          "waterplaneM2": 696,
+          "draftM": 0.8696725382769566,
+          "freeboardM": 4.130327461723043,
+          "supportedGeometry": true,
+          "missing": [],
+          "deckLoadKgM2": 160.3598453243724
+        }
+      ],
+      "equipment": [
+        {
+          "id": "platform-001/module-01/pump-duty",
+          "dimensionsM": [
+            1.2,
+            1.2,
+            0.8
+          ],
+          "operationalMassKg": 180,
+          "ratings": {
+            "capacityW": 45000,
+            "shutoffPa": 250000,
+            "freeFlowM3S": 0.1,
+            "efficiency": 0.72
+          }
+        },
+        {
+          "id": "platform-001/module-01/pump-sea",
+          "dimensionsM": [
+            1.2,
+            1.2,
+            0.8
+          ],
+          "operationalMassKg": 180,
+          "ratings": {
+            "capacityW": 45000,
+            "shutoffPa": 250000,
+            "freeFlowM3S": 0.1,
+            "efficiency": 0.72
+          }
+        },
+        {
+          "id": "platform-001/module-01/battery",
+          "dimensionsM": [
+            2.2,
+            2,
+            1.4
+          ],
+          "operationalMassKg": 3376.923076923077,
+          "ratings": {
+            "energyWh": 400000,
+            "capacityW": 2200000,
+            "storageMaxW": 2200000,
+            "efficiency": 0.95
+          }
+        },
+        {
+          "id": "platform-001/module-01/distribution",
+          "dimensionsM": [
+            1.4,
+            2,
+            1.4
+          ],
+          "operationalMassKg": 500,
+          "ratings": {
+            "capacityW": 2200000
+          }
+        },
+        {
+          "id": "platform-001/module-01/pump-standby",
+          "dimensionsM": [
+            1.2,
+            1.2,
+            0.8
+          ],
+          "operationalMassKg": 180,
+          "ratings": {
+            "capacityW": 45000,
+            "shutoffPa": 250000,
+            "freeFlowM3S": 0.1,
+            "efficiency": 0.72
+          }
+        },
+        {
+          "id": "platform-001/module-01/rack-01/node-01",
+          "dimensionsM": [
+            0.48,
+            0.4445,
+            0.95
+          ],
+          "operationalMassKg": 120,
+          "ratings": {
+            "capacityW": 12000,
+            "accelerators": 8,
+            "heightU": 10,
+            "liquidCaptureFraction": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "requestedAccelerators": 10000,
+      "initial": {
+        "timeS": 0,
+        "itW": 12899999.999999998,
+        "facilityW": 13942645.004000345,
+        "gridW": 13942645.004000345,
+        "pumpPowerW": 209878.34080273187,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 303.15,
+        "batteryWh": 3200000,
+        "instantaneousPUE": 1.080825194108554,
+        "energyPUE": null,
+        "electricalResidualW": 0,
+        "thermalResidualW": -4.656612873077393e-10,
+        "warnings": []
+      },
+      "stepped": {
+        "timeS": 10,
+        "itW": 12899999.999999998,
+        "facilityW": 13942645.004000345,
+        "gridW": 13942645.004000345,
+        "pumpPowerW": 209878.34080273187,
+        "availableAccelerators": 10000,
+        "energizedAccelerators": 10000,
+        "curtailedAccelerators": 0,
+        "maxCoolantK": 303.032991197747,
+        "batteryWh": 3200000,
+        "instantaneousPUE": 1.080825194108554,
+        "energyPUE": 1.0808251941085534,
+        "electricalResidualW": 0,
+        "thermalResidualW": -4.874891601502895e-10,
+        "warnings": []
+      },
+      "firstModuleInitial": {
+        "id": "platform-001/module-01",
+        "coolantK": 303.15,
+        "airK": 298.15,
+        "batteryWh": 400000,
+        "throttle": 1,
+        "states": {
+          "platform-001/module-01": "available",
+          "platform-001/module-01/pump-duty": "running",
+          "platform-001/module-01/pump-standby": "standby",
+          "platform-001/module-01/pump-sea": "running",
+          "platform-001/module-01/cdu": "running",
+          "platform-001/module-01/hx": "running",
+          "platform-001/module-01/battery": "running",
+          "platform-001/module-01/distribution": "running",
+          "platform-001/module-01/rack-network": "running"
+        },
+        "startAtS": {},
+        "technicalFlowM3S": 0.05968751283253368,
+        "seawaterFlowM3S": 0.06637405352485076,
+        "pumpPowerW": 26234.760126705267,
+        "itW": 1651199.9999999998,
+        "facilityW": 1783541.7211515938,
+        "gridW": 1783541.7211515938,
+        "batteryDischargeW": 0,
+        "batteryChargeW": 0,
+        "rejectedHeatW": 1799322.4657475739,
+        "thermalResidualW": -5.820766091346741e-11,
+        "electricalResidualW": 0,
+        "technicalOutletK": 295.96305702766585,
+        "seawaterOutletK": 297.7784792356614,
+        "pressurePa": 160935.0202994846,
+        "energizedNodes": 160,
+        "availableAccelerators": 1280,
+        "warnings": []
+      },
+      "firstModuleStepped": {
+        "id": "platform-001/module-01",
+        "coolantK": 303.03298953772384,
+        "airK": 298.3760825501502,
+        "batteryWh": 400000,
+        "throttle": 1,
+        "states": {
+          "platform-001/module-01": "available",
+          "platform-001/module-01/pump-duty": "running",
+          "platform-001/module-01/pump-standby": "standby",
+          "platform-001/module-01/pump-sea": "running",
+          "platform-001/module-01/cdu": "running",
+          "platform-001/module-01/hx": "running",
+          "platform-001/module-01/battery": "running",
+          "platform-001/module-01/distribution": "running",
+          "platform-001/module-01/rack-network": "running"
+        },
+        "startAtS": {},
+        "technicalFlowM3S": 0.05968751283253368,
+        "seawaterFlowM3S": 0.06637405352485076,
+        "pumpPowerW": 26234.760126705267,
+        "itW": 1651199.9999999998,
+        "facilityW": 1783541.7211515938,
+        "gridW": 1783541.7211515938,
+        "batteryDischargeW": 0,
+        "batteryChargeW": 0,
+        "rejectedHeatW": 1781890.6522703257,
+        "thermalResidualW": -4.3655745685100555e-11,
+        "electricalResidualW": 0,
+        "technicalOutletK": 295.91612552535184,
+        "seawaterOutletK": 297.71426261197473,
+        "pressurePa": 160935.0202994846,
+        "energizedNodes": 160,
+        "availableAccelerators": 1280,
+        "warnings": []
+      },
+      "includedCostUSD": 513697500,
+      "marine": [
+        {
+          "platformId": "platform-001",
+          "massKg": 909031.8771118987,
+          "waterplaneM2": 696,
+          "draftM": 1.2742246665431718,
+          "freeboardM": 3.725775333456828,
+          "supportedGeometry": true,
+          "missing": [],
+          "deckLoadKgM2": 338.0738159556027
+        },
+        {
+          "platformId": "platform-002",
+          "massKg": 903957.1360341788,
+          "waterplaneM2": 696,
+          "draftM": 1.2671112083461995,
+          "freeboardM": 3.7328887916538003,
+          "supportedGeometry": true,
+          "missing": [],
+          "deckLoadKgM2": 334.9489753905042
+        }
+      ],
+      "equipment": [
+        {
+          "id": "platform-001/module-01/pump-duty",
+          "dimensionsM": [
+            1.2,
+            1.2,
+            0.8
+          ],
+          "operationalMassKg": 180,
+          "ratings": {
+            "capacityW": 45000,
+            "shutoffPa": 250000,
+            "freeFlowM3S": 0.1,
+            "efficiency": 0.72
+          }
+        },
+        {
+          "id": "platform-001/module-01/pump-sea",
+          "dimensionsM": [
+            1.2,
+            1.2,
+            0.8
+          ],
+          "operationalMassKg": 180,
+          "ratings": {
+            "capacityW": 45000,
+            "shutoffPa": 250000,
+            "freeFlowM3S": 0.1,
+            "efficiency": 0.72
+          }
+        },
+        {
+          "id": "platform-001/module-01/battery",
+          "dimensionsM": [
+            2.2,
+            2,
+            1.4
+          ],
+          "operationalMassKg": 3376.923076923077,
+          "ratings": {
+            "energyWh": 400000,
+            "capacityW": 2200000,
+            "storageMaxW": 2200000,
+            "efficiency": 0.95
+          }
+        },
+        {
+          "id": "platform-001/module-01/distribution",
+          "dimensionsM": [
+            1.4,
+            2,
+            1.4
+          ],
+          "operationalMassKg": 500,
+          "ratings": {
+            "capacityW": 2200000
+          }
+        },
+        {
+          "id": "platform-001/module-01/pump-standby",
+          "dimensionsM": [
+            1.2,
+            1.2,
+            0.8
+          ],
+          "operationalMassKg": 180,
+          "ratings": {
+            "capacityW": 45000,
+            "shutoffPa": 250000,
+            "freeFlowM3S": 0.1,
+            "efficiency": 0.72
+          }
+        },
+        {
+          "id": "platform-001/module-01/rack-01/node-01",
+          "dimensionsM": [
+            0.48,
+            0.4445,
+            0.95
+          ],
+          "operationalMassKg": 120,
+          "ratings": {
+            "capacityW": 12000,
+            "accelerators": 8,
+            "heightU": 10,
+            "liquidCaptureFraction": 0.9
+          }
+        }
+      ]
+    }
+  ]
+}
