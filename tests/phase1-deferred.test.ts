@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import fixtures from './fixtures/phase-0/scenarios.json';
 import {
@@ -6,6 +5,7 @@ import {
   DEFAULT_CONFIG,
   loopGeometry,
   resolveAsset,
+  replaceEquipment,
 } from '../src/twin/assets/design';
 import {
   advance,
@@ -90,7 +90,7 @@ describe('PH1-REG-01 deferred Phase 0 findings remain explicit', () => {
       }
     }
   });
-  it('PH0-004 retains matching reference defaults and the documented ownership risk without claiming a runtime mismatch', () => {
+  it('PH0-004 reference equivalence remains while Phase 2 closes installed pump ownership', () => {
     const design = small(),
       module = design.modules[0],
       pump = resolveAsset(design, `${module.id}/pump-duty`)!;
@@ -120,16 +120,18 @@ describe('PH1-REG-01 deferred Phase 0 findings remain explicit', () => {
       explicit.flowM3S,
     );
     expect('shutoffPa' in DEFAULT_CONFIG).toBe(false);
-    const source = readFileSync(
-      new URL('../src/twin/engine/simulation.ts', import.meta.url),
-      'utf8',
+    // Phase 2 closes this ownership gap; unrelated Phase 1 deferrals remain below.
+    const replaced = replaceEquipment(design, pump.id, 'pump-efficient');
+    const before = initialize(design).modules[0];
+    const after = initialize(replaced).modules[0];
+    expect(after.technicalFlowM3S).toBe(before.technicalFlowM3S);
+    expect(after.pressurePa).toBe(before.pressurePa);
+    // Hydraulic work / efficiency: only the duty motor changes from .72 to .84.
+    const technicalWorkW = before.pressurePa * before.technicalFlowM3S;
+    expect(after.pumpPowerW).toBeCloseTo(
+      before.pumpPowerW - technicalWorkW / 0.72 + technicalWorkW / 0.84,
+      6,
     );
-    const circuit = source.slice(
-      source.indexOf('function circuit('),
-      source.indexOf('function resolveStep('),
-    );
-    expect(circuit).toContain('solveHydraulics({');
-    expect(circuit).not.toMatch(/shutoffPa|freeFlowM3S|efficiency|\.ratings/);
   });
   it('PH0-005 retains the genuine five-second outage and terminal-only passing assessment', () => {
     const design = small({ batteryWhPerModule: 0 }),
