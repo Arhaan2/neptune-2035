@@ -1,4 +1,4 @@
-import { validateEquipment, resolveSpecification } from '../catalog/equipment';
+import { validateEquipment, validateInstalledAsset, resolveSpecification } from '../catalog/equipment';
 import { validateConfig } from '../assets/design';
 import { failure, finiteNumber, SimulationError } from '../safety';
 import type { Design } from '../types';
@@ -53,6 +53,7 @@ export function validateDesign(value: unknown): asserts value is Design {
       finiteNumber(p.capacity, 'port.capacity', { min: 0 });
     }
     array(a.provenance, 'asset.provenance', 32); a.provenance.forEach(s => string(s, 'asset.provenance'));
+    validateInstalledAsset(value as unknown as Design,a as unknown as Design['assets'][number]);
   }
   for (const id of modules) if (!ids.has(id)) failure('invalid-input', 'DESIGN_MODULE_ASSET', 'Module is missing its inventory asset.', { assetId: id });
   if (!ids.has('shore/grid')) failure('invalid-input', 'DESIGN_SOURCE', 'The implemented electrical model requires the declared shore/grid source asset.');

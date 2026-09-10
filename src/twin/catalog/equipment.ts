@@ -2,6 +2,7 @@ import type { Asset, AssetType, Design, DesignConfig, Vec3 } from '../types';
 import { SOLVER_VERSION } from '../types';
 import { failure, finiteNumber } from '../safety';
 import { identity, keys, record, string, array } from '../persistence/structure';
+import { ALGORITHM_ID, MODEL_ID } from '../persistence/limits';
 
 /** Small synthetic reference catalog. These records are assumptions, not vendor data. */
 export type EquipmentRole = 'pump' | 'compute' | 'battery' | 'distribution' | 'exchanger' | 'cdu' | 'pipe' | 'transformer' | 'shoreTransformer' | 'moduleSupport';
@@ -79,6 +80,28 @@ export function resolveAssetSpecification(design:Design,asset:Asset):Asset {
   const installed=resolveSpecification(design,asset.id);
   return {...asset,catalogId:installed.id,revision:installed.version,dimensionsM:installed.dimensionsM?[...installed.dimensionsM]:asset.dimensionsM,operationalMassKg:role==='pipe'?asset.operationalMassKg:installed.operationalMassKg,ratings:role==='pipe'?{...asset.ratings,...installed.ratings}:{...installed.ratings},provenance:[installed.source],ports:asset.ports.map(p=>p.medium==='power'&&installed.ratings.capacityW!==undefined?{...p,capacity:installed.ratings.capacityW}:p)};
 }
+/** Persisted root equipment is a checked projection, never a second specification owner. */
+export function validateInstalledAsset(design:Design,asset:Asset):void {
+  if(!design.equipment)return; // Preserve the original Phase 1 snapshot for explicit legacy inspection/recalculation.
+  const role=roleForAsset(asset.id);
+  if(!role){
+    if(asset.type==='transformer')failure('unsupported-configuration','SPECIFICATION_SLOT',`Transformer ${asset.id} has no supported installed specification slot.`,{assetId:asset.id});
+    return;
+  }
+  // Module equipment is generated from its installed records. A persisted duplicate
+  // would override the inspector while the solver continued to use the generated asset.
+  if(role!=='transformer'&&role!=='shoreTransformer')failure('invalid-input','SPECIFICATION_ASSET_OVERRIDE',`Installed module equipment ${asset.id} must resolve from its specification; a stored asset cannot override the generated inventory.`,{assetId:asset.id});
+  const installed=resolveSpecification(design,asset.id);
+  const expected={type:installed.type,catalogId:installed.id,revision:installed.version,dimensionsM:installed.dimensionsM,operationalMassKg:installed.operationalMassKg,ratings:installed.ratings};
+  for(const field of Object.keys(expected) as (keyof typeof expected)[]){
+    if(identity(asset[field])!==identity(expected[field]))failure('invalid-input','SPECIFICATION_ASSET_DRIFT',`Installed specification ${installed.id}@${installed.version} disagrees with stored ${field} for ${asset.id}; restore the declared specification or apply a supported replacement.`,{assetId:asset.id,field});
+  }
+  // Both supported transformer compatibility classes declare one input/output pair
+  // at the installed power rating. Connection limits remain separate topology inputs.
+  const expectedPorts=['in','out'].map(direction=>({id:`power-${direction}`,medium:'power',direction,capacity:installed.ratings.capacityW,unit:'W'}));
+  const sortedPorts=[...asset.ports].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
+  if(identity(sortedPorts)!==identity(expectedPorts))failure('invalid-input','SPECIFICATION_ASSET_DRIFT',`Installed specification ${installed.id}@${installed.version} requires its declared power input/output interfaces and ratings.`,{assetId:asset.id,field:'ports'});
+}
 export function validateEquipment(design:Design):void {
   if(!design.equipment)return;const e=design.equipment;
   record(e,'equipment');keys(e,['schemaVersion','defaults','overrides','specifications','controlPolicy','workloadProfile','economics'],'equipment');if(e.schemaVersion!==1)failure('unsupported-configuration','EQUIPMENT_SCHEMA','Unsupported equipment catalog schema.');
@@ -96,9 +119,13 @@ export function validateEquipment(design:Design):void {
 /** Stable non-security run identity. Prices, formatting and unused catalog entries are excluded. */
 export function engineeringIdentity(design:Design):string {
   if(!design.equipment)return identity(design); // Phase 1 checkpoint binding remains inspectable without reinterpretation.
-  const {equipment,config,...physical}=design;const engineeringConfig={...config,budgetUSD:undefined};
+  const {equipment,config}=design;
+  const engineeringConfig={schemaVersion:config.schemaVersion,generation:config.generation,requestedAccelerators:config.requestedAccelerators,supplyW:config.supplyW,standbyPumps:config.standbyPumps,seawaterK:config.seawaterK,workload:config.workload,idleFraction:config.idleFraction,exchangerUAWPerK:config.exchangerUAWPerK,foulingResistanceKPerW:config.foulingResistanceKPerW,batteryWhPerModule:config.batteryWhPerModule,batteryMaxWPerModule:config.batteryMaxWPerModule,pumpSpeed:config.pumpSpeed,requireExternalNetwork:config.requireExternalNetwork,requireClusterNetwork:config.requireClusterNetwork};
+  const assets=design.assets.map(a=>({id:a.id,type:a.type,parentId:a.parentId,catalogId:a.catalogId,revision:a.revision,dimensionsM:a.dimensionsM,positionM:a.positionM,operationalMassKg:a.operationalMassKg,ratings:a.ratings,ports:[...a.ports].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0),failureDomain:a.failureDomain}));
   const installed=new Set([...Object.values(equipment.defaults),...Object.values(equipment.overrides)].map(r=>`${r.id}@${r.version}`));
-  return identity({ ...physical,revision:undefined,config:engineeringConfig,equipment:{schemaVersion:equipment.schemaVersion,defaults:equipment.defaults,overrides:equipment.overrides,specifications:equipment.specifications.filter(s=>installed.has(`${s.id}@${s.version}`)).sort((a,b)=>a.id.localeCompare(b.id)),controlPolicy:equipment.controlPolicy,workloadProfile:equipment.workloadProfile},modelBoundaries:MODEL_BOUNDARIES,solverVersion:SOLVER_VERSION });
+  const specifications=equipment.specifications.filter(s=>installed.has(`${s.id}@${s.version}`)).map(s=>({id:s.id,version:s.version,type:s.type,compatibility:s.compatibility,dimensionsM:s.dimensionsM,operationalMassKg:s.operationalMassKg,ratings:s.ratings,units:s.units})).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
+  const workloadProfile={id:equipment.workloadProfile.id,revision:equipment.workloadProfile.revision,clusterBitSPerNode:equipment.workloadProfile.clusterBitSPerNode,externalBitSPerNode:equipment.workloadProfile.externalBitSPerNode};
+  return identity({schemaVersion:design.schemaVersion,assets,connections:design.connections,modules:design.modules,nodeCount:design.nodeCount,rackCount:design.rackCount,provisionedAccelerators:design.provisionedAccelerators,installedPeakITW:design.installedPeakITW,config:engineeringConfig,equipment:{schemaVersion:equipment.schemaVersion,defaults:equipment.defaults,overrides:equipment.overrides,specifications,controlPolicy:equipment.controlPolicy,workloadProfile},modelBoundaries:MODEL_BOUNDARIES,modelId:MODEL_ID,algorithmId:ALGORITHM_ID,solverVersion:SOLVER_VERSION});
 }
 export function economicIdentity(design:Design):string { return identity({economics:equipmentFor(design).economics,budgetUSD:design.config.budgetUSD,costs:COST_ASSUMPTIONS}); }
 export function updateEconomicAssumptions(design:Design,patch:Partial<EconomicAssumptions>):Design {
@@ -111,7 +138,7 @@ export function resolveModuleEngineering(design:Design,moduleId:string) {
   const compute=resolveSpecification(design,'compute'),battery=get('battery'),distribution=get('distribution');
   const module=design.modules.find(m=>m.id===moduleId);if(!module)failure('invalid-input','MODULE_REFERENCE',`Unknown module ${moduleId}.`);
   let upstreamEfficiency=1,id=module.powerDomainId;const visited=new Set<string>();
-  while(id!=='shore/grid'&&!visited.has(id)){visited.add(id);const asset=design.assets.find(a=>a.id===id);if(asset?.type==='transformer')upstreamEfficiency*=asset.ratings.efficiency;const edges=design.connections.filter(c=>c.to===id&&c.medium==='power'&&c.enabled);if(edges.length!==1)break;id=edges[0].from;}
+  while(id!=='shore/grid'&&!visited.has(id)){visited.add(id);const asset=design.assets.find(a=>a.id===id);if(asset?.type==='transformer')upstreamEfficiency*=design.equipment?resolveSpecification(design,id).ratings.efficiency:asset.ratings.efficiency;const edges=design.connections.filter(c=>c.to===id&&c.medium==='power'&&c.enabled);if(edges.length!==1)break;id=edges[0].from;}
   return {dutyPump:get('pump-duty'),seaPump:get('pump-sea'),standbyPump:design.config.standbyPumps?get('pump-standby'):null,compute,battery,distribution,exchanger:get('hx'),cdu:get('cdu'),pipe:get('pipe-tech'),moduleSupport:resolveSpecification(design,'moduleSupport'),
     moduleLimitW:Math.min(battery.ratings.capacityW,distribution.ratings.capacityW),
     electrical:{nodePeakW:compute.ratings.capacityW,gridEfficiency:upstreamEfficiency*distribution.ratings.efficiency,chargeEfficiency:battery.ratings.chargeEfficiency,dischargeEfficiency:battery.ratings.dischargeEfficiency,batteryReserveFraction:equipmentFor(design).controlPolicy.batteryReserveFraction}};
