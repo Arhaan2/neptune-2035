@@ -1164,6 +1164,7 @@ export default function TwinApp() {
               after that saved checkpoint may have been lost. Recovery is
               paused.
               <button
+                disabled={sim.busy}
                 onClick={() => {
                   try {
                     inspectOrRestore(sim.recovery!);
