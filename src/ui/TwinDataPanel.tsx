@@ -1,3 +1,4 @@
+import { resolveSpecification } from '../twin/catalog/equipment';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { Design, SimulationState } from '../twin/types';
 import { solveExchanger } from '../twin/solvers/thermal';
@@ -10,7 +11,7 @@ function downloadGenerated(design: Design, state: SimulationState) {
   link.href = url; link.download = 'neptune-generated-telemetry.json'; link.click(); URL.revokeObjectURL(url);
 }
 function fixtureCalibration(design: Design): UACalibrationSample[] {
-  const ua = Math.max(10_000, design.config.exchangerUAWPerK * 0.8);
+  const ua = Math.max(10_000, resolveSpecification(design,`${design.modules[0].id}/hx`).ratings.UAWPerK * 0.8);
   return Array.from({ length: 10 }, (_, i) => {
     const boundary = { technicalInletK: 309 + i, seawaterInletK: 291 + i / 3, technicalFlowM3S: 0.05 + i / 1000, seawaterFlowM3S: 0.06, foulingResistanceKPerW: 0 };
     return { assetId: `${design.modules[0].id}/hx`, mappingVersion: design.revision, sourceId: 'generated:calibration-fixture', evidence: 'generated', observedAt: new Date(SIMULATION_EPOCH_MS + i * 1000).toISOString(), observedHeatW: solveExchanger({ ...boundary, cleanUAWPerK: ua }).heatW, boundary };

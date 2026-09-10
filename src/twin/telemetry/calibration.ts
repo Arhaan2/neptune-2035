@@ -64,7 +64,7 @@ export function calibrateUA(design: Design, input: readonly UACalibrationSample[
   if (candidateScore < bestScore) { best = candidate; bestScore = candidateScore; }
   const atBound = Math.min(Math.abs(best - min), Math.abs(best - max)) <= Math.max(0.1, (max - min) * 1e-6);
   const measuredCount = samples.filter(sample => sample.evidence === 'measured').length;
-  const baseline = design.config.exchangerUAWPerK;
+  const baseline = resolveAsset(design,assetId)!.ratings.UAWPerK;
   const heldOutBefore = Math.sqrt(mse(heldOut, baseline)), heldOutAfter = Math.sqrt(mse(heldOut, best));
   return { parameter: 'exchangerUAWPerK', proposedUAWPerK: best, baselineUAWPerK: baseline, boundsWPerK: [min, max], trainingCount: training.length, heldOutCount: heldOut.length, trainingRmseBeforeW: Math.sqrt(mse(training, baseline)), trainingRmseAfterW: Math.sqrt(bestScore), heldOutRmseBeforeW: heldOutBefore, heldOutRmseAfterW: heldOutAfter, iterations, converged: iterations < 80, atBound, measuredCount, designRevision: design.revision, assetId, sourceIds: [...new Set(samples.map(sample => sample.sourceId))], splitAt: heldOut[0].observedAt, validationStatus: 'Calibration/physical validation pending', warnings: [
     ...(measuredCount < samples.length ? ['Generated fixtures verify parameter fitting and data plumbing; they do not physically validate the exchanger.'] : []),
