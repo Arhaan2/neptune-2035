@@ -1,6 +1,7 @@
+import { resolveModuleEngineering, resolveSpecification, equipmentFor, engineeringIdentity, MODEL_BOUNDARIES as B, type ComponentSpecification } from '../catalog/equipment';
 import { loopGeometry } from '../assets/design';
 import { SOLVER_VERSION, type Asset, type Design, type ModuleSpec, type ModuleState, type OperationEvent, type SimulationState, type Summary } from '../types';
-import { allocateGrid, ELECTRICAL_ASSUMPTIONS as E, GRID_EFFICIENCY, nodeDrawW, solveElectrical } from '../solvers/electrical';
+import { allocateGrid, nodeDrawW, solveElectrical } from '../solvers/electrical';
 import { solveHydraulics, type HydraulicResult } from '../solvers/hydraulic';
 import { advanceThermal } from '../solvers/thermal';
 import { createNetworkEvaluator, type NetworkIssue } from '../solvers/network';
@@ -10,13 +11,13 @@ import { validateDesign } from '../persistence/design';
 import { validateState } from '../persistence/state';
 import { mergeEventHistory } from '../persistence/events';
 import { projectFile } from '../persistence/project';
-import { identity, safeJSON } from '../persistence/structure';
+import { safeJSON } from '../persistence/structure';
 import { failure, finiteNumber, finiteOutputs, diagnosticFor } from '../safety';
 export { validateState } from '../persistence/state';
 export { validateEvent } from '../persistence/events';
 const MAX_LOG = CONTRACT.maxLogEntries;
 const ZERO_HYDRAULIC: HydraulicResult = { flowM3S:0, pressurePa:0, electricalW:0, reynolds:0, darcyFactor:0, headResidualPa:0, massResidualKgS:0, iterations:0 };
-interface ModuleContext { module:ModuleSpec; ancestors:string[]; pathCapacityW:number; supported:boolean; technicalLengthM:number; seawaterLengthM:number }
+interface ModuleContext { equipment:ReturnType<typeof resolveModuleEngineering>; module:ModuleSpec; ancestors:string[]; pathCapacityW:number; supported:boolean; technicalLengthM:number; seawaterLengthM:number }
 interface Context { modules:ModuleContext[]; assets:Map<string,Asset>; hydraulicCache:Map<string,HydraulicResult>; network:ReturnType<typeof createNetworkEvaluator> }
 function context(design:Design):Context {
   const assets = new Map(design.assets.map(a => [a.id,a]));
@@ -32,7 +33,7 @@ function context(design:Design):Context {
       capacity=Math.min(capacity,a.ratings.capacityW??Infinity,edges[0].capacity); id=edges[0].from;
     }
     ancestors.push('shore/grid');
-    return { module, ancestors, pathCapacityW:capacity, supported, ...loopGeometry(design,module) };
+    return { equipment:resolveModuleEngineering(design,module.id), module, ancestors, pathCapacityW:capacity, supported, ...loopGeometry(design,module) };
   }) };
 }
 function appendLog(state:SimulationState, assetId:string, message:string, kind:'command'|'controller'|'warning', affectedIds:string[]) {
@@ -57,7 +58,7 @@ function applyEvents(design:Design,state:SimulationState,ctx:Context) {
       state.failedAssetIds=[...failed].sort();
       for(const m of state.modules)if(event.assetId===m.id||event.assetId.startsWith(`${m.id}/`)){
         m.states[event.assetId]=event.kind==='restore'?'available':event.kind==='maintenance'?'maintenance':'failed';
-        if(event.kind==='restore'&&event.assetId.endsWith('/pump-duty')){m.states[event.assetId]='starting';m.startAtS[event.assetId]=state.timeS+3;}
+        if(event.kind==='restore'&&event.assetId.endsWith('/pump-duty')){m.states[event.assetId]='starting';m.startAtS[event.assetId]=state.timeS+equipmentFor(design).controlPolicy.dutyRestartS;}
       }
     }
     const affected=affectedModules(ctx,event.assetId);
@@ -85,24 +86,28 @@ function controller(state:SimulationState,m:ModuleState,design:Design,disabled:b
     if(m.states[duty]==='running')setState(standby,'standby','Duty restored; redundant pump held in standby');
     else if(m.states[standby]==='starting'&&state.timeS>=(m.startAtS[standby]??Infinity))setState(standby,'running','Standby startup delay elapsed; parallel branch enabled');
     else if(m.states[standby]!=='starting'&&m.states[standby]!=='running'){
-      m.startAtS[standby]=state.timeS+8;setState(standby,'starting','Duty unavailable; standby startup scheduled after 8 seconds');
+      m.startAtS[standby]=state.timeS+equipmentFor(design).controlPolicy.standbyStartS;setState(standby,'starting','Duty unavailable; standby startup scheduled after 8 seconds');
     }
   }
-  const old=m.throttle;
-  if(m.coolantK>=328.15||m.airK>=323.15)m.throttle=0;
-  else if(m.throttle===0&&m.coolantK<318.15&&m.airK<313.15)m.throttle=0.5;
-  else if(m.throttle>0.5&&(m.coolantK>=318.15||m.airK>=313.15))m.throttle=0.5;
-  else if(m.throttle===0.5&&m.coolantK<313.15&&m.airK<308.15)m.throttle=1;
+  const old=m.throttle,policy=equipmentFor(design).controlPolicy;
+  if(m.coolantK>=policy.tripCoolantK||m.airK>=policy.tripAirK)m.throttle=0;
+  else if(m.throttle===0&&m.coolantK<policy.restartCoolantK&&m.airK<policy.restartAirK)m.throttle=0.5;
+  else if(m.throttle>0.5&&(m.coolantK>=policy.restartCoolantK||m.airK>=policy.restartAirK))m.throttle=0.5;
+  else if(m.throttle===0.5&&m.coolantK<policy.fullCoolantK&&m.airK<policy.fullAirK)m.throttle=1;
   if(old!==m.throttle)appendLog(state,m.id,`Thermal hysteresis changes permitted whole-node fraction ${old} → ${m.throttle}; bulk coolant ${m.coolantK.toFixed(2)} K, air ${m.airK.toFixed(2)} K`,'controller',[m.id]);
 }
-function circuit(ctx:ModuleContext,medium:'technical'|'seawater',pumps:number,speed:number,cache:Map<string,HydraulicResult>):HydraulicResult {
-  if(!pumps||!speed)return ZERO_HYDRAULIC;
-  const length=medium==='technical'?ctx.technicalLengthM:ctx.seawaterLengthM,key=`${medium}:${length}:${pumps}:${speed}`,cached=cache.get(key);
+function circuit(ctx:ModuleContext,medium:'technical'|'seawater',active:ComponentSpecification[],speed:number,cache:Map<string,HydraulicResult>):HydraulicResult {
+  if(!active.length||!speed)return ZERO_HYDRAULIC;
+  const first=active[0].ratings;
+  if(active.some(p=>p.ratings.shutoffPa!==first.shutoffPa||p.ratings.freeFlowM3S!==first.freeFlowM3S))failure('unsupported-configuration','PARALLEL_PUMP_CURVES','Simultaneously active pumps require matching curves in the implemented parallel-pump solver.');
+  const length=medium==='technical'?ctx.technicalLengthM:ctx.seawaterLengthM,pipe=ctx.equipment.pipe.ratings;
+  const efficiency=active.length/active.reduce((sum,p)=>sum+1/p.ratings.efficiency,0);
+  const key=JSON.stringify([medium,length,pipe,active.map(p=>[p.id,p.version,p.ratings]),speed]),cached=cache.get(key);
   if(cached)return cached;
-  const result=solveHydraulics({lengthM:length,diameterM:0.18,roughnessM:0.000045,
-    densityKgM3:medium==='technical'?997:1025,dynamicViscosityPaS:medium==='technical'?0.000855:0.00108,
-    fittingsK:medium==='technical'?12:10,equipmentDropPaAtReference:medium==='technical'?80_000:55_000,
-    referenceFlowM3S:0.05,pumpCount:pumps,pumpSpeed:speed});
+  const result=solveHydraulics({lengthM:length,diameterM:pipe.diameterM,roughnessM:pipe.roughnessM,
+    densityKgM3:medium==='technical'?B.technicalDensityKgM3:B.seawaterDensityKgM3,dynamicViscosityPaS:medium==='technical'?B.technicalDynamicViscosityPaS:B.seawaterDynamicViscosityPaS,
+    fittingsK:medium==='technical'?B.technicalFittingsK:B.seawaterFittingsK,equipmentDropPaAtReference:medium==='technical'?B.technicalEquipmentDropPa:B.seawaterEquipmentDropPa,
+    referenceFlowM3S:B.referenceFlowM3S,pumpCount:active.length,pumpSpeed:speed,shutoffPa:first.shutoffPa,freeFlowM3S:first.freeFlowM3S,efficiency});
   cache.set(key,result);return result;
 }
 function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,runController:boolean) {
@@ -115,18 +120,18 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     const seaBlocked=disabled||isFailed('hx')||isFailed('valve-sea')||isFailed('pipe-sea');
     const previousStates={...m.states},transitions=new Map<string,EquipmentTransition>();
     if(runController)controller(state,m,design,disabled,techBlocked,transitions);
-    const pumps=techBlocked?0:Number(m.states[`${id}/pump-duty`]==='running')+Number(m.states[`${id}/pump-standby`]==='running');
+    const pumps=techBlocked?[]:[...(m.states[`${id}/pump-duty`]==='running'?[c.equipment.dutyPump]:[]),...(m.states[`${id}/pump-standby`]==='running'&&c.equipment.standbyPump?[c.equipment.standbyPump]:[])];
     const technical=circuit(c,'technical',pumps,state.pumpSpeed,ctx.hydraulicCache);
-    const seawater=circuit(c,'seawater',seaBlocked||isFailed('pump-sea')?0:1,state.pumpSpeed,ctx.hydraulicCache);
+    const seawater=circuit(c,'seawater',seaBlocked||isFailed('pump-sea')?[]:[c.equipment.seaPump],state.pumpSpeed,ctx.hydraulicCache);
     let operableNodes=c.module.nodeCount;
     const failedRacks=new Set([...failed].filter(f=>f.startsWith(`${id}/rack-`)&&/^rack-\d+$/.test(f.slice(id.length+1))));
     for(const rid of failedRacks){const rack=Number(rid.split('/rack-')[1]);operableNodes-=Math.min(4,Math.max(0,c.module.nodeCount-(rack-1)*4));}
     for(const f of failed)if(f.startsWith(`${id}/rack-`)&&f.includes('/node-')&&!failedRacks.has(f.split('/node-')[0]))operableNodes--;
     const desiredNodes=disabled?0:Math.max(0,Math.floor(operableNodes*m.throttle));
-    const criticalW=technical.electricalW+seawater.electricalW+E.controlsWPerModule+E.fanWPerModule;
+    const criticalW=technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW;
     const gridLive=!disabled&&c.supported&&!c.ancestors.some(a=>failed.has(a));
     // Spare upstream power may recharge storage only after module loads; solveElectrical forbids simultaneous charge/discharge.
-    const maxChargeW=Math.min(design.config.batteryMaxWPerModule,Math.max(0,design.config.batteryWhPerModule-m.batteryWh)*3600/(E.chargeEfficiency*(dtS||1)))/GRID_EFFICIENCY;
+    const maxChargeW=Math.min(c.equipment.battery.ratings.storageMaxW,Math.max(0,c.equipment.battery.ratings.energyWh-m.batteryWh)*3600/(c.equipment.electrical.chargeEfficiency*(dtS||1)))/c.equipment.electrical.gridEfficiency;
     return {c,m,disabled,techBlocked,seaBlocked,technical,seawater,networkAvailable:true,desiredNodes,criticalW,gridLive,maxChargeW,previousStates,transitions};
   });
   const domainLimits=new Map<string,number>();
@@ -135,17 +140,17 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
   const blockedDomains=new Set<string>(),networkIssues=new Map<string,NetworkIssue>();
   const planElectrical=()=>{
     for(const d of demands)d.networkAvailable=!blockedDomains.has(d.c.module.networkDomainId);
-    const requests=demands.map(d=>({domainId:d.c.module.powerDomainId,requestedW:d.gridLive?(d.desiredNodes*nodeDrawW(state.workload,design.config.idleFraction,d.networkAvailable)+d.criticalW)/GRID_EFFICIENCY:0,moduleLimitW:2.2e6}));
+    const requests=demands.map(d=>({domainId:d.c.module.powerDomainId,requestedW:d.gridLive?(d.desiredNodes*nodeDrawW(state.workload,design.config.idleFraction,d.networkAvailable,d.c.equipment.electrical.nodePeakW)+d.criticalW)/d.c.equipment.electrical.gridEfficiency:0,moduleLimitW:d.c.equipment.moduleLimitW}));
     let grid=allocateGrid(requests,supply,domainLimits);
     // Charge only after allocating loads; every trial uses the unchanged beginning-of-step stored energy.
     const spentByDomain=new Map<string,number>();
     demands.forEach((d,i)=>spentByDomain.set(d.c.module.powerDomainId,(spentByDomain.get(d.c.module.powerDomainId)??0)+grid[i]));
     const remainingDomains=new Map([...domainLimits].map(([id,limit])=>[id,Math.max(0,limit-(spentByDomain.get(id)??0))]));
-    const charging=allocateGrid(demands.map((d,i)=>({domainId:d.c.module.powerDomainId,requestedW:d.gridLive?d.maxChargeW:0,moduleLimitW:Math.max(0,2.2e6-grid[i])})),Math.max(0,supply-grid.reduce((a,b)=>a+b,0)),remainingDomains);
+    const charging=allocateGrid(demands.map((d,i)=>({domainId:d.c.module.powerDomainId,requestedW:d.gridLive?d.maxChargeW:0,moduleLimitW:Math.max(0,d.c.equipment.moduleLimitW-grid[i])})),Math.max(0,supply-grid.reduce((a,b)=>a+b,0)),remainingDomains);
     grid=grid.map((p,i)=>p+charging[i]);
-    return demands.map((d,i)=>solveElectrical({desiredNodes:d.desiredNodes,workload:state.workload,idleFraction:design.config.idleFraction,networkAvailable:d.networkAvailable,
-      criticalLoadW:d.criticalW,gridAvailableW:grid[i],batteryWh:d.m.batteryWh,batteryCapacityWh:design.config.batteryWhPerModule,
-      batteryMaxW:design.config.batteryMaxWPerModule,batteryAvailable:!failed.has(`${d.m.id}/battery`),isolated:d.disabled,dtS}));
+    return demands.map((d,i)=>solveElectrical({equipment:d.c.equipment.electrical,desiredNodes:d.desiredNodes,workload:state.workload,idleFraction:design.config.idleFraction,networkAvailable:d.networkAvailable,
+      criticalLoadW:d.criticalW,gridAvailableW:grid[i],batteryWh:d.m.batteryWh,batteryCapacityWh:d.c.equipment.battery.ratings.energyWh,
+      batteryMaxW:d.c.equipment.battery.ratings.storageMaxW,batteryAvailable:!failed.has(`${d.m.id}/battery`),isolated:d.disabled,dtS}));
   };
   let electricalPlan=planElectrical();
   // Offered demand is based on energized inventory even while jobs wait. This avoids idle/overload oscillation.
@@ -167,7 +172,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     const technical=electrical.criticalPowered?d.technical:ZERO_HYDRAULIC,seawater=electrical.criticalPowered?d.seawater:ZERO_HYDRAULIC;
     const thermal=advanceThermal({coolantK:m.coolantK,airK:m.airK,itW:electrical.itW,facilityW:electrical.facilityW,
       technicalPumpW:technical.electricalW,seawaterPumpW:seawater.electricalW,technicalFlowM3S:technical.flowM3S,seawaterFlowM3S:seawater.flowM3S,
-      seawaterK:state.seawaterK,exchangerUAWPerK:design.config.exchangerUAWPerK,foulingResistanceKPerW:state.foulingResistanceKPerW,fanPowered:electrical.criticalPowered,dtS});
+      seawaterK:state.seawaterK,exchangerUAWPerK:d.c.equipment.exchanger.ratings.UAWPerK,liquidCaptureFraction:d.c.equipment.compute.ratings.liquidCaptureFraction,foulingResistanceKPerW:state.foulingResistanceKPerW,fanPowered:electrical.criticalPowered,dtS});
     Object.assign(m,{coolantK:thermal.coolantK,airK:thermal.airK,batteryWh:electrical.batteryWh,itW:electrical.itW,facilityW:electrical.facilityW,
       gridW:electrical.gridW,batteryDischargeW:electrical.batteryDischargeW,batteryChargeW:electrical.batteryChargeW,
       technicalFlowM3S:technical.flowM3S,seawaterFlowM3S:seawater.flowM3S,pumpPowerW:technical.electricalW+seawater.electricalW,
@@ -206,7 +211,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     if(m.throttle<1)warnings.push(`Thermal controller limits permitted whole nodes to ${m.throttle*100}%`);
     if(electrical.batteryDischargeW>0)warnings.push('UPS discharging: finite power and energy, 10% reserve');
     if(!d.gridLive&&!d.disabled&&!electrical.criticalPowered)warnings.push('UPS cannot support the minimum critical load at its remaining power/energy limit');
-    if(!d.gridLive&&!d.disabled&&m.batteryWh<=design.config.batteryWhPerModule*0.1+1e-7)warnings.push('UPS reserve reached; no guaranteed ride-through');
+    if(!d.gridLive&&!d.disabled&&m.batteryWh<=d.c.equipment.battery.ratings.energyWh*d.c.equipment.electrical.batteryReserveFraction+1e-7)warnings.push('UPS reserve reached; no guaranteed ride-through');
     if(Math.abs(electrical.normalizedResidual)>1e-9||Math.abs(thermal.normalizedResidual)>1e-9)failure('numerical-failure','CONSERVATION_RESIDUAL','Conservation tolerance exceeded; no state committed.',{assetId:m.id,details:{electrical:electrical.normalizedResidual,thermal:thermal.normalizedResidual,tolerance:1e-9}});
     if(Math.abs(technical.headResidualPa)>0.01||Math.abs(seawater.headResidualPa)>0.01)failure('numerical-failure','HYDRAULIC_RESIDUAL','Hydraulic operating point did not meet 0.01 Pa head tolerance.',{assetId:m.id,unit:'Pa'});
     for(const warning of warnings)if(!m.warnings.includes(warning)){
@@ -219,12 +224,12 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
 }
 export function initialize(design:Design):SimulationState {
   validateDesign(design);
-  const modules:ModuleState[]=design.modules.map(m=>({id:m.id,coolantK:303.15,airK:298.15,batteryWh:design.config.batteryWhPerModule,throttle:1,
+  const modules:ModuleState[]=design.modules.map(m=>({id:m.id,coolantK:equipmentFor(design).controlPolicy.initialCoolantK,airK:equipmentFor(design).controlPolicy.initialAirK,batteryWh:resolveSpecification(design,`${m.id}/battery`).ratings.energyWh*equipmentFor(design).controlPolicy.initialBatteryFraction,throttle:1,
     states:{[m.id]:'available',[`${m.id}/pump-duty`]:'running',...(design.config.standbyPumps?{[`${m.id}/pump-standby`]:'standby' as const}:{}),[`${m.id}/pump-sea`]:'running'},startAtS:{},
     technicalFlowM3S:0,seawaterFlowM3S:0,pumpPowerW:0,itW:0,facilityW:0,gridW:0,batteryDischargeW:0,batteryChargeW:0,
     rejectedHeatW:0,thermalResidualW:0,electricalResidualW:0,technicalOutletK:303.15,seawaterOutletK:design.config.seawaterK,pressurePa:0,
     energizedNodes:0,availableAccelerators:0,warnings:[]}));
-  const state:SimulationState={schemaVersion:CONTRACT.stateSchema,designRevision:design.revision,designIdentity:identity(design),solverVersion:SOLVER_VERSION,timeS:0,integrationStepS:1,stepIndex:0,modules,events:[],log:[],
+  const state:SimulationState={schemaVersion:CONTRACT.stateSchema,designRevision:design.revision,designIdentity:engineeringIdentity(design),solverVersion:SOLVER_VERSION,timeS:0,integrationStepS:1,stepIndex:0,modules,events:[],log:[],
     facilityEnergyWh:0,itEnergyWh:0,gridEnergyWh:0,appliedEventIds:[],workload:design.config.workload,seawaterK:design.config.seawaterK,
     foulingResistanceKPerW:design.config.foulingResistanceKPerW,pumpSpeed:design.config.pumpSpeed,failedAssetIds:[],solverMs:0};
   resolveStep(design,state,context(design),0,true);validateCandidate(design,state);return state;

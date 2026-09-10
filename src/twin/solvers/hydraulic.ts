@@ -1,3 +1,4 @@
+import { catalogSpecification } from '../catalog/equipment';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
 
 /** Single-phase, incompressible series circuit with identical parallel pumps. SI only. */
@@ -28,9 +29,9 @@ function validateInput(input: HydraulicInput) {
   if (input.pumpCount > 2) failure('unsupported-configuration', 'HYDRAULIC_TOPOLOGY', 'Unsupported pump topology: support zero, one, or two identical parallel pumps.', { field: 'pumpCount', unit: 'pumps', details: { maximum: 2, received: input.pumpCount } });
   if (input.pumpSpeed > 1.2) failure('unsupported-configuration', 'HYDRAULIC_AFFINITY_RANGE', 'Pump speed exceeds supported affinity-law range 0–1.2.', { field: 'pumpSpeed', unit: '1', details: { maximum: 1.2, received: input.pumpSpeed } });
   return {
-    shutoff: pumpRating(input, 'shutoffPa', 250_000, 'Pa'),
-    freeFlow: pumpRating(input, 'freeFlowM3S', 0.1, 'm³/s'),
-    efficiency: pumpRating(input, 'efficiency', 0.72, '1'),
+    shutoff: pumpRating(input, 'shutoffPa', catalogSpecification('pump-reference').ratings.shutoffPa, 'Pa'),
+    freeFlow: pumpRating(input, 'freeFlowM3S', catalogSpecification('pump-reference').ratings.freeFlowM3S, 'm³/s'),
+    efficiency: pumpRating(input, 'efficiency', catalogSpecification('pump-reference').ratings.efficiency, '1'),
   };
 }
 function checked(value: number, field: string): number {

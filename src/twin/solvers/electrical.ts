@@ -1,13 +1,17 @@
+import { catalogSpecification, CONTROL_POLICY } from '../catalog/equipment';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
 import { CONTRACT } from '../persistence/limits';
 
 export const ELECTRICAL_ASSUMPTIONS = Object.freeze({
-  nodePeakW: 12_000, acceleratorsPerNode: 8, distributionEfficiency: 0.98, upsEfficiency: 0.97,
-  chargeEfficiency: 0.95, dischargeEfficiency: 0.95, batteryReserveFraction: 0.1,
-  controlsWPerModule: 3_000, fanWPerModule: 15_000,
+  nodePeakW: catalogSpecification('compute-reference').ratings.capacityW, acceleratorsPerNode: 8, distributionEfficiency: catalogSpecification('transformer-reference').ratings.efficiency, upsEfficiency: catalogSpecification('distribution-reference').ratings.efficiency,
+  chargeEfficiency: catalogSpecification('battery-reference').ratings.chargeEfficiency, dischargeEfficiency: catalogSpecification('battery-reference').ratings.dischargeEfficiency, batteryReserveFraction: CONTROL_POLICY.batteryReserveFraction,
+  controlsWPerModule: catalogSpecification('cdu-reference').ratings.capacityW, fanWPerModule: catalogSpecification('moduleSupport-reference').ratings.capacityW,
 });
 export const GRID_EFFICIENCY = ELECTRICAL_ASSUMPTIONS.distributionEfficiency * ELECTRICAL_ASSUMPTIONS.upsEfficiency;
+export interface ElectricalEquipment { nodePeakW:number; gridEfficiency:number; chargeEfficiency:number; dischargeEfficiency:number; batteryReserveFraction:number }
+export const REFERENCE_ELECTRICAL_EQUIPMENT:ElectricalEquipment = {nodePeakW:ELECTRICAL_ASSUMPTIONS.nodePeakW,gridEfficiency:GRID_EFFICIENCY,chargeEfficiency:ELECTRICAL_ASSUMPTIONS.chargeEfficiency,dischargeEfficiency:ELECTRICAL_ASSUMPTIONS.dischargeEfficiency,batteryReserveFraction:ELECTRICAL_ASSUMPTIONS.batteryReserveFraction};
 export interface ElectricalInput {
+  equipment?: ElectricalEquipment;
   desiredNodes: number; workload: number; idleFraction: number; networkAvailable: boolean;
   criticalLoadW: number; gridAvailableW: number; batteryWh: number; batteryCapacityWh: number;
   batteryMaxW: number; batteryAvailable: boolean; isolated: boolean; dtS: number;
@@ -23,11 +27,12 @@ function booleanInput(value: unknown, field: string) {
 function checked(value: number, field: string) {
   return finiteOutputs({ [field]: value }, 'electrical')[field];
 }
-export function nodeDrawW(workload: number, idleFraction: number, networkAvailable = true): number {
+export function nodeDrawW(workload: number, idleFraction: number, networkAvailable = true, nodePeakW = ELECTRICAL_ASSUMPTIONS.nodePeakW): number {
   finiteNumber(workload, 'workload', { min: 0, max: 1, unit: '1' });
   finiteNumber(idleFraction, 'idleFraction', { min: 0, max: 1, unit: '1' });
   booleanInput(networkAvailable, 'networkAvailable');
-  return checked(ELECTRICAL_ASSUMPTIONS.nodePeakW * (idleFraction + (1 - idleFraction) * (networkAvailable ? workload : 0)), 'nodeDrawW');
+  finiteNumber(nodePeakW,'nodePeakW',{min:0,unit:'W'});
+  return checked(nodePeakW * (idleFraction + (1 - idleFraction) * (networkAvailable ? workload : 0)), 'nodeDrawW');
 }
 export function solveElectrical(input: ElectricalInput): ElectricalResult {
   if (!input || typeof input !== 'object') failure('invalid-input', 'ELECTRICAL_INPUT', 'Electrical input must be an object.');
@@ -38,25 +43,28 @@ export function solveElectrical(input: ElectricalInput): ElectricalResult {
   if (input.desiredNodes > 160) failure('unsupported-configuration', 'ELECTRICAL_INVENTORY', 'Unsupported module node inventory: at most 160 nodes.', { field: 'desiredNodes', unit: 'nodes', details: { maximum: 160, received: input.desiredNodes } });
   if (input.batteryWh > input.batteryCapacityWh + 1e-8) failure('invalid-input', 'BATTERY_CAPACITY', 'Battery state exceeds capacity.', { field: 'batteryWh', unit: 'Wh', details: { capacityWh: input.batteryCapacityWh, received: input.batteryWh } });
   finiteNumber(input.dtS, 'dtS', { min: 0, max: 1, unit: 's' });
-  const a = ELECTRICAL_ASSUMPTIONS, dt = input.dtS || 1;
-  const draw = nodeDrawW(input.workload, input.idleFraction, input.networkAvailable);
+  const a = input.equipment ?? REFERENCE_ELECTRICAL_EQUIPMENT, dt = input.dtS || 1;
+  finiteNumber(a.nodePeakW,'nodePeakW',{min:0,unit:'W'});
+  for(const field of ['gridEfficiency','chargeEfficiency','dischargeEfficiency'] as const)finiteNumber(a[field],field,{min:Number.MIN_VALUE,max:1});
+  finiteNumber(a.batteryReserveFraction,'batteryReserveFraction',{min:0,max:1});
+  const draw = nodeDrawW(input.workload, input.idleFraction, input.networkAvailable,a.nodePeakW);
   const gridAvailableW = input.isolated ? 0 : input.gridAvailableW;
   const reserveWh = input.batteryCapacityWh * a.batteryReserveFraction;
   const dischargeLimitW = input.batteryAvailable && !input.isolated
     ? Math.min(input.batteryMaxW, checked(Math.max(0, input.batteryWh - reserveWh) * a.dischargeEfficiency * 3600 / dt, 'dischargeEnergyLimitW')) : 0;
-  const busAvailableW = checked(gridAvailableW * GRID_EFFICIENCY + dischargeLimitW, 'busAvailableW');
+  const busAvailableW = checked(gridAvailableW * a.gridEfficiency + dischargeLimitW, 'busAvailableW');
   const criticalPowered = !input.isolated && busAvailableW + 1e-7 >= input.criticalLoadW;
   const energizedNodes = criticalPowered
     ? Math.min(input.desiredNodes, draw > 0 ? Math.max(0, Math.floor(checked((busAvailableW - input.criticalLoadW + 1e-7) / draw, 'supportedNodes'))) : input.desiredNodes) : 0;
   const itW = energizedNodes * draw;
   const loadW = itW + (criticalPowered ? input.criticalLoadW : 0);
-  const gridToLoadW = Math.min(gridAvailableW * GRID_EFFICIENCY, loadW);
+  const gridToLoadW = Math.min(gridAvailableW * a.gridEfficiency, loadW);
   const batteryDischargeW = Math.max(0, loadW - gridToLoadW);
   const chargeLimitW = input.batteryAvailable && !input.isolated
     ? Math.min(input.batteryMaxW, checked(Math.max(0, input.batteryCapacityWh - input.batteryWh) * 3600 / (a.chargeEfficiency * dt), 'chargeEnergyLimitW')) : 0;
-  const batteryChargeW = batteryDischargeW > 1e-8 ? 0 : Math.min(chargeLimitW, Math.max(0, gridAvailableW * GRID_EFFICIENCY - loadW));
-  const gridW = (gridToLoadW + batteryChargeW) / GRID_EFFICIENCY;
-  const gridLossW = gridW * (1 - GRID_EFFICIENCY);
+  const batteryChargeW = batteryDischargeW > 1e-8 ? 0 : Math.min(chargeLimitW, Math.max(0, gridAvailableW * a.gridEfficiency - loadW));
+  const gridW = (gridToLoadW + batteryChargeW) / a.gridEfficiency;
+  const gridLossW = gridW * (1 - a.gridEfficiency);
   const batteryLossW = batteryDischargeW * (1 / a.dischargeEfficiency - 1) + batteryChargeW * (1 - a.chargeEfficiency);
   const facilityW = loadW + gridLossW + batteryLossW;
   const batteryWh = input.dtS === 0 ? input.batteryWh : input.batteryWh + (a.chargeEfficiency * batteryChargeW - batteryDischargeW / a.dischargeEfficiency) * input.dtS / 3600;

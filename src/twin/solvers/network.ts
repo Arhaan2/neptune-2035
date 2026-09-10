@@ -1,14 +1,11 @@
+import { TRAFFIC_PROFILE, equipmentFor } from '../catalog/equipment';
 import { connectionsForModule, moduleAssets } from '../assets/design';
 import { CONTRACT } from '../persistence/limits';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
 import type { Asset, Connection, Design } from '../types';
 
 /** Declared illustrative offered demand, not measured traffic or achieved throughput. */
-export const NETWORK_ASSUMPTIONS = Object.freeze({
-  id:'illustrative-job-traffic-v1', revision:'1.0.0', evidence:'assumed', date:'2026-09-08',
-  clusterBitSPerNode:100e6, externalBitSPerNode:1e6,
-  scope:'Simultaneous one-direction source-to-node offered demand per energized node; optional network classes carry no required-job demand. No packet, latency, training-speed or delivered-throughput prediction.',
-});
+export const NETWORK_ASSUMPTIONS = TRAFFIC_PROFILE;
 export interface TrafficProfile { clusterBitSPerNode:number; externalBitSPerNode:number }
 export interface NetworkIssue { assetId:string; resourceId:string; reason:string; domainIds:string[] }
 export interface NetworkBottleneck extends NetworkIssue { demandBitS:number; capacityBitS:number }
@@ -120,7 +117,7 @@ function compile(design:Design){
 }
 
 /** Pure evaluator closure; caches only the last identical numerical query, never simulation state. */
-export function createNetworkEvaluator(design:Design,profile:TrafficProfile=NETWORK_ASSUMPTIONS){
+export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equipmentFor(design).workloadProfile){
   if (!profile || typeof profile !== 'object') failure('invalid-input', 'NETWORK_PROFILE', 'Traffic profile must be an object.');
   for (const field of ['clusterBitSPerNode', 'externalBitSPerNode'] as const) finiteNumber(profile[field], field, { min: 0, max: 1e12, unit: 'bit/s per node' });
   validateNetworkDesign(design);
@@ -182,6 +179,6 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=NETW
   };
 }
 
-export function assessNetwork(design:Design,allocations:readonly NetworkAllocation[],failedAssetIds:readonly string[]=[],profile:TrafficProfile=NETWORK_ASSUMPTIONS):NetworkAssessment{
+export function assessNetwork(design:Design,allocations:readonly NetworkAllocation[],failedAssetIds:readonly string[]=[],profile:TrafficProfile=equipmentFor(design).workloadProfile):NetworkAssessment{
   return createNetworkEvaluator(design,profile)(allocations,failedAssetIds);
 }

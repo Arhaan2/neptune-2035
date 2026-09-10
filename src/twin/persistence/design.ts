@@ -1,3 +1,4 @@
+import { validateEquipment, resolveSpecification } from '../catalog/equipment';
 import { validateConfig } from '../assets/design';
 import { failure, finiteNumber, SimulationError } from '../safety';
 import type { Design } from '../types';
@@ -11,10 +12,11 @@ function vector(v: unknown, name: string, positive = false) {
 }
 export function validateDesign(value: unknown): asserts value is Design {
   validateStructure(value); record(value, 'design');
-  keys(value, ['schemaVersion', 'revision', 'config', 'assets', 'connections', 'modules', 'nodeCount', 'rackCount', 'provisionedAccelerators', 'installedPeakITW', 'sourceIds'], 'design');
+  keys(value, ['schemaVersion', 'revision', 'config', 'assets', 'connections', 'modules', 'nodeCount', 'rackCount', 'provisionedAccelerators', 'installedPeakITW', 'sourceIds', 'equipment'], 'design');
   if (value.schemaVersion !== 2) failure('unsupported-configuration', 'DESIGN_SCHEMA', 'Unsupported design schema.');
   string(value.revision, 'design.revision', 100);
   try { validateConfig(value.config); } catch (error) { if (error instanceof SimulationError) throw error; failure('invalid-input', 'DESIGN_CONFIG', error instanceof Error ? error.message : 'Invalid design configuration.', { field: 'design.config' }); }
+  validateEquipment(value as unknown as Design);
   array(value.modules, 'design.modules', CONTRACT.maxModules);
   if (!value.modules.length) failure('invalid-input', 'DESIGN_MODULES', 'Design requires at least one module.');
   const modules = new Set<string>(); let nodes = 0, racks = 0;
@@ -27,7 +29,7 @@ export function validateDesign(value: unknown): asserts value is Design {
     if (m.rackCount !== Math.ceil(m.nodeCount / 4)) failure('invalid-input', 'DESIGN_INVENTORY', 'Module rack and node counts disagree.');
     nodes += m.nodeCount; racks += m.rackCount; vector(m.positionM, 'module.positionM');
   }
-  for (const [key, expected] of Object.entries({ nodeCount: nodes, rackCount: racks, provisionedAccelerators: nodes * 8, installedPeakITW: nodes * 12000 })) if (value[key] !== expected) failure('invalid-input', 'DESIGN_INVENTORY', `Design ${key} disagrees with inventory.`, { field: key });
+  for (const [key, expected] of Object.entries({ nodeCount: nodes, rackCount: racks, provisionedAccelerators: nodes * 8, installedPeakITW: nodes * resolveSpecification(value as unknown as Design,'compute').ratings.capacityW })) if (value[key] !== expected) failure('invalid-input', 'DESIGN_INVENTORY', `Design ${key} disagrees with inventory.`, { field: key });
   array(value.assets, 'design.assets', CONTRACT.maxDesignAssets);
   const ids = new Set<string>();
   for (const a of value.assets) {
@@ -39,7 +41,8 @@ export function validateDesign(value: unknown): asserts value is Design {
     if (!['platform', 'hull', 'module', 'rack', 'compute', 'cdu', 'exchanger', 'pump', 'valve', 'pipe', 'transformer', 'switchboard', 'battery', 'network', 'external'].includes(String(a.type))) failure('unsupported-configuration', 'ASSET_TYPE', 'Unsupported asset type.');
     vector(a.dimensionsM, 'asset.dimensionsM', true); vector(a.positionM, 'asset.positionM');
     if (a.operationalMassKg !== null) finiteNumber(a.operationalMassKg, 'asset.operationalMassKg', { min: 0, unit: 'kg' });
-    record(a.ratings, 'asset.ratings'); for (const [key, n] of Object.entries(a.ratings)) finiteNumber(n, `asset.ratings.${key}`, { min: 0 });
+    record(a.ratings, 'asset.ratings');
+    if(a.type==='transformer')finiteNumber(a.ratings.efficiency,'transformer.efficiency',{min:Number.MIN_VALUE,max:1}); for (const [key, n] of Object.entries(a.ratings)) finiteNumber(n, `asset.ratings.${key}`, { min: 0 });
     array(a.ports, 'asset.ports', 16); const ports = new Set<string>();
     for (const p of a.ports) {
       record(p, 'port'); keys(p, ['id', 'medium', 'direction', 'capacity', 'unit'], 'port'); string(p.id, 'port.id', 100); string(p.unit, 'port.unit', 60);

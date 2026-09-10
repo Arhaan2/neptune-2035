@@ -1,8 +1,9 @@
+import { catalogSpecification } from '../catalog/equipment';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
 
 export const THERMAL_ASSUMPTIONS = Object.freeze({
   technicalDensityKgM3: 997, technicalCpJKgK: 4180, seawaterDensityKgM3: 1025, seawaterCpJKgK: 3990,
-  liquidCapture: 0.9, coolantCapacitanceJK: 24e6, airCapacitanceJK: 12e6,
+  liquidCapture: catalogSpecification('compute-reference').ratings.liquidCaptureFraction, coolantCapacitanceJK: 24e6, airCapacitanceJK: 12e6,
   ambientK: 298.15, passiveAirConductanceWK: 500, fanAirConductanceWK: 22_000,
   pumpToFluidFraction: 0.9,
 });
@@ -56,6 +57,7 @@ export function solveExchanger(input: ExchangerInput): ExchangerResult {
     balanceResidualW: cTechnical * (input.technicalInletK - technicalOutletK) - cSea * (seawaterOutletK - input.seawaterInletK) }, 'solveExchanger');
 }
 export interface ThermalInput {
+  liquidCaptureFraction?: number;
   coolantK: number; airK: number; itW: number; facilityW: number;
   technicalPumpW: number; seawaterPumpW: number; technicalFlowM3S: number; seawaterFlowM3S: number;
   seawaterK: number; exchangerUAWPerK: number; foulingResistanceKPerW: number; fanPowered: boolean; dtS: number;
@@ -83,7 +85,8 @@ export function advanceThermal(input: ThermalInput): ThermalResult {
   const exchanger = solveExchanger({ technicalInletK: input.coolantK, seawaterInletK: input.seawaterK,
     technicalFlowM3S: input.technicalFlowM3S, seawaterFlowM3S: input.seawaterFlowM3S,
     cleanUAWPerK: input.exchangerUAWPerK, foulingResistanceKPerW: input.foulingResistanceKPerW });
-  const coolantHeat = checked(input.itW * a.liquidCapture + input.technicalPumpW * a.pumpToFluidFraction, 'coolantHeatW');
+  const liquidCapture=input.liquidCaptureFraction??a.liquidCapture;finiteNumber(liquidCapture,'liquidCaptureFraction',{min:0,max:1});
+  const coolantHeat = checked(input.itW * liquidCapture + input.technicalPumpW * a.pumpToFluidFraction, 'coolantHeatW');
   const seaDirectHeat = checked(input.seawaterPumpW * a.pumpToFluidFraction, 'seaDirectHeatW');
   const airHeat = checked(input.facilityW - coolantHeat - seaDirectHeat, 'airHeatW');
   if (airHeat < -1e-6) failure('invalid-input', 'THERMAL_ENERGY_BOUNDARY', 'Facility boundary omits an electrical heat source.', { field: 'facilityW', unit: 'W', details: { facilityW: input.facilityW, coolantHeatW: coolantHeat, seaDirectHeatW: seaDirectHeat } });
