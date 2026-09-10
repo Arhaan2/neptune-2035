@@ -159,3 +159,50 @@ test('PH2 fallback replacement and cost-only UI edit retain exact physical check
   expect(observed.errors).toEqual([]);
   await info.attach('phase2-fallback-cost', { body: JSON.stringify({ oldIdentity: before.checkpoint.configIdentity, pricedIdentity: priced.checkpoint.configIdentity, retainedBefore, retainedAfter: await observationHistory.innerText(), ...observed }), contentType: 'application/json' });
 });
+
+test('PH2 mobile recovery waits for actual initialization before activation and restores the exact checkpoint', async ({ page }) => {
+  test.setTimeout(120_000);
+  const observed = observe(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./'); await ready(page); await step(page);
+  const saved = await project(page);
+  await page.addInitScript(() => {
+    const NativeWorker = Worker;
+    const probe = {
+      released: false,
+      held: [] as { worker: Worker; response: unknown }[],
+      release() {
+        this.released = true;
+        for (const item of this.held) item.worker.dispatchEvent(new MessageEvent('message', { data: item.response }));
+        this.held = [];
+      },
+    };
+    Object.assign(window, { phase2RecoveryProbe: probe });
+    window.Worker = class extends NativeWorker {
+      constructor(url: string | URL, options?: WorkerOptions) {
+        super(url, options);
+        this.addEventListener('message', event => {
+          if (!probe.released && event.data.status === 'complete' && event.data.state?.timeS === 0) {
+            event.stopImmediatePropagation();
+            probe.held.push({ worker: this, response: structuredClone(event.data) });
+          }
+        });
+      }
+    };
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  await expect(page.getByTestId('checkpoint-recovery')).toContainText('available at 10s');
+  await expect.poll(() => page.evaluate(() => (window as unknown as { phase2RecoveryProbe: { held: unknown[] } }).phase2RecoveryProbe.held.length)).toBeGreaterThan(0);
+  await expect(main(page)).toHaveAttribute('data-ready', 'false');
+  // A visible recovery action cannot race the layout/state transition from initialization.
+  await expect(button(page, 'Recover saved checkpoint')).toBeDisabled();
+  await page.evaluate(() => (window as unknown as { phase2RecoveryProbe: { release: () => void } }).phase2RecoveryProbe.release());
+  await ready(page);
+  await expect(button(page, 'Recover saved checkpoint')).toBeEnabled();
+  await button(page, 'Recover saved checkpoint').click();
+  await expect(main(page)).toHaveAttribute('data-time', '10'); await ready(page);
+  expect((await project(page)).checkpoint).toEqual(saved.checkpoint);
+  await step(page); await expect(main(page)).toHaveAttribute('data-time', '20');
+  expect(observed.errors).toEqual([]);
+});
