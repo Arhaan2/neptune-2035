@@ -1486,6 +1486,8 @@ dt,
   }
   .generation-tabs {
     gap: 13px;
+    /* Keep every preset visible; the adjacent description can wrap instead. */
+    flex-shrink: 0;
   }
   .generation-tabs button {
     font-size: 10px;
