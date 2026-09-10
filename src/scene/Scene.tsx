@@ -100,6 +100,8 @@ function CameraRig({
   const destination = useRef(new Vector3());
   const target = useRef(new Vector3());
   const transitioning = useRef(true);
+  const transitionId = useRef(0);
+  const frame = useRef(0);
   const exterior = useRef<{ pos: Vector3; target: Vector3 } | null>(null);
   const wasInside = useRef(false);
   const angle = useRef(0);
@@ -183,6 +185,7 @@ function CameraRig({
       target.current.set(0, props.exploded ? 5 : 0, 0);
     }
     wasInside.current = props.inside;
+    transitionId.current += 1;
     transitioning.current = true;
     angle.current = 0;
   }, [
@@ -217,6 +220,10 @@ function CameraRig({
     }
     // A small read-only inspection surface for repeatable acceptance and recording.
     window.__NEPTUNE_SCENE__ = {
+      frame: ++frame.current,
+      transitionId: transitionId.current,
+      transitioning: transitioning.current,
+      inside: props.inside,
       camera: camera.position.toArray(),
       target: c.target.toArray(),
       calls: gl.info.render.calls,
@@ -246,6 +253,10 @@ function CameraRig({
 declare global {
   interface Window {
     __NEPTUNE_SCENE__?: {
+      frame: number;
+      transitionId: number;
+      transitioning: boolean;
+      inside: boolean;
       camera: number[];
       target: number[];
       calls: number;

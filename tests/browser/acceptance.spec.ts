@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
 import { expectNoHorizontalOverflow } from './layout';
+import { readScene, resetCamera, waitForCameraTransition } from './camera';
 const root = (page: Page) => page.locator('main');
 async function load(page: Page) {
   await page.goto('./?legacy=1');
@@ -48,9 +49,7 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
   await expect
     .poll(() => page.evaluate(() => window.__NEPTUNE_SCENE__!.camera))
     .not.toEqual(keyHome);
-  await page.getByRole('button', { name: 'Reset view', exact: true }).click();
-  await page.waitForTimeout(150);
-  const home = await page.evaluate(() => window.__NEPTUNE_SCENE__!);
+  const home = await resetCamera(page);
   const bounds = (await canvas.boundingBox())!;
   await page.mouse.move(
     bounds.x + bounds.width * 0.6,
@@ -63,13 +62,10 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
     { steps: 10 },
   );
   await page.mouse.up();
-  await page.waitForTimeout(150);
+  await expect.poll(() => readScene(page).then(s => s.camera)).not.toEqual(home.camera);
   const orbit = await page.evaluate(() => window.__NEPTUNE_SCENE__!.camera);
   expect(orbit).not.toEqual(home.camera);
-  await page.getByRole('button', { name: 'Reset view', exact: true }).click();
-  await page.waitForTimeout(150);
-  const reset = await page.evaluate(() => window.__NEPTUNE_SCENE__!.camera);
-  reset.forEach((v, i) => expect(v).toBeCloseTo(home.camera[i], 1));
+  await resetCamera(page, home);
   await page.getByRole('button', { name: /X-ray/ }).click();
   await expect(root(page)).toHaveAttribute('data-xray', 'true');
   await page.waitForTimeout(200);
@@ -80,9 +76,10 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
     page.getByText('Move heat. Keep circuits separate.'),
   ).toBeVisible();
   await capture(page, `${info.project.name}-cooling`);
+  const beforeExplode = await readScene(page);
   await page.getByRole('button', { name: 'Explode', exact: true }).click();
   await expect(root(page)).toHaveAttribute('data-exploded', 'true');
-  await page.waitForTimeout(200);
+  await waitForCameraTransition(() => readScene(page), beforeExplode, false);
   await capture(page, `${info.project.name}-exploded`);
   expect(
     await imageDifference(cutaway, await canvas.screenshot()),
@@ -96,8 +93,7 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
   const after = await page.evaluate(() => window.__NEPTUNE_SCENE__!);
   expect(after.geometries).toBeLessThanOrEqual(warmed.geometries + 3);
   expect(after.textures).toBeLessThanOrEqual(warmed.textures + 1);
-  await page.getByRole('button', { name: 'Reset view', exact: true }).click();
-  await page.waitForTimeout(150);
+  await resetCamera(page, home);
   expect(await imageDifference(hero, await canvas.screenshot())).toBeLessThan(
     0.025,
   );
@@ -108,11 +104,12 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
   await expect(
     page.getByText('Connected within. Connected beyond.'),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Reset view', exact: true }).click();
-  const prior = await page.evaluate(() => window.__NEPTUNE_SCENE__!.camera);
+  const prior = await resetCamera(page, home);
   await page.getByRole('button', { name: 'Inside', exact: true }).click();
   await expect(page.getByText('Within a compute module')).toBeVisible();
-  await page.waitForTimeout(200);
+  const interior = await waitForCameraTransition(() => readScene(page), prior, true);
+  expect(Math.hypot(...interior.camera.map((v, i) => v - prior.camera[i]))).toBeGreaterThan(1);
+  expect(Math.hypot(...interior.target.map((v, i) => v - prior.target[i]))).toBeGreaterThan(1);
   await capture(page, `${info.project.name}-interior`);
   expect(
     await imageDifference(hero, await canvas.screenshot()),
@@ -120,10 +117,11 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
   await page
     .getByRole('button', { name: 'Exit interior', exact: true })
     .click();
-  await page.waitForTimeout(150);
-  (await page.evaluate(() => window.__NEPTUNE_SCENE__!.camera)).forEach(
-    (v, i) => expect(v).toBeCloseTo(prior[i], 1),
-  );
+  const restored = await waitForCameraTransition(() => readScene(page), interior, false, prior);
+  await info.attach('camera-return', {
+    body: JSON.stringify({ prior, interior, restored }, null, 2),
+    contentType: 'application/json',
+  });
   expect(errors).toEqual([]);
   await fs.writeFile(
     `assets/screenshots/${info.project.name}-render-stats.json`,
@@ -133,6 +131,26 @@ test('rendered modes, connected exploded paths, interior and bounded resources',
       2,
     ),
   );
+});
+
+test('camera return preserves a manually selected exterior pose with normal motion', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await load(page);
+  const home = await resetCamera(page);
+  await page.locator('canvas').focus();
+  await page.keyboard.press('+');
+  await expect.poll(() => readScene(page).then(s => s.camera)).not.toEqual(home.camera);
+  const prior = await readScene(page);
+  await page.getByRole('button', { name: 'Inside', exact: true }).click();
+  const interior = await waitForCameraTransition(() => readScene(page), prior, true);
+  expect(Math.hypot(...interior.camera.map((v, i) => v - prior.camera[i]))).toBeGreaterThan(1);
+  expect(Math.hypot(...interior.target.map((v, i) => v - prior.target[i]))).toBeGreaterThan(1);
+  await page.getByRole('button', { name: 'Exit interior', exact: true }).click();
+  const restored = await waitForCameraTransition(() => readScene(page), interior, false, prior);
+  await info.attach('camera-return-normal-motion', {
+    body: JSON.stringify({ home, prior, interior, restored }, null, 2),
+    contentType: 'application/json',
+  });
 });
 
 test('presets, engineering controls, validation and fresh-context sharing', async ({
