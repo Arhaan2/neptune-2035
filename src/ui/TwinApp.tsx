@@ -1,4 +1,4 @@
-import { REFERENCE_CATALOG, createEquipmentConfiguration, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity } from '../twin/catalog/equipment';
+import { REFERENCE_CATALOG, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity } from '../twin/catalog/equipment';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Waves,
@@ -16,6 +16,7 @@ import {
 import {
   buildDesign,
   replaceEquipment,
+  reconfigureDesign,
   DEFAULT_CONFIG,
   moduleAssets,
   resolveAsset,
@@ -233,6 +234,7 @@ export default function TwinApp() {
       ) ?? design.modules[0],
     selectedState = state?.modules.find((m) => m.id === selectedModule.id);
   const selectedModuleId = selectedModule.id;
+  const computeSpec=resolveSpecification(design,'compute');
   const installedSpec=asset&&roleForAsset(asset.id)?resolveSpecification(design,asset.id):null;
   const proposedSpec=REFERENCE_CATALOG.find(spec=>spec.id===replacementSpec)!;
   const details = useMemo(
@@ -269,12 +271,7 @@ export default function TwinApp() {
       if(Object.keys(patch).every(key=>key==='budgetUSD')) {
         setConfig(next);setDesignOverride({...design,config:next});setNotice('Economic budget updated. Physical state and engineering identity retained.');return;
       }
-      const reference=createEquipmentConfiguration(next),previous=equipmentFor(design);
-      const equipment={...reference,economics:previous.economics,overrides:{...previous.overrides},defaults:{...previous.defaults}};
-      if(patch.supplyW!==undefined)equipment.defaults.shoreTransformer=reference.defaults.shoreTransformer;
-      if(patch.batteryWhPerModule!==undefined||patch.batteryMaxWPerModule!==undefined)equipment.defaults.battery=reference.defaults.battery;
-      if(patch.exchangerUAWPerK!==undefined)equipment.defaults.exchanger=reference.defaults.exchanger;
-      const nextDesign = buildDesign(next,equipment);
+      const nextDesign = reconfigureDesign(design,patch);
       if (!resolveAsset(nextDesign, selectedId))
         setSelectedId(`${nextDesign.modules[0].id}/pump-duty`);
       setDesignOverride(nextDesign);
@@ -444,12 +441,12 @@ export default function TwinApp() {
       'Full load at 0s → selected duty pump trip at 30s → restore at 180s. Both runs use the same parameters through 240s.',
     );
     setNotice(
-      'Running the same pump trip and restoration with zero and one standby pump.',
+      'Running the same pump trip and restoration with zero and one standby pump. Installed specifications are preserved; the separate no-standby design omits any removed standby slot override.',
     );
     try {
       const result: Compared[] = [];
       for (const standbyPumps of [0, 1] as const) {
-        const d = buildDesign({ ...config, standbyPumps });
+        const d = reconfigureDesign(design,{standbyPumps},{removedOverrides:'omit-in-derived-design'});
         const s = await runWorkerExperiment(
           d,
           signatureEvents(d, selectedModule.id),
@@ -529,7 +526,7 @@ export default function TwinApp() {
                     ),
                   }
                 : { generation: (variant + 1) as 1 | 2 };
-          const d = buildDesign({ ...config, ...patch });
+          const d = reconfigureDesign(design,patch);
           const label =
             mode === 'idle'
               ? `Idle ${num(d.config.idleFraction * 100, 0)}%`
@@ -583,7 +580,7 @@ export default function TwinApp() {
     try {
       let best: Compared | undefined;
       const rows: string[] = [];
-      for (const d of sizingCandidates(config, maxPlatforms)) {
+      for (const d of sizingCandidates(config, maxPlatforms,design)) {
         const s = await runWorkerExperiment(d, signatureEvents(d), 180),
           sum = summarize(d, s);
         const assessment = sizingAssessment(d, s, config.budgetUSD, costScale);
@@ -813,8 +810,7 @@ export default function TwinApp() {
               Workload requires cluster connectivity
             </label>
             <p>
-              Changing design reinitializes operation. Whole-server 12 kW /
-              8-accelerator proxy; all hardware envelopes assumed.
+              Changing physical design reinitializes operation. Installed whole-server reference: {num(computeSpec.ratings.capacityW/1000)} kW / {computeSpec.ratings.accelerators} accelerators, {computeSpec.name} v{computeSpec.version}; hardware envelopes are assumed.
             </p>
           </details>
           <div className="twin-tree">

@@ -1,4 +1,4 @@
-import { createEquipmentConfiguration, resolveAssetSpecification, resolveSpecification, engineeringIdentity, validateEquipment, catalogSpecification, type EquipmentConfiguration, type EquipmentRole } from '../catalog/equipment';
+import { createEquipmentConfiguration, resolveAssetSpecification, resolveSpecification, engineeringIdentity, validateEquipment, catalogSpecification, equipmentFor, type EquipmentConfiguration, type EquipmentRole } from '../catalog/equipment';
 import { HARDWARE as H } from '../catalog/reference';
 import type { Asset, AssetType, Connection, Design, DesignConfig, Medium, ModuleSpec, Vec3 } from '../types';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
@@ -116,6 +116,26 @@ export function withDefaultSpecification(design:Design,role:EquipmentRole,specif
 /** Legacy scenario re-calculation installs deterministic, explicit versioned reference records. */
 export function migrateLegacyDesign(design:Design):Design {
   if(design.equipment)return structuredClone(design);const next=structuredClone(design);next.equipment=createEquipmentConfiguration(design.config);refreshDesign(next);return next;
+}
+/** Carry installed references through the existing scenario/configuration workflows.
+ * Removing a slot is rejected unless a separate derived-design comparison explicitly opts in.
+ * Neither case changes the source design or its recorded event/telemetry history.
+ */
+export function reconfigureDesign(design:Design,patch:Partial<DesignConfig>,options:{removedOverrides?:'reject'|'omit-in-derived-design'}={}):Design {
+  const config=validateConfig({...design.config,...patch}),reference=createEquipmentConfiguration(config),previous=equipmentFor(design);
+  const equipment:EquipmentConfiguration={...reference,defaults:{...previous.defaults},overrides:{...previous.overrides},controlPolicy:structuredClone(previous.controlPolicy),workloadProfile:structuredClone(previous.workloadProfile),economics:structuredClone(previous.economics)};
+  if(patch.supplyW!==undefined)equipment.defaults.shoreTransformer=reference.defaults.shoreTransformer;
+  if(patch.batteryWhPerModule!==undefined||patch.batteryMaxWPerModule!==undefined)equipment.defaults.battery=reference.defaults.battery;
+  if(patch.exchangerUAWPerK!==undefined)equipment.defaults.exchanger=reference.defaults.exchanger;
+  // The new reference provides immutable catalog alternatives plus current legacy adapter records.
+  // Retain any installed saved reference explicitly; never reinterpret it as a newer catalog entry.
+  const required=new Set([...Object.values(equipment.defaults),...Object.values(equipment.overrides)].map(r=>`${r.id}@${r.version}`));
+  for(const spec of previous.specifications)if(required.has(`${spec.id}@${spec.version}`)&&!equipment.specifications.some(s=>s.id===spec.id&&s.version===spec.version))equipment.specifications.push(structuredClone(spec));
+  if(options.removedOverrides==='omit-in-derived-design'){
+    const slots=buildDesign(config);
+    equipment.overrides=Object.fromEntries(Object.entries(equipment.overrides).filter(([slot])=>resolveAsset(slots,slot)!==undefined));
+  }
+  return buildDesign(config,equipment);
 }
 export function moduleAssets(design:Design,moduleId:string):Asset[]{
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
