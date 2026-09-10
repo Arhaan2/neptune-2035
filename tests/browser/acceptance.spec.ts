@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
+import { expectNoHorizontalOverflow } from './layout';
 const root = (page: Page) => page.locator('main');
 async function load(page: Page) {
   await page.goto('./?legacy=1');
@@ -217,9 +218,7 @@ test('mobile controls, contextual inspection and explicit WebGL fallback', async
 }, info) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await load(page);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
-    390,
-  );
+  await expectNoHorizontalOverflow(page, 390);
   await capture(page, `${info.project.name}-mobile`);
   await page.getByRole('button', { name: 'Controls', exact: true }).click();
   const util = page.getByRole('spinbutton', {

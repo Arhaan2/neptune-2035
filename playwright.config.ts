@@ -35,7 +35,8 @@ export default defineConfig({
         launchOptions: {
           args: process.platform === 'darwin'
             ? ['--use-angle=metal']
-            : process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl'] : [],
+            // The test-only Mesa adapter is otherwise blocklisted by Chromium.
+            : process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl', '--ignore-gpu-blocklist'] : [],
         },
       },
     },

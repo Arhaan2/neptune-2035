@@ -1,6 +1,7 @@
 import { test, expect, type Page, type TestInfo, type Locator } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { CONTRACT } from '../../src/twin/persistence/limits';
+import { expectNoHorizontalOverflow } from './layout';
 
 const main=(page:Page)=>page.locator('main.twin-app');
 const pump='platform-001/module-01/pump-duty';
@@ -195,27 +196,47 @@ test.describe('reduced-motion touch acceptance',()=>{
     await page.getByRole('button',{name:'Explode',exact:true}).tap();await expect.poll(async()=>(await diagnostics(page))?.exploded).toBe(true);
     await page.getByRole('button',{name:'Explode',exact:true}).tap();await expect.poll(async()=>(await diagnostics(page))?.exploded).toBe(false);
     await expect(main(page)).toHaveAttribute('data-time','0');expect(await exportArtifact(page,'results')).toBe(before);
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(390);
+    await expectNoHorizontalOverflow(page,390);
     await screenshot(page,info,'reduced-motion-touch');expect(errors).toEqual([]);
   });
 });
 
-test('comparison renders two computed 240-second runs and exports identical disturbance histories',async({page},info)=>{
-  const errors=observeErrors(page);await load(page);await changeNumber(page,'Requested accelerators','1280');
+for (const fallback of [false, true]) {
+test(`comparison renders two computed 240-second runs and exports identical disturbance histories${fallback ? ' with explicit fallback' : ''}`,async({page},info)=>{
+  const errors=observeErrors(page);await load(page,fallback ? './?fallback=1' : './');await changeNumber(page,'Requested accelerators','1280');
   await page.getByRole('button',{name:'Compare',exact:true}).click();
   await page.getByRole('button',{name:'Compare pump experiment',exact:true}).click();
   const cards=page.locator('.twin-comparison-grid article');await expect(cards).toHaveCount(2);
   await expect(cards.nth(0).getByRole('heading',{level:3})).toHaveText('No standby pump');
   await expect(cards.nth(1).getByRole('heading',{level:3})).toHaveText('One standby pump');
-  const temperature=async(card:Locator)=>Number((await card.locator('p').first().innerText()).split('°')[0].replaceAll(',','').trim());
+  if (fallback) {
+    await expect(cards.getByTestId('twin-fallback')).toHaveCount(2);
+    await expect(cards.locator('canvas')).toHaveCount(0);
+  } else {
+    await expect(cards.locator('canvas')).toHaveCount(2);
+    await expect(cards.nth(0).locator('canvas')).toBeVisible();
+    await expect(cards.nth(1).locator('canvas')).toBeVisible();
+  }
+  const temperature=async(card:Locator)=>{
+    // Nested scene/fallback paragraphs are not the card's numerical metric.
+    const metric=card.locator(':scope > p').first();
+    await expect(metric).toHaveText(/^[-\d,.]+ °C · [-\d,.]+ L\/s$/);
+    const value=Number((await metric.innerText()).split('°')[0].replaceAll(',','').trim());
+    expect(Number.isFinite(value)).toBe(true);
+    return value;
+  };
   expect(await temperature(cards.nth(0))).toBeGreaterThan(await temperature(cards.nth(1))+0.5);
   const a=JSON.parse(await textDownload(page,()=>cards.nth(0).getByRole('button',{name:'Export reproducible run',exact:true}).click()));
   const b=JSON.parse(await textDownload(page,()=>cards.nth(1).getByRole('button',{name:'Export reproducible run',exact:true}).click()));
   expect(a.timeS).toBe(240);expect(b.timeS).toBe(240);expect(a.events).toEqual(b.events);
   expect(a.design.standbyPumps).toBe(0);expect(b.design.standbyPumps).toBe(1);
+  const coolantA=a.checkpoint.state.modules[0].coolantK,coolantB=b.checkpoint.state.modules[0].coolantK;
+  expect(Number.isFinite(coolantA)).toBe(true);expect(Number.isFinite(coolantB)).toBe(true);
+  expect(coolantA).toBeGreaterThan(coolantB+0.5);
   await expect(page.locator('.twin-delta')).toContainText('at 240s:');
-  await screenshot(page,info,'comparison');expect(errors).toEqual([]);
+  await screenshot(page,info,fallback ? 'comparison-fallback' : 'comparison');expect(errors).toEqual([]);
 });
+}
 
 test('project exports and imports replay numerical state, with invalid mappings rejected visibly',async({page},info)=>{
   const errors=observeErrors(page);await load(page);await changeNumber(page,'Requested accelerators','1280');
@@ -235,7 +256,7 @@ test('project exports and imports replay numerical state, with invalid mappings 
 test('mobile keyboard and explicit fallback retain asset inspection, operation and exports',async({page},info)=>{
   const errors=observeErrors(page);await page.setViewportSize({width:390,height:844});await load(page,'./?fallback=1');
   await expect(page.getByTestId('twin-fallback')).toBeVisible();await expect(page.locator('canvas')).toHaveCount(0);
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(390);
+  await expectNoHorizontalOverflow(page,390);
   const find=page.getByRole('textbox',{name:'Find asset ID',exact:true});await find.fill('platform-001/module-01/rack-02');await find.press('Enter');
   await expect(main(page)).toHaveAttribute('data-selected','platform-001/module-01/rack-02');
   await expect(page.locator('.twin-inspector')).toContainText('40 U / 48 U');

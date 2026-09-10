@@ -168,7 +168,7 @@ async function diagnose() {
     const browserType = (await import('playwright'))[browserName];
     const variants = browserName === 'chromium' ? [
       { name: 'headless-default', headless: true, args: [] },
-      { name: 'headed-angle-gl', headless: false, args: ['--use-gl=angle', '--use-angle=gl'] },
+      { name: 'headed-angle-gl-allow-mesa', headless: false, args: ['--use-gl=angle', '--use-angle=gl', '--ignore-gpu-blocklist'] },
     ] : [
       { name: `${mode}-software-clock-60`, headless: !headed, prefs: { 'layout.frame_rate': 60 } },
       { name: `${mode}-software-clock-60-software-webrender`, headless: !headed, prefs: { 'layout.frame_rate': 60, 'gfx.webrender.software': true } },
