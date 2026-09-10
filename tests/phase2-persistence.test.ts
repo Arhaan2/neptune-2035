@@ -148,3 +148,29 @@ describe('PH2-11 installed version/unit/rating boundary validation', () => {
     expect(projectFile(design, initialize(design))).toEqual(valid);
   });
 });
+
+describe('PH2-08 installed asset presentation is excluded from physics identity', () => {
+  it.each(['name', 'provenance', 'sourceIds'] as const)('keeps the same engineering fingerprint when only %s display wording changes', field => {
+    const design = small(), formatted = structuredClone(design);
+    const asset = formatted.assets.find(a => a.id === 'shore/transformer')!;
+    if (field === 'name') asset.name = 'Reference shore transformer — display wording only';
+    else if (field === 'provenance') asset.provenance = ['display-source-label'];
+    else formatted.sourceIds = ['display-source-list'];
+    expect(engineeringIdentity(formatted)).toBe(engineeringIdentity(design));
+  });
+});
+
+describe('PH2-11 cached asset values cannot override installed authoritative transformer', () => {
+  it.each(['efficiency', 'capacityW', 'dimensionsM'] as const)('rejects stored transformer %s drift at direct/worker/import boundaries', async field => {
+    const design = small(), bad = structuredClone(design), transformer = bad.assets.find(a => a.id === 'shore/transformer')!;
+    if (field === 'dimensionsM') transformer.dimensionsM = [40, 40, 60];
+    else transformer.ratings[field] = field === 'efficiency' ? 0.5 : 1000;
+    // No dynamic checkpoint: this must be rejected by design/spec admission itself.
+    expect(() => initialize(bad)).toThrow(/specification|installed|rating|envelope|design|immutable/i);
+    const exported = projectFile(design, initialize(design)); exported.checkpoint = null; exported.designSnapshot = bad;
+    expect(() => parseProject(JSON.stringify(exported))).toThrow();
+    const responses: WorkerResponse[] = [];
+    await createWorkerHandler(response => responses.push(response), async () => {}, () => 0)({ version: 2, requestId: 1, epoch: 1, kind: 'initialize', design: bad });
+    expect(responses.at(-1)?.status).toBe('failed'); expect(responses.at(-1)?.state).toBeUndefined();
+  });
+});
