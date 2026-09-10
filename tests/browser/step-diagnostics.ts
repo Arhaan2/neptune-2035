@@ -34,13 +34,27 @@ export async function campusStep(page: Page, info: TestInfo) {
   const main = page.locator('main.twin-app'), button = page.getByRole('button', { name: 'Step 10s', exact: true });
   await expect(button).toBeEnabled();
   const before = Number(await main.getAttribute('data-time'));
-  const start = Date.now();
+  // Hosted 20-run evidence reached 14.0s with a correct real-worker terminal state.
+  // Keep this campus-only budget separate from the 3s action acknowledgement.
+  const completionBudgetMs = observing ? 40_000 : 20_000;
+  const start = Date.now(), remaining = () => Math.max(1, completionBudgetMs - (Date.now() - start));
+  let acknowledgedMs: number | undefined;
   try {
-    await button.click();
-    await expect(main).toHaveAttribute('data-time', String(before + 10), observing ? { timeout: 40_000 } : {});
-    await expect(button).toBeEnabled();
-    await expect(main).toHaveAttribute('data-ready', 'true');
+    await button.click({ timeout: remaining() });
+    await expect.poll(async () => {
+      const time = await main.getAttribute('data-time');
+      const ready = await button.isEnabled();
+      const cancel = page.getByRole('button', { name: 'Cancel run', exact: true });
+      return (time === String(before) && !ready && await cancel.isVisible() && await cancel.isEnabled()) ||
+        (time === String(before + 10) && ready);
+    }, { timeout: Math.max(1, 3_000 - (Date.now() - start)), message: 'campus action acknowledged with Cancel or completed controls within 3s' }).toBe(true);
+    acknowledgedMs = Date.now() - start;
+    expect(acknowledgedMs).toBeLessThanOrEqual(3_000);
+    await expect(main).toHaveAttribute('data-time', String(before + 10), { timeout: remaining() });
+    await expect(button).toBeEnabled({ timeout: remaining() });
+    await expect(main).toHaveAttribute('data-ready', 'true', { timeout: remaining() });
+    expect(Date.now() - start).toBeLessThanOrEqual(completionBudgetMs);
   } finally {
-    await info.attach('campus-latency', { body: JSON.stringify({ elapsedMs: Date.now() - start, diagnostic: observing, originalAssertionBudgetMs: 12_000, time: await main.getAttribute('data-time'), ready: await main.getAttribute('data-ready'), stepEnabled: await button.isEnabled() }), contentType: 'application/json' });
+    await info.attach('campus-latency', { body: JSON.stringify({ elapsedMs: Date.now() - start, acknowledgedMs, completionBudgetMs, diagnostic: observing, originalAssertionBudgetMs: 12_000, time: await main.getAttribute('data-time'), ready: await main.getAttribute('data-ready'), stepEnabled: await button.isEnabled() }), contentType: 'application/json' });
   }
 }

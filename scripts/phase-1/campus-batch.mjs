@@ -8,7 +8,7 @@ await fs.mkdir(out, { recursive: false });
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
 const stability = process.argv.includes('--stability');
 const count = stability ? 20 : 10, results = [];
-const plan = { sourceSha, mode: stability ? 'stability' : 'diagnostic', count, retries: 0, stop: stability ? 'all twenty executions; any failure rejects the batch' : 'first failed execution or measured completion exceeding original 12-second assertion budget', paths: ['fresh large-campus Step 10s', 'context cameras, keyboard interior'], platform: process.platform, arch: process.arch, node: process.version };
+const plan = { sourceSha, mode: stability ? 'stability' : 'diagnostic', count, completionBudgetMs: stability ? 20000 : 40000, acknowledgementBudgetMs: 3000, retries: 0, stop: stability ? 'all twenty executions; any failure rejects the batch' : 'first failed execution or measured completion exceeding original 12-second assertion budget', paths: ['fresh large-campus Step 10s', 'context cameras, keyboard interior'], platform: process.platform, arch: process.arch, node: process.version };
 await fs.writeFile(path.join(out, 'plan.json'), JSON.stringify(plan, null, 2));
 for (let n=0; n<count; n++) {
   const dir = path.join(out, String(n+1).padStart(2, '0')); await fs.mkdir(dir);
@@ -30,4 +30,4 @@ for (let n=0; n<count; n++) {
   if (!stability && (run.status !== 0 || latencies.some(x => x.elapsedMs > 12000))) break;
 }
 
-if (stability && (results.length !== 20 || results.some(r => r.exitCode !== 0 || r.latencies.length !== 1 || r.latencies[0].time !== '10' || !r.latencies[0].stepEnabled))) process.exitCode = 1;
+if (stability && (results.length !== 20 || results.some(r => r.exitCode !== 0 || r.latencies.length !== 1 || r.latencies[0].elapsedMs > 20000 || r.latencies[0].acknowledgedMs > 3000 || r.latencies[0].time !== '10' || !r.latencies[0].stepEnabled))) process.exitCode = 1;

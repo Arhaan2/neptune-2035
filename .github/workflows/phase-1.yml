@@ -64,6 +64,7 @@ jobs:
         with:
           name: phase-1-browser-diagnostics-${{ github.sha }}
           path: artifacts/phase-1-ci-browser-diagnostics
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
   campus-stability:
@@ -86,5 +87,6 @@ jobs:
         with:
           name: phase-1-campus-stability-${{ github.sha }}
           path: artifacts/campus-batch
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
