@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import fs from 'node:fs/promises';
 import { expectNoHorizontalOverflow } from './layout';
 
 async function rendered(page: Page, legacy: boolean) {
@@ -93,6 +94,46 @@ test('V2 mobile scene and inspector retain layout across rendered and fallback r
   await expect(page.getByTestId('twin-fallback')).toBeVisible();
   await expect(page.locator('canvas')).toHaveCount(0);
   await expectNoHorizontalOverflow(page, 375);
+  const recovery = page.getByTestId('checkpoint-recovery');
+  await expect(recovery).toContainText('Local checkpoint available at 0s');
+  const actions = recovery.getByRole('button');
+  await expect(actions).toHaveCount(3);
+  const geometry = await recovery.evaluate(element => {
+    const notice = element.getBoundingClientRect();
+    return {
+      innerWidth,
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      notice: { left: notice.left, right: notice.right },
+      buttons: [...element.querySelectorAll('button')].map(button => {
+        const rect = button.getBoundingClientRect();
+        return { name: button.textContent, left: rect.left, right: rect.right };
+      }),
+    };
+  });
+  for (const button of geometry.buttons) {
+    expect(button.left).toBeGreaterThanOrEqual(geometry.notice.left);
+    expect(button.right).toBeLessThanOrEqual(geometry.notice.right);
+  }
+  await info.attach('recovery-layout', { body: Buffer.from(JSON.stringify(geometry)), contentType: 'application/json' });
+  for (const action of await actions.all()) {
+    await action.focus();
+    await expect(action).toBeFocused();
+    await expect(action).toBeInViewport();
+  }
+  const exportRecovery = recovery.getByRole('button', { name: 'Export recovery project', exact: true });
+  await exportRecovery.focus();
+  const downloadPending = page.waitForEvent('download');
+  await page.keyboard.press('Enter');
+  const download = await downloadPending;
+  expect(await download.failure()).toBeNull();
+  const saved = JSON.parse(await fs.readFile((await download.path())!, 'utf8'));
+  expect(saved.schemaVersion).toBe(3);
+  expect(saved.timeS).toBe(0);
+  expect(saved.checkpoint).toBeTruthy();
+  await expect(recovery).toBeVisible();
+  await expectNoHorizontalOverflow(page, 375);
+  await info.attach('recovery-notice-mobile', { body: await recovery.screenshot(), contentType: 'image/png' });
   await page.setViewportSize({ width: 430, height: 844 });
   await expectNoHorizontalOverflow(page, 430);
   await find.fill('platform-001/module-01/rack-02');
