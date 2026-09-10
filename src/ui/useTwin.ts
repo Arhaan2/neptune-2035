@@ -1,3 +1,4 @@
+import { diagnosticEvent, diagnosticsEnabled } from '../twin/diagnostics';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   Design,
@@ -129,7 +130,9 @@ export function useTwin(design: Design) {
   const persist = useCallback(() => {
     if (recoveryPending.current || !current.current) return;
     try {
+      const persistStart = performance.now();
       const result = writeCheckpoint(captureProject());
+      diagnosticEvent('ui.persist', { ms: performance.now() - persistStart, timeS: current.current.timeS, ok: result.ok });
       if (result.ok) {
         setDurableTimeS(result.timeS);
         setStorageStatus(
@@ -142,7 +145,10 @@ export function useTwin(design: Design) {
   }, [captureProject]);
   const accept = useCallback(
     (next: SimulationState) => {
+      const validationStart = performance.now();
       validateState(designRef.current, next);
+      diagnosticEvent('ui.validate', { ms: performance.now() - validationStart, timeS: next.timeS });
+      const projectStart = performance.now();
       // Admit the complete user project, including provenance and paused execution,
       // before replacing either the physical state or the exportable checkpoint.
       const candidate = projectFile(designRef.current, next, {
@@ -157,7 +163,10 @@ export function useTwin(design: Design) {
             }
           : {}),
       });
+      diagnosticEvent('ui.project', { ms: performance.now() - projectStart, timeS: next.timeS });
+      const summaryStart = performance.now();
       const summary = summarize(designRef.current, next);
+      diagnosticEvent('ui.summarize', { ms: performance.now() - summaryStart, timeS: next.timeS });
       committedProject.current = candidate;
       const initializing = current.current === null;
       current.current = next;
@@ -216,6 +225,7 @@ export function useTwin(design: Design) {
       integrationStepS: IntegrationStep = current.current?.integrationStepS ??
         1,
     ) => {
+      diagnosticEvent('ui.send-attempt', { kind, durationS, selectedRevision: designRef.current.revision, initializedRevision: current.current?.designRevision, pending: pending.current, hasWorker: Boolean(worker.current) });
       if (!worker.current || pending.current) return;
       try {
         finiteNumber(durationS, 'durationS', {
@@ -246,7 +256,9 @@ export function useTwin(design: Design) {
       pending.current = true;
       setBusy(true);
       setError('');
+      diagnosticEvent('ui.dispatch-start', { kind, requestId: requestId.current + 1, epoch: epoch.current, durationS, targetTimeS: target.current });
       worker.current.postMessage({
+        diagnostics: diagnosticsEnabled,
         version: 2,
         requestId: ++requestId.current,
         epoch: epoch.current,
@@ -260,6 +272,7 @@ export function useTwin(design: Design) {
           ? { state: current.current }
           : {}),
       } satisfies WorkerRequest);
+      diagnosticEvent('ui.dispatched', { requestId: requestId.current, epoch: epoch.current });
     },
     [stopClock],
   );
@@ -269,6 +282,7 @@ export function useTwin(design: Design) {
     });
     worker.current = w;
     w.onerror = (e) => {
+      diagnosticEvent('ui.worker-error', { currentWorker: worker.current === w });
       if (worker.current !== w) return;
       epoch.current++;
       pending.current = false;
@@ -283,6 +297,7 @@ export function useTwin(design: Design) {
     };
     w.onmessage = (e: MessageEvent<WorkerResponse>) => {
       const r = e.data;
+      diagnosticEvent('ui.response', { requestId: r.requestId, epoch: r.epoch, status: r.status, timeS: r.state?.timeS, selectedRevision: designRef.current.revision, responseRevision: r.state?.designRevision, rejection: worker.current !== w ? 'worker' : r.version !== 2 ? 'version' : r.epoch !== epoch.current ? 'epoch' : r.requestId !== requestId.current ? 'requestId' : r.state && r.state.designRevision !== designRef.current.revision ? 'designRevision' : 'none' });
       if (
         worker.current !== w ||
         r.version !== 2 ||
@@ -319,6 +334,7 @@ export function useTwin(design: Design) {
     };
   }, [workerGeneration, accept, persist, invalidate, stopClock]);
   useEffect(() => {
+    diagnosticEvent('ui.design-selected', { revision: design.revision });
     designRef.current = design;
     if (restoredDesign.current === design) {
       restoredDesign.current = null;
@@ -428,6 +444,9 @@ export function useTwin(design: Design) {
     setDurableTimeS(null);
     persist();
   }, [persist]);
+  useEffect(() => {
+    diagnosticEvent('ui.committed', { selectedRevision: design.revision, initializedRevision: state?.designRevision, timeS: state?.timeS, busy });
+  }, [design.revision, state, busy]);
   return {
     state: state?.designRevision === design.revision ? state : null,
     running: running && state?.designRevision === design.revision,

@@ -1,3 +1,4 @@
+import { diagnosticEvent } from '../diagnostics';
 import type { SimulationState, WorkerRequest, WorkerResponse } from '../types';
 import {
   CONTRACT,
@@ -42,6 +43,8 @@ export function createWorkerHandler(
       });
       return;
     }
+    const trace = (stage: string, fields: Record<string, string | number | boolean | undefined> = {}) => diagnosticEvent(stage, { requestId: request.requestId, epoch: request.epoch, ...fields }, request.diagnostics === true);
+    trace('worker.received', { kind: request.kind, revision: request.design?.revision, durationS: request.durationS });
     const response = {
       version: 2 as const,
       requestId: Number.isSafeInteger(request.requestId)
@@ -103,6 +106,7 @@ export function createWorkerHandler(
         completedWork,
         totalWork,
       };
+      trace('worker.publish', { status, timeS: committed.timeS, targetTimeS, elapsedMs: now() - start });
       post({ ...response, status, state: committed, progress: latestProgress });
       lastPost = now();
     };
@@ -122,7 +126,9 @@ export function createWorkerHandler(
           'Unknown worker operation.',
         );
       const design = request.design;
+      const validationStart = now();
       validateDesign(design);
+      trace('worker.design-validated', { ms: now() - validationStart });
       const duration = Object.hasOwn(request, 'durationS')
         ? request.durationS
         : 0;
@@ -161,6 +167,7 @@ export function createWorkerHandler(
       } else {
         committed = initialize(design);
       }
+      trace('worker.initialized', { timeS: committed.timeS, revision: committed.designRevision, elapsedMs: now() - start });
       const integrationStepS = Object.hasOwn(request, 'integrationStepS')
         ? request.integrationStepS
         : committed.integrationStepS;
@@ -323,7 +330,10 @@ export function createWorkerHandler(
               },
             },
           );
+        const chunkStart = now();
+        trace('worker.chunk-start', { timeS: committed.timeS, chunk, targetTimeS });
         committed = advance(design, committed, chunk);
+        trace('worker.chunk-end', { timeS: committed.timeS, ms: now() - chunkStart });
         completedWork += work;
         latest = committed;
         latestProgress = {

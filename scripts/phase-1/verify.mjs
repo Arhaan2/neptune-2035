@@ -1,5 +1,6 @@
 /** Reproducible source-only acceptance. No deployment, release, push or repository mutation. */
 import fs from 'node:fs/promises';
+import { retainBrowser } from './retain-browser.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import net from 'node:net';
@@ -60,7 +61,7 @@ try {
   await run('browser', 'npm', ['run', 'test:browser'], { NEPTUNE_BASE_URL: 'http://127.0.0.1:5173' }, true);
   const browser = JSON.parse(await fs.readFile(path.join(checkout, 'artifacts/browser-results.json'), 'utf8'));
   const browserTests = [];
-  const walk = suites => { for (const suite of suites) { for (const spec of suite.specs ?? []) for (const test of spec.tests) browserTests.push({ file: spec.file, name: spec.title, browser: test.projectName, status: test.status, results: test.results.map(r => ({ status: r.status, durationMs: r.duration })) }); walk(suite.suites ?? []); } };
+  const walk = suites => { for (const suite of suites) { for (const spec of suite.specs ?? []) for (const test of spec.tests) browserTests.push({ file: spec.file, name: spec.title, browser: test.projectName, status: test.status, results: test.results.map(r => ({ status: r.status, durationMs: r.duration, retry: r.retry })) }); walk(suite.suites ?? []); } };
   walk(browser.suites);
   await fs.writeFile(path.join(out, 'browser-summary.json'), JSON.stringify({ stats: browser.stats, tests: browserTests }, null, 2) + '\n');
   // Preserve textual failure context (including control states) for remote diagnosis.
@@ -89,6 +90,9 @@ try {
 } catch (error) {
   records.push({ name: 'gate', error: sanitize(String(error)), exitCode: 1 }); process.exitCode = 1;
 } finally {
+  // Always retain real files even when a crashed test leaves incomplete JSON.
+  try { await retainBrowser(checkout, `${out}-browser-diagnostics`, { sourceSha: sha, originalGateExitCode: process.exitCode ?? 0 }); }
+  catch (error) { records.push({ name: 'browser-diagnostic-retention', error: sanitize(String(error)), exitCode: 1 }); process.exitCode = process.exitCode || 1; }
   if (server) { try { process.kill(-server.pid, 'SIGTERM'); } catch {} }
   await fs.writeFile(path.join(out, 'server.log'), sanitize(serverLog));
   const mismatches = [];

@@ -1,13 +1,16 @@
+import { installStepDiagnostics, diagnosticURL, campusStep } from './step-diagnostics';
 import { test, expect, type Page, type TestInfo, type Locator } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { CONTRACT } from '../../src/twin/persistence/limits';
 import { expectNoHorizontalOverflow } from './layout';
 
+installStepDiagnostics();
+
 const main=(page:Page)=>page.locator('main.twin-app');
 const pump='platform-001/module-01/pump-duty';
 async function load(page:Page,url='./'){
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.goto(url);
+  await page.goto(diagnosticURL(url));
   await expect(main(page)).toHaveAttribute('data-ready','true');
   await expect(page.getByRole('button',{name:'Step 10s',exact:true})).toBeEnabled();
   await expect(page.getByText('Design-stage digital twin · Simulated operation',{exact:true})).toBeVisible();
@@ -298,7 +301,7 @@ test('context cameras, keyboard interior, distinct families and bounded large-sc
   const start=Date.now();await page.getByLabel('Starting scenario',{exact:true}).selectOption('500000');
   await expect.poll(async()=>(await diagnostics(page))?.totalModules,{timeout:20000}).toBe(391);const large=await diagnostics(page),largeInteractionMs=Date.now()-start,largeCadence=await frameCadence(page);
   expect(large?.renderedPlatforms).toBe(98);expect(large?.renderedModules).toBe(large?.totalModules);
-  const stepStart=Date.now();await step(page,10);const largeStepResponseMs=Date.now()-stepStart;
+  const stepStart=Date.now();await campusStep(page,info);const largeStepResponseMs=Date.now()-stepStart;
   const hardware=await page.evaluate(()=>{
     const gl=document.querySelector('canvas')?.getContext('webgl2'),extension=gl?.getExtension('WEBGL_debug_renderer_info');
     return {userAgent:navigator.userAgent,hardwareConcurrency:navigator.hardwareConcurrency,renderer:gl&&extension?gl.getParameter(extension.UNMASKED_RENDERER_WEBGL):'unavailable'};
@@ -318,4 +321,15 @@ test('legacy saved scenario links retain the explicit aggregate model',async({pa
   const legacyURL=new URL(link);legacyURL.searchParams.delete('legacy');await page.goto(legacyURL.href);
   await expect(page.getByRole('spinbutton',{name:'Accelerators',exact:true})).toBeVisible();
   await expect(main(page)).toHaveCount(0);expect(errors).toEqual([]);
+});
+
+// Same 391-module family as the transition journey, in a fresh browser context.
+test('fresh large-campus Step 10s completes with the active design and ready controls', async ({page}, info) => {
+  const errors=observeErrors(page); await load(page);
+  await page.getByRole('button',{name:'Design family III',exact:true}).click();
+  await page.getByLabel('Starting scenario',{exact:true}).selectOption('500000');
+  await expect.poll(async()=>(await diagnostics(page))?.totalModules,{timeout:20000}).toBe(391);
+  await expect(main(page)).toHaveAttribute('data-time','0');
+  await campusStep(page,info);
+  expect(errors).toEqual([]);
 });

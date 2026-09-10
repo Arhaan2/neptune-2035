@@ -16,7 +16,7 @@ export default defineConfig({
   expect: { timeout: 12_000 },
   reporter: [
     ['list'],
-    ['json', { outputFile: 'artifacts/browser-results.json' }],
+    ['json', { outputFile: process.env.NEPTUNE_BROWSER_REPORT || 'artifacts/browser-results.json' }],
   ],
   use: {
     baseURL: process.env.NEPTUNE_BASE_URL || 'http://127.0.0.1:5173',

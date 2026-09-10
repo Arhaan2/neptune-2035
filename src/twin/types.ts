@@ -54,7 +54,7 @@ export interface Summary {
   maxCoolantK: number; batteryWh: number; instantaneousPUE: number | null; energyPUE: number | null;
   electricalResidualW: number; thermalResidualW: number; warnings: string[];
 }
-export interface WorkerRequest { version: 2; requestId: number; epoch: number; kind: 'initialize' | 'advance' | 'replay' | 'restore' | 'cancel'; design?: Design; state?: SimulationState; events?: OperationEvent[]; durationS?: number; chunkS?: number; integrationStepS?: IntegrationStep }
+export interface WorkerRequest { diagnostics?: boolean; version: 2; requestId: number; epoch: number; kind: 'initialize' | 'advance' | 'replay' | 'restore' | 'cancel'; design?: Design; state?: SimulationState; events?: OperationEvent[]; durationS?: number; chunkS?: number; integrationStepS?: IntegrationStep }
 export interface WorkerResponse { version: 2; requestId: number; epoch: number; state?: SimulationState; error?: string; diagnostic?: FailureDiagnostic; status?: 'progress' | 'complete' | 'cancelled' | 'failed' | 'resource-limited'; progress?: { completedTimeS: number; targetTimeS: number; completedWork: number; totalWork: number } }
 export interface Observation {
   assetId: string; metric: string; value: number; unit: string; sourceId: string;

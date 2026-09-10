@@ -58,3 +58,37 @@ jobs:
           path: artifacts/phase-1-ci
           if-no-files-found: error
           retention-days: 14
+      - name: Retain actual browser traces and attachments
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1-browser-diagnostics-${{ github.sha }}
+          path: artifacts/phase-1-ci-browser-diagnostics
+          if-no-files-found: error
+          retention-days: 14
+  campus-diagnosis:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/codex/neptune-phase-1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx playwright install --with-deps firefox
+      - run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
+      - name: Exercise real failure artifact retention
+        run: env -u MOZ_HEADLESS xvfb-run -a -s '-screen 0 1920x1200x24' node scripts/phase-1/check-retention.mjs
+      - name: Observe at most ten fresh and transition campus steps
+        run: env -u MOZ_HEADLESS xvfb-run -a -s '-screen 0 1920x1200x24' node scripts/phase-1/campus-batch.mjs
+      - name: Retain all observations and retention exercise
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1-campus-observations-${{ github.sha }}
+          path: |
+            artifacts/retention-harness
+            artifacts/campus-batch
+          if-no-files-found: error
+          retention-days: 14
