@@ -1,4 +1,4 @@
-import { resolveSpecification } from '../twin/catalog/equipment';
+import { engineeringIdentity, resolveSpecification } from '../twin/catalog/equipment';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { Design, SimulationState } from '../twin/types';
 import { solveExchanger } from '../twin/solvers/thermal';
@@ -19,7 +19,13 @@ function fixtureCalibration(design: Design): UACalibrationSample[] {
 }
 
 export function DataPanel({ design, state }: { design: Design; state: SimulationState }) {
-  const store = useMemo(() => new TelemetryStore(design, { maxStreams: Math.min(20_000, Math.max(2_000, design.modules.length * 8 + 32)) }), [design]);
+  const physicsIdentity = useMemo(() => engineeringIdentity(design), [design]);
+  return <ObservationSession key={`${design.revision}:${physicsIdentity}`} design={design} state={state} />;
+}
+
+/** Observation history and connections belong to the physical revision, independently of prices. */
+function ObservationSession({ design, state }: { design: Design; state: SimulationState }) {
+  const [store] = useState(() => new TelemetryStore(design, { maxStreams: Math.min(20_000, Math.max(2_000, design.modules.length * 8 + 32)) }));
   useSyncExternalStore(store.subscribe, store.snapshot, store.snapshot);
   const [status, setStatus] = useState<StreamStatus | null>(null);
   const [message, setMessage] = useState('');
@@ -35,12 +41,12 @@ export function DataPanel({ design, state }: { design: Design; state: Simulation
   const [uaMin, setUAMin] = useState(10_000), [uaMax, setUAMax] = useState(2_000_000);
   const [calibration, setCalibration] = useState<UACalibrationResult | null>(null);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
-  useEffect(() => () => { stop.current?.(); stop.current = null; }, [design]);
+  useEffect(() => () => { stop.current?.(); stop.current = null; }, []);
   useEffect(() => {
     if (state.timeS < lastSampleTime.current) store.resetSource('generated:simulation-1', 'Simulation reset/replay boundary', SIMULATION_EPOCH_MS + state.timeS * 1000);
     lastSampleTime.current = state.timeS;
-    if (!dropout) for (const observation of generateObservations(design, state)) store.ingest(observation);
-  }, [design, state, store, dropout]);
+    if (!dropout) for (const observation of generateObservations(store.design, state)) store.ingest(observation);
+  }, [state, store, dropout]);
 
   const samples = store.samples(), sources = [...new Set(samples.map(s => s.sourceId))];
   const streamLimitRejections = store.raw.filter(record => record.result.reason === 'stream-limit').length;
