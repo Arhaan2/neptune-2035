@@ -117,7 +117,7 @@ describe('Phase 3 bounded topology failures and invalid graphs', () => {
     const duplicate = { ...design, assets: [...design.assets, structuredClone(design.assets[0])] };
     expect(() => assessNetwork(duplicate, zero)).toThrow();
     const malformed = { ...design, connections: design.connections.map(connection => connection.medium === 'cluster' ? { ...connection, toPort: 'unknown-port' } : connection) };
-    expect(() => assessNetwork(malformed, zero)).toThrowError(expect.objectContaining({
+    expect(() => assessNetwork(malformed, zero)).toThrow(expect.objectContaining({
       diagnostic: expect.objectContaining({ kind: 'invalid-input', code: 'NETWORK_PORT_TOPOLOGY' }),
     }));
   });
