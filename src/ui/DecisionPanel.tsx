@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   PAIRED_SENSITIVITIES, createDecisionCampaign, validateDecisionCampaign, planDecisionCampaign, runDecisionCampaign,
   createDecisionWorkerExecutor, exportDecisionCampaign, importDecisionCampaign, decisionReport, compareReproduction,
@@ -30,8 +30,9 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
   const [selected, setSelected] = useState<string | null>(null), [scenarioId, setScenarioId] = useState(''), [sensitivityId, setSensitivityId] = useState('central');
   const [imported, setImported] = useState<DecisionExport | null>(null), [reproduction, setReproduction] = useState('');
   const sourceIdentity = useRef({commit:'unpackaged-development',sourceTree:'unpackaged-development'});
-  const resultSource = useRef(sourceIdentity.current);
+  const resultSource = useRef({commit:'unpackaged-development',sourceTree:'unpackaged-development'});
   const abort = useRef<AbortController | null>(null), epoch = useRef(0), edited = useRef(false);
+  const invalidate = useCallback(() => { abort.current?.abort(); epoch.current++; }, []);
   const current = useMemo(() => {
     try { validateDecisionCampaign(campaign); return {plan: planDecisionCampaign(campaign), error: ''}; }
     catch (error) { return {plan: null, error: String(error)}; }
@@ -70,8 +71,8 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       setStorage('Recovered local decision draft. Stored outcomes are supplied evidence; rerun to verify.');
     }).catch(error => { if (active) setStorage(`Saved draft retained but not loaded: ${String(error)}`); })
       .finally(() => { if (active) {setRecovered(true); setStorage(value => value === 'Recovering local decision draft…' ? 'Decision draft stored on this device.' : value);} });
-    return () => {active = false; abort.current?.abort(); epoch.current++;};
-  }, []);
+    return () => {active = false; invalidate();};
+  }, [invalidate]);
   useEffect(() => {
     if (!recovered || running) return;
     const timer = setTimeout(() => {
@@ -137,7 +138,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
     {(current.error || problem) && <p role="alert">{current.error || problem}</p>}
     <p className="muted">{storage}</p>
     <output data-testid="decision-coverage" data-status={running ? 'running' : result?.status ?? 'ready'} data-completed={result?.coverage.completed ?? 0} data-planned={result?.coverage.planned ?? current.plan?.totalRuns ?? 0} aria-live="polite">{result ? `${result.coverage.completed}/${result.coverage.planned} runs completed; ${result.coverage.fullyEvaluatedCandidates}/${result.plan.candidates} candidates fully evaluated. ${running ? 'Running' : result.status}.` : `Ready: ${current.plan?.totalRuns ?? 0} planned runs.`}</output>
-    {stale && <p role="status" data-testid="decision-stale">Results are stale: campaign inputs changed. Export retains the original evaluated definitions. Rerun the current inputs before using a recommendation.</p>}
+    {stale && <output data-testid="decision-stale">Results are stale: campaign inputs changed. Export retains the original evaluated definitions. Rerun the current inputs before using a recommendation.</output>}
     {result && <>
       <div data-testid="decision-recommendation" data-ranking-status={stale ? 'stale' : result.ranking.status} className="decision-recommendation">
         <strong>{stale ? 'Historical result — inputs changed' : result.ranking.status.replaceAll('-', ' ')}</strong>
@@ -156,7 +157,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       <div className="twin-actions"><button disabled={!selectedRun || busy || running} onClick={() => {try{onLoad(selectedRun!);setProblem('');}catch(error){setProblem(String(error));}}}>Load selected candidate</button><button disabled={!selectedRun || !loaded || busy || running} onClick={() => onRun(selectedRun!)}>Run selected experiment</button><button onClick={() => setSelected(null)}>Close candidate inspection</button></div>
       <details><summary>Resolved design, fault targets and actual initialization</summary><pre>{JSON.stringify(selectedRun ?? candidate,null,2)}</pre></details>
     </section>}
-    {reproduction && <p role="status" data-testid="decision-reproduction">{reproduction}</p>}
+    {reproduction && <output data-testid="decision-reproduction">{reproduction}</output>}
     <details><summary>Unassessed conditions and excluded search space</summary><ul>{campaign.exclusions.map(item => <li key={item}>{item}</li>)}</ul><p>No global optimality, failure probability, real-world availability or physical validation is inferred from these deterministic scenarios.</p></details>
   </section>;
 }
