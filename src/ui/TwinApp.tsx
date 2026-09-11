@@ -1466,8 +1466,8 @@ export default function TwinApp() {
                     </tr>
                   </thead>
                   <tbody>
-                    {cost.rows.map((r) => (
-                      <tr key={r.scope}>
+                    {cost.rows.map((r, index) => (
+                      <tr key={`${index}:${r.scope}`}>
                         <td>{r.scope}</td>
                         <td>{num(r.count, 0)}</td>
                         <td>{num(r.totalUSD, 0)}</td>
