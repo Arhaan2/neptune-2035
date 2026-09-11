@@ -3,8 +3,10 @@ import type { TransferAttempt } from './types';
 import { allocateTransferBundles } from './controller';
 import { activePowerDesign, powerPath, powerResources } from './topology';
 export interface RestorableDemand { id:string; platformId:string; domainId:string; requestedW:number; moduleLimitW:number }
-function networkDemand(design:Design,platformId:string):number {const n=design.assets.find(a=>a.id===`${platformId}/cluster`);return design.equipment?.networkDesign&&n?n.ratings.capacityW/powerPath(design,design.modules.find(m=>m.platformId===platformId)!.powerDomainId).efficiency:0;}
-export function restorationRequestedW(design:Design,demands:RestorableDemand[],routeId:string):number {const r=design.transfer!.routes.find(r=>r.id===routeId)!;return demands.filter(d=>d.platformId===r.recipientPlatformId).reduce((n,d)=>n+d.requestedW,0)+networkDemand(design,r.recipientPlatformId);}
+function networkDemand(design:Design,platformId:string,efficiency=powerPath(design,design.modules.find(m=>m.platformId===platformId)!.powerDomainId).efficiency):number {const n=design.assets.find(a=>a.id===`${platformId}/cluster`);return design.equipment?.networkDesign&&n?n.ratings.capacityW/efficiency:0;}
+/** Module requests start on their native source basis; a transfer changes every upstream conversion loss. */
+function transferredModuleW(design:Design,demand:RestorableDemand,donorEfficiency:number):number {return demand.requestedW*(powerPath(design,demand.domainId).efficiency/donorEfficiency);}
+export function restorationRequestedW(design:Design,demands:RestorableDemand[],routeId:string):number {const r=design.transfer!.routes.find(r=>r.id===routeId)!,efficiency=powerPath(design,r.donorBusId).efficiency;return demands.filter(d=>d.platformId===r.recipientPlatformId).reduce((n,d)=>n+transferredModuleW(design,d,efficiency),0)+networkDemand(design,r.recipientPlatformId,efficiency);}
 /** Reserve complete native required loads, then atomically admit proposed whole recipients. */
 export function planTransfers(design:Design,state:SimulationState,demands:RestorableDemand[],candidates:TransferAttempt[]) {
   const proposed=structuredClone(state.transfer!);for(const a of proposed.attempts)if(candidates.some(c=>c.id===a.id)){a.originalClosed=false;a.tieClosed=true;}
@@ -17,7 +19,7 @@ export function planTransfers(design:Design,state:SimulationState,demands:Restor
     for(const pid of new Set(design.modules.map(m=>m.platformId))){if(recipientPlatforms.has(pid)||failed.has(`${pid}/cluster`)||failed.has(pid))continue;const path=powerPath(active,design.modules.find(m=>m.platformId===pid)!.powerDomainId);if(path.supported&&!path.assetIds.some(id=>failed.has(id)))reserve(path.resourceIds,networkDemand(active,pid));}
   }
   const bundles=candidates.map(a=>{
-    const r=design.transfer!.routes.find(r=>r.id===a.id)!,path=powerPath(active,r.receivingBusId),requestedW=restorationRequestedW(active,demands,a.id),local=demands.filter(d=>d.platformId===r.recipientPlatformId),localLimit=Math.min(...local.map(d=>d.requestedW>0?d.moduleLimitW/d.requestedW*requestedW:Infinity));
+    const r=design.transfer!.routes.find(r=>r.id===a.id)!,path=powerPath(active,r.receivingBusId),requestedW=restorationRequestedW(design,demands,a.id),local=demands.filter(d=>d.platformId===r.recipientPlatformId),localLimit=Math.min(...local.map(d=>{const requested=transferredModuleW(design,d,path.efficiency);return requested>0?d.moduleLimitW/requested*requestedW:Infinity;}));
     const moduleResource={id:`bundle:${a.id}:module-distribution`,capacityW:Number.isFinite(localLimit)?localLimit:design.config.supplyW,nativeW:0};resources.push(moduleResource);
     return{id:a.id,priority:r.priority,requestedW,resourceIds:[...path.resourceIds,moduleResource.id]};
   });
