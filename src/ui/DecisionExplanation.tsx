@@ -2,7 +2,7 @@ import type { DecisionCampaign, DecisionResult, DecisionRunEvidence, PlannedDeci
 import { wholeExperimentReport } from '../twin/experiment/report';
 import { resolveAsset } from '../twin/assets/design';
 const format = (value: number | null | undefined, digits = 4) => value == null || !Number.isFinite(value) ? 'unavailable' : value.toLocaleString('en-US', { maximumFractionDigits: digits });
-export type InspectDecisionEvidence = (run: PlannedDecisionRun, evidence: DecisionRunEvidence, provenance: DecisionResult['provenance'], context?: { assetId: string; timeS: number }) => void;
+export type InspectDecisionEvidence = (run: PlannedDecisionRun, evidence: DecisionRunEvidence, provenance: DecisionResult['provenance'], context?: { assetId: string; timeS: number; boundary?: 'post' | 'at-or-after' }) => void;
 
 export function DecisionRunExplanation({ campaign, result, run, onInspect, disabled }: { campaign: DecisionCampaign; result: DecisionResult; run: PlannedDecisionRun; onInspect: InspectDecisionEvidence; disabled: boolean }) {
   const evidence = result.runs.find(item => item.id === run.id), report = evidence?.state ? wholeExperimentReport(evidence.state) : null;
@@ -27,7 +27,8 @@ export function DecisionRunExplanation({ campaign, result, run, onInspect, disab
     <details open><summary>Exact requirements, margins and supported evidence</summary>{requirements.map((requirement, index) => {
       const assetId = requirement.assetIds.find(id => resolveAsset(run.design, id));
       const timeS = requirement.timeS == null || evidence?.state?.experiment?.originTimeS == null ? null : requirement.timeS + evidence.state.experiment.originTimeS;
-      return <article key={`${requirement.id}-${index}`}><p><strong>{requirement.id} · {requirement.status}</strong>: {format(requirement.actual, 8)} {requirement.operator} {format(requirement.threshold, 8)} {requirement.unit}; signed margin {format(requirement.margin, 8)}; tolerance {requirement.tolerance}. {requirement.scenarioId ?? 'installed design / cost'} / {requirement.sensitivityId}.</p><p>{requirement.reason}</p>{assetId && timeS != null && evidence?.state && requirement.scenarioId === run.scenarioId && <button disabled={disabled} onClick={() => onInspect(run, evidence, result.provenance, { assetId, timeS })}>Inspect {requirement.id} asset/time evidence</button>}</article>;
+      const boundary = requirement.id === 'confirmed-recovery' ? 'at-or-after' : 'post';
+      return <article key={`${requirement.id}-${index}`}><p><strong>{requirement.id} · {requirement.status}</strong>: {format(requirement.actual, 8)} {requirement.operator} {format(requirement.threshold, 8)} {requirement.unit}; signed margin {format(requirement.margin, 8)}; tolerance {requirement.tolerance}. {requirement.scenarioId ?? 'installed design / cost'} / {requirement.sensitivityId}.</p><p>{requirement.reason}</p>{assetId && timeS != null && evidence?.state && requirement.scenarioId === run.scenarioId && <>{boundary === 'at-or-after' && <p>Recovery confirmation is a metric marker at absolute {format(timeS)} s. Inspection shows the first canonical scene boundary at or after that marker and labels its actual time separately.</p>}<button disabled={disabled} onClick={() => onInspect(run, evidence, result.provenance, { assetId, timeS, boundary })}>Inspect {requirement.id} asset/time evidence</button></>}</article>;
     })}</details>
     <p>{evaluation?.includedCost.exclusions ?? 'Included cost scope unavailable.'}</p>
   </section>;

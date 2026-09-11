@@ -231,7 +231,7 @@ export default function TwinApp() {
     [walkthroughPaused, setWalkthroughPaused] = useState(false),
     [walkthroughNavigation, setWalkthroughNavigation] = useState(0),
     [walkthroughApplied, setWalkthroughApplied] = useState(-1),
-    [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number} | null>(null);
+    [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number; boundary:'post'|'at-or-after'} | null>(null);
   const appliedWalkthroughNavigation = useRef(-1);
   const sourceOrigin = sim.sourceOrigin;
   const inspection = useInspection(design, state, selectedId, sim.runGeneration);
@@ -314,7 +314,7 @@ export default function TwinApp() {
     const next = sim.restore(projectFile(run.design, evidence.state), provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config); setDemo(false); setWorkspace('Operate');
     const assetId = context?.assetId ?? `${next.modules[0].id}/pump-duty`;
     setSelectedId(assetId); setFocus('selection'); setResetId(value=>value+1);
-    setPendingEvidenceView({definitionId:run.definition.id,assetId,timeS:context?.timeS ?? evidence.state.timeS});
+    setPendingEvidenceView({definitionId:run.definition.id,assetId,timeS:context?.timeS ?? evidence.state.timeS,boundary:context?.boundary ?? 'post'});
     setNotice('Completed scenario loaded explicitly; previous active project saved in Compare. Event/history inspection does not modify the loaded result.');
   };
   const startResultWalkthrough = (campaign: DecisionCampaign, result: DecisionResult) => {
@@ -333,7 +333,7 @@ export default function TwinApp() {
   },[walkthrough,walkthroughIndex,walkthroughPaused,walkthroughNavigation,sim.busy,state?.experiment?.definition.id]);
   useEffect(() => {
     if(!pendingEvidenceView||sim.busy||state?.experiment?.definition.id!==pendingEvidenceView.definitionId)return;
-    const timer=setTimeout(()=>{inspectionController.current.inspect(pendingEvidenceView.timeS);setPendingEvidenceView(null);},0);return()=>clearTimeout(timer);
+    const timer=setTimeout(()=>{inspectionController.current.inspect(pendingEvidenceView.timeS,pendingEvidenceView.boundary);setPendingEvidenceView(null);},0);return()=>clearTimeout(timer);
   },[pendingEvidenceView,sim.busy,state?.experiment?.definition.id]);
   useEffect(() => {const hide=()=>{if(document.hidden)setWalkthroughPaused(true);};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[]);
   const setDesign = (patch: Partial<DesignConfig>, nominalPreset = false) => {
