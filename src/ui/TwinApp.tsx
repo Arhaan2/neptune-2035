@@ -1,3 +1,5 @@
+import { AssetContext, WorkspaceGuide } from './OperatorExperience';
+import { assetOperatingStatus } from '../twin/presentation/assets';
 import { DecisionPanel } from './DecisionPanel';
 import { TransferPanel } from './TransferPanel';
 import { activePowerDesign } from '../twin/transfer/topology';
@@ -271,6 +273,7 @@ export default function TwinApp() {
     (e) => e.from === selectedId || e.to === selectedId,
   );
   const select = (id: string, view: Focus = 'selection') => {
+    if (!resolveAsset(design, id)) { setNotice('Unsupported asset ID. Select an installed asset from the asset list.'); return; }
     setSelectedId(id);
     setFocus(view);
     setResetId((v) => v + 1);
@@ -681,6 +684,7 @@ export default function TwinApp() {
           {(['Explore', 'Operate', 'Compare'] as const).map((w) => (
             <button
               className={workspace === w ? 'active' : ''}
+              aria-pressed={workspace === w}
               key={w}
               onClick={() => {
                 setWorkspace(w);
@@ -707,9 +711,10 @@ export default function TwinApp() {
           <i /> Design-stage digital twin · Simulated operation
         </span>
         <span>Public prototype — simulated, design-stage model</span>
-        <span>Simulated, design-stage prototype.</span>
+        <span>Simulated, design-stage prototype; physical validation pending.</span>
         <span>{design.revision} · 1 world unit = 1 m</span>
       </div>
+      <WorkspaceGuide workspace={workspace} onAssets={() => document.querySelector('.twin-tree')?.scrollIntoView({block:'start', behavior:reducedMotion?'instant':'smooth'})} onEquipment={() => document.querySelector('.twin-inspector')?.scrollIntoView({block:'start', behavior:reducedMotion?'instant':'smooth'})} onCampus={() => {setInside(false);setFocus('campus');setResetId(value=>value+1);setDemo(false);}} />
       <div className="twin-layout">
         <aside className="twin-design">
           <div className="twin-eyebrow">
@@ -1044,13 +1049,13 @@ export default function TwinApp() {
               ],
               [
                 'Facility draw',
-                `${num((summary?.facilityW ?? 0) / 1e6, 2)} MW`,
+                summary ? `${num(summary.facilityW / 1e6, 2)} MW` : 'Unknown',
                 'IT + cooling + conversion',
               ],
               [
                 'Workload available',
-                num(summary?.availableAccelerators ?? 0, 0),
-                `${num(summary?.energizedAccelerators ?? 0, 0)} energized`,
+                num(summary?.availableAccelerators ?? NaN, 0),
+                `${num(summary?.energizedAccelerators ?? NaN, 0)} energized`,
               ],
               [
                 'Bulk coolant',
@@ -1513,15 +1518,10 @@ export default function TwinApp() {
           </div>
           <h2>{asset?.name ?? 'Select an asset'}</h2>
           <code className="twin-id">{selectedId}</code>
-          <span
-            className={`twin-tag ${state?.failedAssetIds.includes(selectedId) ? 'failed' : ''}`}
-          >
-            {selectedState?.states[selectedId] ??
-              (state?.failedAssetIds.includes(selectedId)
-                ? 'failed'
-                : 'available')}{' '}
-            · simulated
+          <span className={`twin-tag ${assetOperatingStatus(state, selectedId)}`}>
+            {assetOperatingStatus(state, selectedId)} · simulated
           </span>
+          <AssetContext design={design} state={state} assetId={selectedId} onSelect={select} />
           {asset && (
             <dl className="twin-properties">
               <dt>Envelope (W × H × D)</dt>

@@ -47,3 +47,16 @@
 .decision-table-scroll:focus-visible { outline: 2px solid #83d8d1; outline-offset: 3px; }
 .decision-table td:nth-child(8) { min-width: 12rem; }
 .decision-panel > output { display: block; margin-block: .6rem; }
+
+.operator-guide { padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); background: #102730; }
+.operator-guide h2 { font-size: 18px; margin: 4px 0 6px; }
+.operator-guide p { max-width: 780px; margin: 0; color: var(--muted); font-size: 13px; }
+.operator-guide .twin-eyebrow { margin: 0; }
+.operator-guide .twin-actions { flex-shrink: 0; max-width: 370px; }
+.asset-context { margin: 15px 0; padding: 12px 0; border-block: 1px solid var(--line); font-size: 12px; }
+.asset-context p { font-size: 12px; }
+.asset-connection-list { padding-left: 16px; }
+.asset-connection-list li { margin: 10px 0; }
+.asset-connection-list span { display: block; color: var(--muted); }
+@media (max-width: 960px) { .operator-guide { align-items: flex-start; flex-direction: column; padding: 16px; } .operator-guide .twin-actions { max-width: 100%; } }
+@media (max-width: 620px) { .twin-mode { flex-wrap: wrap; gap: 4px 10px; } .twin-mode span { min-width: 0; } .operator-guide { padding: 12px; } .operator-guide .twin-actions button { font-size: 11px; } }
