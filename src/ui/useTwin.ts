@@ -1,3 +1,6 @@
+import type { ExperimentDefinition } from '../twin/experiment/types';
+import { createExperimentDefinition } from '../twin/experiment/definition';
+import { experimentExecutionDuration, setExperimentStatus } from '../twin/experiment/runtime';
 import { engineeringIdentity } from '../twin/catalog/equipment';
 import { diagnosticEvent, diagnosticsEnabled } from '../twin/diagnostics';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -30,7 +33,9 @@ export function runWorkerExperiment(
   events: OperationEvent[],
   durationS: number,
   integrationStepS: IntegrationStep = 1,
+  experimentDefinition?: ExperimentDefinition,
 ): Promise<SimulationState> {
+  const definition = experimentDefinition ?? createExperimentDefinition(design, { name: 'Reproducible comparison', durationS, disturbances: events, integrationStepS });
   return new Promise((resolve, reject) => {
     const worker = new Worker(
       new URL('../twin/engine/worker.ts', import.meta.url),
@@ -79,9 +84,10 @@ export function runWorkerExperiment(
       epoch: 1,
       kind: 'replay',
       design,
-      events,
-      durationS,
-      integrationStepS,
+      events: [],
+      durationS: experimentExecutionDuration(definition),
+      integrationStepS: definition.integrationStepS,
+      experimentDefinition: definition,
     } satisfies WorkerRequest);
   });
 }
@@ -154,7 +160,7 @@ export function useTwin(design: Design) {
       // before replacing either the physical state or the exportable checkpoint.
       const candidate = projectFile(designRef.current, next, {
         ...(provenance.current ? { provenance: provenance.current } : {}),
-        ...(target.current !== null && target.current > next.timeS
+        ...(target.current !== null && target.current > next.timeS && (!next.experiment || !['completed','cancelled','warmup-timeout','numerical-failed'].includes(next.experiment.status))
           ? {
               execution: {
                 targetTimeS: target.current,
@@ -209,13 +215,14 @@ export function useTwin(design: Design) {
         // Pause freezes the last UI-committed checkpoint, including when an
         // advance or cancellation reply is already on its way from the worker.
         invalidate();
+        if (current.current?.experiment) accept(setExperimentStatus(current.current, 'paused', 'Paused at the last UI-committed physical and metric checkpoint.'));
         persist();
       } else if (worker.current && current.current && !pending.current) {
         clockRunning.current = true;
         setRunningState(true);
       }
     },
-    [invalidate, persist],
+    [invalidate, persist, accept],
   );
   const send = useCallback(
     (
@@ -225,6 +232,7 @@ export function useTwin(design: Design) {
       continuing = false,
       integrationStepS: IntegrationStep = current.current?.integrationStepS ??
         1,
+      experimentDefinition?: ExperimentDefinition,
     ) => {
       diagnosticEvent('ui.send-attempt', { kind, durationS, selectedRevision: designRef.current.revision, initializedRevision: current.current?.designRevision, pending: pending.current, hasWorker: Boolean(worker.current) });
       if (!worker.current || pending.current) return;
@@ -270,6 +278,7 @@ export function useTwin(design: Design) {
         durationS,
         events,
         integrationStepS,
+        ...(experimentDefinition ? { experimentDefinition } : {}),
         ...((kind === 'advance' || kind === 'restore' || continuing) &&
         current.current
           ? { state: current.current }
@@ -315,6 +324,7 @@ export function useTwin(design: Design) {
         if (r.status === 'progress') return;
         pending.current = false;
         setBusy(false);
+        if (r.state?.experiment && ['completed', 'cancelled', 'warmup-timeout', 'numerical-failed'].includes(r.state.experiment.status)) stopClock();
         if (r.status === 'complete') {
           target.current = null;
           setResumeTarget(null);
@@ -383,11 +393,12 @@ export function useTwin(design: Design) {
       timeS: number,
       source?: ProjectProvenance,
       integrationStepS?: IntegrationStep,
+      definition?: ExperimentDefinition,
     ) => {
       invalidate();
       if (source) provenance.current = source;
       setHistory([]);
-      send('replay', timeS, events, false, integrationStepS);
+      send('replay', definition ? experimentExecutionDuration(definition) : timeS, definition ? [] : events, false, integrationStepS, definition);
     },
     [send, invalidate],
   );
@@ -409,16 +420,17 @@ export function useTwin(design: Design) {
       setRecoveryBlocked(false);
       setProgress(undefined);
       setError('');
-      accept(restored.state);
+      accept(restored.state.experiment && !['completed','cancelled','warmup-timeout','numerical-failed'].includes(restored.state.experiment.status) ? setExperimentStatus(restored.state,'paused','Restored a complete physical and metric checkpoint; resume explicitly.') : restored.state);
       return restored.design;
     },
     [accept, invalidate],
   );
   const cancel = useCallback(() => {
     invalidate();
+    if (current.current?.experiment) { accept(setExperimentStatus(current.current, 'cancelled', 'Cancelled at the last UI-committed physical and metric checkpoint.')); target.current = null; setResumeTarget(null); }
     setError('Run cancelled. The last completed numerical state is retained.');
     persist();
-  }, [invalidate, persist]);
+  }, [invalidate, persist, accept]);
   const resume = useCallback(() => {
     if (
       current.current &&
@@ -429,6 +441,12 @@ export function useTwin(design: Design) {
       send('replay', target.current - current.current.timeS, [], true);
     }
   }, [send, invalidate]);
+  const startExperiment = useCallback((definition: ExperimentDefinition) => {
+    invalidate();
+    provenance.current = undefined;
+    setHistory([]);
+    send('replay', experimentExecutionDuration(definition), [], false, definition.integrationStepS, definition);
+  }, [invalidate, send]);
   const command = useCallback(
     (kind: OperationEvent['kind'], assetId: string, value?: number) => {
       const s = current.current;
@@ -470,6 +488,8 @@ export function useTwin(design: Design) {
     busy,
     history,
     command,
+    startExperiment,
+    prepareExperiment: (definition: ExperimentDefinition) => { invalidate(); provenance.current = undefined; setHistory([]); send('initialize', 0, [], false, definition.integrationStepS, definition); },
     replay,
     reset: () => replay([], 0),
     cancel,
