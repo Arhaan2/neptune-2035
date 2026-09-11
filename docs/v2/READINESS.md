@@ -22,7 +22,7 @@ The software has no hidden estimator or forecast. Unmeasured state remains simul
 ## Known implementation limits
 
 - Generic hardware, pump curves, UA, capacitances, efficiencies, costs and structural masses are assumptions. No manufacturer endorsement, quotation or hardware compatibility validation is asserted.
-- Electrical analysis is a radial capacity/energy allocation, not AC load flow or protection coordination. Family III open ties confer no independent-feed credit; enabled meshed power operation is unsupported.
+- Electrical analysis is a radial capacity/energy allocation, not AC load flow or protection coordination. Legacy Family III open ties confer no transfer benefit. The explicit Phase 5 preset models one-hop open-before-close whole-platform transfer after eligible local feeder failure, with native-first shared capacity and no independent-feed credit for a common source failure. Energized meshes, synchronized parallel sources, automatic retransfer and physical switchgear control remain unsupported. Exact software acceptance is recorded in [Phase 5 evidence](../phase-5/REQUIREMENT-MATRIX.md); physical validation remains pending.
 - Technical and seawater loops are separate equivalent circuits. Rack branches are explicit assets and wet mass, but individually balanced rack hydraulics, cavitation, water hammer and multiphase flow are unmodeled.
 - Temperatures are module bulk coolant and air nodes, not GPU junctions or CFD fields. Control thresholds and startup delays are declared assumptions.
 - Network demand uses a versioned illustrative traffic profile. Job-specific demand validation, packet latency and training performance remain outside scope.
