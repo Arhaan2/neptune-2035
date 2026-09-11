@@ -119,10 +119,14 @@ function circuit(ctx:ModuleContext,medium:'technical'|'seawater',active:Componen
     referenceFlowM3S:B.referenceFlowM3S,pumpCount:active.length,pumpSpeed:speed,shutoffPa:first.shutoffPa,freeFlowM3S:first.freeFlowM3S,efficiency});
   cache.set(key,result);return result;
 }
+/** Current full restoration demand only; no time integration or checkpoint validation. */
+export function transferRestorationDemands(design:Design,state:SimulationState,ctx:Context=context(design)):RestorableDemand[] {
+  return ctx.modules.map(c=>{const technical=circuit(c,'technical',[c.equipment.dutyPump],state.pumpSpeed,ctx.hydraulicCache),seawater=circuit(c,'seawater',[c.equipment.seaPump],state.pumpSpeed,ctx.hydraulicCache);return{id:c.module.id,platformId:c.module.platformId,domainId:c.module.powerDomainId,requestedW:(c.module.nodeCount*nodeDrawW(state.workload,design.config.idleFraction,true,c.equipment.electrical.nodePeakW)+technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW+(c.equipment.network?.ratings.capacityW??0))/c.equipment.electrical.gridEfficiency,moduleLimitW:c.equipment.moduleLimitW};});
+}
 function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,runController:boolean) {
   if(design.transfer&&state.transfer){
     if(runController){
-      const restoration:RestorableDemand[]=ctx.modules.map(c=>{const technical=circuit(c,'technical',[c.equipment.dutyPump],state.pumpSpeed,ctx.hydraulicCache),seawater=circuit(c,'seawater',[c.equipment.seaPump],state.pumpSpeed,ctx.hydraulicCache);return{id:c.module.id,platformId:c.module.platformId,domainId:c.module.powerDomainId,requestedW:(c.module.nodeCount*nodeDrawW(state.workload,design.config.idleFraction,true,c.equipment.electrical.nodePeakW)+technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW+(c.equipment.network?.ratings.capacityW??0))/c.equipment.electrical.gridEfficiency,moduleLimitW:c.equipment.moduleLimitW};});
+      const restoration=transferRestorationDemands(design,state,ctx);
       const previous=state.transfer.sequence;
       updateTransfer(design,state,candidates=>planTransfers(design,state,restoration,candidates),id=>restorationRequestedW(design,restoration,id));
       for(const e of state.transfer.transitions.filter(e=>e.sequence>previous)){const route=design.transfer.routes.find(r=>r.id===e.id)!;appendLog(state,route.tieId,`Transfer ${e.previous} → ${e.status}: ${e.reason}; admitted ${e.admittedW} W; unserved ${e.unservedW} W`,'controller',design.modules.filter(m=>m.platformId===route.recipientPlatformId).map(m=>m.id));}
