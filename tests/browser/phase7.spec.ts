@@ -23,6 +23,8 @@ test('PH7 C1 real canvas keeps failed selected pump and feeder visible through r
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await expect(main(page)).toHaveAttribute('data-ready', 'true');
+  await button(page, 'Design family III').click();
+  await expect(button(page, 'Step 10s')).toBeEnabled();
   await expect(page.locator('canvas')).toBeVisible();
   const pump = 'platform-001/module-01/pump-duty';
   await page.getByLabel('Select equipment', { exact: true }).selectOption(pump);
