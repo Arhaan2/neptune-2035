@@ -296,7 +296,11 @@ export function advanceWork(design:Design,state:SimulationState,durationS:number
   const due=state.events.filter(e=>e.timeS<=state.timeS+durationS&&!applied.has(e.id)).length+events.filter(e=>!existing.has(e.id)&&e.timeS<=state.timeS+durationS).length;
   return design.modules.length*(durationS/stepS+due);
 }
-export function advanceWithStep(design:Design,input:SimulationState,durationS:number,events:OperationEvent[]=[],maxStepS?:number):SimulationState {
+export interface SimulationDispatchObservation { timeS:number; endTimeS:number; gridW:number; phase:'boundary'|'interval' }
+/** Optional observer reports canonical dispatch, including transfer substeps; it never changes state. */
+export type SimulationDispatchObserver=(observation:SimulationDispatchObservation)=>void;
+function upstreamGridW(design:Design,state:SimulationState):number {return state.modules.reduce((sum,module)=>sum+module.gridW,0)+assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW;}
+export function advanceWithStep(design:Design,input:SimulationState,durationS:number,events:OperationEvent[]=[],maxStepS?:number,observer?:SimulationDispatchObserver):SimulationState {
   validateDesign(design);validateState(design,input);
   maxStepS ??= input.integrationStepS;
   finiteNumber(durationS,'advance.durationS',{min:0,max:CONTRACT.maxAdvanceS,integer:true,unit:'s'});
@@ -315,11 +319,13 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
   const initiallyApplied=applyEvents(design,state,ctx);
   if(durationS===0&&!initiallyApplied)resolveStep(design,state,ctx,0,false);
   finishExperimentBoundary(state);
+  observer?.({timeS:state.timeS,endTimeS:state.timeS,gridW:upstreamGridW(design,state),phase:'boundary'});
   while(state.timeS<end&&!experimentFinished(state)){
     // Each fixed step starts at a committed boundary; chunk endpoints add no controller transitions.
     const before=beginInterval(state);
     const dtS=design.transfer?Math.min(end-state.timeS,maxStepS-(state.timeS%maxStepS),nextTransferDeadline(state)-state.timeS):maxStepS;
     resolveStep(design,state,ctx,dtS,false);
+    observer?.({timeS:state.timeS,endTimeS:state.timeS+dtS,gridW:upstreamGridW(design,state),phase:'interval'});
     if(state.experiment){const energy={batteryDischargeWh:0,batteryChargeWh:0,batteryLossWh:0};for(let i=0;i<state.modules.length;i++){const m=state.modules[i],e=ctx.modules[i].equipment.electrical;energy.batteryDischargeWh+=m.batteryDischargeW*dtS/3600;energy.batteryChargeWh+=m.batteryChargeW*dtS/3600;energy.batteryLossWh+=(m.batteryDischargeW*(1/e.dischargeEfficiency-1)+m.batteryChargeW*(1-e.chargeEfficiency))*dtS/3600;}commitExperimentInterval(state,before,dtS,energy);}
     state.timeS+=dtS;
     if(design.transfer){state.stepIndex=Math.floor(state.timeS/maxStepS);if(state.timeS%maxStepS!==0&&!state.transfer!.splitTimesS.includes(state.timeS))state.transfer!.splitTimesS.push(state.timeS);}else state.stepIndex++;
@@ -328,6 +334,7 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
     prepareExperimentBoundary(design,state);
     if(!applyEvents(design,state,ctx)&&!warming)resolveStep(design,state,ctx,0,true);
     finishExperimentBoundary(state);
+    observer?.({timeS:state.timeS,endTimeS:state.timeS,gridW:upstreamGridW(design,state),phase:'boundary'});
     finiteOutputs(state,'simulation accumulators');
   }
   validateCandidate(design,state);return state;
@@ -339,7 +346,7 @@ export function summarize(design:Design,state:SimulationState):Summary {
   const sum=(key:keyof Pick<ModuleState,'itW'|'facilityW'|'gridW'|'pumpPowerW'|'availableAccelerators'|'batteryWh'|'electricalResidualW'|'thermalResidualW'>)=>state.modules.reduce((n,m)=>n+m[key],0);
   const rootNetworkW=assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW;
   const itW=sum('itW'),facilityW=sum('facilityW')+rootNetworkW,energizedAccelerators=state.modules.reduce((n,m)=>n+m.energizedNodes*8,0);
-  return finiteOutputs({timeS:state.timeS,itW,facilityW,gridW:sum('gridW')+rootNetworkW,pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
+  return finiteOutputs({timeS:state.timeS,itW,facilityW,gridW:upstreamGridW(design,state),pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
     curtailedAccelerators:Math.max(0,design.provisionedAccelerators-energizedAccelerators),maxCoolantK:Math.max(...state.modules.map(m=>m.coolantK)),batteryWh:sum('batteryWh'),
     instantaneousPUE:itW>0?facilityW/itW:null,energyPUE:state.itEnergyWh>0?state.facilityEnergyWh/state.itEnergyWh:null,
     electricalResidualW:sum('electricalResidualW'),thermalResidualW:sum('thermalResidualW'),warnings:[...new Set(state.modules.flatMap(m=>m.warnings))]},'simulation summary');
