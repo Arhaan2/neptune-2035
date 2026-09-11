@@ -52,6 +52,16 @@ describe('PH5 G complete checkpoint and deterministic replay', () => {
     expect(fresh.experiment!.metrics.elapsedS).toBe(0); expect(fresh.transfer!.sequence).toBe(0);
     expect(fresh.transfer!.attempts.every(attempt => attempt.status === 'normal' && attempt.originalClosed && !attempt.tieClosed)).toBe(true);
   });
+  it.each([3, 6])('checkpoint and replay preserve valid evolving demand at t=%i without requiring historical snapshots to equal current watts', changeS => {
+    const changedDefinition = createExperimentDefinition(design, { id: `phase5-demand-${changeS}`, durationS: 12, disturbances: [...definition.disturbances, { id: 'demand-change', timeS: changeS, kind: 'workload', assetId: 'shore/grid', value: 0.9 }] });
+    const source = advance(design, initialize(design, changedDefinition), 12);
+    const checkpoint = advance(design, initialize(design, changedDefinition), 8);
+    const restored = restoreProject(parseProject(serializeProject(projectFile(design, checkpoint))));
+    expect(physical(advance(design, restored.state, 4))).toEqual(physical(source));
+    expect(physical(advance(design, replayExperimentState(design, source), 12))).toEqual(physical(source));
+    expect(source.transfer!.attempts[0].status).toBe('transferred');
+    if (changeS === 6) expect(source.transfer!.attempts[0].admittedW).toBeGreaterThan(source.transfer!.transitions.find(transition => transition.reason === 'TRANSFERRED')!.admittedW);
+  });
 });
 
 describe('PH5 G/H checkpoint corruption cannot fabricate switch or capacity evidence', () => {
@@ -70,6 +80,10 @@ describe('PH5 G/H checkpoint corruption cannot fabricate switch or capacity evid
   }));
   it('rejects invented capacity even when internal arithmetic balances', () => rejects(state => {
     const resource = state.transfer!.resources.find(resource => resource.id === 'asset:shore/grid')!;
+    resource.capacityW += 1; resource.headroomW += 1;
+  }));
+  it('rejects invented virtual module distribution capacity', () => rejects(state => {
+    const resource = state.transfer!.resources.find(resource => resource.id.endsWith(':module-distribution'))!;
     resource.capacityW += 1; resource.headroomW += 1;
   }));
   it('rejects an invented resource identity', () => rejects(state => { state.transfer!.resources[0].id = 'asset:invented-capacity'; }));
