@@ -4,7 +4,8 @@ import { advance, initialize } from '../src/twin/engine/simulation';
 import { createWorkerHandler } from '../src/twin/engine/worker';
 import { createExperimentDefinition } from '../src/twin/experiment/definition';
 import { attachExperiment, finishExperimentBoundary } from '../src/twin/experiment/runtime';
-import { replayExperimentState } from '../src/twin/experiment/runner';
+import { signatureDemonstration } from '../src/twin/experiment/demonstrations';
+import { replayExperimentState, runExperiment } from '../src/twin/experiment/runner';
 import { validateState } from '../src/twin/persistence/state';
 import { CONTRACT } from '../src/twin/persistence/limits';
 import type { WorkerRequest, WorkerResponse } from '../src/twin/types';
@@ -130,5 +131,30 @@ describe('PH4 authoritative metrics independent of worker grouping and delivery'
     expect(replayed.at(-1)?.state?.appliedEventIds).toEqual(source.appliedEventIds);
     expect(replayed.at(-1)?.state?.modules).toEqual(source.modules);
     expect(replayed.at(-1)?.state?.experiment?.metrics).toEqual(source.experiment!.metrics);
+  });
+});
+
+// Long histories exercise the production worker's repeated bounded advances,
+// which a single reference-runner call does not cover.
+describe('PH4 full signature through bounded worker chunks', () => {
+  it.each(signatureDemonstration())('matches the full reference trajectory for $definition.name', async fixture => {
+    const expected = runExperiment(fixture.design, fixture.definition);
+    const responses: WorkerResponse[] = [];
+    let yieldedChunks = 0;
+    const before = process.memoryUsage(), started = performance.now();
+    const handler = createWorkerHandler(response => responses.push(structuredClone(response)), async () => { yieldedChunks++; });
+    await handler(request({ design: fixture.design, experimentDefinition: fixture.definition, durationS: fixture.definition.durationS }));
+    const elapsedMs = performance.now() - started, after = process.memoryUsage(), final = responses.at(-1)!;
+    console.info(JSON.stringify({ evidence: 'phase4-long-worker', node: process.version, platform: process.platform, architecture: process.arch, label: fixture.definition.name, moduleCount: fixture.design.modules.length, simulatedDurationS: fixture.definition.durationS, injectedScheduler: 'immediate promise; browser wall timing measured separately', yieldedChunks, wallMs: elapsedMs, rssBefore: before.rss, rssAfter: after.rss, status: final.status }));
+    expect(final.status).toBe('complete');
+    expect(final.state?.experiment).toEqual(expected.experiment);
+    expect(final.state?.modules).toEqual(expected.modules);
+    expect(final.state?.events).toEqual(expected.events);
+    expect(final.state?.log).toEqual(expected.log);
+    expect(final.state?.appliedEventIds).toEqual(expected.appliedEventIds);
+    expect(yieldedChunks).toBeGreaterThan(1);
+    for (const delivered of responses) {
+      if (delivered.state) expect(() => validateState(fixture.design, delivered.state)).not.toThrow();
+    }
   });
 });
