@@ -1,10 +1,10 @@
-import { initialize, advance } from '../engine/simulation';
+import { initialize, advance, initializeExperimentFromState } from '../engine/simulation';
 import type { Design, SimulationState } from '../types';
 import { CONTRACT } from '../persistence/limits';
 import { identity } from '../persistence/structure';
 import { diagnosticFor } from '../safety';
 import { createExperimentDefinition, validateExperimentDefinition } from './definition';
-import { attachExperiment, experimentExecutionDuration, experimentFinished, setExperimentStatus } from './runtime';
+import { experimentExecutionDuration, experimentFinished, setExperimentStatus } from './runtime';
 import { evaluateExperiment } from './metrics';
 import type { ExperimentDefinition } from './types';
 
@@ -45,9 +45,7 @@ export function replayExperimentState(design: Design, source: SimulationState): 
   if(run.originTimeS!==null&&identity(operationContent(run.inputs))!==identity(operationContent(declared))){
     definition={...definition,id:`${definition.id.slice(0,120)}:replay-${identity(run.inputs)}`,name:`${definition.name.slice(0,135)} · recorded-input replay`,disturbances:run.inputs.map(event=>({...event,timeS:event.timeS-run.originTimeS!})),provenance:{source:'simulated-definition',parentDefinitionId:run.definition.id,note:'Explicit derived replay includes every recorded input at its evaluation time and preserves the source physical initial checkpoint and all experiment assumptions.'}};
   }
-  const initial=structuredClone(run.initialState);
-  attachExperiment(design,initial,definition);
-  return initial;
+  return initializeExperimentFromState(design,run.initialState,definition);
 }
 export function comparePair(faulted: SimulationState, baseline: SimulationState) {
   const f=faulted.experiment,b=baseline.experiment,reasons:string[]=[];

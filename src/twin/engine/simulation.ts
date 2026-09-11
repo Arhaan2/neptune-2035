@@ -243,6 +243,16 @@ export function initialize(design:Design,definition?:ExperimentDefinition):Simul
   if(definition){state.integrationStepS=definition.integrationStepS;attachExperiment(design,state,definition);applyEvents(design,state,ctx);finishExperimentBoundary(state);}
   validateCandidate(design,state);return state;
 }
+/** Begin a replay from its saved physical initial checkpoint, committing t=0 atomically. */
+export function initializeExperimentFromState(design:Design,initialState:SimulationState,definition:ExperimentDefinition):SimulationState {
+  validateDesign(design);validateState(design,initialState);
+  const state=structuredClone(initialState);
+  attachExperiment(design,state,definition);
+  applyEvents(design,state,context(design));
+  finishExperimentBoundary(state);
+  validateCandidate(design,state);
+  return state;
+}
 function validateCandidate(design:Design,state:SimulationState) {
   try { projectFile(design,state); }
   catch(error) { const cause=diagnosticFor(error);failure('numerical-failure','INVALID_CANDIDATE',`Candidate state was not committed: ${cause.message}`,{field:cause.field,assetId:cause.assetId,details:{cause: cause.code}}); }
