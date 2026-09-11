@@ -41,6 +41,12 @@ jobs:
           done
           env -u MOZ_HEADLESS NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 xvfb-run -a -s '-screen 0 1920x1200x24' npm test -- --reporter=default --reporter=json --outputFile=artifacts/prototype/unit.json
       - run: npm run build
+      - name: Preserve tested production payload identity
+        run: |
+          npm run package:preview > artifacts/prototype/tested-release.log
+          cp dist/build-manifest.json artifacts/prototype/tested-build-manifest.json
+          cp dist/release.json artifacts/prototype/tested-release.json
+          tar -cf artifacts/prototype/tested-build.tar -C dist .
       - name: Production prototype smoke in three browsers
         run: |
           npm run start -- --port 4173 > artifacts/prototype/server.log 2>&1 &

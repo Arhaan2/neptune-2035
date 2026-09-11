@@ -14,12 +14,17 @@ The actual runtime limit is four active agents including root. Building, Testing
 | `/root/building` | `neptune-phase5-building` | Production `src/**`, transfer contract and demonstrations docs | `1f7f16c` | 2026-09-11 07:24 |
 | `/root/testing` | `neptune-phase5-testing` | Phase 5 tests/fixtures/browser journeys, testing receipts | `1f7f16c` | 2026-09-11 07:24 |
 | `/root/verification` | `neptune-phase5-verification` | Read-only engineering review and independent probes/receipts | `1f7f16c` | 2026-09-11 07:24 |
+| `/root/fixing` | `neptune-phase5-fixing` | Focused reproductions; no product lease before a named finding | `1f7f16c` | 2026-09-11 07:29 |
 
 Times above are minute-level orchestration records; native evidence records exact execution times. Completion/result identities are added as work is handed off. Fixing receives a named failing commit and an explicit module lease; worktrees alone do not authorize overlapping product edits.
 
 | Milestone | Origin commit | Integrated commit | Evidence / state |
 | --- | --- | --- | --- |
 | 5A contract | Building `68b19b1` | `5f7a2bd` | Contract v1 frozen for independent review; implementation not yet accepted |
+| 5A expectations | Testing `dae3f23` | `bfe1b88` | Independent frozen capacity/service oracle: 8/8; retained baseline focused suite: 108/108 |
+| 5A independent review | Verification `115d862` | `c491a89` | Eight source-specific engineering review checkpoints; coherent contract, implementation acceptance pending |
+
+After Verification's completed initial review, `/root/fixing` started in a distinct worktree. The actual live-agent inventory showed root, Building, Testing and Fixing concurrently active, within the four-agent limit. Verification retains its identity for later independent review.
 
 Baseline full-inventory verification matched 90 tracked files: 88 public HTTP files and two Git-only `.nojekyll` markers. These are observed baseline counts, not future fixed assertions. Rollback archive extraction matched every staged byte, including the preview; recovery bundle validation confirmed complete history. These checks do not replace the fresh pre-promotion recheck.
 
