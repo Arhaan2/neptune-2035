@@ -85,3 +85,37 @@ First integrated production slice was Building `e67e115` plus root UI through `7
 The independent numerical/integration tests exposed four expected release blockers on that slice: zero-load multiple-parent and malformed-port graphs were incorrectly satisfied, and standalone network evaluation missed local power/common-grid dependencies although actual simulation correctly applied them. Fixing owns those repairs; assertions remain unchanged. The million-accelerator test initially took 5.538s and hit the default 5s test limit because it created a matcher for every field of every resource. Aggregating an invalid-resource list still inspects every resource, removes test-framework overhead, and makes all 7 finite-tier cases pass within the unchanged per-test limit. No production timeout was relaxed.
 
 After Fixing `a9f0765`, a 61-case Phase 3 focused run passed 60 cases. The remaining case had expected a malformed missing-port graph to report `unsupported`, while the repair correctly rejects invalid input with structured `NETWORK_PORT_TOPOLOGY`. The test now requires that exact invalid-input error. Multiple valid parents still require `unsupported`; the categories remain distinct. Local and common-mode standalone power checks passed after the repair.
+
+## Final local acceptance: PASS
+
+Exact tested head: `b71af7ecac5f325e686eaa341f2891250ab369b3` in the isolated Testing worktree. Tested tree: `17f7bfc0bbdc99494c7818407950ac9d336e0378`, identical to root candidate `42410fa`. Later independent-review and this evidence text are documentation-only additions; CI must still test the final merged candidate.
+
+- Environment: macOS arm64, Node 24.18.0, npm 11.16.0; repository Playwright configuration unchanged.
+- Lockfile Git blob: `36113f734cddba74c9af06813e5c3f7200adfa23`; SHA-256: `87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9`.
+- Solver `2.3.0`, model `neptune-reference-3`, algorithm `committed-boundary-1`, project schema 3; saved legacy checkpoint retains solver `2.2.0` and its original engineering fingerprint.
+
+| Actual command/gate | Result |
+| --- | --- |
+| `npm ci` | PASS, installed from the unchanged lockfile |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
+| `NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 npm test -- --reporter=default --reporter=json --outputFile=artifacts/phase3/unit.json` | **364 passed, 0 failed, 0 skipped; 21 files**, 33.22 s |
+| Both real telemetry integrations | PASS: native browser reconnect/Last-Event-ID/source validation and actual app mapping/raw/dropout/calibration/streaming; all 47 telemetry cases executed |
+| `npm run build` | PASS |
+| Production preview on 4173; `npm run test:browser -- tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts --retries=0` | **19 passed, 0 failed, 2 historical exclusions**, about 1.3 min; Chromium/Firefox/WebKit |
+
+All 61 Phase 3 unit/integration cases are included in the 364 total, including Fixing's 13 admission/dependency cases and Building's 2 unknown-price cases. Independent capacity expectations passed at every listed boundary and nominal scale up to the selectable one-million-accelerator envelope. The final one-million-accelerator resource case took 3.201 s within the unchanged 5 s unit-test limit.
+
+All six ordinary Phase 3 browser journeys passed with real workers and no application, console or asset-loading errors. Firefox additionally completed the real 100,000-accelerator comparison. The existing Firefox 500,000-accelerator Step 10s journey passed in 12.7 s, advancing the actual simulation clock. The only exclusions remain that existing 500,000-accelerator Step 10s case in Chromium and WebKit. There are no new skips, broadened exclusions, retries or arbitrary load delays.
+
+One lint-only correction replaced deprecated `toThrowError` with equivalent supported `toThrow`. The entire telemetry-enabled unit suite was repeated once after that correction to establish an unambiguous frozen tested tree; both full runs passed 364/364. The final production browser gate passed in its first run.
+
+Local raw/native results are retained under the **Testing worktree**, not claimed as public artifacts:
+
+- `/private/tmp/neptune-phase3-testing/artifacts/phase3/unit.json`
+- `/private/tmp/neptune-phase3-testing/artifacts/phase3/browser.json`
+- `/private/tmp/neptune-phase3-testing/artifacts/phase3/acceptance-identity.json`
+- `/private/tmp/neptune-phase3-testing/artifacts/phase3/acceptance-summary.log` (explicit command/result summary, not raw stdout)
+- `/private/tmp/neptune-phase3-testing/test-results/` (browser screenshots and runtime attachments)
+
+This local acceptance does not claim CI, merge, publication, hosted parity or physical validation. Root owns those remaining release gates and records their actual identities/results separately.
