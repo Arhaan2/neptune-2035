@@ -11,6 +11,8 @@ node scripts/phase-8/fetch-historical.mjs --out=/absolute/evidence/historical-in
 node scripts/phase-8/numerical.mjs --out=/absolute/evidence/numerical
 node scripts/phase-8/experiments.mjs --campaigns=/absolute/evidence/historical-inputs --legacy-checkout=/absolute/legacy-reference --out=/absolute/evidence/experiments
 node scripts/phase-8/gate.mjs --campaigns=/absolute/evidence/historical-inputs --legacy-checkout=/absolute/legacy-reference --out=/absolute/evidence/local
+node scripts/phase-8-history/reproduce.mjs --out=/absolute/evidence/original-regressions
+node scripts/phase-8-measure.mjs --out=/absolute/evidence/operating-envelope
 ```
 
 Solver 2.3.1 corrects V8-05. Historical comparisons first reproduce the untouched original campaigns through verified solver 2.3.0 in the exact legacy checkout, then create separately identified current campaigns with unchanged physical inputs. A path-specific identity ledger and original unit tolerances distinguish representational version changes from numerical differences. Old project checkpoints are inspectable/exportable; explicit current-model recalculation preserves parent identity, while exact old-version resume remains unavailable.
