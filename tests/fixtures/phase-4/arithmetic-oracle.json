@@ -1,0 +1,24 @@
+{
+  "description": "Synthetic metric fixture, independently specified by the Phase 4 acceptance brief; not a physical simulator result.",
+  "units": { "time": "s", "capacity": "accelerators", "shortfall": "accelerator-seconds", "temperature": "K" },
+  "boundary": "Each interval is left closed and right open; a healthy final interval can confirm dwell at its right boundary.",
+  "recoveryDwellS": 5,
+  "intervals": [
+    { "startS": 0, "endS": 5, "required": 100, "serviceable": 100 },
+    { "startS": 5, "endS": 10, "required": 100, "serviceable": 40 },
+    { "startS": 10, "endS": 15, "required": 100, "serviceable": 80 },
+    { "startS": 15, "endS": 20, "required": 100, "serviceable": 100 }
+  ],
+  "expected": {
+    "shortfallAcceleratorS": 400,
+    "minimumServiceable": 40,
+    "minimumServiceableTimeS": 5,
+    "serviceViolationS": 10,
+    "firstViolationS": 5,
+    "recoveryOnsetS": 15,
+    "recoveryConfirmationS": 20,
+    "interruptionCount": 1,
+    "longestInterruptionS": 10
+  },
+  "independentDerivation": "(100-40)*(10-5)+(100-80)*(15-10)=300+100=400 accelerator-seconds. The union of [5,10) and [10,15) is [5,15), duration10. The contiguous healthy interval [15,20) has duration5, confirming onset15 at20."
+}

@@ -1,3 +1,4 @@
+import { experimentFinished, setExperimentStatus } from '../experiment/runtime';
 import { diagnosticEvent } from '../diagnostics';
 import type { SimulationState, WorkerRequest, WorkerResponse } from '../types';
 import {
@@ -83,7 +84,7 @@ export function createWorkerHandler(
       post({
         ...response,
         status: 'cancelled',
-        state: latest,
+        state: latest ? setExperimentStatus(latest, 'cancelled', 'Execution cancelled at the last committed checkpoint.') : undefined,
         progress: latestProgress,
       });
       return;
@@ -126,6 +127,7 @@ export function createWorkerHandler(
           'Unknown worker operation.',
         );
       const design = request.design;
+      if(request.experimentDefinition && (request.state || !['initialize','replay'].includes(request.kind))) failure('invalid-input','WORKER_EXPERIMENT','A definition can only start a separate experiment; continuation retains its persisted definition.');
       const validationStart = now();
       validateDesign(design);
       trace('worker.design-validated', { ms: now() - validationStart });
@@ -165,7 +167,7 @@ export function createWorkerHandler(
         validateState(design, request.state);
         committed = structuredClone(request.state);
       } else {
-        committed = initialize(design);
+        committed = initialize(design, request.experimentDefinition);
       }
       trace('worker.initialized', { timeS: committed.timeS, revision: committed.designRevision, elapsedMs: now() - start });
       const integrationStepS = Object.hasOwn(request, 'integrationStepS')
@@ -277,7 +279,7 @@ export function createWorkerHandler(
         return;
       }
       let firstChunk = true;
-      while (committed.timeS < targetTimeS) {
+      while (committed.timeS < targetTimeS && !experimentFinished(committed)) {
         await yieldTask();
         if (mine !== token) return;
         let chunk = Math.min(
@@ -366,6 +368,7 @@ export function createWorkerHandler(
       const diagnostic = diagnosticFor(error);
       // Never replace an existing checkpoint with an unvalidated request or a failed candidate.
       if (committed && admitted) {
+        committed = setExperimentStatus(committed, diagnostic.kind === 'resource-limit' ? 'resource-limited' : 'numerical-failed', diagnostic.message);
         latest = committed;
         latestProgress = {
           completedTimeS: committed.timeS,

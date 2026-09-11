@@ -1,3 +1,7 @@
+import { ExperimentPanel, ExperimentReport, ExperimentComparison, CounterfactualReport } from './ExperimentPanel';
+import { signatureDemonstration, referenceExperiment } from '../twin/experiment/demonstrations';
+import { counterfactualDefinition } from '../twin/experiment/runner';
+import { createExperimentDefinition } from '../twin/experiment/definition';
 import { REFERENCE_CATALOG, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity } from '../twin/catalog/equipment';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -177,6 +181,7 @@ function readSavedScenarios(): {
   }
 }
 interface Compared {
+  role?: 'faulted' | 'unfaulted';
   provenance?: ProjectProvenance;
   label: string;
   design: Design;
@@ -323,6 +328,7 @@ export default function TwinApp() {
           pendingProject.timeS,
           pendingProject.provenance,
           1,
+          createExperimentDefinition(pendingProject.designSnapshot, { name: 'Explicit derived whole experiment', durationS: pendingProject.timeS, disturbances: pendingProject.events }),
         );
         setPendingProject(null);
       }, 0);
@@ -368,6 +374,9 @@ export default function TwinApp() {
   const showComparison =
     workspace === 'Compare' ||
     (demo && (state?.timeS ?? 0) >= 180 && (state?.timeS ?? 0) < 220);
+  const endpointTimes=comparison.map(item=>item.state.experiment?.metrics.elapsedS??item.state.timeS);
+  const endpointModules=comparison.map(item=>item.state.modules.find(module=>module.id===selectedModule.id));
+  const comparableEndpoint=comparison.length===2&&Boolean(comparison[0].state.experiment)===Boolean(comparison[1].state.experiment)&&endpointTimes[0]===endpointTimes[1]&&endpointModules.every(module=>module!==undefined);
   useEffect(() => {
     if (!demo || !state || state.timeS < 220 || sim.busy) return;
     const timer = setTimeout(() => {
@@ -498,6 +507,28 @@ export default function TwinApp() {
       setCompareBusy(false);
     }
   };
+  const comparePhase4 = async (kind: 'signature' | 'pair') => {
+    setDemo(false); setCompareBusy(true); setComparison([]);
+    setNotice('0/2 experiments completed. Running canonical worker execution.');
+    setComparisonDescription(kind === 'signature'
+      ? 'Signature: 1,280 requested accelerators, full workload, cold start, duty pump trip at 30 s and restore at 300 s; 1,800 s evaluation. Supported designs differ only by an installed standby pump. Close final coolant means ≤0.01 K difference; close final air means ≤0.1 K. Both absolute histories use identical disturbance scope; each design needs its own unfaulted baseline for incremental attribution.'
+      : 'Faulted and unfaulted pair: identical initial physical state, workload, environment, policy and numerical settings. Core trip at 5 s and restore at 15 s; baseline suppresses only those declared faults. Both evaluate 20 s.');
+    try {
+      const result: Compared[] = [];
+      if (kind === 'signature') {
+        for (const item of signatureDemonstration()) {
+          const state=await runWorkerExperiment(item.design, [], item.definition.durationS, item.definition.integrationStepS, item.definition, progress=>setNotice(`${result.length}/2 experiments completed. ${item.definition.name}: ${progress.completedTimeS}/${progress.targetTimeS} physical seconds committed.`));
+          result.push({label:item.definition.name,design:item.design,state});
+          setComparison([...result]);
+          setNotice(`${result.length}/2 experiments completed. Validated whole-run reports appear as each worker finishes.`);
+        }
+      } else {
+        const faulted = referenceExperiment(design), baseline = counterfactualDefinition(design, faulted);
+        for (const [role, definition] of [['faulted', faulted], ['unfaulted', baseline]] as const) result.push({ role, label: role === 'faulted' ? 'Faulted experiment' : 'Unfaulted baseline', design, state: await runWorkerExperiment(design, [], definition.durationS, definition.integrationStepS, definition) });
+      }
+      setComparison(result); setNotice('Real worker execution complete. Compare the final state with authoritative whole-run interruption and recovery metrics.');
+    } catch (error) { setNotice(String(error)); } finally { setCompareBusy(false); }
+  };
   const compareSaved = async (mode: 'saved' | 'idle' | 'ua' | 'family') => {
     setCompareBusy(true);
     setComparison([]);
@@ -509,6 +540,11 @@ export default function TwinApp() {
           : 'Paired assumptions under identical full-load, pump-trip and restoration events, evaluated at 240s. These bounds are not confidence intervals.',
     );
     try {
+      if (mode === 'saved' && saved.length >= 2 && saved.slice(-2).every(item => item.project.schemaVersion === 3 && item.project.checkpoint?.state.experiment)) {
+        setComparison(saved.slice(-2).map(item => { const project = item.project as CurrentProject; return { label: item.name, design: project.designSnapshot, state: project.checkpoint!.state, provenance: project.provenance }; }));
+        setComparisonDescription('Saved whole experiments retain their original observed windows, definitions, lifecycle and metrics. Axes align at evaluation origin. Unequal durations or cross-design disturbance footprints are separate absolute observations; they do not form an equivalent faulted/unfaulted pair.');
+        return;
+      }
       const runs: {
         label: string;
         design: Design;
@@ -730,7 +766,7 @@ export default function TwinApp() {
                 setDesign({
                   requestedAccelerators: count,
                   supplyW:
-                    count === 10000
+                    count <= 10000
                       ? 30e6
                       : count === 100000
                         ? 300e6
@@ -743,6 +779,8 @@ export default function TwinApp() {
               <option value="" disabled>
                 Choose capacity…
               </option>
+              <option value="8">8 accelerator fast reference</option>
+              <option value="1280">1,280 accelerator module</option>
               <option value="10000">10,000 accelerator pilot</option>
               <option value="100000">100,000 campus</option>
               <option value="500000">500,000 archipelago</option>
@@ -1108,7 +1146,7 @@ export default function TwinApp() {
               disabled={sim.busy || !state}
               onClick={() => {
                 setDemo(false);
-                if (state) sim.replay(state.events, state.timeS);
+                if (state && sim.replay(state.events, state.timeS, undefined, state.integrationStepS, state.experiment?.definition)) setNotice('Replay created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
               }}
             >
               Replay
@@ -1138,7 +1176,7 @@ export default function TwinApp() {
               onClick={() => {
                 if (state) {
                   setDemo(false);
-                  sim.replay(state.events, replayTimeS);
+                  if(sim.replay(state.events, replayTimeS, undefined, state.integrationStepS, state.experiment?.definition))setNotice('Seek created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
                 }
               }}
             >
@@ -1264,9 +1302,10 @@ export default function TwinApp() {
               </button>
             </div>
           )}
+          {state && !showComparison && <ExperimentPanel design={design} state={state} busy={sim.busy} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && <Trend history={sim.history} />}
           {showComparison && (
-            <section className="twin-compare" ref={comparisonRegion}>
+            <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
               <div className="twin-section-line">
                 <h2>
                   {demo
@@ -1280,13 +1319,14 @@ export default function TwinApp() {
                   {compareBusy ? 'Evaluating…' : 'Compare pump experiment'}
                 </button>
               </div>
+              <div className="twin-actions"><button disabled={compareBusy} onClick={() => void comparePhase4('signature')}>Run signature demonstration</button><button disabled={compareBusy} onClick={() => void comparePhase4('pair')}>Run faulted / unfaulted pair</button></div>
               <p>{comparisonDescription}</p>
+              {comparison.some(item => item.state.experiment) && <ExperimentComparison runs={comparison} />}
+              {comparison[0]?.role === 'faulted' && comparison[1]?.role === 'unfaulted' && <CounterfactualReport faulted={comparison[0].state} baseline={comparison[1].state} />}
               <div className="twin-comparison-grid">
                 {comparison.map((c) => {
                   const s = summarize(c.design, c.state),
-                    m =
-                      c.state.modules.find((m) => m.id === selectedModule.id) ??
-                      c.state.modules[0];
+                    m = c.state.modules.find((m) => m.id === selectedModule.id);
                   return (
                     <article className="twin-card" key={c.label}>
                       <h3>{c.label}</h3>
@@ -1309,10 +1349,10 @@ export default function TwinApp() {
                           />
                         </Suspense>
                       </div>
-                      <p>
+                      {m ? <p>
                         {num(m.coolantK - 273.15, 2)} °C ·{' '}
                         {num(m.technicalFlowM3S * 1000, 2)} L/s
-                      </p>
+                      </p> : <p>Selected module {selectedModule.id} is not installed in this design; its endpoint temperature and flow are unavailable.</p>}
                       <p>
                         {num(s.availableAccelerators, 0)} available /{' '}
                         {num(c.design.provisionedAccelerators, 0)}
@@ -1320,8 +1360,7 @@ export default function TwinApp() {
                       <p>
                         {num(s.facilityW / 1e6, 2)} MW ·{' '}
                         {
-                          c.state.log.filter((e) => e.kind === 'controller')
-                            .length
+                          c.state.experiment?.metrics.controllerTransitionCount ?? c.state.log.filter((e) => e.kind === 'controller').length
                         }{' '}
                         controller actions
                       </p>
@@ -1329,6 +1368,7 @@ export default function TwinApp() {
                         {num(s.gridW / 1e6, 2)} MW grid import ·{' '}
                         {num(s.batteryWh / 1000, 1)} kWh stored
                       </p>
+                      <ExperimentReport state={c.state} compact />
                       <button
                         onClick={() =>
                           download(
@@ -1351,17 +1391,12 @@ export default function TwinApp() {
                   );
                 })}
               </div>
-              {comparison.length === 2 && (
+              {comparableEndpoint && (
                 <p className="twin-delta">
                   {comparison[1].label} minus {comparison[0].label} at{' '}
-                  {comparison[0].state.timeS}s:{' '}
+                  {comparison[0].state.experiment?'evaluation time ':'physical time '}{endpointTimes[0]}s:{' '}
                   {num(
-                    (comparison[1].state.modules.find(
-                      (m) => m.id === selectedModule.id,
-                    )?.coolantK ?? 0) -
-                      (comparison[0].state.modules.find(
-                        (m) => m.id === selectedModule.id,
-                      )?.coolantK ?? 0),
+                    endpointModules[1]!.coolantK-endpointModules[0]!.coolantK,
                     3,
                   )}{' '}
                   K coolant;{' '}
@@ -1375,6 +1410,7 @@ export default function TwinApp() {
                   available accelerators.
                 </p>
               )}
+              {comparison.length===2&&!comparableEndpoint&&<p role="note">Endpoint difference unavailable: matching observation times and the selected installed module in both designs are required. Each run retains its own time and full-run report.</p>}
               <div className="twin-actions">
                 <button
                   disabled={!state}

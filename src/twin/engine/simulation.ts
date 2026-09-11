@@ -1,3 +1,5 @@
+import type { ExperimentDefinition } from '../experiment/types';
+import { attachExperiment, beginInterval, commitExperimentInterval, admitExperimentInputs, prepareExperimentBoundary, finishExperimentBoundary, recordExperimentEvent, recordExperimentController, experimentFinished } from '../experiment/runtime';
 import { resolveModuleEngineering, resolveSpecification, equipmentFor, engineeringIdentity, MODEL_BOUNDARIES as B, type ComponentSpecification } from '../catalog/equipment';
 import { loopGeometry } from '../assets/design';
 import { SOLVER_VERSION, type Asset, type Design, type ModuleSpec, type ModuleState, type OperationEvent, type SimulationState, type Summary } from '../types';
@@ -38,7 +40,8 @@ function context(design:Design):Context {
   }) };
 }
 function appendLog(state:SimulationState, assetId:string, message:string, kind:'command'|'controller'|'warning', affectedIds:string[]) {
-  state.log.push({timeS:state.timeS,assetId,message,kind,affectedIds});
+  const entry={timeS:state.timeS,assetId,message,kind,affectedIds};
+  state.log.push(entry);recordExperimentController(state,entry);
   if(state.log.length>MAX_LOG)state.log.splice(0,state.log.length-MAX_LOG);
 }
 function affectedModules(ctx:Context, id:string):string[] {
@@ -62,6 +65,7 @@ function applyEvents(design:Design,state:SimulationState,ctx:Context) {
         if(event.kind==='restore'&&event.assetId.endsWith('/pump-duty')){m.states[event.assetId]='starting';m.startAtS[event.assetId]=state.timeS+equipmentFor(design).controlPolicy.dutyRestartS;}
       }
     }
+    recordExperimentEvent(state,event);
     const affected=affectedModules(ctx,event.assetId);
     appendLog(state,event.assetId,`${event.kind}${event.value===undefined?'':` = ${event.value} ${event.kind==='seawater'?'K':event.kind==='fouling'?'K/W':'fraction'}`}; ${affected.length} module(s) in dependency scope`,'command',affected);
     state.appliedEventIds.push(event.id);
@@ -225,7 +229,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     state.facilityEnergyWh+=electrical.facilityW*dtS/3600;state.itEnergyWh+=electrical.itW*dtS/3600;state.gridEnergyWh+=electrical.gridW*dtS/3600;
   }
 }
-export function initialize(design:Design):SimulationState {
+export function initialize(design:Design,definition?:ExperimentDefinition):SimulationState {
   validateDesign(design);
   const modules:ModuleState[]=design.modules.map(m=>({id:m.id,coolantK:equipmentFor(design).controlPolicy.initialCoolantK,airK:equipmentFor(design).controlPolicy.initialAirK,batteryWh:resolveSpecification(design,`${m.id}/battery`).ratings.energyWh*equipmentFor(design).controlPolicy.initialBatteryFraction,throttle:1,
     states:{[m.id]:'available',[`${m.id}/pump-duty`]:'running',...(design.config.standbyPumps?{[`${m.id}/pump-standby`]:'standby' as const}:{}),[`${m.id}/pump-sea`]:'running'},startAtS:{},
@@ -235,7 +239,19 @@ export function initialize(design:Design):SimulationState {
   const state:SimulationState={schemaVersion:CONTRACT.stateSchema,designRevision:design.revision,designIdentity:engineeringIdentity(design),solverVersion:SOLVER_VERSION,timeS:0,integrationStepS:1,stepIndex:0,modules,events:[],log:[],
     facilityEnergyWh:0,itEnergyWh:0,gridEnergyWh:0,appliedEventIds:[],workload:design.config.workload,seawaterK:design.config.seawaterK,
     foulingResistanceKPerW:design.config.foulingResistanceKPerW,pumpSpeed:design.config.pumpSpeed,failedAssetIds:[],solverMs:0};
-  resolveStep(design,state,context(design),0,true);validateCandidate(design,state);return state;
+  const ctx=context(design);resolveStep(design,state,ctx,0,true);
+  if(definition){state.integrationStepS=definition.integrationStepS;attachExperiment(design,state,definition);applyEvents(design,state,ctx);finishExperimentBoundary(state);}
+  validateCandidate(design,state);return state;
+}
+/** Begin a replay from its saved physical initial checkpoint, committing t=0 atomically. */
+export function initializeExperimentFromState(design:Design,initialState:SimulationState,definition:ExperimentDefinition):SimulationState {
+  validateDesign(design);validateState(design,initialState);
+  const state=structuredClone(initialState);
+  attachExperiment(design,state,definition);
+  applyEvents(design,state,context(design));
+  finishExperimentBoundary(state);
+  validateCandidate(design,state);
+  return state;
 }
 function validateCandidate(design:Design,state:SimulationState) {
   try { projectFile(design,state); }
@@ -258,15 +274,25 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
   const work=advanceWork(design,input,durationS,events,maxStepS);
   if(work>CONTRACT.maxJobModuleSteps)failure('resource-limit','ADVANCE_WORK','Valid scenario exceeds the per-call execution budget; retain/export it and use bounded worker chunks.',{details:{work,max:CONTRACT.maxJobModuleSteps}});
   // Validate project allocation before numerical work. New events are validated history, not yet applied.
-  const state:SimulationState={...input,integrationStepS:maxStepS as IntegrationStep,modules:input.modules.map(m=>({...m,states:{...m.states},startAtS:{...m.startAtS},warnings:[...m.warnings]})),events:history,log:input.log.map(e=>({...e,affectedIds:[...e.affectedIds]})),appliedEventIds:[...input.appliedEventIds],failedAssetIds:[...input.failedAssetIds],solverMs:0};
+  const state:SimulationState={...input,integrationStepS:maxStepS as IntegrationStep,modules:input.modules.map(m=>({...m,states:{...m.states},startAtS:{...m.startAtS},warnings:[...m.warnings]})),events:history,log:input.log.map(e=>({...e,affectedIds:[...e.affectedIds]})),appliedEventIds:[...input.appliedEventIds],failedAssetIds:[...input.failedAssetIds],solverMs:0,...(input.experiment?{experiment:structuredClone(input.experiment)}:{})};
+  admitExperimentInputs(state,events);
+  if(state.experiment&&['paused','resource-limited'].includes(state.experiment.status)){state.experiment.status=state.experiment.originTimeS===null?'warming':'running';state.experiment.reason=null;}
   safeJSON({designSnapshot:design,events:history,checkpoint:{state}});
   const ctx=context(design),end=state.timeS+durationS;
   const initiallyApplied=applyEvents(design,state,ctx);
   if(durationS===0&&!initiallyApplied)resolveStep(design,state,ctx,0,false);
-  while(state.timeS<end){
+  finishExperimentBoundary(state);
+  while(state.timeS<end&&!experimentFinished(state)){
     // Each fixed step starts at a committed boundary; chunk endpoints add no controller transitions.
-    resolveStep(design,state,ctx,maxStepS,false);state.timeS+=maxStepS;state.stepIndex++;
-    if(!applyEvents(design,state,ctx))resolveStep(design,state,ctx,0,true);
+    const before=beginInterval(state);
+    resolveStep(design,state,ctx,maxStepS,false);
+    if(state.experiment){const energy={batteryDischargeWh:0,batteryChargeWh:0,batteryLossWh:0};for(let i=0;i<state.modules.length;i++){const m=state.modules[i],e=ctx.modules[i].equipment.electrical;energy.batteryDischargeWh+=m.batteryDischargeW*maxStepS/3600;energy.batteryChargeWh+=m.batteryChargeW*maxStepS/3600;energy.batteryLossWh+=(m.batteryDischargeW*(1/e.dischargeEfficiency-1)+m.batteryChargeW*(1-e.chargeEfficiency))*maxStepS/3600;}commitExperimentInterval(state,before,maxStepS,energy);}
+    state.timeS+=maxStepS;state.stepIndex++;
+    const warming=state.experiment?.originTimeS===null;
+    if(warming)resolveStep(design,state,ctx,0,true);
+    prepareExperimentBoundary(design,state);
+    if(!applyEvents(design,state,ctx)&&!warming)resolveStep(design,state,ctx,0,true);
+    finishExperimentBoundary(state);
     finiteOutputs(state,'simulation accumulators');
   }
   validateCandidate(design,state);return state;

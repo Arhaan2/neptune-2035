@@ -1,3 +1,4 @@
+import { validateExperimentRun } from '../experiment/validation';
 import { engineeringIdentity, resolveSpecification, equipmentFor } from '../catalog/equipment';
 import { moduleAssets } from '../assets/design';
 import { failure, finiteNumber } from '../safety';
@@ -11,7 +12,7 @@ const nonnegative = ['technicalFlowM3S', 'seawaterFlowM3S', 'pumpPowerW', 'itW',
 const signed = ['rejectedHeatW', 'thermalResidualW', 'electricalResidualW'];
 export function validateState(design: Design, value: unknown, options: { allowDifferentSolver?: boolean } = {}): asserts value is SimulationState {
   validateStructure(value); record(value, 'state');
-  keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs'], 'state');
+  keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs', 'experiment'], 'state');
   string(value.solverVersion, 'state.solverVersion', 100);
   if (value.schemaVersion !== CONTRACT.stateSchema || value.designRevision !== design.revision || (!options.allowDifferentSolver && value.solverVersion !== SOLVER_VERSION)) failure('invalid-input', 'STATE_REVISION', 'Simulation revision mismatch; explicit model migration/recalculation required.');
   if (value.designIdentity !== engineeringIdentity(design)) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
@@ -29,11 +30,15 @@ export function validateState(design: Design, value: unknown, options: { allowDi
   array(value.appliedEventIds, 'state.appliedEventIds', CONTRACT.maxEvents);
   const due = value.events.filter(e => e.timeS <= (value.timeS as number));
   if (due.length !== value.appliedEventIds.length || due.some((e, i) => e.id !== (value.appliedEventIds as unknown[])[i])) failure('invalid-input', 'STATE_EVENT_CURSOR', 'Checkpoint applied-event cursor must contain exactly the events due at this boundary, in order.');
-  const known = new Set(design.assets.map(a => a.id)), moduleIds = new Set(design.modules.map(m => m.id)), local = new Map<string, Set<string>>();
+  const known = new Set(design.assets.map(a => a.id)), moduleIds = new Set(design.modules.map(m => m.id)), local = new Map<string, Set<string>>(), expandedInventory = new Set<string>();
   const assetKnown = (id: string) => {
     if (known.has(id)) return true;
     const m = design.modules.find(m => id.startsWith(`${m.id}/`)); if (!m) return false;
-    if (!local.has(m.id)) local.set(m.id, new Set(moduleAssets(design, m.id).map(a => a.id)));
+    if (!local.has(m.id)) local.set(m.id, new Set(moduleAssets(design, m.id, { attachmentOnly: true }).map(a => a.id)));
+    if (!local.get(m.id)!.has(id) && !expandedInventory.has(m.id)) {
+      local.set(m.id, new Set(moduleAssets(design, m.id).map(a => a.id)));
+      expandedInventory.add(m.id);
+    }
     return local.get(m.id)!.has(id);
   };
   array(value.failedAssetIds, 'state.failedAssetIds', CONTRACT.maxEvents);
@@ -100,4 +105,5 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     array(entry.affectedIds, 'log.affectedIds', CONTRACT.maxModules);
     for (const id of entry.affectedIds) if (typeof id !== 'string' || !moduleIds.has(id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');
   }
+  validateExperimentRun(design, value as unknown as SimulationState);
 }

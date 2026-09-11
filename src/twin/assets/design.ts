@@ -216,7 +216,10 @@ export function moduleAssets(design:Design,moduleId:string,options:{networkOnly?
 }
 export function resolveAsset(design:Design,id:string):Asset|undefined {
   const existing=design.assets.find(a=>a.id===id);if(existing)return existing;
-  const match=id.match(/^(platform-\d{3,}\/module-\d{2})\//);return match?moduleAssets(design,match[1]).find(a=>a.id===id):undefined;
+  const match=id.match(/^(platform-\d{3,}\/module-\d{2})\//);if(!match)return undefined;
+  // Routine support/controller lookups do not need the rack and server inventory.
+  // Unmatched references still resolve against the complete canonical inventory.
+  return moduleAssets(design,match[1],{attachmentOnly:true}).find(a=>a.id===id)??moduleAssets(design,match[1]).find(a=>a.id===id);
 }
 export function* allAssets(design:Design):Iterable<Asset>{yield*design.assets;for(const m of design.modules)yield*moduleAssets(design,m.id);}
 export function connectionsForModule(design:Design,moduleId:string,options:{assets?:Asset[];networkOnly?:boolean;attachmentOnly?:boolean}={}):Connection[]{
