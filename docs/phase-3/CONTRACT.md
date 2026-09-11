@@ -40,6 +40,7 @@ Runtime limit: four active agents including root. Initial overlap: Building, Tes
 | `/root/building` | `neptune-phase3-building` | Equipment/topology/evaluator/supply/report production slices |
 | `/root/testing` | `neptune-phase3-testing` | Independent tests, browser journeys, CI command, requirement matrix |
 | `/root/verification` | `neptune-phase3-verification` | Independent reference calculations and review; no production changes |
+| `/root/fixing` | `neptune-phase3-fixing` | Concrete edge admission and standalone power-assessment repairs after builder handoff |
 
 | Stage | Dependency | State |
 | --- | --- | --- |
@@ -52,6 +53,8 @@ Runtime limit: four active agents including root. Initial overlap: Building, Tes
 
 ## Defect queue and acceptance
 
-No candidate accepted yet. Initial baseline fixture: 31,992→3,999 nodes/399.9 Gbit/s passes; 31,999 and 32,000→4,000/400.0 passes; 32,001 and 32,008→4,001/400.1 fails at `port:shore/cluster-core:cluster-out`. A fully energized 100,000 campus offers 1.25 Tbit/s cluster and 12.5 Gbit/s external and fails the original core.
+No candidate accepted yet. Initial baseline fixture: 31,992→3,999 nodes/399.9 Gbit/s passes; 31,999 and 32,000→4,000/400.0 passes; 32,001 and 32,008→4,001/400.1 fails at `port:shore/cluster-core:cluster-out`. A fully energized 100,000 campus offers 1.25 Tbit/s cluster and 12.5 Gbit/s external and fails the original core. Fresh public verification matched all 90 tracked Pages files (HTTP for public files, committed bytes for dotfile markers); raw receipt is `artifacts/phase-3/baseline-public.json`.
+
+Initial Verification checkpoint `f307e20` completed before Fixing started; its independent fixture passed two tests with eight scale cases. Fixer checkpoint `d49f475` reproduced four failures in five dormant-graph tests: zero-load missing endpoint port, duplicate port IDs, malformed disabled link and unreachable cyclic required topology. These are requirements-derived admission defects, assigned to Fixing after the builder's network slice. Acceptance remains pending repairs and the integrated candidate.
 
 Actual commands: `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm run test:browser`. Full unit acceptance sets both `NEPTUNE_TELEMETRY_BROWSER=1` and `NEPTUNE_TELEMETRY_APP=1` with the real app server. Browser acceptance runs prototype, Phase 2 and Phase 3 suites with retries zero. Existing Chromium/WebKit 500,000-campus prototype exclusions remain disclosed; Firefox must advance the actual clock. No Phase 3 ordinary journey is excluded. Existing deferred Phase 1 performance/stress gates remain deferred.
