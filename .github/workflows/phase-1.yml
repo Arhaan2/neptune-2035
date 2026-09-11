@@ -182,7 +182,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4173/ > /dev/null
-          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts --project="$TESTED_BROWSER" --workers=1 --retries=0
+          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts tests/browser/phase7.spec.ts --project="$TESTED_BROWSER" --workers=1 --retries=0
       - name: Retain native browser results and traces even on failure
         if: always()
         uses: actions/upload-artifact@v4
