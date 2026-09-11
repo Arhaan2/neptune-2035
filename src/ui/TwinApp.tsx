@@ -711,6 +711,7 @@ export default function TwinApp() {
               <button
                 key={g}
                 className={config.generation === g ? 'active' : ''}
+                disabled={sim.busy || !state}
                 onClick={() => setDesign({ generation: g as 1 | 2 | 3 })}
                 aria-label={`Design family ${romans[g - 1]}`}
               >
@@ -722,6 +723,7 @@ export default function TwinApp() {
             Starting scenario
             <select
               aria-label="Starting scenario"
+              disabled={sim.busy || !state}
               value=""
               onChange={(e) => {
                 const count = Number(e.target.value);
