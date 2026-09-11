@@ -137,3 +137,19 @@ Testing independently profiled each original large fixture once at exact source 
 The existing legacy test performs only one required build and simulation, so its fixture remains unchanged and needs a production performance repair. The Phase 3 capacity fixture now selects its network on an eight-accelerator design and then uses the supported resize operation to build the requested full inventory once. Two added pilot/campus regression cases compare the **entire resulting Design**, including topology, specifications and revision, against the original large-legacy-then-convert construction; both passed. Every capacity/resource assertion, traffic rate, requested scale and the 5 s test limit remain unchanged. This removes redundant fixture setup; it does not reduce evaluated inventory or replace the solver.
 
 Fixing owns the separate production repair. Full acceptance and CI on the repaired candidate are required before release; the earlier local pass is not being substituted for the failed CI result.
+
+
+## Repaired integrated local acceptance
+
+Root `a39738e9842cf9337dc49d561271367d02af71ca` and Testing `165f3c194ce2fc75c6f98edd6fd76826c8973cbd` share exact tree `7ba4dbe1f864addc8dd037f172142b92e3d9151f`. Typecheck, lint and production build passed. The final telemetry-enabled full suite passed **374 tests in 22 files, zero failures/skips, 27.11 s**, including both real integrations. The ten additional cases are two exact design-equivalence tests and eight canonical projection/dormant-validation cases. No existing expected result or timeout changed.
+
+The production browser gate passed **19 checks, zero failures/flaky results, two unchanged historical exclusions, 73.616 s, zero retries**. All six Phase 3 journeys passed across all three engines; Firefox also exercised the real 100,000-accelerator comparison and existing 500,000-accelerator clock advancement. The running browser gate finished naturally during the user-requested pause before its runner could be stopped. No gate was launched after the pause; work resumed only after explicit user instruction.
+
+Final native reports remain in the Testing worktree at `artifacts/phase3-ci-profile/unit-repaired.json` and `browser-repaired.json`; full saved copies and source bundle are under the original workspace's ignored `artifacts/phase-3/paused-20260911T014733Z/`. These supersede earlier local gate counts without relabeling the initial CI failure. CI and hosted checks remain separate release gates.
+
+
+## Final gate after independent operable-inventory repair
+
+Independent review found and Fixing repaired PH3-CI-02 without relaxing validation or timeouts; see [repair review](REPAIR-REVIEW.md) and [repair history](CI-PERFORMANCE-REPAIR.md). Final root `58cee60176705fb8e5ad82fcbbe9d01f7965d16f` and Testing `e76c997` share tree `f95c491a744881bbe76cc209be2174f26d936943`. The final gate passed **376 unit/integration tests, 22 files, zero failures/skips, 29.33 s**, including both actual telemetry integrations. Typecheck, lint and production build passed. The original legacy and Phase 3 million-accelerator cases took 2,021 and 2,058 ms under the unchanged 5 s limit.
+
+Production browser acceptance passed **19 checks, two historical exclusions, zero failures/flaky results, zero retries, 73.745 s**. Phase 2: nine passed; Phase 3: six passed; prototype: four passed and two unchanged Chromium/WebKit large-campus exclusions. Firefox exercised the real 100,000-accelerator nominal/undersized comparison and the existing 500,000-accelerator Step 10s check (11.616 s for the latter). No new loading, runtime or console errors occurred. Final native reports and exact environment/source/lockfile receipt are in Testing `artifacts/phase3-final-gate/`; see [final local acceptance](FINAL-LOCAL-ACCEPTANCE.md).

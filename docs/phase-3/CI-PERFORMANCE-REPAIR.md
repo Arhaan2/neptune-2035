@@ -35,3 +35,12 @@ Focused repair validation:
 - After integrating Testing's setup repair, `npm test -- tests/twin-integration.test.ts tests/phase3-topology.test.ts -t 'million-accelerator|provisions 1000000'`: **both original timed cases passed**, 36 unrelated cases excluded by this deliberate name filter, 4.50 seconds for the whole bounded invocation. Neither assertion set nor timeout changed.
 
 Full integrated testing, independent exact-diff review and a fresh successful CI run remain root's acceptance gates. This document records the cause and focused repair, not completed release acceptance.
+
+
+## Independent admission parity finding — PH3-CI-02
+
+The independent Verifier found a small invalid-input regression in candidate `a39738e`: with both traffic classes optional, compact evaluation returned satisfied for an energized allocation that included an explicitly failed compute node, while the complete evaluator correctly raised `NETWORK_OPERABLE_INVENTORY`. The independent one-node fixture reproduced it in 13 ms. The release remained blocked pending repair.
+
+Fixing repaired it in `e76c997` (root equivalent `58cee60176705fb8e5ad82fcbbe9d01f7965d16f`): the compact fast path applies only with no explicit failures. Failure queries compile the complete canonical graph and retain operable-inventory validation. Dormant validation uses a separate boolean, so a healthy query cannot cache an incomplete graph that is mistaken for a complete graph on a later failure. No global cache or new formula was added.
+
+Two new regression cases use the same evaluator through healthy operation, invalid node/rack failure allocations, valid zero/remaining-node allocations, and restoration. Both failed before the repair and passed afterward. Focused validation passed 43 tests; typecheck/lint passed. Both original timed million-accelerator cases passed within unchanged five-second limits in a single 4.09-second invocation. Final full acceptance and independent review are recorded separately.
