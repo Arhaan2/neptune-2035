@@ -19,4 +19,14 @@ Root retains the accepted inspection-only path for unavailable legacy model/solv
 
 ## Repair and retest
 
-Pending initial Building slice and `src/twin/solvers/network.ts` ownership handoff.
+Building handed off exclusive `src/twin/solvers/network.ts` ownership with source `e67e115`, cherry-picked here as `f246649`. Its duplicate-port check repaired P3-F02. The same five fixtures then produced **3 failed, 2 passed**, confirming P3-F01/F03/F04 remained.
+
+The focused repair rejects missing/incompatible directional endpoint ports during the one-time graph compilation, including disabled links. A static per-class topology mask detects enabled ambiguous parents and cycles with linear graph traversal, including disconnected required domains. Every provisioned module is checked for structural unsupported topology independently of instantaneous energized count. Valid zero-load disconnection remains a finite satisfied instantaneous assessment, while the full-installed assessment exposes its unreachable domain. Legacy external source paths retain their independent origin interpretation.
+
+Standalone evaluation now composes the same declared network-power dependency evaluator as simulation. `assessNetworkProvisioning` explicitly ignores instantaneous power admission while preserving disabled network links. The optional `includeResources: false` evaluator mode skips inspector resource materialization and limits per-node path mapping to actual bottlenecks; full and compact results have identical admission, demands, issues and limiting domains. The evaluator compiles topology and power dependencies once and caches the last complete numerical query. Issue and affected-domain order is deterministic.
+
+Regression fixture now has **13 cases**, including disconnected ambiguous parents with positive/zero demand, valid zero-demand disconnection versus installed assessment, common shore and local generation-two power dependencies, generation-one shared-bus impact, full installed demand at zero supply, preserved disabled-link impact, and complete-versus-compact evaluator parity for both presets across normal/local/common failure cases.
+
+The first new local-power test failed because it inherited generation one, whose shore bus intentionally serves both platform domains. The fixture was corrected to explicitly select generation two for local isolation, and a separate generation-one assertion now verifies the common-mode behavior; no production defect or assertion relaxation was inferred from that fixture mistake.
+
+Validation after repair: `npm test -- tests/phase3-edge-validation.test.ts tests/phase3-network.test.ts tests/twin-network.test.ts` — **3 files, 33 tests passed**; `npm run typecheck` and `npm run lint` passed. These are focused repair gates, not full-candidate or telemetry/browser/release acceptance.

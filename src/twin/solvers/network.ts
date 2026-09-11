@@ -3,6 +3,7 @@ import { connectionsForModule, moduleAssets } from '../assets/design';
 import { CONTRACT } from '../persistence/limits';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
 import type { Asset, Connection, Design } from '../types';
+import { createNetworkPowerEvaluator } from './network-power';
 
 /** Declared illustrative offered demand, not measured traffic or achieved throughput. */
 export const NETWORK_ASSUMPTIONS = TRAFFIC_PROFILE;
@@ -17,6 +18,7 @@ export interface NetworkAssessment {
 }
 export interface NetworkResource { resourceId:string; assetId:string; kind:'edge'|'port'|'switch'; demandBitS:number; capacityBitS:number; headroomBitS:number; maxUtilization:number|null; domainIds:string[] }
 export interface NetworkAllocation { id:string; energizedNodes:number }
+export interface NetworkEvaluationOptions { includeResources?:boolean; ignorePower?:boolean }
 interface Resource { id:string; assetId:string; capacity:number; kind:'edge'|'port'|'switch' }
 interface Edge { connection:Connection; from:number; to:number; resources:number[]; invalid:boolean }
 interface Tree { source:number; parent:Int32Array; order:number[]; reachable:Uint8Array; unsupported:Uint8Array }
@@ -90,6 +92,7 @@ function compile(design:Design){
     const fromAsset=assets.get(c.from)??rootAssets.get(c.from),toAsset=assets.get(c.to)??rootAssets.get(c.to);
     const fromPort=fromAsset?.ports.find(p=>p.id===c.fromPort),toPort=toAsset?.ports.find(p=>p.id===c.toPort);
     const invalid=!fromPort||!toPort||fromPort.medium!==c.medium||toPort.medium!==c.medium||fromPort.unit!=='bit/s'||toPort.unit!=='bit/s'||!['out','bidirectional'].includes(fromPort.direction)||!['in','bidirectional'].includes(toPort.direction);
+    if(invalid)failure('invalid-input','NETWORK_PORT_TOPOLOGY','Every network connection, including a disabled connection, requires existing compatible directional ports in bit/s.',{assetId:c.from,field:c.id});
     const from=vertex(c.from),to=vertex(c.to),r=[resource(`edge:${c.id}`,c.from,c.capacity),resource(`port:${c.from}:${c.fromPort}`,c.from,fromPort?.capacity??0),resource(`port:${c.to}:${c.toPort}`,c.to,toPort?.capacity??0)];
     // A source-to-node traversal consumes its source switch once, on egress.
     // Ingress and egress are not counted twice; both required traffic classes share this budget.
@@ -121,14 +124,41 @@ function compile(design:Design){
     return {source,parent,order,reachable,unsupported};
   }
   const diagnosticCluster=tree('shore/cluster-core',false,new Set(),true),diagnosticExternal=tree('shore/fiber',true,new Set(),true);
-  return {ids,index,resources,edges,leaves,tree,diagnosticCluster,diagnosticExternal};
+  // Admission is independent of offered demand and failures. Kahn elimination
+  // leaves cycles and their descendants even in components disconnected from a root.
+  const structural=(external:boolean)=>{
+    const rooted=tree(external?'shore/fiber':'shore/cluster-core',external,new Set());
+    const unsupported=rooted.unsupported.slice(),indegree=new Int32Array(ids.length),parents=new Int32Array(ids.length);
+    const allowed=(e:Edge)=>e.connection.enabled&&(external||e.connection.medium==='cluster');
+    const clusterSource=index.get('shore/cluster-core')!;
+    for(const e of edges)if(allowed(e)){
+      indegree[e.to]++;
+      // The legacy external tree does not traverse the independent cluster root.
+      // Its source edge is not an alternative external path into a platform.
+      if(!(external&&e.from===clusterSource&&!rooted.reachable[clusterSource]))parents[e.to]++;
+    }
+    const queue:number[]=[];
+    for(let n=0;n<ids.length;n++)if(indegree[n]===0)queue.push(n);
+    for(let q=0;q<queue.length;q++)for(const ei of outgoing[queue[q]]){
+      const e=edges[ei];if(allowed(e)&&--indegree[e.to]===0)queue.push(e.to);
+    }
+    const invalidQueue:number[]=[];
+    for(let n=0;n<ids.length;n++)if(unsupported[n]||indegree[n]>0||parents[n]>1){unsupported[n]=1;invalidQueue.push(n);}
+    for(let q=0;q<invalidQueue.length;q++)for(const ei of outgoing[invalidQueue[q]]){
+      const e=edges[ei];if(allowed(e)&&!unsupported[e.to]){unsupported[e.to]=1;invalidQueue.push(e.to);}
+    }
+    return unsupported;
+  };
+  const structuralCluster=structural(false),structuralExternal=structural(true);
+  return {ids,index,resources,edges,leaves,tree,diagnosticCluster,diagnosticExternal,structuralCluster,structuralExternal};
 }
 
 /** Pure evaluator closure; caches only the last identical numerical query, never simulation state. */
-export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equipmentFor(design).workloadProfile){
+export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equipmentFor(design).workloadProfile,options:NetworkEvaluationOptions={}){
   if (!profile || typeof profile !== 'object') failure('invalid-input', 'NETWORK_PROFILE', 'Traffic profile must be an object.');
   for (const field of ['clusterBitSPerNode', 'externalBitSPerNode'] as const) finiteNumber(profile[field], field, { min: 0, max: 1e12, unit: 'bit/s per node' });
   validateNetworkDesign(design);
+  const networkPower=options.ignorePower?undefined:createNetworkPowerEvaluator(design);
   const clusterRate=design.config.requireClusterNetwork?profile.clusterBitSPerNode:0,externalRate=design.config.requireExternalNetwork?profile.externalBitSPerNode:0;
   let graph:ReturnType<typeof compile>|undefined,lastKey='',lastResult:NetworkAssessment|undefined;
   return (allocations:readonly NetworkAllocation[],failedAssetIds:readonly string[]=[]):NetworkAssessment=>{
@@ -141,6 +171,7 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
     failedAssetIds.forEach(id => identity(id, 'failedAssetIds'));
     const failed=new Set<string>(failedAssetIds),key=`${allocations.map(a=>a.energizedNodes).join(',')}|${[...failed].sort().join(',')}`;
     if(lastResult&&key===lastKey)return lastResult;
+    for(const id of networkPower?.(failedAssetIds).unavailableAssetIds??[])failed.add(id);
     const energizedNodes=allocations.reduce((n,a)=>n+a.energizedNodes,0);
     const result:NetworkAssessment={assessmentBasis:'energized',resources:[],status:'satisfied',energizedNodes,clusterDemandBitS:energizedNodes*clusterRate,externalDemandBitS:energizedNodes*externalRate,blockedDomainIds:[],unreachableDomainIds:[],unsupportedDomainIds:[],bottlenecks:[],issues:[],maxUtilization:0};
     graph??=compile(design);const g=graph,resourceLoads=new Float64Array(g.resources.length),issues=new Map<string,NetworkIssue>(),blocked=new Set<string>(),unreachable=new Set<string>(),unsupported=new Set<string>();
@@ -160,20 +191,22 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
     if(design.config.requireExternalNetwork)channels.push([true,externalRate,'external',g.tree('shore/fiber',true,failed)]);
     for(const [external,rate,label,t] of channels){
       const loads=new Float64Array(g.ids.length),diagnostic=external?g.diagnosticExternal:g.diagnosticCluster;
+      const structural=external?g.structuralExternal:g.structuralCluster;
+      for(const module of design.modules){
+        const node=g.leaves.get(module.id)!.find(n=>structural[n]);
+        if(node!==undefined){unsupported.add(module.networkDomainId);record(g.ids[node],`unsupported:${label}:${module.networkDomainId}`,`Required ${label} topology has multiple enabled parents or a cycle, independently of offered load`,module.networkDomainId);}
+      }
       active.forEach((nodes,i)=>{const domain=design.modules[i].networkDomainId;for(const node of nodes){
-        if(t.unsupported[node]){unsupported.add(domain);record(g.ids[node],`unsupported:${label}:${domain}`,`Required ${label} path has multiple enabled parents, a cycle, or invalid ports`,domain);}
+        if(structural[node]||t.unsupported[node]){unsupported.add(domain);record(g.ids[node],`unsupported:${label}:${domain}`,`Required ${label} path has multiple enabled parents or a cycle`,domain);}
         else if(!t.reachable[node]){
           unreachable.add(domain);let cursor=node,cause=g.ids[node],resourceId=`unreachable:${label}:${domain}`;
           while(cursor>=0){if(failed.has(g.ids[cursor])){cause=g.ids[cursor];resourceId=`failed:${cause}`;break;}const ei=diagnostic.parent[cursor];if(ei<0)break;const e=g.edges[ei];if(!e.connection.enabled){cause=e.connection.from;resourceId=`edge:${e.connection.id}`;break;}cursor=e.from;}
           record(cause,resourceId,`Required ${label} path unreachable through ${cause}`,domain);
         }else loads[node]+=rate;
       }});
-      for(let q=t.order.length-1;q>=0;q--){const n=t.order[q],ei=t.parent[n];if(ei<0||t.unsupported[n]||loads[n]===0)continue;const e=g.edges[ei];loads[e.from]+=loads[n];for(const r of e.resources)resourceLoads[r]+=loads[n];}
+      for(let q=t.order.length-1;q>=0;q--){const n=t.order[q],ei=t.parent[n];if(ei<0||structural[n]||t.unsupported[n]||loads[n]===0)continue;const e=g.edges[ei];loads[e.from]+=loads[n];for(const r of e.resources)resourceLoads[r]+=loads[n];}
     }
     const bottleneckByResource=new Map<number,NetworkBottleneck>();
-    const resourceDomains = new Map<number,Set<string>>();
-    for(const [,rate,,t] of channels){if(rate===0)continue;active.forEach((nodes,i)=>{const domain=design.modules[i].networkDomainId;for(const node of nodes){if(!t.reachable[node]||t.unsupported[node])continue;let cursor=node;while(t.parent[cursor]>=0){const edge=g.edges[t.parent[cursor]];for(const r of edge.resources){let domains=resourceDomains.get(r);if(!domains){domains=new Set();resourceDomains.set(r,domains);}domains.add(domain);}cursor=edge.from;}}});}
-    result.resources=g.resources.map((resource,r)=>({resourceId:resource.id,assetId:resource.assetId,kind:resource.kind,capacityBitS:resource.capacity,demandBitS:resourceLoads[r],headroomBitS:resource.capacity-resourceLoads[r],maxUtilization:resource.capacity>0?(Number.isFinite(resourceLoads[r]/resource.capacity)?resourceLoads[r]/resource.capacity:null):resourceLoads[r]>0?null:0,domainIds:[...(resourceDomains.get(r)??[])].sort()})).sort((a,b)=>a.resourceId.localeCompare(b.resourceId));
     for(let r=0;r<g.resources.length;r++){
       const resource=g.resources[r],load=resourceLoads[r];if(load===0)continue;
       finiteOutputs({load}, 'network resource demand');
@@ -181,10 +214,13 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
       result.maxUtilization=result.maxUtilization===null||utilization===null||!Number.isFinite(utilization)?null:Math.max(result.maxUtilization,utilization);
       if(utilization===null||!Number.isFinite(utilization)||load>resource.capacity+Math.max(1,resource.capacity*1e-9))bottleneckByResource.set(r,{assetId:resource.assetId,resourceId:resource.id,demandBitS:load,capacityBitS:resource.capacity,reason:`Declared offered demand ${(load/1e9).toFixed(3)} Gbit/s exceeds ${(resource.capacity/1e9).toFixed(3)} Gbit/s at ${resource.id}`,domainIds:[]});
     }
+    const resourceDomains = new Map<number,Set<string>>();
+    if(options.includeResources!==false||bottleneckByResource.size)for(const [external,rate,,t] of channels){if(rate===0)continue;const structural=external?g.structuralExternal:g.structuralCluster;active.forEach((nodes,i)=>{const domain=design.modules[i].networkDomainId;for(const node of nodes){if(!t.reachable[node]||structural[node]||t.unsupported[node])continue;let cursor=node;while(t.parent[cursor]>=0){const edge=g.edges[t.parent[cursor]];for(const r of edge.resources){if(options.includeResources===false&&!bottleneckByResource.has(r))continue;let domains=resourceDomains.get(r);if(!domains){domains=new Set();resourceDomains.set(r,domains);}domains.add(domain);}cursor=edge.from;}}});}
+    if(options.includeResources!==false)result.resources=g.resources.map((resource,r)=>({resourceId:resource.id,assetId:resource.assetId,kind:resource.kind,capacityBitS:resource.capacity,demandBitS:resourceLoads[r],headroomBitS:resource.capacity-resourceLoads[r],maxUtilization:resource.capacity>0?(Number.isFinite(resourceLoads[r]/resource.capacity)?resourceLoads[r]/resource.capacity:null):resourceLoads[r]>0?null:0,domainIds:[...(resourceDomains.get(r)??[])].sort()})).sort((a,b)=>a.resourceId.localeCompare(b.resourceId));
     for(const [r,bottleneck] of bottleneckByResource)bottleneck.domainIds=[...(resourceDomains.get(r)??[])].sort();
     result.bottlenecks=[...bottleneckByResource.values()].sort((a,b)=>a.resourceId.localeCompare(b.resourceId));
     for(const b of result.bottlenecks)for(const domain of b.domainIds)record(b.assetId,b.resourceId,b.reason,domain);
-    result.issues=[...issues.values()];result.blockedDomainIds=[...blocked].sort();result.unreachableDomainIds=[...unreachable].sort();result.unsupportedDomainIds=[...unsupported].sort();
+    result.issues=[...issues.values()].map(issue=>({...issue,domainIds:[...issue.domainIds].sort()})).sort((a,b)=>a.resourceId.localeCompare(b.resourceId));result.blockedDomainIds=[...blocked].sort();result.unreachableDomainIds=[...unreachable].sort();result.unsupportedDomainIds=[...unsupported].sort();
     result.status=unsupported.size?'unsupported':blocked.size?'violated':'satisfied';finiteOutputs(result, 'assessNetwork');lastKey=key;lastResult=result;return result;
   };
 }
@@ -195,5 +231,5 @@ export function assessNetwork(design:Design,allocations:readonly NetworkAllocati
 
 /** Capacity at the complete provisioned inventory, independently of instantaneous power dispatch. */
 export function assessNetworkProvisioning(design:Design):NetworkAssessment {
-  return {...assessNetwork(design,design.modules.map(m=>({id:m.id,energizedNodes:m.nodeCount}))),assessmentBasis:'installed'};
+  return {...createNetworkEvaluator(design,undefined,{ignorePower:true})(design.modules.map(m=>({id:m.id,energizedNodes:m.nodeCount}))),assessmentBasis:'installed'};
 }
