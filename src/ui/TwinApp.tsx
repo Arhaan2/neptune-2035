@@ -1308,7 +1308,7 @@ export default function TwinApp() {
             </div>
           )}
           <TransferPanel design={design} state={state} busy={sim.busy||compareBusy} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
-          {state && !showComparison && <ExperimentPanel design={design} state={state} busy={sim.busy} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
+          {state && <ExperimentPanel design={design} state={state} busy={sim.busy} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && <Trend history={sim.history} />}
           {showComparison && (
             <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
