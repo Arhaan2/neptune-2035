@@ -1,0 +1,30 @@
+# Phase 5 declared demonstrations
+
+Simulated, design-stage prototype; physical validation pending.
+
+Use the **Phase 5 · Controlled electrical transfer** section in the real application. Select **Eligible feeder failure**, then **Compare Generation II / III**. Four actual workers execute Generation II faulted/unfaulted and Generation III faulted/unfaulted. **Export Phase 5 comparison** preserves both designs, actual initial checkpoints, disturbance assets, definitions, complete outcomes, costs, switch state and transition history. Each individual project export imports through the existing project compatibility and replay path.
+
+For inspection, select the case and **Load Phase 5 reference**. This deliberately installs the opt-in Generation III transfer preset and prepares its declared experiment at zero seconds. **Run loaded Phase 5 experiment** runs it through the existing worker; **Step experiment 1 s** permits inspection before isolation, during the delay and after transfer. The transfer inspector links actual physical assets and shows original/tie positions, supplying paths, admitted/unserved load, binding capacity and reasons. **Reset** uses the existing safe initialization path. Clearing the original fault after transfer leaves its isolator open.
+
+The principal reference is intentionally sparse: three complete physical platforms with one single-node module each, eight accelerators per platform, 24 requested/provisioned accelerators. Full installed module pumps, fans, controls and network auxiliaries remain included despite sparse compute. This is a fast operational test specimen, not an economical campus design. Both architectures declare workload0.8, seawater291.15K, identical required cluster/external network, no battery energy/power, cold initial conditions, a12s observation, fault at2s and5s recovery dwell. Generation III's configured2.375s delay executes at4.375s, between the ordinary one-second boundaries. Geometry-dependent hydraulic differences are retained; platform ownership and installed IDs remain unchanged when active power changes.
+
+The suite was declared in `src/twin/transfer/demonstrations.ts` before numerical outputs were observed. Disturbances map to physical recipient `platform-002` and, for partial restoration, `platform-003`. Generation II's switchboard is its receiving distribution domain; Generation III has separate original `segment-feeder` and `receiving-bus` assets. Tie-only failures are intentionally installed only in Generation III and documented in the exported definitions.
+
+| Case | II unmet accelerator-s | III unmet accelerator-s | III final service | Result |
+| --- | ---: | ---: | ---: | --- |
+| Eligible feeder | 80 | 19 | 24 | Platform002 restored at4.375s; recovery onset4.375s and confirmed9.375s |
+| Receiving bus | 80 | 80 | 16 | Receiving failure remains failed; no transfer benefit |
+| Transfer disabled | 80 | 80 | 16 | Same III hardware, policy disabled |
+| Partial/shared donor | 160 | 99 | 16 | Platform002 admitted; indivisible platform003 refused |
+| Common source | 240 | 240 | 0 | Same shore source cannot provide independent-feed benefit |
+| Tie unavailable | 80 | 80 | 16 | Required tie unavailable |
+| Donor unavailable | 168 | 168 | 8 | Donor failure at1s, recipient feeder at2s |
+| Representative campus | 51,200 | 51,200 | 5,128 | Valid10,248-accelerator campus has insufficient donor spare |
+
+These are Building's native engine observations on the implementation slice; release acceptance and independent measurements are recorded separately. All four unfaulted runs in each comparison have zero unmet requirement. The eligible signed III-minus-II difference is−61 accelerator-seconds and−7.625s service violation. The faulted cases remain whole-run FAIL against the declared zero-interruption success limit, even when recovered; transfer success does not overwrite experiment failure.
+
+The partial case constrains the existing donor input connection `shore/grid>platform-001/transformer:power` to140,000W in both designs. Native required load is62,076.364624W. Platform002 requires62,076.364624W including cooling/network/conversion;15,847.270751W remains, insufficient for platform003's62,080.115928W bundle. The latter remains unserved. Hardware ratings/ports are unchanged. The representative campus requires7.148321MW for its affected5,120-accelerator platform while the donor has only1.651679MW spare; the policy correctly refuses it. No fractional platform or additional generation capacity is invented.
+
+Generation III adds two generic ties, two original-path isolators and two receiving buses. Their assumed equipment price is USD160,000; the existing20% installation plus25% contingency produces an included-cost difference of USD240,000. Combined added equipment mass is2,800kg with declared fixed dimensions. These are generic reference assumptions, not vendor specifications or prices. Switching transients, protection coordination, independent actuator/standby power, incremental tie/bus losses, cabling/civil works, commissioning and physical validation are excluded. Existing transformer/distribution losses and network/pump auxiliaries remain in the calculations. The report exports full included-cost rows and exclusions.
+
+Legacy Generation III designs and experiments without the optional transfer extension retain their prior non-transferring behavior. Transfer uses design/state extension1, policy `platform-transfer-1`, topology `single-hop-radial-1`, model `neptune-transfer-1`, algorithm `transfer-boundary-1` and solver2.3.0. Project/state schema3 and existing whole-run metrics `whole-run-1` continue; off-step internal interval boundaries are explicitly checkpointed and checked against metric interval counts. External events and exported checkpoints retain integer-second admission. Transferred topology remains radial; meshed/parallel sources, automatic retransfer, optimization, physical control and training-throughput prediction remain outside the supported envelope.
