@@ -354,6 +354,37 @@ test('PH7 C3 walkthrough pause user takeover and emulated hidden visibility pres
   await info.attach('C3-guidance-interruption', { body: JSON.stringify({ pointerAndKeyboard: 'native', hiddenTabEvent: 'document.hidden emulated in desktop browser; physical background-tab behavior not asserted', checkpointUnchanged: true }), contentType: 'application/json' });
 });
 
+test('PH7 D06 imported completed decision history retains supplied provenance in its displayed context', async ({ page }, info) => {
+  await setup(page);
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const exported: DecisionExport = await downloadJSON(page, () => button(page, 'Export decision campaign').click());
+  await page.getByLabel('Import decision campaign', { exact: true }).setInputFiles({ name: 'supplied-decision.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
+  await expect(page.getByTestId('decision-recommendation')).toContainText('Imported supplied evidence');
+  await page.getByTestId('decision-row-iii-24').getByRole('button', { name: 'Inspect candidate', exact: true }).click();
+  await button(page, 'Inspect completed run history').click();
+  await expect(main(page)).toHaveAttribute('data-inspection-status', 'resolved');
+  const context = page.getByTestId('inspection-context');
+  await info.attach('D06-imported-completed-origin', { body: await context.innerText(), contentType: 'text/plain' });
+  await expect(context).toContainText(/supplied|imported/i);
+  await expect(page.getByTestId('asset-context')).toContainText(/supplied|imported/i);
+});
+
+test('PH7 D06 fresh reset replaces an imported checkpoint origin instead of retaining a stale source label', async ({ page }, info) => {
+  await setup(page);
+  const project = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  await page.getByLabel('Import project', { exact: true }).setInputFiles({ name: 'supplied-project.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(project)) });
+  await expect(main(page)).toHaveAttribute('data-ready', 'true');
+  await expect(page.getByTestId('inspection-context')).toContainText(/supplied|imported/i);
+  await button(page, 'Reset state').click();
+  await expect(button(page, 'Step 10s')).toBeEnabled();
+  await expect(main(page)).toHaveAttribute('data-time', '0');
+  const context = page.getByTestId('inspection-context');
+  await info.attach('D06-fresh-reset-origin', { body: await context.innerText(), contentType: 'text/plain' });
+  await expect(context).not.toContainText(/supplied|imported/i);
+  await expect(context).toContainText(/simulated/i);
+});
+
 for (const editedInput of ['fixture', 'recovery policy'] as const) {
   test(`PH7 D01 historical candidate inspection preserves original evidence after ${editedInput} edit`, async ({ page }, info) => {
     const errors: string[] = [];
