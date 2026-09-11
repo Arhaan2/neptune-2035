@@ -30,6 +30,9 @@ The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `
 | `878305d` | Fixing `f72d257b` | Post-controller settling, terminal recovery and missing-measurement repair |
 | `4eccabf` | Testing + integrated repair | 102/102 focused Phase4 cases passed on an identical root/Testing source tree |
 | `64e0988` | Building `b1b1f68` | Bounded paired runner, signed comparisons, reports and reproducible signature definitions |
+| `626d67a` | Building `bf9f18a` | Real experiment controls, reports, history comparison and exports |
+| `7311c42` | Testing `4b78440` | 12 independent pairing/signature/envelope cases passed |
+| `bdc8fbe` | Testing `72cae78` | Six real browser journeys and independently reproduced settling/pairing defects |
 
 No main/Pages publication or final acceptance has occurred. Commit identity in this ledger documents the actual integrated slice; it is not a claim that subsequent whole-phase gates passed.
 
@@ -43,4 +46,4 @@ Then root obtains exact-candidate independent review and CI, rechecks main and t
 
 ## Agent-resumption limitation observed during integration
 
-After the second Fixing checkpoint completed, three attempts to resume the existing independent `/root/verification` agent returned `agent thread limit reached`. Both relative and canonical targets were tried. Live-agent inventory showed root/Building/Testing running and Fixing completed. Interrupting the completed Fixing agent did not release the limit; no close-agent capability is exposed. No global settings or spending configuration were changed. This limitation does not invalidate the actual five-role overlap and prior verification receipts, but final independent core/candidate/public verification remains a required unmet gate until resumption succeeds. Implementation and independent Testing continue.
+After the second Fixing checkpoint completed, three attempts to resume the existing independent `/root/verification` agent returned `agent thread limit reached`. Both relative and canonical targets were tried. Live-agent inventory showed root/Building/Testing running and Fixing completed. Interrupting the completed Fixing agent did not release the limit; no close-agent capability is exposed. No global settings or spending configuration were changed. This limitation does not invalidate the actual five-role overlap and prior verification receipts, and no verification gate was waived. After Building completed its UI checkpoint, resuming the same Verification agent succeeded; independent integrated review then reproduced additional settling, recovery-reference, comparison and replay defects. Fixing resumed for those repairs while Testing supplied independent regressions. Final candidate and public-artifact reviews remain required.
