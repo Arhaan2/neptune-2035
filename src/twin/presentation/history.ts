@@ -1,4 +1,5 @@
 import { resolveAsset } from '../assets/design';
+import { engineeringIdentity } from '../catalog/equipment';
 import { conservationResiduals } from '../analysis/reports';
 import { advanceWithStep, summarizeObservedBoundary } from '../engine/simulation';
 import { replayExperimentState } from '../experiment/runner';
@@ -20,7 +21,7 @@ export interface InspectionResolution {
 }
 /** Stable throughout stepping/pause; recorded input/design/initial-condition changes invalidate the view. */
 export function inspectionRunIdentity(design: Design, state: SimulationState | null): string {
-  return identity({ design: state?.designIdentity ?? design.revision, definition: state?.experiment?.definition ?? null, initial: state?.experiment?.initialStateIdentity ?? null, inputs: state?.experiment?.inputs ?? state?.events ?? [] });
+  return identity({ design: engineeringIdentity(design), sourceDesign: state?.designIdentity ?? null, definition: state?.experiment?.definition ?? null, initial: state?.experiment?.initialStateIdentity ?? null, inputs: state?.experiment?.inputs ?? state?.events ?? [] });
 }
 
 function compactSamples(samples: InspectionSample[]): InspectionSample[] {
