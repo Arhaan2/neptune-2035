@@ -15,7 +15,7 @@ Durable ignored evidence: `/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/pha
 
 ## Actual parallel work
 
-The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `/root/verification`. The effective ceiling is four agents including root, not five simultaneous agents. All three workers overlapped for reconnaissance/contract review. Verification completed its initial read-only receipt before the planned Fixing rotation. A distinct Fixing agent starts only when a reproduced defect is ready; its participation must be recorded when it occurs.
+The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `/root/verification`. The effective ceiling is four agents including root, not five simultaneous agents. All three workers overlapped for reconnaissance/contract review. Verification completed its initial read-only receipt before the planned Fixing rotation. Distinct agent `/root/fixing` then repaired reproduced PH4-T01/T01b while Building and Testing continued. A live-agent inventory confirmed root + Building + Testing + Fixing concurrently. Verification returned after the isolated repair for independent review.
 
 | Integrated root commit | Origin / role | Result |
 | --- | --- | --- |
@@ -24,6 +24,9 @@ The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `
 | `024f568` | Testing `8cfdd89` | Frozen synthetic400 accelerator-second arithmetic oracle |
 | `61bc952` | Root | Independent contract receipt, baseline gap, mandatory Phase4 browser CI and release metadata |
 | `22cb8fd` | Building `4e7097bb` | Versioned definitions/criteria/types; builder and root typecheck passed |
+| `d32704c`, `e7b59a5`, `cf55820` | Testing | 23 definition checks; reproduced direct-inventory overstatement and upstream-transformer omission |
+| `46d6800` | Fixing `41c9281f` | Isolated footprint repair; Testing independently rechecked exact tree with 23/23 passed |
+| `4fb8fca` | Building `49c2890b` | Canonical interval metrics, pending recovery, atomic checkpoint extension and worker integration; root typecheck passed, focused numerical gate pending |
 
 No main/Pages publication or final acceptance has occurred. Commit identity in this ledger documents the actual integrated slice; it is not a claim that subsequent whole-phase gates passed.
 

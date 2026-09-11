@@ -14,7 +14,7 @@ Four concurrent agents including root are supported. Five distinct roles rotate:
 | Building | `/root/building` | Production `src/twin/**` and affected existing UI; successive completed slices |
 | Testing | `/root/testing` | Independent Phase 4 tests and browser journeys; immutable integrated candidate gates |
 | Verification | `/root/verification` | Independent read-only review; durable review receipts |
-| Fixing | Pending initial review checkpoint | Only reproduced defects in explicitly transferred completed surfaces; regression tests coordinated with Testing |
+| Fixing | `/root/fixing` | Only reproduced defects in explicitly transferred completed surfaces; regression tests coordinated with Testing |
 
 Writers use separate branches/worktrees of the isolated clone. Root records every integrated commit and ownership transfer in the execution log. Raw reports, traces, recovery bundle and rollback tar are retained in the original workspace's ignored `artifacts/phase-4-20260911/`, outside the disposable worktrees.
 
