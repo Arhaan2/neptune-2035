@@ -7,6 +7,7 @@ import { updateEconomicAssumptions, engineeringIdentity } from '../src/twin/cata
 import { parseProject, projectFile, restoreProject, serializeProject, compatibilityFor } from '../src/twin/persistence/project';
 import { validateState } from '../src/twin/persistence/state';
 import { createTransferReferenceDesign } from '../src/twin/transfer/design';
+import { transferDemonstration } from '../src/twin/transfer/demonstrations';
 import type { SimulationState } from '../src/twin/types';
 
 const design = createTransferReferenceDesign(), feeder = design.transfer!.routes[0].originalFeederId;
@@ -109,4 +110,25 @@ describe('PH5 G/H checkpoint corruption cannot fabricate switch or capacity evid
   it('rejects missing donor evidence path', () => rejects(state => { state.transfer!.attempts[0].donorPath = []; }));
   it('rejects reversed original path evidence', () => rejects(state => { state.transfer!.attempts[0].originalPath.reverse(); }));
   it('rejects a current attempt contradicting its final recorded transition', () => rejects(state => { state.transfer!.transitions.at(-1)!.admittedW = 0; }));
+  it('rejects exported closure history that predates the declared transfer deadline', () => {
+    const project = projectFile(design, run());
+    project.checkpoint!.state.transfer!.transitions.find(transition => transition.status === 'transferred')!.timeS = 3;
+    expect(() => parseProject(JSON.stringify(project))).toThrow();
+  });
+  it('rejects forged unserved watts on a blocked whole-platform allocation', () => {
+    const fixture = transferDemonstration('partial').find(fixture => fixture.generation === 3 && fixture.role === 'faulted')!;
+    const state = advance(fixture.design, initialize(fixture.design, fixture.definition), 12);
+    const project = projectFile(fixture.design, state), attempt = project.checkpoint!.state.transfer!.attempts.find(attempt => attempt.status === 'blocked')!;
+    expect(attempt.unservedW).toBeGreaterThan(60000);
+    attempt.unservedW = 1;
+    expect(() => parseProject(JSON.stringify(project))).toThrow();
+  });
+  it('rejects a closed transferred path claiming isolation was unconfirmed even with matching history and counters', () => {
+    const project = projectFile(design, run()), transfer = project.checkpoint!.state.transfer!;
+    transfer.attempts[0].reason = 'ISOLATION_UNCONFIRMED';
+    transfer.transitions.find(transition => transition.status === 'transferred')!.reason = 'ISOLATION_UNCONFIRMED';
+    delete transfer.transitionCounts.TRANSFERRED;
+    transfer.transitionCounts.ISOLATION_UNCONFIRMED = 1;
+    expect(() => parseProject(JSON.stringify(project))).toThrow();
+  });
 });
