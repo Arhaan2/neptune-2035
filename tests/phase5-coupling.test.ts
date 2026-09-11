@@ -101,4 +101,25 @@ describe('PH5 V02 installed standby dependency and actual restoration demand', (
       expect(attempt.admittedW + 1e-6).toBeGreaterThanOrEqual(recipient.gridW + platformNetworkW / donorEfficiency);
     }
   });
+  it.each([125000, 126000])('protects native donor demand with replacement standby under a %i W shared feeder', capacityW => {
+    let design = createTransferReferenceDesign();
+    const donorModule = design.modules.find(module => module.platformId === 'platform-001')!;
+    design = replaceEquipment(design, `${donorModule.id}/pump-standby`, 'pump-physical');
+    const edge = design.connections.find(edge => edge.from === 'shore/grid' && edge.to === 'platform-001/transformer')!;
+    edge.capacity = capacityW; design.revision = `native-standby-limit-${engineeringIdentity(design)}`;
+    const state = run(design, [{ id: 'native-duty-fails', kind: 'trip', timeS: 0, assetId: `${donorModule.id}/pump-duty` }, events(design)[0]], 20);
+    const attempt = state.transfer!.attempts[0], native = state.modules.find(module => module.id === donorModule.id)!;
+    expect(native.availableAccelerators).toBe(8);
+    if (capacityW === 125000) {
+      expect(attempt.status).not.toBe('transferred'); expect(attempt.admittedW).toBe(0);
+    } else {
+      expect(attempt.status).toBe('transferred');
+      expect(state.modules.find(module => module.id.startsWith('platform-002/'))!.availableAccelerators).toBe(8);
+      const resource = state.transfer!.resources.find(resource => resource.id === `edge:${edge.id}`)!;
+      const platformNetworkW = design.assets.find(asset => asset.id === 'platform-001/cluster')!.ratings.capacityW;
+      const efficiency = design.assets.find(asset => asset.id === 'platform-001/transformer')!.ratings.efficiency;
+      expect(resource.nativeW + 1e-6).toBeGreaterThanOrEqual(native.gridW + platformNetworkW / efficiency);
+      expect(resource.nativeW + resource.transferredW).toBeLessThanOrEqual(capacityW + 1e-6);
+    }
+  });
 });
