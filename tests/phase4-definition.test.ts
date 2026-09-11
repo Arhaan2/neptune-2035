@@ -11,7 +11,9 @@ const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 72, workl
 describe('PH4 reproducible definition contract', () => {
   it('binds physical design, workload, environment, controller, versions, criteria and supported timestep', () => {
     const definition = createExperimentDefinition(design, { durationS: 20 });
-    expect(definition).toMatchObject({ durationS: 20, physicalIdentity: engineeringIdentity(design), designRevision: design.revision, modelId: 'neptune-reference-3', solverVersion: '2.3.0', algorithmId: 'committed-boundary-1', metricsVersion: METRICS_VERSION, integrationStepS: 1 });
+    // V8-05 repairs exchanger arithmetic; new definitions must carry the new exact
+    // numerical identity. Old 2.3.0 fixture semantics are tested separately.
+    expect(definition).toMatchObject({ durationS: 20, physicalIdentity: engineeringIdentity(design), designRevision: design.revision, modelId: 'neptune-reference-3', solverVersion: '2.3.1', algorithmId: 'committed-boundary-1', metricsVersion: METRICS_VERSION, integrationStepS: 1 });
     expect(definition.workload).toMatchObject({ requiredAccelerators: 72, utilization: 0.2, requireClusterNetwork: true });
     expect(definition.workload.profile.length).toBeGreaterThan(0);
     expect(definition.controllerPolicy.length).toBeGreaterThan(0);
