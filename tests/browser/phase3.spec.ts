@@ -51,7 +51,7 @@ test('PH3 nominal and undersized inspection, real worker, revision history, fail
   await changeNumber(page, 'Supply ceiling', '100');
   await preset(page, 'scalable-reference');
   await expect(page.locator('canvas')).toBeVisible();
-  await expect(page.getByText('Simulated, design-stage prototype; physical validation pending.', { exact: true })).toBeVisible();
+  await expect(page.locator('.twin-mode').getByText('Simulated, design-stage prototype; physical validation pending.', { exact: true })).toBeVisible();
   await expect(page.getByTestId('network-design-name')).toHaveText('Scalable reference network');
   await expect(page.getByTestId('network-provisioning')).toContainText('Installed design demand: satisfied');
   await expect(page.getByTestId('network-provisioning')).toContainText('4,001 provisioned nodes');
