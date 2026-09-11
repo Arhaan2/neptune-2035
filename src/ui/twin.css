@@ -10,3 +10,10 @@
 .twin-mode{position:sticky;top:0;z-index:60}.twin-scene-shell,.twin-compare{scroll-margin-top:55px}
 /* Recovery actions stay within their notice when its container is narrow. */
 .twin-notice{flex-wrap:wrap}
+.twin-network{border-top:1px solid var(--line);margin-top:20px;padding-top:4px;min-width:0;font-size:12px}
+.twin-network>div{border-left:2px solid #486c73;padding-left:9px;margin:15px 0}
+.twin-network-table{max-width:100%;max-height:350px;overflow:auto}
+.twin-network-table table{width:100%;table-layout:fixed}
+.twin-network-table td,.twin-network-table th{overflow-wrap:anywhere}
+.twin-network-link{border-top:1px solid var(--line);padding:10px 0}
+.twin-network button{max-width:100%;white-space:normal;overflow-wrap:anywhere}

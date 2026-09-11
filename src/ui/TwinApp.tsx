@@ -20,7 +20,11 @@ import {
   DEFAULT_CONFIG,
   moduleAssets,
   resolveAsset,
+  withNetworkPreset,
+  withNetworkConnectionEnabled,
 } from '../twin/assets/design';
+import type { NetworkPreset } from '../twin/network-contract';
+import { TwinNetworkPanel } from './TwinNetworkPanel';
 import {
   billOfEquipment,
   conservationResiduals,
@@ -265,13 +269,23 @@ export default function TwinApp() {
     setResetId((v) => v + 1);
     setDemo(false);
   };
-  const setDesign = (patch: Partial<DesignConfig>) => {
+  const retainBeforeRevision = (label: string) => {
+    if (!state || sim.busy) throw Error('Wait for the current worker operation to complete before changing the design.');
+    const history = [...saved.slice(-(CONTRACT.maxSavedScenarios - 1)), {name: `${label} · ${state.timeS}s`, project: sim.captureProject()}];
+    const serialized = JSON.stringify(history.map(item => ({name: item.name, project: JSON.parse(serializeProject(item.project))})));
+    preflightJSON(serialized); validateStructure(history);
+    localStorage.setItem('neptune-v2-scenarios', serialized);
+    setSaved(history); sim.cancel(); setPendingProject(null);
+  };
+  const setDesign = (patch: Partial<DesignConfig>, nominalPreset = false) => {
     try {
       const next = { ...config, ...patch };
       if(Object.keys(patch).every(key=>key==='budgetUSD')) {
         setConfig(next);setDesignOverride({...design,config:next});setNotice('Economic budget updated. Physical state and engineering identity retained.');return;
       }
-      const nextDesign = reconfigureDesign(design,patch);
+      const startingDesign = nominalPreset && !equipmentFor(design).networkDesign ? withNetworkPreset(design, 'scalable-reference') : design;
+      const nextDesign = reconfigureDesign(startingDesign, patch);
+      retainBeforeRevision('Before design change');
       if (!resolveAsset(nextDesign, selectedId))
         setSelectedId(`${nextDesign.modules[0].id}/pump-duty`);
       setDesignOverride(nextDesign);
@@ -279,11 +293,27 @@ export default function TwinApp() {
       setInside(false);
       setDemo(false);
       setNotice(
-        'Design revision changed. Clock, stored energy and thermal state reinitialized; simulation paused.',
+        'Design revision changed. Previous experiment saved in Compare. Clock, stored energy and thermal state reinitialized; simulation paused.',
       );
     } catch (e) {
       setNotice(String(e));
     }
+  };
+  const applyNetwork = (preset: NetworkPreset) => {
+    try {
+      const next = withNetworkPreset(design, preset);
+      retainBeforeRevision('Before network change');
+      setDesignOverride(next); setConfig(next.config); select('shore/cluster-core');
+      setNotice('Network applied as a new design revision. Prior checkpoint and events saved in Compare; new run paused at 0 s. Old observation mappings remain incompatible.');
+    } catch (problem) { setNotice(`Network change was not applied; current run retained. ${String(problem)}`); }
+  };
+  const changeNetworkConnection = (id: string, enabled: boolean) => {
+    try {
+      const next = withNetworkConnectionEnabled(design, id, enabled);
+      retainBeforeRevision('Before network link change');
+      setDesignOverride(next); setConfig(next.config); setDemo(false);
+      setNotice(`Network link ${enabled ? 'enabled' : 'disabled'} in a new design revision. Prior run saved in Compare; new run paused at 0 s. No alternate routing is modeled.`);
+    } catch (problem) { setNotice(`Link change was not applied; current run retained. ${String(problem)}`); }
   };
   useEffect(() => {
     if (state && pendingProject) {
@@ -666,6 +696,7 @@ export default function TwinApp() {
           <i /> Design-stage digital twin · Simulated operation
         </span>
         <span>Public prototype — simulated, design-stage model</span>
+        <span>Simulated, design-stage prototype.</span>
         <span>{design.revision} · 1 world unit = 1 m</span>
       </div>
       <div className="twin-layout">
@@ -680,6 +711,7 @@ export default function TwinApp() {
               <button
                 key={g}
                 className={config.generation === g ? 'active' : ''}
+                disabled={sim.busy || !state}
                 onClick={() => setDesign({ generation: g as 1 | 2 | 3 })}
                 aria-label={`Design family ${romans[g - 1]}`}
               >
@@ -691,6 +723,7 @@ export default function TwinApp() {
             Starting scenario
             <select
               aria-label="Starting scenario"
+              disabled={sim.busy || !state}
               value=""
               onChange={(e) => {
                 const count = Number(e.target.value);
@@ -704,7 +737,7 @@ export default function TwinApp() {
                         : count === 500000
                           ? 1.2e9
                           : 10e9,
-                });
+                }, true);
               }}
             >
               <option value="" disabled>
@@ -1430,12 +1463,14 @@ export default function TwinApp() {
                   onChange={setCostScale}
                 />
                 <p>
-                  Included-scope estimate ${num(cost.totalUSD / 1e6, 1)} million
+                  {cost.completeWithinIncludedScope ? 'Included-scope estimate' : 'Known included-scope subtotal'} ${num(cost.totalUSD / 1e6, 1)} million
                   · dated {cost.date}. Editable cost multiplier explores
                   sensitivity; range {num(cost.rangeUSD[0] / 1e6)}–
                   {num(cost.rangeUSD[1] / 1e6)} million is not a confidence
                   interval.
                 </p>
+                {!cost.completeWithinIncludedScope && <p>Missing declared prices: {cost.missingCostAssetIds.join(', ')}. This subtotal is incomplete.</p>}
+                <p>{cost.networkAccounting}</p>
                 <table>
                   <thead>
                     <tr>
@@ -1533,6 +1568,7 @@ export default function TwinApp() {
               )}
             </dl>
           )}
+          <TwinNetworkPanel design={design} state={state} busy={sim.busy} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} />
           {asset?.type==='pump'&&installedSpec&&(
             <section aria-label="Replace installed pump">
               <h3>Replace installed pump</h3>

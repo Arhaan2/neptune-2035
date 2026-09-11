@@ -6,6 +6,19 @@ import { execFileSync } from 'node:child_process';
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const sourceSha = git('rev-parse', 'HEAD');
+const argument = key => process.argv.find(value => value.startsWith(`--${key}=`))?.slice(key.length + 3);
+const production = argument('channel') === 'production';
+const releaseEvidence = production ? {
+  validatedFeatureSha: argument('validated-sha'),
+  sourceCI: argument('ci'),
+  pullRequest: argument('pr'),
+  preservedRollback: argument('rollback'),
+  preservedPreviewTree: argument('preview-tree'),
+} : {};
+if (production && (git('branch', '--show-current') !== 'main' || Object.values(releaseEvidence).some(value => !value)))
+  throw Error('Production packaging requires accepted main and validated-sha, ci, pr, rollback and preview-tree evidence.');
+if (production && git('rev-parse', `${releaseEvidence.validatedFeatureSha}^{tree}`) !== git('rev-parse', 'HEAD^{tree}'))
+  throw Error('Accepted main tree differs from the independently verified candidate.');
 const dirty = git(
   'status',
   '--porcelain',
@@ -54,16 +67,25 @@ await fs.writeFile('dist/build-manifest.json', manifestText);
 const release = {
   product: 'NEPTUNE',
   version: pkg.version,
-  channel: 'separate-preview',
+  channel: production ? 'production' : 'separate-preview',
   sourceSha,
   sourceBranch: git('branch', '--show-current'),
+  sourceTree: git('rev-parse', 'HEAD^{tree}'),
+  lockSha256: createHash('sha256').update(await fs.readFile('package-lock.json')).digest('hex'),
   builtAt: new Date().toISOString(),
   artifactSha256,
   artifactIdentity:
     'SHA-256 of build-manifest.json; its file entries hash all compiled/static files except the two identity manifests.',
-  qualifier: 'Design-stage digital twin · Simulated operation',
+  qualifier: 'Simulated, design-stage prototype.',
   physicalValidation: 'pending',
-  productionPromotion: 'not performed',
+  ...(production ? {
+    ...releaseEvidence,
+    publicURL: 'https://arhaan2.github.io/neptune-2035/',
+    releaseScope: 'Phase 3 workload persistence and explicit scalable network resources; physical validation, training throughput, Phase 4/5 and previously deferred Phase 1 performance/stress gates remain outside scope',
+    modelId: 'neptune-reference-3',
+    solverVersion: '2.3.0',
+    projectSchema: 3,
+  } : { productionPromotion: 'not performed' }),
 };
 await fs.writeFile(
   'dist/release.json',

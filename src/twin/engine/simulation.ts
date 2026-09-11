@@ -4,6 +4,7 @@ import { SOLVER_VERSION, type Asset, type Design, type ModuleSpec, type ModuleSt
 import { allocateGrid, nodeDrawW, solveElectrical } from '../solvers/electrical';
 import { solveHydraulics, type HydraulicResult } from '../solvers/hydraulic';
 import { advanceThermal } from '../solvers/thermal';
+import { createNetworkPowerEvaluator, assessNetworkPower } from '../solvers/network-power';
 import { createNetworkEvaluator, type NetworkIssue } from '../solvers/network';
 
 import { CONTRACT, INTEGRATION_STEPS, type IntegrationStep } from '../persistence/limits';
@@ -18,12 +19,12 @@ export { validateEvent } from '../persistence/events';
 const MAX_LOG = CONTRACT.maxLogEntries;
 const ZERO_HYDRAULIC: HydraulicResult = { flowM3S:0, pressurePa:0, electricalW:0, reynolds:0, darcyFactor:0, headResidualPa:0, massResidualKgS:0, iterations:0 };
 interface ModuleContext { equipment:ReturnType<typeof resolveModuleEngineering>; module:ModuleSpec; ancestors:string[]; pathCapacityW:number; supported:boolean; technicalLengthM:number; seawaterLengthM:number }
-interface Context { modules:ModuleContext[]; assets:Map<string,Asset>; hydraulicCache:Map<string,HydraulicResult>; network:ReturnType<typeof createNetworkEvaluator> }
+interface Context { modules:ModuleContext[]; assets:Map<string,Asset>; hydraulicCache:Map<string,HydraulicResult>; network:ReturnType<typeof createNetworkEvaluator>; networkPower:ReturnType<typeof createNetworkPowerEvaluator> }
 function context(design:Design):Context {
   const assets = new Map(design.assets.map(a => [a.id,a]));
   const incoming = new Map<string,typeof design.connections>();
   for (const edge of design.connections) if (edge.medium === 'power' && edge.enabled) incoming.set(edge.to,[...(incoming.get(edge.to)??[]),edge]);
-  return { assets, hydraulicCache:new Map(), network:createNetworkEvaluator(design), modules:design.modules.map(module => {
+  return { assets, hydraulicCache:new Map(), network:createNetworkEvaluator(design,undefined,{includeResources:false}), networkPower:createNetworkPowerEvaluator(design), modules:design.modules.map(module => {
     const ancestors:string[]=[]; let id=module.powerDomainId, capacity=design.config.supplyW, supported=true;
     while (id !== 'shore/grid') {
       if (ancestors.includes(id)) { supported=false; break; }
@@ -128,15 +129,16 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     for(const rid of failedRacks){const rack=Number(rid.split('/rack-')[1]);operableNodes-=Math.min(4,Math.max(0,c.module.nodeCount-(rack-1)*4));}
     for(const f of failed)if(f.startsWith(`${id}/rack-`)&&f.includes('/node-')&&!failedRacks.has(f.split('/node-')[0]))operableNodes--;
     const desiredNodes=disabled?0:Math.max(0,Math.floor(operableNodes*m.throttle));
-    const criticalW=technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW;
+    const criticalW=technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW+(isFailed('rack-network')?0:c.equipment.network?.ratings.capacityW??0);
     const gridLive=!disabled&&c.supported&&!c.ancestors.some(a=>failed.has(a));
     // Spare upstream power may recharge storage only after module loads; solveElectrical forbids simultaneous charge/discharge.
     const maxChargeW=Math.min(c.equipment.battery.ratings.storageMaxW,Math.max(0,c.equipment.battery.ratings.energyWh-m.batteryWh)*3600/(c.equipment.electrical.chargeEfficiency*(dtS||1)))/c.equipment.electrical.gridEfficiency;
     return {c,m,disabled,techBlocked,seaBlocked,technical,seawater,networkAvailable:true,desiredNodes,criticalW,gridLive,maxChargeW,previousStates,transitions};
   });
+  const networkPower=ctx.networkPower(state.failedAssetIds);
   const domainLimits=new Map<string,number>();
-  for(const d of demands)domainLimits.set(d.c.module.powerDomainId,d.c.pathCapacityW);
-  const supply=failed.has('shore/grid')?0:design.config.supplyW;
+  for(const d of demands)domainLimits.set(d.c.module.powerDomainId,Math.max(0,d.c.pathCapacityW-(networkPower.domainGridW.get(d.c.module.powerDomainId)??0)));
+  const supply=failed.has('shore/grid')?0:Math.max(0,design.config.supplyW-networkPower.gridW);
   const blockedDomains=new Set<string>(),networkIssues=new Map<string,NetworkIssue>();
   const planElectrical=()=>{
     for(const d of demands)d.networkAvailable=!blockedDomains.has(d.c.module.networkDomainId);
@@ -156,7 +158,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
   // Offered demand is based on energized inventory even while jobs wait. This avoids idle/overload oscillation.
   // Blocking is monotone within a timestep and releases on the next solve when the constraint clears.
   for(let pass=0;pass<8;pass++){
-    const assessment=ctx.network(electricalPlan.map((e,i)=>({id:demands[i].m.id,energizedNodes:e.energizedNodes})),state.failedAssetIds);
+    const assessment=ctx.network(electricalPlan.map((e,i)=>({id:demands[i].m.id,energizedNodes:e.energizedNodes})),[...state.failedAssetIds,...networkPower.unavailableAssetIds,...(design.equipment?.networkDesign?electricalPlan.flatMap((e,i)=>e.criticalPowered?[]:[`${demands[i].m.id}/rack-network`]):[])]);
     for(const issue of assessment.issues)networkIssues.set(issue.resourceId,issue);
     const newlyBlocked=assessment.blockedDomainIds.filter(id=>!blockedDomains.has(id));
     if(newlyBlocked.length===0)break;
@@ -166,6 +168,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     }
     electricalPlan=planElectrical();
   }
+  state.facilityEnergyWh+=networkPower.gridW*dtS/3600;state.gridEnergyWh+=networkPower.gridW*dtS/3600;
   for(let i=0;i<demands.length;i++){
     const d=demands[i],m=d.m,electrical=electricalPlan[i];
     // Binary circuit coupling converges in one correction: no critical power means both pump curves are disabled.
@@ -273,8 +276,9 @@ export function replay(design:Design,events:OperationEvent[],durationS:number):S
 export function summarize(design:Design,state:SimulationState):Summary {
   validateState(design,state);
   const sum=(key:keyof Pick<ModuleState,'itW'|'facilityW'|'gridW'|'pumpPowerW'|'availableAccelerators'|'batteryWh'|'electricalResidualW'|'thermalResidualW'>)=>state.modules.reduce((n,m)=>n+m[key],0);
-  const itW=sum('itW'),facilityW=sum('facilityW'),energizedAccelerators=state.modules.reduce((n,m)=>n+m.energizedNodes*8,0);
-  return finiteOutputs({timeS:state.timeS,itW,facilityW,gridW:sum('gridW'),pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
+  const rootNetworkW=assessNetworkPower(design,state.failedAssetIds).gridW;
+  const itW=sum('itW'),facilityW=sum('facilityW')+rootNetworkW,energizedAccelerators=state.modules.reduce((n,m)=>n+m.energizedNodes*8,0);
+  return finiteOutputs({timeS:state.timeS,itW,facilityW,gridW:sum('gridW')+rootNetworkW,pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
     curtailedAccelerators:Math.max(0,design.provisionedAccelerators-energizedAccelerators),maxCoolantK:Math.max(...state.modules.map(m=>m.coolantK)),batteryWh:sum('batteryWh'),
     instantaneousPUE:itW>0?facilityW/itW:null,energyPUE:state.itEnergyWh>0?state.facilityEnergyWh/state.itEnergyWh:null,
     electricalResidualW:sum('electricalResidualW'),thermalResidualW:sum('thermalResidualW'),warnings:[...new Set(state.modules.flatMap(m=>m.warnings))]},'simulation summary');
