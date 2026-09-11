@@ -46,7 +46,18 @@ try {
     const inspectionStatus = await page.locator('main.twin-app').getAttribute('data-inspection-status');
     assert(['resolved', 'current'].includes(inspectionStatus), `Walkthrough state unavailable: ${inspectionStatus}`);
     await page.locator('.twin-scene-shell').scrollIntoViewIfNeeded();
-    await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.cameraTransitioning ?? false)).toBe(false);
+    await expect.poll(() => page.evaluate(() => {
+      const scene = window.__NEPTUNE_TWIN_SCENE__, main = document.querySelector('main.twin-app');
+      return Boolean(scene && scene.selectedId === main.dataset.selected && scene.simulationTimeS === Number(main.dataset.displayTime));
+    })).toBe(true);
+    let previousPose = null, stableObservations = 0;
+    await expect.poll(async () => {
+      const scene = await page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__);
+      const pose = [...scene.camera, ...scene.target];
+      stableObservations = previousPose && pose.every((value, axis) => Math.abs(value - previousPose[axis]) < 0.015) ? stableObservations + 1 : 0;
+      previousPose = pose;
+      return stableObservations;
+    }, { intervals: [350], timeout: 12_000 }).toBeGreaterThanOrEqual(2);
     // Deliberate readable recording dwell only; readiness above is condition-based.
     await page.waitForTimeout(1500);
     const title = await walkthrough.getAttribute('data-step-title');
