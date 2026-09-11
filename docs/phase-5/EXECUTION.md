@@ -1,0 +1,26 @@
+# Phase 5 execution and ownership
+
+Simulated, design-stage prototype; physical validation pending.
+
+The current remote baseline is `1f7f16c4680d2839af8775fe75b96d3f2ce77cfa`, tree `6928aeb11bcf53c3b6d6311fe67920d81e110e7f`. The freshly verified Pages release is `b054b720b8a11c2e08e7df44eb3eb9cef1fc180b`, artifact `265911bb1063aaae182fc5d377601c328d9ca0490ad1959296294ea4c854ddf6`. The preserved preview tree is `531d00a67da4c1f2f02a22bf249d93e683b2601b`. No intervening main release was found. No standalone roadmap file was found in the current source; the supplied Phase 5 brief defines this phase's bounded scope.
+
+The original Phase 1 checkout and its two unrelated untracked files are preserved. Root recovered complete source history from the Phase 4 bundle into a separate clone, then refreshed remote refs. All writers use independent worktrees under `/private/tmp/neptune-phase5-*`; no parent-repository edits are needed. Native evidence and recovery packages live outside those worktrees at `/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/phase-5-20260911/`.
+
+The actual runtime limit is four active agents including root. Building, Testing and Verification began in parallel. Verification and Fixing rotate the remaining child slot while retaining distinct identities. No nested agents are authorized. An independent final engineering and evidence review remains mandatory.
+
+| Agent | Worktree | Ownership | Initial base | Started UTC |
+| --- | --- | --- | --- | --- |
+| `/root` | `neptune-phase5-integration` | Integration, release scripts/workflow, ledger, acceptance, remote actions | `1f7f16c` | 2026-09-11 07:20 |
+| `/root/building` | `neptune-phase5-building` | Production `src/**`, transfer contract and demonstrations docs | `1f7f16c` | 2026-09-11 07:24 |
+| `/root/testing` | `neptune-phase5-testing` | Phase 5 tests/fixtures/browser journeys, testing receipts | `1f7f16c` | 2026-09-11 07:24 |
+| `/root/verification` | `neptune-phase5-verification` | Read-only engineering review and independent probes/receipts | `1f7f16c` | 2026-09-11 07:24 |
+
+Times above are minute-level orchestration records; native evidence records exact execution times. Completion/result identities are added as work is handed off. Fixing receives a named failing commit and an explicit module lease; worktrees alone do not authorize overlapping product edits.
+
+| Milestone | Origin commit | Integrated commit | Evidence / state |
+| --- | --- | --- | --- |
+| 5A contract | Building `68b19b1` | `5f7a2bd` | Contract v1 frozen for independent review; implementation not yet accepted |
+
+Baseline full-inventory verification matched 90 tracked files: 88 public HTTP files and two Git-only `.nojekyll` markers. These are observed baseline counts, not future fixed assertions. Rollback archive extraction matched every staged byte, including the preview; recovery bundle validation confirmed complete history. These checks do not replace the fresh pre-promotion recheck.
+
+Pages is configured for the root of `codex/pages` with legacy branch deployment. Merging main alone does not publish. The authenticated account has repository/workflow access and main currently has no required branch protections; all requested acceptance and independent review gates still apply.
