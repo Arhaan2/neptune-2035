@@ -40,9 +40,12 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
   }, [campaign]);
   const stale = Boolean(result && result.campaignIdentity !== current.plan?.campaignIdentity);
   const evidenceCampaign = resultCampaign ?? campaign;
-  const inspectedPlan = result && !stale ? result.plan : current.plan;
-  const candidate = evidenceCampaign.candidates.find(item => item.id === selected) ?? campaign.candidates.find(item => item.id === selected);
-  const choices = inspectedPlan?.runs.filter(run => run.candidateId === selected) ?? [];
+  // Result rows belong to their evaluated campaign, including when the editable
+  // inputs change. Never attach a historical row to a newly planned experiment.
+  const inspectedPlan = result ? result.plan : current.plan;
+  const inspectedCampaign = result ? resultCampaign : campaign;
+  const candidate = inspectedCampaign?.candidates.find(item => item.id === selected);
+  const choices = candidate ? inspectedPlan?.runs.filter(run => run.candidateId === candidate.id) ?? [] : [];
   const selectedRun = choices.find(run => run.scenarioId === scenarioId && run.sensitivityId === sensitivityId) ?? choices[0];
   const loaded = Boolean(selectedRun && state?.experiment && identity(activeDesign) === identity(selectedRun.design) && identity(state.experiment.definition) === identity(selectedRun.definition) && identity(state.experiment.initialState) === identity(selectedRun.initialState));
   const inspect = (id: string) => {
@@ -152,6 +155,8 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
     </>}
     {!result && <div className="twin-actions">{campaign.candidates.map(item => <button key={item.id} onClick={() => inspect(item.id)}>Inspect candidate · {item.label}</button>)}</div>}
     {candidate && <section className="decision-inspection" aria-label="Decision candidate inspection"><h3>{candidate.label}</h3>
+      <p>{result ? `Inspecting the original evaluated campaign: ${inspectedCampaign!.name}. ${stale ? 'These historical results are stale for the edited inputs. Loading or running here uses the original evaluated definition; start a new campaign to evaluate the current inputs.' : 'Scenario and assumption choices use the definitions retained with these results.'}` : 'Inspecting the current campaign plan; no evaluated result is selected.'}</p>
+      {!selectedRun && <output>No matching declared run is available for this candidate. Loading and running are unavailable.</output>}
       <label>Scenario<select aria-label="Decision scenario" value={selectedRun?.scenarioId ?? ''} onChange={event => setScenarioId(event.target.value)}>{Array.from(new Set(choices.map(run => run.scenarioId))).map(id => <option key={id} value={id}>{id}</option>)}</select></label>
       <label>Assumption case<select aria-label="Decision sensitivity" value={selectedRun?.sensitivityId ?? ''} onChange={event => setSensitivityId(event.target.value)}>{Array.from(new Set(choices.map(run => run.sensitivityId))).map(id => <option key={id} value={id}>{id}</option>)}</select></label>
       <p>Inspection does not replace the active project. Loading preserves its checkpoint in Compare. Running uses this exported scenario and actual initial conditions.</p>
