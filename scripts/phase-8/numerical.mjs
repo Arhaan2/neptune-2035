@@ -7,7 +7,7 @@ import { createServer } from 'vite';
 import { root, argument, sha256, sourceIdentity, tolerances as t, resultSet, writeResults } from './results.mjs';
 
 const out = path.resolve(argument('out') ?? 'artifacts/phase-8-numerical');
-const identity = await sourceIdentity(), results = resultSet(), residualSummaries = [], timestepCases = [];
+const identity = await sourceIdentity(), results = resultSet(), residualSummaries = [], timestepCases = [], switchingSensitivityCases = [];
 const startedAt = new Date().toISOString();
 const server = await createServer({ root, configFile: false, server: { middlewareMode: true, ws: false }, appType: 'custom', optimizeDeps: { noDiscovery: true } });
 let error = null;
@@ -161,12 +161,104 @@ try {
     results.numeric(`P8-NUM/network/${accelerators}/shared-port`, core?.demandBitS, expectedDemand, 0, 'bit/s');
     results.numeric(`P8-NUM/network/${accelerators}/capacity`, core?.capacityBitS, 400e9, 0, 'bit/s');
   }
+
+  // Existing Phase 5 fixture and pre-Phase-8 independent interruption oracle.
+  const [transferDemonstrations, experimentReports] = await Promise.all([
+    server.ssrLoadModule('/src/twin/transfer/demonstrations.ts'), server.ssrLoadModule('/src/twin/experiment/report.ts'),
+  ]);
+  const transferFixture = transferDemonstrations.transferDemonstration('eligible').find(fixture => fixture.generation === 3 && fixture.role === 'faulted');
+  const transferOracleBytes = await fs.readFile(path.join(root, 'tests/fixtures/phase-5/frozen-expectations.json'));
+  const transferOracle = JSON.parse(transferOracleBytes).service;
+  const transferRuns = [];
+  for (const stepS of [1, 0.5, 0.25]) {
+    const design = transferFixture.design, def = { ...structuredClone(transferFixture.definition), integrationStepS: stepS };
+    const initial = simulation.initialize(design, def), resourceHistory = [], matched = [];
+    const state = simulation.advanceWithStep(design, initial, def.durationS, [], stepS, undefined, (timeS, snapshot) => {
+      const boundary = snapshot();
+      const resourceRows = boundary.transfer.resources.map(resource => ({ ...resource, excessW: resource.nativeW + resource.transferredW - resource.capacityW }));
+      for (const resource of resourceRows) results.numeric(`P8-NUM/transfer-step/${stepS}/${timeS}/${resource.id}/capacity-excess`, Math.max(0, resource.excessW), 0, 1e-6, 'W');
+      for (const attempt of boundary.transfer.attempts) results.exact(`P8-NUM/transfer-step/${stepS}/${timeS}/${attempt.id}/no-parallel-feed`, attempt.originalClosed && attempt.tieClosed, false);
+      results.exact(`P8-NUM/transfer-step/${stepS}/${timeS}/native-service`, boundary.modules.find(module => module.id.startsWith('platform-001/')).availableAccelerators, 8);
+      if (resourceRows.length) resourceHistory.push({ timeS, resources: resourceRows });
+      if ([2, 4.375, 5, 9.375, 12].includes(timeS)) matched.push({ timeS, modules: boundary.modules.map(module => ({ id: module.id, coolantK: module.coolantK, airK: module.airK, batteryWh: module.batteryWh, serviceableAccelerators: module.availableAccelerators })), facilityEnergyWh: boundary.facilityEnergyWh, gridEnergyWh: boundary.gridEnergyWh });
+    });
+    results.exact(`P8-NUM/transfer-step/${stepS}/completed`, state.experiment.status, 'completed');
+    results.numeric(`P8-NUM/transfer-step/${stepS}/unmet`, state.experiment.metrics.shortfallAcceleratorS, transferOracle.generationIIIShortfallAcceleratorS, t.integratedMetric, 'accelerator·s');
+    results.numeric(`P8-NUM/transfer-step/${stepS}/interruption`, state.experiment.metrics.serviceViolationS, transferOracle.generationIIIInterruptionS, t.integratedMetric, 's');
+    results.numeric(`P8-NUM/transfer-step/${stepS}/recovery-confirmation`, experimentReports.experimentRecoveryReport(state).confirmationTimeS, transferOracle.recoveryConfirmationS, t.integratedMetric, 's');
+    results.exact(`P8-NUM/transfer-step/${stepS}/internal-deadline`, state.transfer.transitions.filter(transition => transition.reason === 'TRANSFERRED').map(transition => transition.timeS), [transferOracle.transferS]);
+    results.exact(`P8-NUM/transfer-step/${stepS}/observed-capacity-resources`, resourceHistory.length > 0, true);
+    transferRuns.push({ stepS, matched, resourceHistory, metrics: state.experiment.metrics, transitions: state.transfer.transitions,
+      recovery: experimentReports.experimentRecoveryReport(state) });
+  }
+  switchingSensitivityCases.push({ id: 'phase5-eligible-transfer', source: 'src/twin/transfer/demonstrations.ts: transferDemonstration(eligible), Generation III faulted',
+    originalOracle: { path: 'tests/fixtures/phase-5/frozen-expectations.json', sha256: sha256(transferOracleBytes), service: transferOracle },
+    interpretation: 'Fixed external fault at 2 s and internal transfer deadline 4.375 s split every production resolution exactly. Discrete service area and recovery are independently fixed; no smooth convergence order is imposed.', runs: transferRuns });
+
+  // Storage depletion makes terminal power and whole-node allocation timestep-dependent.
+  // Record those differences while independently enforcing the energy boundary and reserve.
+  const storageDesign = build({ batteryWhPerModule: 1000, requireClusterNetwork: false, requireExternalNetwork: false });
+  const equipmentAPI = await server.ssrLoadModule('/src/twin/catalog/equipment.ts');
+  const storageEquipment = equipmentAPI.resolveModuleEngineering(storageDesign, storageDesign.modules[0].id);
+  results.exact('P8-NUM/storage-step/fixture-equipment', { nodePeakW: storageEquipment.electrical.nodePeakW,
+    batteryCapacityWh: storageEquipment.battery.ratings.energyWh, dischargeEfficiency: storageEquipment.electrical.dischargeEfficiency,
+    chargeEfficiency: storageEquipment.electrical.chargeEfficiency, reserveFraction: storageEquipment.electrical.batteryReserveFraction },
+  { nodePeakW: 12000, batteryCapacityWh: 1000, dischargeEfficiency: 0.95, chargeEfficiency: 0.95, reserveFraction: 0.1 });
+  const storageEvents = [{ id: 'storage-source-trip', kind: 'trip', assetId: 'shore/grid', timeS: 2 }, { id: 'storage-source-restore', kind: 'restore', assetId: 'shore/grid', timeS: 20 }];
+  const storageRuns = [], storageSampleTimes = [2, 10, 19, 20, 30, 60];
+  for (const stepS of [1, 0.5, 0.25]) {
+    const def = definition.createExperimentDefinition(storageDesign, { id: 'phase8-storage-step-sensitivity', name: 'Storage exhaustion timestep sensitivity', durationS: 60, integrationStepS: stepS, disturbances: storageEvents });
+    const initial = simulation.initialize(storageDesign, def), initialWh = initial.modules.reduce((sum, module) => sum + module.batteryWh, 0);
+    const initialCriticalW = initial.modules[0].pumpPowerW + storageEquipment.cdu.ratings.capacityW + storageEquipment.moduleSupport.ratings.capacityW;
+    const remainingUpperWh = 100 + initialCriticalW * stepS / (0.95 * 3600), matched = [], boundaryEnergy = [];
+    let rechargeObserved = false;
+    const state = simulation.advanceWithStep(storageDesign, initial, 60, [], stepS, undefined, (timeS, snapshot) => {
+      const boundary = snapshot(), batteryWh = boundary.modules.reduce((sum, module) => sum + module.batteryWh, 0);
+      const residualWh = boundary.gridEnergyWh - (batteryWh - initialWh) - boundary.facilityEnergyWh;
+      results.numeric(`P8-NUM/storage-step/${stepS}/${timeS}/energy-closure`, residualWh, 0, 1e-6, 'Wh', { equation: 'gridEnergyWh - (storedWh - initialStoredWh) - facilityEnergyWh' });
+      // No network requirement and full workload: delivered accelerator-time derives from actual integrated IT energy, not zero-dt display dispatch.
+      const independentUnmet = 1280 * timeS - boundary.itEnergyWh * 3600 * 8 / 12000;
+      results.numeric(`P8-NUM/storage-step/${stepS}/${timeS}/service-area`, boundary.experiment.metrics.shortfallAcceleratorS, independentUnmet, t.integratedMetric, 'accelerator·s', { reference: '1280*t - actual integrated IT Wh * 3600 s/h * 8 accelerators/node / 12000 W/node; full utilization and neither network requirement' });
+      for (const module of boundary.modules) {
+        results.exact(`P8-NUM/storage-step/${stepS}/${timeS}/${module.id}/reserve`, module.batteryWh >= 100 - t.batteryWh, true);
+        results.exact(`P8-NUM/storage-step/${stepS}/${timeS}/${module.id}/capacity`, module.batteryWh <= 1000 + t.batteryWh, true);
+        results.exact(`P8-NUM/storage-step/${stepS}/${timeS}/${module.id}/exclusive-actions`, module.batteryChargeW === 0 || module.batteryDischargeW === 0, true);
+        results.exact(`P8-NUM/storage-step/${stepS}/${timeS}/${module.id}/finite`, [module.coolantK, module.airK, module.batteryWh, module.gridW, module.facilityW, module.itW].every(Number.isFinite), true);
+        if (timeS >= 2 && timeS < 20) results.numeric(`P8-NUM/storage-step/${stepS}/${timeS}/${module.id}/source-lost`, module.gridW, 0, 0, 'W');
+        if (timeS === 19) {
+          results.numeric(`P8-NUM/storage-step/${stepS}/exhausted-upper-energy`, Math.max(0, module.batteryWh - remainingUpperWh), 0, t.batteryWh, 'Wh', { reserveWh: 100, initialCriticalW, remainingUpperWh });
+          results.exact(`P8-NUM/storage-step/${stepS}/exhausted-nodes`, module.energizedNodes, 0);
+          results.numeric(`P8-NUM/storage-step/${stepS}/exhausted-discharge`, module.batteryDischargeW, 0, 0, 'W');
+        }
+        if (timeS >= 20 && module.batteryChargeW > 0) rechargeObserved = true;
+      }
+      boundaryEnergy.push({ timeS, residualWh, batteryWh, independentUnmet, recordedUnmet: boundary.experiment.metrics.shortfallAcceleratorS });
+      if (storageSampleTimes.includes(timeS)) matched.push({ timeS, batteryWh, coolantK: boundary.modules[0].coolantK, airK: boundary.modules[0].airK,
+        shortfallAcceleratorS: boundary.experiment.metrics.shortfallAcceleratorS, serviceViolationS: boundary.experiment.metrics.serviceViolationS,
+        serviceableAccelerators: boundary.modules[0].availableAccelerators, facilityEnergyWh: boundary.facilityEnergyWh, itEnergyWh: boundary.itEnergyWh,
+        gridEnergyWh: boundary.gridEnergyWh, controllerTransitions: structuredClone(boundary.experiment.metrics.controllerTransitions) });
+    });
+    results.exact(`P8-NUM/storage-step/${stepS}/completed`, state.experiment.status, 'completed');
+    results.exact(`P8-NUM/storage-step/${stepS}/recharge-observed`, rechargeObserved, true);
+    storageRuns.push({ stepS, initialWh, reserveWh: 100, initialCriticalW, remainingUpperWh, matched, boundaryEnergy,
+      metrics: state.experiment.metrics, recovery: experimentReports.experimentRecoveryReport(state), controllerTransitions: state.experiment.metrics.controllerTransitions });
+  }
+  const storageDifferences = [];
+  for (const [coarse, fine] of [[storageRuns[0], storageRuns[1]], [storageRuns[0], storageRuns[2]], [storageRuns[1], storageRuns[2]]]) {
+    storageDifferences.push({ coarseStepS: coarse.stepS, fineStepS: fine.stepS,
+      matched: coarse.matched.map((sample, index) => ({ timeS: sample.timeS, differenceCoarseMinusFine: Object.fromEntries(
+        ['batteryWh', 'coolantK', 'airK', 'shortfallAcceleratorS', 'serviceViolationS', 'serviceableAccelerators', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh'].map(key => [key, sample[key] - fine.matched[index][key]])) })) });
+  }
+  switchingSensitivityCases.push({ id: 'storage-depletion-and-recovery', requestedAccelerators: 1280, workload: 1, capacityWh: 1000, reserveWh: 100,
+    durationS: 60, disturbances: storageEvents, networkRequirements: 'neither required', resolvedEquipment: storageEquipment,
+    interpretation: 'Identical cold state, source fault/restoration, controller policy and physical sample times. Energy-limited whole-node dispatch and residual usable storage can depend on timestep. Differences below are descriptive, with no convergence-order or exact-service-independence claim. Energy closure, reserve and independent service-area arithmetic remain mandatory.',
+    runs: storageRuns, differences: storageDifferences });
 } catch (problem) { error = problem.stack ?? String(problem); }
 finally {
   await server.close();
   await writeResults(out, 'numerical', identity, results, { startedAt, completedAt: new Date().toISOString(),
-    residualSummaries, timestepCases,
+    residualSummaries, timestepCases, switchingSensitivityCases,
     limitations: ['Series-circuit mass equality is structural and does not establish arbitrary hydraulic network conservation.',
-      'Timestep comparisons cover smooth thermal evolution and grid-aligned network switching; no smooth convergence order is claimed across controller discontinuities.',
+      'Timestep comparisons cover smooth thermal evolution, aligned network faults, internal transfer deadlines, and storage depletion/recovery; no smooth convergence order is claimed across controller or whole-node allocation discontinuities.',
       'Integrated transfer native-load/capacity behavior and additional storage/switching scenarios are tested by the retained acceptance suites.'] }, error);
 }
