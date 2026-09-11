@@ -26,6 +26,8 @@ Times above are minute-level orchestration records; native evidence records exac
 | Topology / allocator slice | Building `5ecc557` | `f4e63e7` | Installed transfer hardware, explicit one-hop route and atomic bundle allocator; engine integration pending |
 | Independent capacity tests | Testing `73d6ff1` | `8af798f` | Root and Testing reproduced 31/32 focused passes, one malformed-input failure; native failed JSON retained |
 | PH5-T01 repair | Fixing `176e3e0` | `f171adc` | `controller.ts` exclusive lease; duplicate resource paths now rejected; independent retest pending |
+| PH5-T01 closure / topology review | Verification `e2bcff7`, `28914d1` | `ac74550` and subsequent review receipt | 32/32 independent plus direct probe; PH5-T02 and PH5-V01 reproduced |
+| 5B engine and checkpoint slice | Building `a9d15ad` | `bd3fab1` | Root typecheck passed; Building observed24 initial/final service, fault2/closure4.375 and19 accelerator-seconds; independent integrated acceptance pending |
 
 After Verification's completed initial review, `/root/fixing` started in a distinct worktree. The actual live-agent inventory showed root, Building, Testing and Fixing concurrently active, within the four-agent limit. Verification retains its identity for later independent review.
 

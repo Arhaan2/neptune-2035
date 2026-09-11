@@ -86,6 +86,7 @@ const release = {
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',
     transferTopology: 'single-hop-radial-1',
+    transferAlgorithmId: 'transfer-boundary-1',
     transferExtensionSchema: 1,
     solverVersion: '2.3.0',
     projectSchema: 3,
