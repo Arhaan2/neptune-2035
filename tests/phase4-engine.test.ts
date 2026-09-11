@@ -129,18 +129,21 @@ describe('PH4 actual settling boundaries and state preservation', () => {
     expect(state.experiment!.evaluation.outcome).toBe('INCOMPLETE');
     expect(state.experiment!.reason).toMatch(/settling|warmup/i);
   });
-  it('cannot confirm controller-quiescent settling at a boundary where thermal control actually changes', () => {
+  it.each([false, true])('cannot confirm controller-quiescent settling at a thermal transition (checkpoint resumed: %s)', resumed => {
     const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 1280, workload: 1, pumpSpeed: 0 });
     const physicalRun = advance(design, initialize(design), 600);
     const transition = physicalRun.log.find(entry => entry.kind === 'controller' && entry.message.includes('Thermal hysteresis'));
     expect(transition).toBeDefined();
     const crossingS = transition!.timeS;
     expect(crossingS).toBeGreaterThan(0);
-    const definition = createExperimentDefinition(design, { durationS: 1, initial: { mode: 'settled', settling: { maxWarmupS: crossingS + 10, dwellS: crossingS, maxTemperatureRateKPerS: 100, maxBatteryRateWhPerS: 1000, requireControllerQuiescence: true, requireService: false, requireThermal: false } } });
-    const state = advance(design, beginExperiment(design, definition), crossingS);
+    const definition = createExperimentDefinition(design, { durationS: 1, disturbances: [{ id: 'after-settling-only', timeS: 0, assetId: 'shore/cluster-core', kind: 'trip' }], initial: { mode: 'settled', settling: { maxWarmupS: crossingS + 10, dwellS: crossingS, maxTemperatureRateKPerS: 100, maxBatteryRateWhPerS: 1000, requireControllerQuiescence: true, requireService: false, requireThermal: false } } });
+    const start = resumed ? restoreProject(parseProject(serializeProject(projectFile(design, advance(design, beginExperiment(design, definition), crossingS - 1))))).state : beginExperiment(design, definition);
+    const state = advance(design, start, resumed ? 1 : crossingS);
     expect(state.log.some(entry => entry.kind === 'controller' && entry.timeS === crossingS && entry.message.includes('Thermal hysteresis'))).toBe(true);
     expect(state.experiment!.originTimeS).toBeNull();
     expect(state.experiment!.warmup.status).toBe('warming');
     expect(state.experiment!.warmup.candidateSinceS).toBeNull();
+    expect(state.failedAssetIds).not.toContain('shore/cluster-core');
+    expect(state.appliedEventIds).not.toContain('after-settling-only');
   });
 });

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { accumulateInterval, createMetrics, observeBoundary, recoveryReport } from '../src/twin/experiment/metrics';
+import { accumulateInterval, createMetrics, evaluateExperiment, observeBoundary, recoveryReport } from '../src/twin/experiment/metrics';
 import { EXPERIMENT_LIMITS, type MetricInterval, type MetricSample, type RecoveryCriteria } from '../src/twin/experiment/types';
+import { buildDesign, DEFAULT_CONFIG } from '../src/twin/assets/design';
+import { initialize } from '../src/twin/engine/simulation';
+import { createExperimentDefinition } from '../src/twin/experiment/definition';
 import oracle from './fixtures/phase-4/arithmetic-oracle.json';
 
 const criteria: RecoveryCriteria = { dwellS: 5, capacityToleranceAccelerators: 0, coolantLimitK: 318.15, airLimitK: 313.15, temperatureToleranceK: 0, thermalComparator: 'strictly-below', scope: 'all-modules-and-required-service' };
@@ -96,6 +99,16 @@ describe('PH4 independent synthetic arithmetic and whole-window meaning', () => 
     expect(metrics.boundaryHealthy).toBeNull();
     expect(metrics.maxAir).toBeNull();
   });
+  it('keeps unavailable coverage when a known hot domain coexists with a missing required measurement', () => {
+    const metrics = createMetrics(criteria);
+    accumulateInterval(metrics, interval(0, 1, 100, { sample: sample(0, 100, { temperatures: [{ assetId: 'module-a', domain: 'coolant', kelvin: 320 }, { assetId: 'module-a', domain: 'air', kelvin: null }] }) }), criteria);
+    expect(metrics.thermalViolationS).toBe(1);
+    expect(metrics.unavailableS).toBe(1);
+    const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 });
+    const definition = createExperimentDefinition(design, { durationS: 1, success: { maxThermalViolationS: 1, requireRecovery: false } });
+    const run = { ...initialize(design, definition).experiment!, status: 'completed' as const, metrics };
+    expect(evaluateExperiment(run).outcome).toBe('UNAVAILABLE');
+  });
   it('retains gross discharge and recharge separately from net storage change and losses', () => {
     const metrics = createMetrics(criteria);
     observeBoundary(metrics, sample(0, 100, { batteryWh: 1000 }), criteria);
@@ -152,6 +165,9 @@ describe('PH4 sustained recovery and repeated disruptions', () => {
     accumulateInterval(metrics, interval(0, 5, 0), zeroDwell);
     observeBoundary(metrics, sample(5), zeroDwell);
     expect(recoveryReport(metrics, 'completed')).toMatchObject({ status: 'recovered', onsetTimeS: 5, confirmationTimeS: 5 });
+    const evidence = structuredClone(metrics.recoveryEpisodes);
+    observeBoundary(metrics, sample(5), zeroDwell);
+    expect(metrics.recoveryEpisodes).toEqual(evidence);
   });
 });
 
