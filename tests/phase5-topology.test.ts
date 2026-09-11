@@ -39,7 +39,8 @@ describe('PH5 architecture definition, inventory and compatibility', () => {
       const spec = resolveSpecification(design, asset.id);
       expect(asset.ratings).toEqual(spec.ratings); expect(asset.dimensionsM).toEqual(spec.dimensionsM);
       expect(asset.operationalMassKg).toBe(spec.operationalMassKg);
-      expect(spec.source.toLowerCase()).toMatch(/assum|reference/);
+      expect(spec.evidence).toBe('assumed');
+      expect(spec.assumptions.toLowerCase()).toContain('assumed generic');
       expect(design.equipment!.economics.specificationUnitUSD[`${spec.id}@${spec.version}`]).toBeGreaterThan(0);
     }
   });
