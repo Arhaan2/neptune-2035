@@ -10,8 +10,8 @@ import type { Design, OperationEvent, SimulationState } from '../src/twin/types'
 import frozen from './fixtures/phase-5/frozen-expectations.json';
 
 const reference = (options: Parameters<typeof createTransferReferenceDesign>[1] = {}) => createTransferReferenceDesign(3, options);
-const trip = (assetId: string, timeS = 2, id = `trip-${assetId}`): OperationEvent => ({ id, assetId, timeS, kind: 'trip' });
-const restore = (assetId: string, timeS: number): OperationEvent => ({ id: `restore-${assetId}`, assetId, timeS, kind: 'restore' });
+const trip = (assetId: string, timeS = 2, id = `trip-${assetId.replaceAll('/', '-')}`): OperationEvent => ({ id, assetId, timeS, kind: 'trip' });
+const restore = (assetId: string, timeS: number): OperationEvent => ({ id: `restore-${assetId.replaceAll('/', '-')}`, assetId, timeS, kind: 'restore' });
 const feeder = (design: Design) => design.transfer?.routes[0].originalFeederId ?? design.modules.find(module => module.platformId === 'platform-002')!.powerDomainId;
 const definition = (design: Design, events: OperationEvent[] = [trip(feeder(design))], durationS = 12) => createExperimentDefinition(design, { id: 'independent-phase5', durationS, disturbances: events });
 function run(design: Design, events?: OperationEvent[], durationS = 12) { return advance(design, initialize(design, definition(design, events, durationS)), durationS); }
