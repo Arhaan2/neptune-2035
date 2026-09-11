@@ -18,7 +18,9 @@
     "telemetry:publisher": "node scripts/telemetry-publisher.mjs",
     "test:telemetry": "NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 vitest run tests/twin-telemetry.test.ts",
     "package:preview": "node scripts/package-preview.mjs",
-    "licenses:notice": "node scripts/third-party-notices.mjs"
+    "licenses:notice": "node scripts/third-party-notices.mjs",
+    "decision:reproduce": "node scripts/phase-6/reproduce.mjs",
+    "decision:gate": "node scripts/phase-6/gate.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

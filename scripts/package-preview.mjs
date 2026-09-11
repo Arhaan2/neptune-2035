@@ -81,7 +81,7 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Phase 5 opt-in single-hop radial platform transfer after eligible local feeder failures, shared native-first capacity, coupled whole-experiment comparisons and checkpointed evidence; physical validation, meshed/parallel sources, training throughput, Phases 6–9 and previously deferred Phase 1 stress gates remain outside scope',
+    releaseScope: 'Phase 6 bounded discrete decision campaigns, whole-run operating constraints, paired exploratory sensitivity and reproducible evidence; retained Phase 4/5 experiment and single-hop radial transfer behavior. Physical validation, meshed/parallel sources, global optimization, training throughput, Phases 7–9 and previously deferred stress gates remain outside scope',
     modelId: 'neptune-reference-3',
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',
@@ -91,6 +91,8 @@ const release = {
     solverVersion: '2.3.0',
     projectSchema: 3,
     experimentSchema: 1,
+    decisionSchema: 1,
+    decisionPolicy: 'decision-campaign-1',
     metricsVersion: 'whole-run-1',
     algorithmId: 'committed-boundary-1',
   } : { productionPromotion: 'not performed' }),

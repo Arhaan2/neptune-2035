@@ -1,3 +1,4 @@
+import { DecisionPanel } from './DecisionPanel';
 import { TransferPanel } from './TransferPanel';
 import { activePowerDesign } from '../twin/transfer/topology';
 import type { ExperimentDefinition } from '../twin/experiment/types';
@@ -39,11 +40,9 @@ import {
   inventoryCSV,
   resultsCSV,
   signatureEvents,
-  sizingCandidates,
-  sizingAssessment,
   topologyForSelection,
 } from '../twin/analysis/reports';
-import { summarize } from '../twin/engine/simulation';
+import { summarize, initializeExperimentFromState } from '../twin/engine/simulation';
 import {
   compatibilityFor,
   parseProject,
@@ -230,9 +229,7 @@ export default function TwinApp() {
       null,
     ),
     [replacementSpec, setReplacementSpec] = useState('pump-efficient'),
-    [replayTimeS, setReplayTimeS] = useState(0),
-    [maxPlatforms, setMaxPlatforms] = useState(8),
-    [sizing, setSizing] = useState('');
+    [replayTimeS, setReplayTimeS] = useState(0);
   const [pendingPhase5,setPendingPhase5]=useState<ExperimentDefinition|null>(null);
   useEffect(()=>{if(pendingPhase5&&state?.designRevision===pendingPhase5.designRevision&&!sim.busy){const timer=setTimeout(()=>{sim.prepareExperiment(pendingPhase5);setPendingPhase5(null);},0);return()=>clearTimeout(timer);}},[pendingPhase5,state?.designRevision,sim]);
   const costScale=equipmentFor(design).economics.unitCostScale;
@@ -639,33 +636,6 @@ export default function TwinApp() {
       );
     } catch (e) {
       setNotice(String(e));
-    } finally {
-      setCompareBusy(false);
-    }
-  };
-  const runSizing = async () => {
-    setCompareBusy(true);
-    setSizing(
-      'Evaluating bounded whole-platform candidates under a pump trip…',
-    );
-    try {
-      let best: Compared | undefined;
-      const rows: string[] = [];
-      for (const d of sizingCandidates(config, maxPlatforms,design)) {
-        const s = await runWorkerExperiment(d, signatureEvents(d), 180),
-          sum = summarize(d, s);
-        const assessment = sizingAssessment(d, s, config.budgetUSD, costScale);
-        const pass = assessment.passes;
-        rows.push(
-          `${d.assets.filter((a) => a.type === 'platform').length} platforms: ${pass ? 'satisfies evaluated cuts' : assessment.failures.join(', ')} (${num(sum.maxCoolantK - 273.15)}°C, ${num(sum.availableAccelerators, 0)} available)`,
-        );
-        if (pass) best = { label: 'Sized candidate', design: d, state: s };
-      }
-      setSizing(
-        `${best ? `Largest passing sampled candidate: ${num(best.design.provisionedAccelerators, 0)} accelerators.` : 'No solution among sampled candidates.'} ${rows.join(' · ')} Uses the declared reference traffic profile and ${costScale}× included cost assumptions. Marine stability, application-specific traffic validation and excluded costs remain unassessed.`,
-      );
-    } catch (e) {
-      setSizing(String(e));
     } finally {
       setCompareBusy(false);
     }
@@ -1310,6 +1280,9 @@ export default function TwinApp() {
           <TransferPanel design={design} state={state} busy={sim.busy||compareBusy} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
           {state && <ExperimentPanel design={design} state={state} busy={sim.busy} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && <Trend history={sim.history} />}
+          <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy}
+            onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
+            onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
           {showComparison && (
             <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
               <div className="twin-section-line">
@@ -1449,36 +1422,7 @@ export default function TwinApp() {
                   </button>
                 ))}
               </div>
-              <details>
-                <summary>
-                  Build Your AI Factory · bounded scenario sizing
-                </summary>
-                <NumberField
-                  label="Maximum platforms"
-                  value={maxPlatforms}
-                  unit="platforms"
-                  min={1}
-                  max={200}
-                  onChange={setMaxPlatforms}
-                />
-                <NumberField
-                  label="Included-scope budget"
-                  value={(config.budgetUSD ?? 0) / 1e6}
-                  unit="million USD (0 = unset)"
-                  min={0}
-                  max={10000000}
-                  onChange={(v) =>
-                    setDesign({ budgetUSD: v === 0 ? null : v * 1e6 })
-                  }
-                />
-                <button disabled={compareBusy} onClick={() => void runSizing()}>
-                  Evaluate discrete candidates
-                </button>
-                <p>
-                  {sizing ||
-                    'Uses current supply, thermal assumptions, standby and optional included-scope budget. Fixed reference packing; 1–200 platform limit.'}
-                </p>
-              </details>
+              <p className="muted">The earlier endpoint sizing tool is superseded by Phase 6 decision support above. Its recommendations assess every declared whole experiment in the bounded candidate menu.</p>
               <details>
                 <summary>Cost scope and assumption sensitivity</summary>
                 <div className="twin-actions">
@@ -1522,8 +1466,8 @@ export default function TwinApp() {
                     </tr>
                   </thead>
                   <tbody>
-                    {cost.rows.map((r) => (
-                      <tr key={r.scope}>
+                    {cost.rows.map((r, index) => (
+                      <tr key={`${index}:${r.scope}`}>
                         <td>{r.scope}</td>
                         <td>{num(r.count, 0)}</td>
                         <td>{num(r.totalUSD, 0)}</td>

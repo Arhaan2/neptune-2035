@@ -1,4 +1,4 @@
-name: Transfer, whole-experiment and prototype verification
+name: Decision campaigns, transfer and prototype verification
 on:
   pull_request:
     branches: [main]
@@ -9,28 +9,39 @@ concurrency:
   group: phase-1-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  acceptance:
-    name: Transfer and whole-experiment acceptance
+  core:
+    name: Core unit, telemetry and tested production build
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      source-sha: ${{ steps.source.outputs.sha }}
+      source-tree: ${{ steps.source.outputs.tree }}
+      tar-sha256: ${{ steps.payload.outputs.sha256 }}
+      artifact-id: ${{ steps.upload-payload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox webkit
-      - run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
       - name: Record tested source
+        id: source
         run: |
           mkdir -p artifacts/prototype
           git rev-parse HEAD > artifacts/prototype/source-sha.txt
           git show -s --format='%H %P %T' > artifacts/prototype/source-identity.txt
+          git rev-parse 'HEAD^{tree}' > artifacts/prototype/source-tree.txt
+          sha256sum package-lock.json > artifacts/prototype/source-lock.sha256
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
       - run: npm run typecheck
       - run: npm run lint
-      - name: Core unit and telemetry tests
+      - name: Core unit and both real telemetry tests
         run: |
           npm run dev -- --strictPort > artifacts/prototype/unit-server.log 2>&1 &
           unit_server_pid=$!
@@ -39,32 +50,160 @@ jobs:
             if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then break; fi
             sleep 1
           done
+          curl --fail --silent http://127.0.0.1:5173/ > /dev/null
           env -u MOZ_HEADLESS NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 xvfb-run -a -s '-screen 0 1920x1200x24' npm test -- --reporter=default --reporter=json --outputFile=artifacts/prototype/unit.json
       - run: npm run build
       - name: Preserve tested production payload identity
+        id: payload
         run: |
           npm run package:preview > artifacts/prototype/tested-release.log
           cp dist/build-manifest.json artifacts/prototype/tested-build-manifest.json
           cp dist/release.json artifacts/prototype/tested-release.json
           tar -cf artifacts/prototype/tested-build.tar -C dist .
-      - name: Production prototype smoke in three browsers
+          (cd artifacts/prototype && sha256sum tested-build.tar > tested-build.sha256)
+          echo "sha256=$(cut -d ' ' -f 1 artifacts/prototype/tested-build.sha256)" >> "$GITHUB_OUTPUT"
+      - name: Publish the single accepted core build for every browser
+        id: upload-payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: tested-build-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            artifacts/prototype/tested-build.tar
+            artifacts/prototype/tested-build.sha256
+            artifacts/prototype/tested-build-manifest.json
+            artifacts/prototype/tested-release.json
+            artifacts/prototype/source-*.txt
+            artifacts/prototype/source-lock.sha256
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain native core results even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prototype-core-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            artifacts/prototype
+            !artifacts/prototype/tested-build.tar
+            test-results
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+  browsers:
+    name: Production browser acceptance (${{ matrix.browser }})
+    needs: core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    env:
+      TESTED_SOURCE_SHA: ${{ needs.core.outputs.source-sha }}
+      TESTED_SOURCE_TREE: ${{ needs.core.outputs.source-tree }}
+      TESTED_TAR_SHA256: ${{ needs.core.outputs.tar-sha256 }}
+      TESTED_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.core.outputs.source-sha }}
+          fetch-depth: 0
+      - name: Record browser source
         run: |
-          npm run start -- --port 4173 > artifacts/prototype/server.log 2>&1 &
+          mkdir -p artifacts/prototype
+          git show -s --format='%H %P %T' > artifacts/prototype/browser-source-identity.txt
+          test "$(git rev-parse HEAD)" = "$TESTED_SOURCE_SHA"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$TESTED_SOURCE_TREE"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx playwright install --with-deps "${TESTED_BROWSER}"
+      - run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
+      - name: Download the exact immutable core artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.core.outputs.artifact-id }}
+          path: artifacts/tested-core
+          merge-multiple: true
+      - name: Verify archive, source, lockfile and every packaged byte
+        run: |
+          printf '%s  %s\n' "$TESTED_TAR_SHA256" artifacts/tested-core/tested-build.tar | sha256sum -c -
+          sha256sum -c artifacts/tested-core/source-lock.sha256
+          test "$(cat artifacts/tested-core/source-sha.txt)" = "$TESTED_SOURCE_SHA"
+          test "$(cat artifacts/tested-core/source-tree.txt)" = "$TESTED_SOURCE_TREE"
+          mkdir dist
+          tar -xf artifacts/tested-core/tested-build.tar -C dist
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          import path from 'node:path';
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+          const manifestBytes = await fs.readFile('dist/build-manifest.json');
+          const releaseBytes = await fs.readFile('dist/release.json');
+          assert.deepEqual(manifestBytes, await fs.readFile('artifacts/tested-core/tested-build-manifest.json'));
+          assert.deepEqual(releaseBytes, await fs.readFile('artifacts/tested-core/tested-release.json'));
+          const manifest = JSON.parse(manifestBytes), release = JSON.parse(releaseBytes);
+          assert.equal(release.sourceSha, process.env.TESTED_SOURCE_SHA);
+          assert.equal(release.sourceTree, process.env.TESTED_SOURCE_TREE);
+          assert.equal(release.lockSha256, hash(await fs.readFile('package-lock.json')));
+          assert.equal(manifest.algorithm, 'sha256');
+          assert.equal(release.artifactSha256, hash(manifestBytes));
+          const paths = manifest.files.map(file => file.path);
+          assert.equal(new Set(paths).size, paths.length);
+          for (const file of manifest.files) {
+            assert(path.resolve('dist', file.path).startsWith(path.resolve('dist') + path.sep));
+            const bytes = await fs.readFile(path.join('dist', file.path));
+            assert.equal(bytes.length, file.bytes, file.path);
+            assert.equal(hash(bytes), file.sha256, file.path);
+          }
+          const inventory = [];
+          async function visit(directory) {
+            for (const entry of await fs.readdir(directory, {withFileTypes:true})) {
+              const location = path.join(directory, entry.name);
+              if (entry.isDirectory()) await visit(location);
+              else { assert(entry.isFile(), location); inventory.push(path.relative('dist', location)); }
+            }
+          }
+          await visit('dist');
+          assert.deepEqual(inventory.sort(), [...paths, 'build-manifest.json', 'release.json'].sort());
+          const receipt = {browser:process.env.TESTED_BROWSER, sourceSha:release.sourceSha, sourceTree:release.sourceTree, lockSha256:release.lockSha256, tarSha256:process.env.TESTED_TAR_SHA256, artifactSha256:release.artifactSha256, files:paths.length, status:'verified'};
+          await fs.writeFile('artifacts/prototype/payload-verification.json', JSON.stringify(receipt, null, 2) + '\n');
+          console.log(JSON.stringify(receipt));
+          NODE
+      - name: Production prototype smoke for the selected browser
+        run: |
+          npm run start -- --port 4173 --strictPort > artifacts/prototype/server.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
             sleep 1
           done
-          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts --retries=0
-      - name: Retain actual prototype results and browser traces
+          curl --fail --silent http://127.0.0.1:4173/ > /dev/null
+          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts --project="$TESTED_BROWSER" --workers=1 --retries=0
+      - name: Retain native browser results and traces even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: prototype-verification-${{ github.sha }}
+          name: prototype-browser-${{ matrix.browser }}-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             artifacts/prototype
             test-results
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
+  acceptance:
+    name: Decision campaign and whole-experiment acceptance
+    if: always()
+    needs: [core, browsers]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Require core and all three browser jobs to succeed
+        env:
+          CORE_RESULT: ${{ needs.core.result }}
+          BROWSER_RESULTS: ${{ needs.browsers.result }}
+        run: |
+          test "$CORE_RESULT" = success && test "$BROWSER_RESULTS" = success
