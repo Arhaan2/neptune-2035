@@ -385,6 +385,39 @@ test('PH7 D06 fresh reset replaces an imported checkpoint origin instead of reta
   await expect(context).toContainText(/simulated/i);
 });
 
+test('PH7 D07 confirmed recovery constraint preserves raw metric time while inspecting the next canonical scene', async ({ page }, info) => {
+  await setup(page);
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const campaign: DecisionExport = await downloadJSON(page, () => button(page, 'Export decision campaign').click());
+  const evaluation = campaign.result.evaluations.find(item => item.candidateId === 'iii-24' && item.sensitivityId === 'central')!;
+  const requirement = evaluation.requirements.find(item => item.scenarioId === 'eligible-feeder' && item.id === 'confirmed-recovery')!;
+  const run = campaign.result.runs.find(item => item.candidateId === 'iii-24' && item.scenarioId === requirement.scenarioId && item.sensitivityId === 'central')!;
+  const planned = campaign.result.plan.runs.find(item => item.id === run.id)!;
+  expect(requirement).toMatchObject({ actual: 9.375, threshold: 10, unit: 's', status: 'satisfied' });
+  const marker = requirement.timeS! + run.state!.experiment!.originTimeS!;
+  const boundaries: number[] = [];
+  advanceWithStep(planned.design, replayExperimentState(planned.design, run.state!), run.state!.timeS, [], planned.definition.integrationStepS, undefined, time => boundaries.push(time));
+  expect(boundaries).not.toContain(marker);
+  const expectedTime = Math.min(...boundaries.filter(time => time >= marker));
+  expect(expectedTime).toBe(10);
+  await page.getByTestId('decision-row-iii-24').getByRole('button', { name: 'Inspect candidate', exact: true }).click();
+  await expect(page.getByTestId('decision-run-explanation')).toContainText(`Recovery confirmation is a metric marker at absolute ${marker} s`);
+  await button(page, 'Inspect confirmed-recovery asset/time evidence').click();
+  await expect(main(page)).toHaveAttribute('data-inspection-status', 'resolved');
+  await expect(main(page)).toHaveAttribute('data-display-time', String(expectedTime));
+  await expect(main(page)).toHaveAttribute('data-time', String(run.state!.timeS));
+  const context = page.getByTestId('inspection-context');
+  await expect(context).toContainText(`Metric marker at ${marker} s`);
+  await expect(context).toContainText('first canonical boundary observed at or after');
+  await expect(context).toContainText(`Displayed scene and operating values: ${expectedTime} s`);
+  const loaded = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  expect(loaded.checkpoint.state.experiment.metrics).toEqual(run.state!.experiment!.metrics);
+  await button(page, 'Compare').click();
+  expect(await downloadJSON(page, () => button(page, 'Export decision campaign').click())).toEqual(campaign);
+  await info.attach('D07-raw-constraint-marker-and-observed-scene', { body: JSON.stringify({ requirement, marker, expectedTime, loaded }), contentType: 'application/json' });
+});
+
 for (const editedInput of ['fixture', 'recovery policy'] as const) {
   test(`PH7 D01 historical candidate inspection preserves original evidence after ${editedInput} edit`, async ({ page }, info) => {
     const errors: string[] = [];
