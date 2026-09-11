@@ -1,6 +1,6 @@
 # Phase 4 acceptance evidence
 
-Release acceptance is pending. This document maps executable checks to requirements; counts below describe completed focused gates, not a substitute for final local, CI or public gates.
+This immutable pre-promotion checkpoint maps executable checks to requirements; final release status and full local/CI/hosted evidence are linked through [RELEASE.md](RELEASE.md). Counts below describe completed focused gates, not a substitute for final local, CI or public gates.
 
 | Requirement | Independent executable evidence |
 | --- | --- |
@@ -33,3 +33,11 @@ Freeze source and record its SHA/tree. Install from the unchanged lock, run type
 Independent Verification reviews the exact candidate; source CI must test the same tree that main will accept. Preserve a fresh verified Pages rollback and the entire preview before publication. Accepted-main build bytes must equal the tested production build except narrowly explained identity metadata. Verify completed Pages deployment, all tracked public files/manifest hashes/preview markers and release identity before and after the full hosted browser gate. A critical hosted failure triggers the preserved artifact rollback; publication alone is not acceptance.
 
 The durable evidence directory is `/Users/arhaan/Documents/ChatGPT/Neptune/artifacts/phase-4-20260911/`. GitHub source CI retains native JSON, logs and traces in its `prototype-verification` artifact. `EXECUTION.md` records source and release links when available. No credentials, recordings or large native traces are committed.
+
+## Repaired focused candidate
+
+On integrated `b1e9588f7354be7c0958cff18912d6996d14de2a`, tree `73ed3b4e76fdbc89955df42499e704fb09785a61`, all122 Phase4 tests in8 files passed, zero failures/pending; production build/typecheck also passed. Worker18 includes original-initial-state replay, recorded cold/settled interactive inputs, and zero-duration/time-zero fault admission. The first six-journey Chromium recheck passed5 and failed1 assertion: adjacent semantic dt/dd text content contains no literal intervening space. The rendered timing values were correct. Testing changed the assertion to check the label and its associated value separately; no product value or timeout was changed. The failed native result remains `testing-phase4-final-chromium.json`.
+
+The replay repair itself exposed an initial-boundary admission defect, independently found and reproduced before broad gates: provisional evaluation or unapplied time-zero events were correctly rejected by the worker. `7b49460` commits the canonical initial boundary before admission without relaxing validation. The custom-initial-state regression fixture was also corrected to finalize and validate its source before testing replay; five helper failures remained on the pre-repair source, isolating the real defect. See `SLICE-3-REPAIRS.md` and independent replay review.
+
+Corrected Chromium gate:6/6 passed, zero failures/skips/flaky, retries0,21.3 seconds on `0dcadd8cb2586dd0003a9d6aa834dcba8555e488`, tree `6ca994fe971df17adac9a04d497208104cf10d2c`. Production inputs match the122-test focused candidate; only the reviewed semantic-field browser assertion changed. Native `testing-phase4-final-chromium-corrected.json` and `TESTING-RECEIPT.md` preserve the handoff. Testing stopped its4176 server before root replaced shared dependencies for final local acceptance.

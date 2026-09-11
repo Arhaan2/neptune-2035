@@ -29,3 +29,11 @@ Signature reference defect reproduced by independent demonstration assertion: ac
 - Testing owns additional custom-initial-state and recorded-input replay regressions, plus native browser rechecks, on root's integrated source.
 
 Independent review and final release gates remain required. This receipt does not assert acceptance or deployment.
+
+## PH4-I01 follow-up: canonical initial-boundary admission
+
+Verification found a defect introduced by the replay repair: merely attaching the experiment to its physical initial state left a provisional evaluation and unapplied time-zero events, so the worker rejected that supplied checkpoint before it could execute. Fixing reproduced on `fb72719` (equivalent affected source to root `e32e9a0`): reference trip at 5 rejected with `EXPERIMENT_EVALUATION`; trip at 0 rejected with `STATE_EVENT_CURSOR`. Both direct `validateState` and the actual worker handler rejected the candidate.
+
+Isolated repair `b9c5a7611d69fc4f71bfb5186b535306fe11ae3b` (parent `fb72719029387da3ab153bb8847efefdae47dda0`) changes only `src/twin/engine/simulation.ts` and `src/twin/experiment/runner.ts`. New canonical `initializeExperimentFromState` validates the saved physical initial checkpoint, clones it, attaches the definition, applies due time-zero events, finalizes the experiment boundary and validates the whole candidate before returning it to worker admission. No validator was relaxed and stored initial physical quantities are preserved.
+
+Four direct worker checks now pass with exact entire-experiment equality to their original runs: cold fault at 5 (80 accelerator-seconds), cold fault at 0 (120 accelerator-seconds), zero-duration fault at 0 (0 accelerator-seconds), and settled-start fault at evaluation 5 (80 accelerator-seconds). Typecheck and diff whitespace checks pass. Testing independently owns the expanded executable replay regressions and integrated browser recheck.

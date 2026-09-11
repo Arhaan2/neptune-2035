@@ -1,0 +1,18 @@
+# Independent Testing final focused acceptance receipt
+
+Integrated source: `b1e9588f7354be7c0958cff18912d6996d14de2a`, tree `73ed3b4e76fdbc89955df42499e704fb09785a61`.
+Testing merge: `6f234ac7389d779e324c85ab385350159c48f4c1`, identical tree. No production writes by Testing.
+
+`npm test -- tests/phase4-*.test.ts --reporter=json --outputFile=.../testing-phase4-final-focused.json`: **122 PASS, 0 FAIL, 0 pending** in eight files. Baseline gap1, definition23, demonstrations2, engine18, metrics32, pairing11, persistence17, worker18. `npm run build` (includes TypeScript) **PASS**; Vite emitted the real worker asset `worker-bp4-2dVC.js` and application asset `index-BXxVEMjd.js`.
+
+The worker suite now independently checks custom physical initial battery/temperatures, direct validator admission, time-zero fault including zero-duration experiment, and all cold/settled interactive replay inputs. The source fixture using the low-level attach API initially omitted its first observation boundary. Test setup now explicitly calls finishExperimentBoundary and validates the source before invoking replay; then the replay helper still rejected the valid source on old production. Raw old-source failures remain in testing-replay-helper-initial.json (13/3) and testing-replay-helper-corrected-source.json (13/5). The canonical initializer repair makes all18 worker tests pass without weakening state validation.
+
+The first final Chromium run had **5 PASS / 1 assertion harness failure**, zero retries. The signature report rendered the correct actual fault30, violation240, recovery364, confirmation369. The assertion expected a literal space between adjacent dt and dd textContent, but DOM concatenates those elements. Commit6e8f791 scopes the field by the exact dt label and asserts its associated dd value240 plus relative124/129. The fault30 and fault-relative339 assertions remain; exact export assertions remain. Verification independently approved this correction. Raw output, screenshot and trace remain in testing-phase4-final-chromium.json and matching directory. Repaired Replay/Seek and unequal-window comparison journeys passed in that run. Final Chromium rerun recorded separately.
+
+## Final Chromium pass and handoff
+
+Integrated browser source: `0dcadd8cb2586dd0003a9d6aa834dcba8555e488`, tree `6ca994fe971df17adac9a04d497208104cf10d2c`. Testing merge `415498a6c540bd4f17085808e1e09cf8dbaa5dfe` has the identical tree. This differs from the122-test gate only by the one-line browser field assertion; production is identical, confirmed by git diff.
+
+`NEPTUNE_BASE_URL=http://127.0.0.1:4176 ... npm run test:browser -- tests/browser/phase4.spec.ts --project=chromium --retries=0 --output=.../testing-phase4-final-chromium-corrected`: **6 PASS, 0 FAIL, 0 skipped, 0 retries, 21.3 seconds** on the unchanged production build. Native JSON is testing-phase4-final-chromium-corrected.json; screenshots and exported report attachments are in the matching directory. All journeys executed real app controls, workers, and exports. Desktop/mobile report, history/import/reload, manual/speed/pause/cancel/dwell, real fault pair/signature, settled timeout/success, replay/seek, and unequal-window endpoint behavior pass. Console/asset error observations in the four monitored main journeys were empty.
+
+Testing preview session5224 on port4176 stopped by SIGINT after the gate. Working tree clean. No further tests or servers scheduled by Testing; root may replace shared node_modules and run complete baseline/telemetry/all-browser gates. Initial failed artifacts retained without overwriting. No production source change made by Testing.

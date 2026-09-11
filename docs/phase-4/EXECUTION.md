@@ -1,6 +1,6 @@
 # Phase 4 execution and release ledger
 
-Acceptance status: implementation in progress, not merged or deployed. Live production remains the independently byte-verified Phase3 artifact.
+This immutable ledger records the implementation and pre-promotion checkpoint. All Phase4 focused tests and six production Chromium journeys passed after the documented repairs. Final full local/CI/hosted evidence and actual release identities are linked through [RELEASE.md](RELEASE.md); no earlier slice result is presented as deployment acceptance.
 
 ## Preserved source and artifact
 
@@ -34,6 +34,9 @@ The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `
 | `7311c42` | Testing `4b78440` | 12 independent pairing/signature/envelope cases passed |
 | `bdc8fbe` | Testing `72cae78` | Six real browser journeys and independently reproduced settling/pairing defects |
 | `6c6cad1` | Fixing `7bb04dc` | Warmup interval-start thermal predicate and unavailable-pair rejection; Testing28/28 on `d856c69` |
+| `e32e9a0` | Fixing `fb72719` | Replay definition/initial state and comparison/recovery clocks |
+| `7b49460` | Fixing `b9c5a76` | Canonical initial-boundary admission after independent replay finding |
+| `b1e9588` | Testing integrated regressions | 122/122 focused Phase4 cases passed; subsequent Chromium whitespace assertion diagnosed separately |
 
 No main/Pages publication or final acceptance has occurred. Commit identity in this ledger documents the actual integrated slice; it is not a claim that subsequent whole-phase gates passed.
 
