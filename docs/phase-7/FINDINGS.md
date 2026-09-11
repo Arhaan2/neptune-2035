@@ -39,3 +39,15 @@ P7-06/P7-11. Testing at09c5cb7 recorded two original native failures: inspecting
 ## Recording tool failures
 
 The first real capture traversed all eight steps but attempted video save after browser shutdown; the second capture read the previous inspection status before React applied a new step. Both native failures/raw outputs are retained. The capture tool now saves after context close but before browser close and waits for the walkthrough's applied-step status. These attempts are not accepted release recordings.
+
+## P7-D07 — recovery requirement link requested a nonexistent exact scene
+
+P7-09/P7-10. The requirement retained the correct9.375s confirmation marker, but its inspect link requested exact post state at that marker, producing unavailable history. Fix580437e integrated2bb9edf explicitly selects `at-or-after` only for this metric, keeps the original raw requirement marker, labels the first canonical scene time10s separately, and leaves physical event links exact. Fixing's strict original native before/after passed. Testing added a separate strict regressionb4bf152 integrated05ce705; independent acceptance remains pending.
+
+## P7-D08 — changed execution retained original walkthrough narrative
+
+P7-03/P7-08/P7-12. Independent Verification at15836e4 completed all eight steps, returned current, used execution Seek time6, added a supported shore/grid trip, stepped the run to12, then resumed the original walkthrough. The definition ID stayed unchanged while recorded inputs and displayed history changed; the original recovered/feasible narrative incorrectly remained completed. Directly adding an input to the already-closed terminal run was correctly rejected; the defect requires the supported seek/derived-execution path. This is a release blocker pending a source-identity guard, unchanged failing reproduction, and independent semantic closure.
+
+## P7-D09 — legacy engineering explanation lacked exact qualification
+
+P7-10/P7-11. The default engineering Markdown report header retained older wording. Decision and whole-experiment explanations already contain the required sentence, but an uninstrumented/legacy engineering report did not. Add the exact mandated qualification in its visible header without altering model arithmetic or evidence. Independent Verification concurs that the wording must be fixed before acceptance.
