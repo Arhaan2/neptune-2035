@@ -11,6 +11,8 @@ const statuses=['normal','detected','isolated','evaluating','waiting','transferr
 const reasons=['NORMAL','FEEDER_FAULT','ISOLATION_CONFIRMED','EVALUATING','WAITING','TRANSFERRED','DISABLED','RECEIVING_BUS_FAILED','DOWNSTREAM_FAILED','COMMON_SOURCE_FAILED','DONOR_UNAVAILABLE','TIE_UNAVAILABLE','ISOLATION_UNCONFIRMED','ORIGINAL_RESTORED','NO_HEADROOM','INSUFFICIENT_HEADROOM','PATH_UNAVAILABLE','CAPACITY_SHED'];
 const attemptKeys=['id','attemptId','status','reason','detectedAtS','deadlineS','originalClosed','tieClosed','requestedW','accelerators','originalPath','donorPath','admittedW','unservedW','bindingResourceId','headroomW'];
 const legalNext:Record<string,string[]>={normal:['detected','blocked'],detected:['isolated','lockout'],isolated:['evaluating'],evaluating:['waiting','blocked'],waiting:['transferred','blocked','lockout'],transferred:['lockout'],blocked:[],lockout:[]};
+const refusalReasons=['DISABLED','RECEIVING_BUS_FAILED','DOWNSTREAM_FAILED','COMMON_SOURCE_FAILED','DONOR_UNAVAILABLE','TIE_UNAVAILABLE','PATH_UNAVAILABLE'];
+const stateReasons:Record<string,string[]>={normal:['NORMAL'],detected:['FEEDER_FAULT'],isolated:['ISOLATION_CONFIRMED'],evaluating:['EVALUATING'],waiting:['WAITING'],transferred:['TRANSFERRED'],blocked:[...refusalReasons,'ORIGINAL_RESTORED','NO_HEADROOM','INSUFFICIENT_HEADROOM'],lockout:[...refusalReasons,'ISOLATION_UNCONFIRMED','CAPACITY_SHED']};
 const close=(a:number,b:number)=>Math.abs(a-b)<=1e-7;
 export function validateTransferState(design:Design,state:SimulationState):void {
   const t=state.transfer;
@@ -25,7 +27,7 @@ export function validateTransferState(design:Design,state:SimulationState):void 
   const routes=new Map(design.transfer.routes.map(r=>[r.id,r])),knownResources=new Set(powerResources(design).map(r=>r.id));
   const validateSnapshot=(a:TransferAttempt,historical=false)=>{
     const r=routes.get(a.id);if(!r)failure('invalid-input','TRANSFER_ATTEMPTS','Unknown transfer recipient.');
-    if(!statuses.includes(a.status)||!reasons.includes(a.reason))failure('invalid-input','TRANSFER_STATUS','Unknown transfer state/reason.');
+    if(!statuses.includes(a.status)||!stateReasons[a.status]?.includes(a.reason))failure('invalid-input','TRANSFER_STATUS','Transfer reason must correspond to its controller state.');
     if(typeof a.originalClosed!=='boolean'||typeof a.tieClosed!=='boolean'||a.originalClosed&&a.tieClosed||a.tieClosed!==(a.status==='transferred'))failure('invalid-input','TRANSFER_SWITCHES','Transfer positions violate single supply or disagree with controller state.');
     for(const key of ['requestedW','admittedW','unservedW','headroomW','accelerators'] as const)finiteNumber(a[key],`transfer.${key}`,{min:0});
     if(a.status==='transferred'?!close(a.admittedW,a.requestedW)||a.unservedW!==0:a.admittedW!==0)failure('invalid-input','TRANSFER_ALLOCATION','An admitted transfer must serve its whole requested bundle; an open tie has no admitted load.');
@@ -51,6 +53,7 @@ export function validateTransferState(design:Design,state:SimulationState):void 
     finiteNumber(e.timeS,'transfer transition time',{min:Math.max(0,time),max:state.timeS});time=e.timeS;validateSnapshot(e,true);
     if(e.attemptId!==`${e.id}:attempt-1`||e.detectedAtS===null)failure('invalid-input','TRANSFER_ATTEMPT_ID','Historical transfer attempt identity missing.');finiteNumber(e.detectedAtS,'transfer detectedAtS',{min:0,max:e.timeS});
     if(e.status==='waiting'?e.deadlineS!==e.detectedAtS+design.transfer.delayS||e.deadlineS<e.timeS:e.deadlineS!==null)failure('invalid-input','TRANSFER_DEADLINE','Historical transfer deadline disagrees with its policy/state.');
+    if((e.status==='transferred'||e.previous==='waiting'&&['NO_HEADROOM','INSUFFICIENT_HEADROOM'].includes(e.reason))&&e.timeS!==e.detectedAtS+design.transfer.delayS)failure('invalid-input','TRANSFER_CLOSURE_TIME','A deadline allocation or closure must occur at its configured transfer deadline.');
     const r=routes.get(e.id)!,prior=last.get(e.id);if(prior?e.previous!==prior.status||e.detectedAtS!==prior.detectedAtS:!t.transitionsTruncated&&e.previous!=='normal')failure('invalid-input','TRANSFER_TRANSITION_CHAIN','Retained transfer transitions do not form a continuous attempt.');
     if(JSON.stringify(e.affectedAssetIds)!==JSON.stringify([r.originalFeederId,r.receivingBusId,r.donorBusId,r.tieId,r.isolatorId]))failure('invalid-input','TRANSFER_TRANSITION_ASSETS','Transfer transition scope differs from its installed route.');
     last.set(e.id,e);retainedCounts.set(e.reason,(retainedCounts.get(e.reason)??0)+1);
@@ -59,6 +62,10 @@ export function validateTransferState(design:Design,state:SimulationState):void 
     // Current demand/headroom can change without another switch transition. Validate
     // historical numeric snapshots internally; only stable state fields must agree.
     for(const key of ['attemptId','status','reason','detectedAtS','deadlineS','originalClosed','tieClosed','accelerators'] as const)if(a[key]!==e[key])failure('invalid-input','TRANSFER_CURRENT_HISTORY','Current transfer state disagrees with its last recorded transition.');
+    // An open-tie decision retains its last evaluated shortfall/headroom even
+    // while requestedW tracks newer workload inputs. Those supplied decision
+    // values must remain bound to the same retained outcome snapshot.
+    if(a.status!=='transferred'&&(!close(a.unservedW,e.unservedW)||!close(a.headroomW,e.headroomW)||a.bindingResourceId!==e.bindingResourceId))failure('invalid-input','TRANSFER_DECISION_HISTORY','Current open-tie decision evidence differs from its retained outcome.');
   }
   record(t.transitionCounts,'transfer counts');let count=0;for(const [reason,n] of Object.entries(t.transitionCounts)){if(!reasons.includes(reason))failure('invalid-input','TRANSFER_REASON','Unknown cumulative reason.');finiteNumber(n,'transfer reason count',{min:retainedCounts.get(reason)??0,integer:true});count+=n;}if(count!==t.sequence||[...retainedCounts].some(([reason,n])=>(t.transitionCounts[reason as keyof typeof t.transitionCounts]??0)<n))failure('invalid-input','TRANSFER_COUNTS','Cumulative transfer count disagrees with retained history.');
   // Recompute only the current allocation, using the engine's same demand helper.
