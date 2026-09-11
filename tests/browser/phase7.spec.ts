@@ -229,6 +229,133 @@ test('PH7 D05 an unavailable historical network observation stays unknown rather
   await expect(network).toContainText(/unavailable|unknown/i);
 });
 
+test('PH7 C3 primary walkthrough exposes engine metrics and exact scene times then survives real context loss', async ({ page }, info) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await setup(page, false);
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const campaign: DecisionExport = await downloadJSON(page, () => button(page, 'Export decision campaign').click());
+  const run = campaign.result.runs.find(item => item.candidateId === 'iii-24' && item.scenarioId === 'eligible-feeder')!;
+  const planned = campaign.result.plan.runs.find(item => item.id === run.id)!;
+  await page.getByTestId('decision-row-iii-24').getByRole('button', { name: 'Inspect candidate', exact: true }).click();
+  const explanation = page.getByTestId('decision-run-explanation'), metrics = run.state!.experiment!.metrics;
+  await expect(explanation).toContainText(`unmet ${metrics.shortfallAcceleratorS} accelerator-s`);
+  await expect(explanation).toContainText(`Total interval union ${metrics.serviceViolationS}`);
+  await expect(explanation).toContainText(`Onset ${metrics.pendingRecovery!.onsetTimeS}; confirmation ${metrics.pendingRecovery!.confirmationTimeS}`);
+  await expect(explanation).toContainText('Original experiment / Phase 5 verdict: FAIL');
+  await expect(explanation).toContainText('campaign requirements: feasible');
+  const evaluation = campaign.result.evaluations.find(item => item.candidateId === run.candidateId && item.sensitivityId === 'central')!;
+  for (const requirement of evaluation.requirements.filter(item => item.scenarioId === run.scenarioId)) {
+    await expect(explanation).toContainText(`${requirement.id} · ${requirement.status}`);
+    await expect(explanation).toContainText(`tolerance ${requirement.tolerance}`);
+  }
+  await expect(page.getByTestId('decision-time-comparison')).toContainText('experiment-relative seconds');
+  await button(page, 'Start result walkthrough').click();
+  const walkthrough = page.getByTestId('operator-walkthrough');
+  await expect(walkthrough).toHaveAttribute('data-run-id', run.id);
+  const fault = planned.definition.disturbances[0], transfer = run.state!.transfer!.transitions.find(item => item.reason === 'TRANSFERRED')!;
+  const boundaryTimes: number[] = [];
+  advanceWithStep(planned.design, replayExperimentState(planned.design, run.state!), run.state!.timeS, [], planned.definition.integrationStepS, undefined, timeS => boundaryTimes.push(timeS));
+  const confirmation = metrics.pendingRecovery!.confirmationTimeS!;
+  const confirmedScene = Math.min(...boundaryTimes.filter(time => time >= confirmation));
+  const times = [0, fault.timeS, fault.timeS, transfer.timeS, transfer.timeS, metrics.pendingRecovery!.onsetTimeS!, confirmedScene, run.state!.timeS];
+  await expect(walkthrough).toHaveAttribute('data-step-count', String(times.length));
+  const visited: { step: number; scene: number; title: string | null }[] = [];
+  for (let step = 0; step < times.length; step++) {
+    await expect(walkthrough).toHaveAttribute('data-step-index', String(step));
+    await expect(walkthrough).toHaveAttribute('data-status', step === times.length - 1 ? 'completed' : 'ready');
+    await expect(main(page)).toHaveAttribute('data-display-time', String(times[step]));
+    await expect(main(page)).toHaveAttribute('data-time', String(run.state!.timeS));
+    if (step === 1) await page.locator('canvas').screenshot({ path: info.outputPath('C3-walkthrough-failed-feeder-canvas.png') });
+    if (step === 6) {
+      await expect(walkthrough).toContainText(`Metric marker ${confirmation} s · actual displayed scene ${confirmedScene} s`);
+      await page.screenshot({ path: info.outputPath('C3-metric-marker-and-observed-scene.png'), fullPage: true });
+    }
+    visited.push({ step, scene: Number(await main(page).getAttribute('data-display-time')), title: await walkthrough.getAttribute('data-step-title') });
+    if (step < times.length - 1) await button(page, 'Next walkthrough step').click();
+  }
+  await expect(walkthrough).toContainText('iii-24'.replace('iii-24', campaign.campaign.candidates.find(item => item.id === 'iii-24')!.label));
+  const viewed = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  expect(viewed.checkpoint.state.experiment.metrics).toEqual(metrics);
+  await button(page, 'Exit walkthrough').click();
+  await expect(main(page)).toHaveAttribute('data-inspection-mode', 'current');
+  const supported = await page.locator('canvas').evaluate(canvas => {
+    const context = (canvas as HTMLCanvasElement).getContext('webgl2') ?? (canvas as HTMLCanvasElement).getContext('webgl');
+    const extension = context?.getExtension('WEBGL_lose_context');
+    if (!extension) return false;
+    extension.loseContext(); return true;
+  });
+  expect(supported, 'Actual WEBGL_lose_context extension').toBe(true);
+  await expect(page.locator('canvas')).toHaveCount(0);
+  await expect(page.getByText(/WebGL is unavailable or fallback was requested/)).toBeVisible();
+  expect((await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'))).checkpoint).toEqual(viewed.checkpoint);
+  await page.screenshot({ path: info.outputPath('C3-actual-context-loss-fallback.png'), fullPage: true });
+  expect(errors).toEqual([]);
+  await info.attach('C3-primary-evidence-and-visited-times', { body: JSON.stringify({ campaign, visited, contextLoss: 'actual WEBGL_lose_context', reducedMotion: true }), contentType: 'application/json' });
+});
+
+test('PH7 C3 375px fallback walkthroughs preserve nominal preference and honest no-feasible coverage', async ({ page }, info) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await setup(page);
+  const outcomes: unknown[] = [];
+  for (const fixture of ['nominal', 'no-benefit-bus', 'no-benefit-source']) {
+    await button(page, 'Compare').click();
+    await page.getByLabel('Decision fixture', { exact: true }).selectOption(fixture);
+    await button(page, 'Start decision campaign').click();
+    await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+    const campaign: DecisionExport = await downloadJSON(page, () => button(page, 'Export decision campaign').click());
+    expect(campaign.result.ranking.scopeComplete).toBe(true);
+    expect(campaign.result.ranking.winnerIds).toEqual(fixture === 'nominal' ? ['ii-24'] : []);
+    await button(page, 'Start result walkthrough').focus(); await page.keyboard.press('Enter');
+    const walkthrough = page.getByTestId('operator-walkthrough');
+    const count = Number(await walkthrough.getAttribute('data-step-count'));
+    for (let step = 0; step < count; step++) {
+      await expect(walkthrough).toHaveAttribute('data-status', step === count - 1 ? 'completed' : 'ready');
+      if (step < count - 1) { await button(page, 'Next walkthrough step').focus(); await page.keyboard.press('Enter'); }
+    }
+    await expect(walkthrough).toContainText(campaign.result.ranking.status);
+    if (fixture !== 'nominal') await expect(walkthrough).toContainText('No evaluated candidate meets');
+    await expect.poll(() => page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
+    await page.screenshot({ path: info.outputPath(`C3-375px-${fixture}.png`), fullPage: true });
+    outcomes.push({ fixture, run: await walkthrough.getAttribute('data-run-id'), steps: count, ranking: campaign.result.ranking });
+    await button(page, 'Exit walkthrough').click();
+  }
+  await info.attach('C3-alternate-completed-outcomes', { body: JSON.stringify({ outcomes, environment: '375px desktop browser emulation; no WebGL; reduced motion' }), contentType: 'application/json' });
+});
+
+test('PH7 C3 walkthrough pause user takeover and emulated hidden visibility preserve current evidence', async ({ page }, info) => {
+  await setup(page);
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  await button(page, 'Start result walkthrough').click();
+  const walkthrough = page.getByTestId('operator-walkthrough');
+  await expect(walkthrough).toHaveAttribute('data-status', 'ready');
+  const before = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  await button(page, 'Resume walkthrough').click();
+  await expect(walkthrough).toHaveAttribute('data-status', 'ready');
+  await button(page, 'Pause walkthrough').click();
+  await expect(walkthrough).toHaveAttribute('data-status', 'paused');
+  await button(page, 'Resume walkthrough').click();
+  await expect(walkthrough).toHaveAttribute('data-status', 'ready');
+  await page.getByLabel('Find asset ID', { exact: true }).fill('shore/grid'); await button(page, 'Find').click();
+  await expect(walkthrough).toHaveAttribute('data-status', 'paused');
+  await expect(main(page)).toHaveAttribute('data-selected', 'shore/grid');
+  await button(page, 'Resume walkthrough').click();
+  await expect(walkthrough).toHaveAttribute('data-status', 'ready');
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect(walkthrough).toHaveAttribute('data-status', 'paused');
+  await page.evaluate(() => { Reflect.deleteProperty(document, 'hidden'); document.dispatchEvent(new Event('visibilitychange')); });
+  await button(page, 'Exit walkthrough').click();
+  await expect(walkthrough).toHaveCount(0);
+  await expect(main(page)).toHaveAttribute('data-inspection-mode', 'current');
+  expect((await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'))).checkpoint).toEqual(before.checkpoint);
+  await info.attach('C3-guidance-interruption', { body: JSON.stringify({ pointerAndKeyboard: 'native', hiddenTabEvent: 'document.hidden emulated in desktop browser; physical background-tab behavior not asserted', checkpointUnchanged: true }), contentType: 'application/json' });
+});
+
 for (const editedInput of ['fixture', 'recovery policy'] as const) {
   test(`PH7 D01 historical candidate inspection preserves original evidence after ${editedInput} edit`, async ({ page }, info) => {
     const errors: string[] = [];
