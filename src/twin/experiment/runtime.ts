@@ -41,7 +41,7 @@ export function commitExperimentInterval(state: SimulationState, before: ReturnT
     });
     run.warmup.elapsedS=end;
     run.warmup.maxObservedTemperatureRateKPerS=Math.max(run.warmup.maxObservedTemperatureRateKPerS??0,rate);
-    const conditions=sampleConditions(metricSample(state,0),run.definition.recovery);
+    const conditions=sampleConditions(metricSample(state,0,before.temperatures),run.definition.recovery);
     const good=rate<=criteria.maxTemperatureRateKPerS&&batteryRate<=criteria.maxBatteryRateWhPerS&&(!criteria.requireControllerQuiescence||controllersQuiet)&&(!criteria.requireService||conditions.service===true)&&(!criteria.requireThermal||conditions.thermal===true);
     if(good)run.warmup.candidateSinceS??=state.timeS;else run.warmup.candidateSinceS=null;
     // Confirmation waits for the end-boundary controller solve. Its transition

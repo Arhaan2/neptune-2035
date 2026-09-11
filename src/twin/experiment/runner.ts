@@ -5,6 +5,7 @@ import { identity } from '../persistence/structure';
 import { diagnosticFor } from '../safety';
 import { createExperimentDefinition, validateExperimentDefinition } from './definition';
 import { experimentExecutionDuration, experimentFinished, setExperimentStatus } from './runtime';
+import { evaluateExperiment } from './metrics';
 import type { ExperimentDefinition } from './types';
 
 export function beginExperiment(design: Design, definition: ExperimentDefinition): SimulationState { return initialize(design,definition); }
@@ -48,7 +49,7 @@ export function comparePair(faulted: SimulationState, baseline: SimulationState)
     if(identity(operationContent(run.inputs))!==identity(operationContent(declared)))reasons.push('Recorded interactive inputs require an explicit derived pair definition.');
   }
   if(reasons.length)return{status:'mismatched' as const,reasons,absolute:null,difference:null};
-  if(f.status!=='completed'||b.status!=='completed'||f.metrics.unavailableS||b.metrics.unavailableS||f.originTimeS!==b.originTimeS)return{status:'incomplete' as const,reasons:['Both runs must complete the same evaluation coverage with available metrics and matching warmup origins.'],absolute:null,difference:null};
+  if([f,b].some(run=>run.status!=='completed'||run.metrics.elapsedS!==run.definition.durationS||evaluateExperiment(run).outcome==='UNAVAILABLE')||f.originTimeS!==b.originTimeS)return{status:'incomplete' as const,reasons:['Both runs must complete the same evaluation coverage with available metrics and matching warmup origins.'],absolute:null,difference:null};
   const results=(run:typeof f)=>({shortfallAcceleratorS:run.metrics.shortfallAcceleratorS,serviceViolationS:run.metrics.serviceViolationS,thermalViolationS:run.metrics.thermalViolationS,maximumCoolantK:run.metrics.maxCoolant?.value??null,minimumServiceableAccelerators:run.metrics.minServiceable?.value??null,batteryDischargeWh:run.metrics.batteryDischargeWh,warmupS:run.warmup.elapsedS,outcome:run.evaluation.outcome});
   const absolute={faulted:results(f),baseline:results(b)};
   return{status:'comparable' as const,reasons:[],absolute,difference:{shortfallAcceleratorS:f.metrics.shortfallAcceleratorS-b.metrics.shortfallAcceleratorS,serviceViolationS:f.metrics.serviceViolationS-b.metrics.serviceViolationS,thermalViolationS:f.metrics.thermalViolationS-b.metrics.thermalViolationS,batteryDischargeWh:f.metrics.batteryDischargeWh===null||b.metrics.batteryDischargeWh===null?null:f.metrics.batteryDischargeWh-b.metrics.batteryDischargeWh},convention:'signed faulted minus unfaulted; accelerator-seconds are unmet requirement, not delivered throughput or financial loss'};
