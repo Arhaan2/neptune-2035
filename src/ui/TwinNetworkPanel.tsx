@@ -71,7 +71,7 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
     {selectedResources.length > 0 && <details open>
       <summary>Selected resource budgets</summary>
       <div className="twin-network-table"><table><thead><tr><th>Resource</th><th>Demand / rating / headroom (Gbit/s)</th></tr></thead>
-        <tbody>{selectedResources.map(resource => <tr key={resource.resourceId}><td><span title={resource.resourceId}>{resource.kind === 'switch' ? 'Shared switch budget' : resource.kind === 'port' ? resource.resourceId.split(':').at(-1) : `Link to ${resource.resourceId.split('>').at(-1)?.split(':')[0]}`}</span><br />{resource.domainIds.length} domains</td><td>{gb(resource.demandBitS)} / {gb(resource.capacityBitS)} / {gb(resource.headroomBitS)}</td></tr>)}</tbody>
+        <tbody>{selectedResources.map(resource => <tr key={resource.resourceId}><td><span title={resource.resourceId}>{resource.kind === 'switch' ? `${resource.resourceId} · Shared budget` : resource.kind === 'port' ? resource.resourceId.split(':').at(-1) : `Link to ${resource.resourceId.split('>').at(-1)?.split(':')[0]}`}</span><br />{resource.domainIds.length} domains</td><td>{gb(resource.demandBitS)} / {gb(resource.capacityBitS)} / {gb(resource.headroomBitS)}</td></tr>)}</tbody>
       </table></div>
       <details><summary>Affected job domains</summary>{affectedDomains.map(id => <p key={id}><button className="twin-text-button" onClick={() => onSelect(id)}>{id}</button></p>)}</details>
       <p>Installed demand in the declared source-to-node direction. Shared switch budget counts each traversal once. Ports and links retain individual limits.</p>
