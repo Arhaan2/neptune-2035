@@ -144,3 +144,48 @@ test('PH6 D actual whole-run supply ceiling chooses the largest passing discrete
   expect(campaign.campaign.scenarios.find(s => s.kind === 'thermal')).toMatchObject({ durationS: 120, settling: 'not-requested' });
   await evidence(info, 'phase6-native-integer-sizing', campaign, observed);
 });
+
+test('PH6 E all81 paired assumption cells execute through the bounded native workers', async ({ page }, info) => {
+  const observed = observe(page); await setup(page);
+  await page.getByLabel('Decision fixture', { exact: true }).selectOption('sensitivity');
+  await button(page, 'Start decision campaign').click();
+  // Condition-based worker completion within the unchanged 60-second browser test budget.
+  await page.waitForFunction(() => document.querySelector('[data-testid="decision-coverage"]')?.getAttribute('data-status') === 'completed');
+  const campaign = await exported(page);
+  expect(campaign.result.coverage).toEqual({ completed: 81, planned: 81, fullyEvaluatedCandidates: 3 });
+  expect(campaign.result.status).toBe('completed'); expect(campaign.result.ranking.winnerIds).toEqual(['iii-24']);
+  expect(campaign.result.sensitivityRankings).toHaveLength(9);
+  for (const ranking of campaign.result.sensitivityRankings) {
+    expect(ranking.scopeComplete).toBe(true); expect(ranking.winnerIds).toEqual(['iii-24']);
+  }
+  expect(campaign.campaign.sensitivityNote).toContain('Joint combinations are untested');
+  expect(campaign.result.sensitivityConclusion).toContain('unchanged winner set');
+  for (const thermal of campaign.result.runs.filter(run => run.scenarioId === 'thermal')) expect(thermal.state!.experiment).toMatchObject({ warmup: { status: 'not-requested' }, metrics: { elapsedS: 120 } });
+  for (const candidate of campaign.campaign.candidates) for (const scenario of campaign.campaign.scenarios) {
+    const central = campaign.result.runs.find(run => run.candidateId === candidate.id && run.scenarioId === scenario.id && run.sensitivityId === 'central')!;
+    for (const cost of campaign.result.runs.filter(run => run.candidateId === candidate.id && run.scenarioId === scenario.id && run.sensitivityId.startsWith('cost-'))) expect(cost.state!.experiment!.metrics).toEqual(central.state!.experiment!.metrics);
+  }
+  await evidence(info, 'phase6-native-complete-paired-sensitivity', campaign, observed);
+});
+
+test('PH6 E frozen50millionUSD budget passes central and rejects the upper included-cost bound in the UI', async ({ page }, info) => {
+  const observed = observe(page); await setup(page);
+  await page.getByLabel('Decision fixture', { exact: true }).selectOption('nominal');
+  await page.getByLabel('Decision budget USD', { exact: true }).fill('50000000');
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const central = await exported(page); expect(central.result.ranking.winnerIds).toEqual(['ii-24']);
+  await page.getByLabel('Decision budget basis', { exact: true }).selectOption('upper-bound');
+  await expect(page.getByTestId('decision-stale')).toBeVisible();
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const upper = await exported(page);
+  expect(upper.result.ranking).toMatchObject({ status: 'no-feasible-evaluated-candidate', winnerIds: [], scopeComplete: true });
+  for (const row of upper.result.evaluations) {
+    const original = central.result.evaluations.find(item => item.candidateId === row.candidateId)!;
+    expect(original.feasibility).toBe('feasible'); expect(row.budgetCostUSD).toBe(original.includedCost.totalUSD * 1.5);
+    expect(row.requirements.find(item => item.id === 'included-cost-budget')).toMatchObject({ status: 'violated', threshold: 50000000, unit: 'USD' });
+  }
+  expect(upper.result.runs.map(run => run.state!.experiment!.metrics)).toEqual(central.result.runs.map(run => run.state!.experiment!.metrics));
+  await evidence(info, 'phase6-native-central-upper-budget-consequence', { central, upper }, observed);
+});
