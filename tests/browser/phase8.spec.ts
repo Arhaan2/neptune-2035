@@ -51,6 +51,22 @@ test('P8-S02 old active project requires explicit recalculation and old campaign
   expect(derived.solverVersion).toBe('2.3.1');
   expect(derived.provenance.parent).toMatchObject({ solverVersion: '2.3.0', action: 'recalculate-current-model' });
   expect(derived.checkpoint.state.experiment.definition.solverVersion).toBe('2.3.1');
+  expect(derived.checkpoint.state.experiment.definition.durationS).toBe(12);
+  expect(derived.events).toEqual(oldProject.events);
+  expect(derived.checkpoint.state.events).toEqual(oldProject.checkpoint.state.events);
+  expect(derived.checkpoint.state.experiment.inputs).toEqual(oldProject.checkpoint.state.experiment.inputs);
+  expect(derived.checkpoint.state.appliedEventIds).toEqual(['network-fault']);
+  expect(derived.checkpoint.state.modules[0].availableAccelerators).toBe(0);
+  await step.click();
+  await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '12');
+  await expect(step).toBeEnabled();
+  const continued = await exportProject();
+  expect(continued.checkpoint.state.appliedEventIds).toEqual(['network-fault', 'network-recovery']);
+  expect(continued.checkpoint.state.failedAssetIds).not.toContain('shore/cluster-core');
+  expect(continued.checkpoint.state.modules[0].availableAccelerators).toBe(8);
+  expect(continued.checkpoint.state.experiment.status).toBe('completed');
+  expect(continued.checkpoint.state.experiment.metrics.elapsedS).toBe(12);
+  expect(continued.provenance.parent).toEqual(derived.provenance.parent);
   expect(await nativeJSON(page, () => page.getByRole('button', { name: 'Export original project', exact: true }).click())).toEqual(oldProject);
   await page.getByRole('button', { name: 'Compare', exact: true }).click();
   await page.getByLabel('Decision fixture', { exact: true }).selectOption('nominal');
@@ -62,9 +78,9 @@ test('P8-S02 old active project requires explicit recalculation and old campaign
   await page.getByLabel('Import decision campaign', { exact: true }).setInputFiles({ name: 'old-campaign.json', mimeType: 'application/json', buffer: Buffer.from(oldCampaign) });
   await expect(page.getByRole('region', { name: 'Phase 6 decision support', exact: true })).toContainText('Import rejected; current campaign retained.');
   expect(await exportCampaign()).toEqual(currentCampaign);
-  expect((await exportProject()).checkpoint).toEqual(derived.checkpoint);
+  expect((await exportProject()).checkpoint).toEqual(continued.checkpoint);
   expect(errors).toEqual([]);
-  await info.attach('P8-S02-native-version-boundaries', { body: JSON.stringify({ rejected, oldSolver: oldProject.solverVersion, derivedSolver: derived.solverVersion, parent: derived.provenance.parent, oldCampaignSolver: JSON.parse(oldCampaign).campaign.versions.solver, currentCampaignSolver: currentCampaign.campaign.versions.solver, exactActiveCampaignPreservation: true, exactOriginalProjectPreservation: true }), contentType: 'application/json' });
+  await info.attach('P8-S02-native-version-boundaries', { body: JSON.stringify({ rejected, oldSolver: oldProject.solverVersion, derivedSolver: derived.solverVersion, parent: derived.provenance.parent, oldCampaignSolver: JSON.parse(oldCampaign).campaign.versions.solver, currentCampaignSolver: currentCampaign.campaign.versions.solver, derivedTimeS: derived.checkpoint.state.timeS, continuedTimeS: continued.checkpoint.state.timeS, appliedFutureEvents: continued.checkpoint.state.appliedEventIds, exactActiveCampaignPreservation: true, exactOriginalProjectPreservation: true }), contentType: 'application/json' });
 });
 
 test('P8-S02 legacy query and generated hash routes retain the saved aggregate scenario', async ({ page }) => {

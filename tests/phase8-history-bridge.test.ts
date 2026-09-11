@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
+import type { SimulationState } from '../src/twin/types';
 import type { DecisionExport } from '../src/twin/decision/types';
 
 type Compared = Pick<DecisionExport, 'campaign' | 'result'>;
@@ -43,6 +44,25 @@ describe('P8-E08 independent historical bridge acceptance boundaries', () => {
       state.modules[0][field] += tolerance * 2;
       expect(compare(original, revised).matches, `${location}.${field} outside existing tolerance`).toBe(false);
     }
+  });
+
+  it.each(['sequence', 'accelerators'] as const)('preserves the exact runtime transfer %s from an actual archived state', field => {
+    // Test the comparator's leaf policy with actual archived transfer evidence.
+    // Campaign/state consistency remains the separate strict importer's responsibility.
+    const archived = JSON.parse(readFileSync(new URL('./fixtures/phase-8/phase7-transfer.json', import.meta.url), 'utf8')) as { checkpoint: { state: SimulationState } };
+    const left = structuredClone(original), right = structuredClone(original);
+    left.result.runs[0].state!.transfer = structuredClone(archived.checkpoint.state.transfer);
+    right.result.runs[0].state!.transfer = structuredClone(archived.checkpoint.state.transfer);
+    expect(compare(left, right).matches).toBe(true);
+    right.result.runs[0].state!.transfer!.transitions[0][field] += 1e-7;
+    expect(compare(left, right).matches).toBe(false);
+  });
+
+  it('does not infer a physical unit tolerance from an unrecognized field name ending in W', () => {
+    const left = structuredClone(original), right = structuredClone(original);
+    Object.assign(left.result.runs[0].state!.modules[0], { unrecognizedReadingW: 0 });
+    Object.assign(right.result.runs[0].state!.modules[0], { unrecognizedReadingW: 1e-7 });
+    expect(compare(left, right).matches).toBe(false);
   });
 
   it('rejects added metadata keys and preserves unrecognized numeric metadata exactly', () => {
