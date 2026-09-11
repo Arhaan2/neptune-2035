@@ -31,9 +31,9 @@ The fault occurs at30 s; qualifying violation begins at240 s, recovery at364 s a
 
 ## Measured execution envelope
 
-Independent Testing measured these observations on macOS arm64, Node24.18.0/npm11.16.0, unchanged lockfile. They are observations, not latency or memory guarantees. Memory values are process snapshots and cumulative process maximum RSS, not isolated peak allocations.
+Independent Testing measured these observations on macOS arm64, Node24.18.0/npm11.16.0, unchanged lockfile. They are observations, not latency or memory guarantees. These times measure the synchronous reference runner; interactive workers additionally perform bounded chunk admission, messaging and rendering. Memory values are process snapshots and cumulative process maximum RSS, not isolated peak allocations.
 
-| Scenario | Modules | Simulated duration | Wall time | RSS before → after | Process max RSS |
+| Scenario | Modules | Simulated duration | Synchronous runner wall time | RSS before → after | Process max RSS |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 1,280, no standby | 1 | 1,800 s | 95.42 ms | 86,933,504 → 98,287,616 B | 95,984 KiB |
 | 1,280, one standby | 1 | 1,800 s | 76.48 ms | 98,304,000 → 101,007,360 B | 98,640 KiB |
