@@ -37,3 +37,9 @@ Pending implementation handoffs. Contract and requirement matrix must freeze bef
 - Building explicitly transferred `runner.ts` and `worker-client.ts` to Fixing for P6-T003/P6-T004 while continuing evidence import/export/report implementation. Fixing owns only those files plus isolated `tests/phase6-fixes.test.ts`; Testing owns all other Phase 6 tests and independently retests repairs.
 
 All handoff base/patch identities remain in Git history. No agent other than Orchestration publishes shared refs, integrates the release branch or deploys. Local and browser gates remain pending until all slices integrate; these incremental passes are not release acceptance.
+
+- Building `f1be93f`/`cba6d5f` delivered validated portable evidence and complete readable report appendices; integrated `6120120`/`d17f8ae`. Real81-cell sensitivity export/import/serial recompute matched.
+- Fixing `9d96140`/`0545341` delivered bounded watchdog/global completeness plus safe10s chunks; integrated `7666a3f`/`03dc990`. Testing independently closed T003/T004 and retained before/after evidence.
+- Fixing switched its isolated worktree to successor branch `codex/neptune-phase6-fixing-ui` based on integrated `03dc990`, repaired T005 in `a8b4fb2` (integrated `e8e02a1`), and released every lease before completing its turn. Verification then resumed its same original identity for integrated engineering and exact-candidate review.
+- Testing `826f479`/`d28134a` delivered complete portable evidence tests, browser E/budget cases and T006 mismatch regressions; integrated `3d316c0`/`0ccf944`. Building `708432` corrected T006, integrated `a324447`; Testing independently retested and closed it.
+- Orchestration executed all8named/budget CLI demonstrations from detached `a324447` with complete source identities and native logs. Building completed its final handoff and released all leases. No five-way concurrency was used or claimed.
