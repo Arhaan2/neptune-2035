@@ -1,6 +1,6 @@
 # NEPTUNE v2 reduced-order model cards
 
-Status: **Design-stage digital twin · Simulated operation.** The implemented model is a reproducible design investigation, with no identified physical installation or empirical calibration. Software and numerical verification below are not physical validation or operational commissioning. Solver version is `2.3.0`; the authoritative runtime value is `SOLVER_VERSION` in `src/twin/types.ts`.
+Status: **Design-stage digital twin · Simulated operation.** The implemented model is a reproducible design investigation, with no identified physical installation or empirical calibration. Software and numerical verification below are not physical validation or operational commissioning. Solver version is `2.3.1`; the authoritative runtime value is `SOLVER_VERSION` in `src/twin/types.ts`.
 
 ## Intended uses and evidence boundary
 
@@ -119,6 +119,10 @@ epsilon = (1 − exp(−NTU (1−r))) / (1 − r exp(−NTU (1−r)))
 ```
 
 For equal capacity rates, `epsilon = NTU / (1+NTU)`. Transfer is `epsilon C_min (T_technical,in − T_seawater,in)`. Outlet temperatures follow each stream's energy balance. Fouling is an explicit additional total resistance in K/W, not a dimensionless multiplier. `UA_clean=0` or either zero flow gives zero transfer. Temperature reversal gives signed reverse heat transfer. Stable `expm1` evaluation avoids cancellation at small NTU. The near-equal capacity threshold is `abs(1−r)<1e-8`.
+
+Phase 8 finding V8-05 identified cancellation in the denominator immediately outside that threshold. Solver `2.3.1` evaluates the same equation as `a / ((1−r) + r a)`, where `a = −expm1(−NTU(1−r))`, instead of subtracting nearly equal terms in `1−r exp(−NTU(1−r))`. The equal-capacity approximation and its cutoff are unchanged. With capacity rates 1000 and `1000/(1−1.1e-8)` W/K, UA 1000 W/K and inlet difference 20 K, solver `2.3.0` reported `10000.000045929364 W`. The independent spatial RK4 boundary-value reference gives `10000.00002750005 W`, independently confirmed by 70-digit decimal arithmetic as `10000.0000275000002227 W`. The old absolute error `1.84293e-5 W` exceeded the previously declared `1e-6 W` reference tolerance; the conditioned formula closes that gap without changing a tolerance or reference.
+
+This arithmetic repair changes the numerical solver identity from `2.3.0` to `2.3.1`. Saved `2.3.0` project checkpoints, including active experiment and transfer records, remain inspectable and exportable without rewriting their payload or identities. Only the known archived `2.3.0` identity calculation is retained for this inspection; all nested versions, design bindings, input history, metrics and transfer checks still apply. Exact restoration and runtime continuation of those states are unavailable. Explicit recalculation creates a separate current-model experiment with no restored checkpoint and retains the original project identity and solver in parent provenance. Existing Phase 2 inspection behavior remains supported. Existing inspection of unknown numerical labels on structurally valid current-identity simple projects remains read-only; unknown labels cannot select the archived identity calculation. Historical decision-campaign outputs must remain original supplied evidence; any comparison to a separately recalculated `2.3.1` campaign must disclose the version change, preserve the old payload and use the existing numerical tolerances.
 
 The formulation and resistance structure were checked against [MathWorks E-NTU Heat Transfer](https://www.mathworks.com/help/hydro/ref/entuheattransfer.html) on 2026-09-08. This equation reference validates neither the assumed UA nor generic equipment selection, and does not create a MATLAB dependency.
 

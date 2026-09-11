@@ -1,5 +1,5 @@
 import { modelForDesign, algorithmForDesign } from '../transfer/version';
-import { engineeringIdentity } from '../catalog/equipment';
+import { engineeringIdentity, historicalEngineeringIdentity } from '../catalog/equipment';
 import { buildDesign, migrateLegacyDesign, validateConfig } from '../assets/design';
 import { failure, finiteNumber, SimulationError } from '../safety';
 import { SOLVER_VERSION, type Design, type SimulationState } from '../types';
@@ -45,8 +45,9 @@ function validateProject(value: unknown): asserts value is ProjectFile {
   if (identity(value.provenance.sourceIds) !== identity(value.designSnapshot.sourceIds)) failure('invalid-input', 'PROJECT_SOURCE_BINDING', 'Source provenance disagrees with the saved design.');
   if (value.checkpoint !== null) {
     record(value.checkpoint, 'checkpoint'); keys(value.checkpoint, ['boundary', 'configIdentity', 'state'], 'checkpoint');
-    if (value.checkpoint.boundary !== 'after-events-and-controller' || value.checkpoint.configIdentity !== engineeringIdentity(value.designSnapshot)) failure('invalid-input', 'CHECKPOINT_BINDING', 'Checkpoint boundary or design identity mismatch.');
-    validateState(value.designSnapshot, value.checkpoint.state, { allowDifferentSolver: true });
+    const configIdentity=value.solverVersion==='2.3.0'?historicalEngineeringIdentity(value.designSnapshot,'2.3.0'):engineeringIdentity(value.designSnapshot);
+    if (value.checkpoint.boundary !== 'after-events-and-controller' || value.checkpoint.configIdentity !== configIdentity) failure('invalid-input', 'CHECKPOINT_BINDING', 'Checkpoint boundary or design identity mismatch.');
+    validateState(value.designSnapshot, value.checkpoint.state, { allowDifferentSolver: true, ...(value.solverVersion==='2.3.0'?{inspectionSolverVersion:'2.3.0' as const}:{}) });
     if (value.checkpoint.state.timeS !== value.timeS || value.checkpoint.state.solverVersion !== value.solverVersion || identity(value.checkpoint.state.events) !== identity(value.events)) failure('invalid-input', 'CHECKPOINT_HISTORY', 'Checkpoint clock, solver or event history mismatch; explicit migration cannot repair inconsistent data.');
   }
   if (Object.hasOwn(value, 'execution')) {
