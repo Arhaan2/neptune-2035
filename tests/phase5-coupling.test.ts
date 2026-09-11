@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { engineeringIdentity } from '../src/twin/catalog/equipment';
+import { replaceEquipment } from '../src/twin/assets/design';
 import { advance, initialize, summarize } from '../src/twin/engine/simulation';
 import { createExperimentDefinition } from '../src/twin/experiment/definition';
 import { createTransferReferenceDesign } from '../src/twin/transfer/design';
@@ -74,5 +75,27 @@ describe('PH5 H real thermal coupling after electrical restoration', () => {
     expect(state.log.some(entry => entry.message.includes('Thermal hysteresis'))).toBe(true);
     expect(summarize(design, state).availableAccelerators).toBeLessThan(3840);
     expect(state.experiment!.metrics.shortfallAcceleratorS).toBeGreaterThan(1280 * 2.375);
+  });
+});
+
+describe('PH5 V02 installed standby dependency and actual restoration demand', () => {
+  it.each([63000, 64000])('accounts for the installed replacement standby pump at a %i W tie', capacityW => {
+    let design = createTransferReferenceDesign();
+    const module = design.modules.find(module => module.platformId === 'platform-002')!;
+    design = replaceEquipment(design, `${module.id}/pump-standby`, 'pump-physical');
+    const route = design.transfer!.routes[0];
+    for (const edge of design.connections) if (route.tieConnectionIds.includes(edge.id)) edge.capacity = capacityW;
+    design.revision = `standby-limit-${engineeringIdentity(design)}`;
+    const state = run(design, [{ id: 'duty-fails', kind: 'trip', timeS: 0, assetId: `${module.id}/pump-duty` }, events(design)[0]], 20);
+    const attempt = state.transfer!.attempts[0], recipient = state.modules.find(candidate => candidate.id === module.id)!;
+    if (capacityW === 63000) {
+      expect(attempt.status).not.toBe('transferred');
+      expect(attempt.tieClosed).toBe(false); expect(attempt.admittedW).toBe(0); expect(attempt.unservedW).toBeGreaterThan(0);
+    } else {
+      expect(attempt.status).toBe('transferred'); expect(recipient.availableAccelerators).toBe(8);
+      const platformNetworkW = design.assets.find(asset => asset.id === 'platform-002/cluster')!.ratings.capacityW;
+      const donorEfficiency = design.assets.find(asset => asset.id === 'platform-001/transformer')!.ratings.efficiency;
+      expect(attempt.admittedW + 1e-6).toBeGreaterThanOrEqual(recipient.gridW + platformNetworkW / donorEfficiency);
+    }
   });
 });
