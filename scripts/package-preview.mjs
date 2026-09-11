@@ -81,10 +81,13 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Phase 3 workload persistence and explicit scalable network resources; physical validation, training throughput, Phase 4/5 and previously deferred Phase 1 performance/stress gates remain outside scope',
+    releaseScope: 'Phase 4 whole-experiment metrics, sustained recovery, explicit lifecycle, checkpointed evidence and bounded faulted/unfaulted comparisons; physical validation, training throughput, Phase 5/6/7 and previously deferred Phase 1 performance/stress gates remain outside scope',
     modelId: 'neptune-reference-3',
     solverVersion: '2.3.0',
     projectSchema: 3,
+    experimentSchema: 1,
+    metricsVersion: 'whole-run-1',
+    algorithmId: 'committed-boundary-1',
   } : { productionPromotion: 'not performed' }),
 };
 await fs.writeFile(
