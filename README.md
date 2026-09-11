@@ -2,11 +2,15 @@
 
 ## Current product
 
-[Open NEPTUNE](https://arhaan2.github.io/neptune-2035/) · [Preserved v2 preview](https://arhaan2.github.io/neptune-2035/v2-preview/) · [Phase 6 release evidence](https://github.com/Arhaan2/neptune-2035/releases/tag/phase-6-2026-09-11)
+[Open NEPTUNE](https://arhaan2.github.io/neptune-2035/) · [Preserved v2 preview](https://arhaan2.github.io/neptune-2035/v2-preview/) · [Phase 7 historical release evidence](https://github.com/Arhaan2/neptune-2035/releases/tag/phase-7-2026-09-11)
+
+**Asset-linked design-stage offshore infrastructure twin with coupled operation and failure simulation.**
 
 **Simulated, design-stage prototype; physical validation pending.** NEPTUNE includes installed equipment, coupled simulation, whole-experiment metrics, bounded radial transfer, constrained decision campaigns, read-only observations and reproducible exports. The `/v2-preview/` deployment is preserved separately; it does not describe the current production root. The published [release identity](https://arhaan2.github.io/neptune-2035/release.json) names the actual deployed source and artifact.
 
 Phase 7 adds Explore, Operate and Compare guidance, connected asset inspection, exact event-boundary history, whole-run decision explanations and an evidence-derived fault-and-recovery walkthrough. Read the [walkthrough instructions](docs/phase-7/WALKTHROUGH.md) and [acceptance matrix](docs/phase-7/REQUIREMENT-MATRIX.md). Acceptance, recordings and deployment are recorded in the corresponding release receipt; this source document alone is not evidence that Phase 7 is live.
+
+Phase 8 defines independent software, numerical and integrated behavioral verification in the [contract](docs/phase-8/CONTRACT.md), [requirement matrix](docs/phase-8/REQUIREMENT-MATRIX.md) and [reproduction/release procedure](docs/phase-8/RELEASE.md). Final acceptance and deployed identities are external release receipts, not inferred from this document.
 
 Use **Explore** to select installed equipment and inspect its specification and supported paths. **Operate** contains simulated fault controls and whole-experiment execution. **Compare** evaluates minimum included cost for fixed workload or maximum passing evaluated workload under a supply ceiling. The reference campaigns demonstrate eligible transfer, nominal-only preference and honest no-feasible receiving-bus/common-source outcomes under their declared requirements. These scenarios do not establish physical reliability or long-term adequacy.
 

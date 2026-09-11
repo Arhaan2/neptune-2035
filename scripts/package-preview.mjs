@@ -66,6 +66,7 @@ const artifactSha256 = createHash('sha256').update(manifestText).digest('hex');
 await fs.writeFile('dist/build-manifest.json', manifestText);
 const release = {
   product: 'NEPTUNE',
+  description: 'Asset-linked design-stage offshore infrastructure twin with coupled operation and failure simulation.',
   version: pkg.version,
   channel: production ? 'production' : 'separate-preview',
   sourceSha,
@@ -81,7 +82,7 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Phase 7 operator workspaces, connected asset inspection, exact event-boundary history and evidence-derived walkthrough; retained Phase 6 bounded decisions and Phase 4/5 whole-run metrics and radial transfer. Physical validation, meshed/parallel sources, global optimization, training throughput, Phases 8–9 and previously deferred stress gates remain outside scope',
+    releaseScope: 'Phase 8 independent agent verification of asset-linked coupled operation, failures, whole-run evidence, numerical accounting, bounded operating comparisons and release identity; retained Phase 7 workspaces/history/walkthrough and Phase 4–6 contracts. Simulated, design-stage prototype; physical validation pending. Physical equipment, marine stability/mooring/environment/permitting, meshed/parallel sources, global optimization, training throughput, reliability probabilities and previously deferred stress gates remain outside scope',
     modelId: 'neptune-reference-3',
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',

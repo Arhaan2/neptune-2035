@@ -5,6 +5,11 @@ import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 const arg = key => process.argv.find(value => value.startsWith(`--${key}=`))?.slice(key.length + 3);
 const out = path.resolve(arg('out') ?? 'artifacts/phase-7-gate');
+const basePath = arg('base-path') ?? '/';
+if (!/^\/[a-zA-Z0-9/_-]*\/$/.test(basePath) && basePath !== '/') throw Error('Invalid acceptance base path.');
+const extraBrowser = arg('browser-file');
+if (extraBrowser && !/^tests\/browser\/[a-zA-Z0-9-]+\.spec\.ts$/.test(extraBrowser)) throw Error('Invalid extra browser acceptance file.');
+const productionURL = `http://127.0.0.1:4173${basePath}`;
 const git = (...args) => execFileSync('git', args, {encoding:'utf8'}).trim();
 if(git('status','--porcelain','--untracked-files=no'))throw Error('Freeze tracked changes before the acceptance gate.');
 await fs.mkdir(out,{recursive:true});
@@ -39,8 +44,8 @@ try{
  await fs.copyFile('dist/build-manifest.json',path.join(out,'tested-build-manifest.json'));
  await fs.copyFile('dist/release.json',path.join(out,'tested-release.json'));
  await run('archive','tar',['-cf',path.join(out,'tested-build.tar'),'-C','dist','.'],{COPYFILE_DISABLE:'1'});
- await server('production-server',['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4173','--strictPort'],'http://127.0.0.1:4173/');
- await run('browser','npx',['playwright','test','tests/browser/prototype.spec.ts','tests/browser/phase2.spec.ts','tests/browser/phase3.spec.ts','tests/browser/phase4.spec.ts','tests/browser/phase5.spec.ts','tests/browser/phase6.spec.ts','tests/browser/phase7.spec.ts','--retries=0'],{NEPTUNE_BASE_URL:'http://127.0.0.1:4173/',NEPTUNE_BROWSER_REPORT:path.join(out,'browser.json')});
+ await server('production-server',['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4173','--strictPort','--base',basePath],productionURL);
+ await run('browser','npx',['playwright','test','tests/browser/prototype.spec.ts','tests/browser/phase2.spec.ts','tests/browser/phase3.spec.ts','tests/browser/phase4.spec.ts','tests/browser/phase5.spec.ts','tests/browser/phase6.spec.ts','tests/browser/phase7.spec.ts',...(extraBrowser?[extraBrowser]:[]),'--workers=1','--retries=0'],{NEPTUNE_BASE_URL:productionURL,NEPTUNE_BROWSER_REPORT:path.join(out,'browser.json')});
 }catch(problem){error=String(problem);console.error(error);process.exitCode=1;}
 finally{
  for(const {child,log} of servers){child.kill('SIGTERM');await log.close();}
