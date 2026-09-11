@@ -81,7 +81,7 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Phase 6 bounded discrete decision campaigns, whole-run operating constraints, paired exploratory sensitivity and reproducible evidence; retained Phase 4/5 experiment and single-hop radial transfer behavior. Physical validation, meshed/parallel sources, global optimization, training throughput, Phases 7–9 and previously deferred stress gates remain outside scope',
+    releaseScope: 'Phase 7 operator workspaces, connected asset inspection, exact event-boundary history and evidence-derived walkthrough; retained Phase 6 bounded decisions and Phase 4/5 whole-run metrics and radial transfer. Physical validation, meshed/parallel sources, global optimization, training throughput, Phases 8–9 and previously deferred stress gates remain outside scope',
     modelId: 'neptune-reference-3',
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',

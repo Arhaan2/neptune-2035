@@ -1,0 +1,11 @@
+import type { WalkthroughDefinition } from '../twin/presentation/walkthrough';
+export function WalkthroughPanel({ walkthrough, index, status, displayTimeS, onStep, onPause, onResume, onExit, onPreviousBoundary }: { walkthrough: WalkthroughDefinition; index: number; status: string; displayTimeS: number | null; onStep: (index: number) => void; onPause: () => void; onResume: () => void; onExit: () => void; onPreviousBoundary: () => void }) {
+  const step = walkthrough.steps[index];
+  return <section className="operator-walkthrough" aria-label="Fault and recovery walkthrough" data-testid="operator-walkthrough" data-step-index={index} data-step-count={walkthrough.steps.length} data-step-title={step.title} data-run-id={walkthrough.run.id} data-status={status}>
+    <div className="twin-section-line"><strong>Fault and recovery walkthrough · {index + 1}/{walkthrough.steps.length}</strong><span>{status}</span></div>
+    <h2>{step.title}</h2><p>{step.explanation}</p>
+    <p>Source: {walkthrough.result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied campaign evidence'}. Run <code>{walkthrough.run.id}</code>. {step.boundary === 'at-or-after' ? 'Metric marker' : 'Requested boundary'} {step.timeS} s · actual displayed scene {displayTimeS === null ? 'unavailable / resolving' : `${displayTimeS} s`}.</p>
+    <div className="twin-actions"><button disabled={index === 0} onClick={() => onStep(index - 1)}>Previous walkthrough step</button><button disabled={index === walkthrough.steps.length - 1 || status === 'loading'} onClick={() => onStep(index + 1)}>Next walkthrough step</button>{status === 'paused' ? <button onClick={onResume}>Resume walkthrough</button> : <button onClick={onPause}>Pause walkthrough</button>}<button onClick={onExit}>Exit walkthrough</button>{step.boundary === 'at-or-after' && <button onClick={onPreviousBoundary}>Inspect boundary before metric marker</button>}</div>
+    <small>Stepwise navigation uses the real scene camera and exact engine history. Camera or asset interaction pauses guidance. Exit returns to the loaded current checkpoint; the previous project remains saved in Compare. Simulated, design-stage prototype; physical validation pending.</small>
+  </section>;
+}

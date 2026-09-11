@@ -29,6 +29,8 @@ import type {
 } from '../twin/persistence/types';
 import { diagnosticFor, finiteNumber } from '../twin/safety';
 
+export type SimulationSourceOrigin = 'simulated model execution' | 'simulated model execution from supplied initial checkpoint' | 'simulated initialization from evaluated campaign definition' | 'executed simulated campaign' | 'imported supplied simulated campaign evidence' | 'imported or saved simulated checkpoint · supplied evidence';
+
 export function runWorkerExperiment(
   design: Design,
   events: OperationEvent[],
@@ -102,6 +104,9 @@ export function useTwin(design: Design) {
     [history, setHistory] = useState<Summary[]>([]),
     [progress, setProgress] = useState<WorkerResponse['progress']>(),
     [workerGeneration, setWorkerGeneration] = useState(0),
+    // View identity only: repeated executions of identical definitions are distinct runs.
+    [runGeneration, setRunGeneration] = useState(0),
+    [sourceOrigin, setSourceOrigin] = useState<SimulationSourceOrigin>('simulated model execution'),
     [recoveryRead] = useState(() => readCheckpoint()),
     [recovery, setRecovery] = useState<ProjectFile | null>(
       recoveryRead.project,
@@ -127,6 +132,8 @@ export function useTwin(design: Design) {
     designRef = useRef(design),
     restoredDesign = useRef<Design | null>(null),
     provenance = useRef<ProjectProvenance | undefined>(undefined),
+    admittedOrigin = useRef<SimulationSourceOrigin>('simulated model execution'),
+    requestOrigin = useRef<SimulationSourceOrigin>('simulated model execution'),
     target = useRef<number | null>(null),
     recoveryPending = useRef(
       recoveryRead.project !== null || Boolean(recoveryRead.diagnostic),
@@ -153,7 +160,7 @@ export function useTwin(design: Design) {
     }
   }, [captureProject]);
   const accept = useCallback(
-    (next: SimulationState) => {
+    (next: SimulationState, origin: SimulationSourceOrigin = admittedOrigin.current) => {
       const validationStart = performance.now();
       validateState(designRef.current, next);
       diagnosticEvent('ui.validate', { ms: performance.now() - validationStart, timeS: next.timeS });
@@ -177,6 +184,8 @@ export function useTwin(design: Design) {
       const summary = summarize(designRef.current, next);
       diagnosticEvent('ui.summarize', { ms: performance.now() - summaryStart, timeS: next.timeS });
       committedProject.current = candidate;
+      admittedOrigin.current = origin;
+      setSourceOrigin(origin);
       const initializing = current.current === null;
       current.current = next;
       setState(next);
@@ -270,6 +279,9 @@ export function useTwin(design: Design) {
       setProgress(undefined);
       setBusy(true);
       setError('');
+      requestOrigin.current = kind === 'initialize' || kind === 'replay' && !continuing
+        ? replayInitialState && admittedOrigin.current.includes('supplied') ? 'simulated model execution from supplied initial checkpoint' : 'simulated model execution'
+        : admittedOrigin.current;
       diagnosticEvent('ui.dispatch-start', { kind, requestId: requestId.current + 1, epoch: epoch.current, durationS, targetTimeS: target.current });
       worker.current.postMessage({
         diagnostics: diagnosticsEnabled,
@@ -287,6 +299,8 @@ export function useTwin(design: Design) {
           ? { state: current.current }
           : {}),
       } satisfies WorkerRequest);
+      if (kind === 'initialize' || kind === 'restore' || kind === 'replay' && !continuing)
+        setRunGeneration(value => value + 1);
       diagnosticEvent('ui.dispatched', { requestId: requestId.current, epoch: epoch.current });
     },
     [stopClock],
@@ -323,7 +337,7 @@ export function useTwin(design: Design) {
       try {
         if (r.progress) setProgress(r.progress);
         if (r.state && r.state.designRevision === designRef.current.revision)
-          accept(r.state);
+          accept(r.state, requestOrigin.current);
         if (r.status === 'progress') return;
         pending.current = false;
         setBusy(false);
@@ -409,7 +423,7 @@ export function useTwin(design: Design) {
     [send, invalidate],
   );
   const restore = useCallback(
-    (project: ProjectFile) => {
+    (project: ProjectFile, origin: SimulationSourceOrigin = 'imported or saved simulated checkpoint · supplied evidence') => {
       const restored = restoreProject(project);
       invalidate();
       restoredDesign.current = restored.design;
@@ -426,7 +440,8 @@ export function useTwin(design: Design) {
       setRecoveryBlocked(false);
       setProgress(undefined);
       setError('');
-      accept(restored.state.experiment && !['completed','cancelled','warmup-timeout','numerical-failed'].includes(restored.state.experiment.status) ? setExperimentStatus(restored.state,'paused','Restored a complete physical and metric checkpoint; resume explicitly.') : restored.state);
+      accept(restored.state.experiment && !['completed','cancelled','warmup-timeout','numerical-failed'].includes(restored.state.experiment.status) ? setExperimentStatus(restored.state,'paused','Restored a complete physical and metric checkpoint; resume explicitly.') : restored.state, origin);
+      setRunGeneration(value => value + 1);
       return restored.design;
     },
     [accept, invalidate],
@@ -485,6 +500,8 @@ export function useTwin(design: Design) {
     diagnosticEvent('ui.committed', { selectedRevision: design.revision, initializedRevision: state?.designRevision, timeS: state?.timeS, busy });
   }, [design.revision, state, busy]);
   return {
+    runGeneration,
+    sourceOrigin,
     state: state?.designRevision === design.revision ? state : null,
     running: running && state?.designRevision === design.revision,
     setRunning,

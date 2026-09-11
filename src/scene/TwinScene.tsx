@@ -1,3 +1,4 @@
+import { visualAssetStates } from '../twin/presentation/assets';
 import { activePowerDesign } from '../twin/transfer/topology';
 import { engineeringIdentity } from '../twin/catalog/equipment';
 import {
@@ -753,9 +754,7 @@ function TwinFacility({
     () => new Map([...props.design.assets, ...details].map((a) => [a.id, a])),
     [props.design, details],
   );
-  const states = props.state.modules.find(
-    (m) => m.id === moduleSpec?.id,
-  )?.states;
+  const states = useMemo(() => visualAssetStates(props.state), [props.state]);
   const common = {
     selectedId: props.selectedId,
     onSelect: props.onSelect,
@@ -781,7 +780,7 @@ function TwinFacility({
     <group>
       <Instances assets={hulls} {...common} />
       <Instances assets={platforms} {...common} />
-      <Instances assets={shells} {...common} opacity={props.xray ? 0.35 : 1} />
+      <Instances assets={shells} {...common} states={states} opacity={props.xray ? 0.35 : 1} />
       <ModuleEnvelopeDetails
         assets={envelopes}
         selectedModuleId={moduleSpec?.id}
@@ -789,7 +788,7 @@ function TwinFacility({
         xray={props.xray}
         onSelect={props.onSelect}
       />
-      <Instances assets={globals} {...common} />
+      <Instances assets={globals} {...common} states={states} />
       {moduleAsset && (
         <ModuleStructure
           asset={moduleAsset}
@@ -867,7 +866,7 @@ function TwinFacility({
           className="twin-asset-label"
         >
           <span>{active.name}</span>
-          <small>{active.id}</small>
+          <small>{active.id} · {states?.[active.id] ?? 'status unknown'}</small>
         </Html>
       )}
     </group>
@@ -918,7 +917,7 @@ function CameraRig({
   useEffect(() => {
     const c = controls.current;
     if (!c) return;
-    const context = `${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
+    const context = `${props.design.revision}:${props.exploded ? 'exploded' : 'assembled'}:${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
     if (lastContext.current && !wasInside.current && !inside)
       snapshots.current.set(lastContext.current, {
         position: camera.position.clone(),
@@ -1009,6 +1008,7 @@ function CameraRig({
         };
       }
     }
+    while (snapshots.current.size > 24) snapshots.current.delete(snapshots.current.keys().next().value!);
     wasInside.current = inside;
     lastContext.current = context;
     transitioning.current = true;
@@ -1290,16 +1290,14 @@ export function TwinFallback(props: TwinSceneProps) {
   const b =
     props.focus === 'campus' || !moduleSpec
       ? bounds
-      : footprintBounds([resolveAsset(props.design, moduleSpec.id)!]);
+      : footprintBounds([resolveAsset(props.design, props.selectedId) ?? resolveAsset(props.design, moduleSpec.id)!]);
   const objects =
     props.focus === 'campus' || !moduleSpec
       ? props.design.assets.filter(
           (a) => a.type === 'module' || a.type === 'platform',
         )
-      : details;
-  const states = props.state.modules.find(
-    (m) => m.id === moduleSpec?.id,
-  )?.states;
+      : moduleSpec.id === props.selectedId || props.selectedId.startsWith(`${moduleSpec.id}/`) ? details : props.design.assets.filter(asset => asset.parentId === resolveAsset(props.design, props.selectedId)?.parentId || asset.id === props.selectedId);
+  const states = useMemo(() => visualAssetStates(props.state), [props.state]);
   const onReady = props.onReady;
   useEffect(() => {
     onReady?.();
@@ -1330,7 +1328,7 @@ export function TwinFallback(props: TwinSceneProps) {
             key={a.id}
             role="button"
             tabIndex={0}
-            aria-label={`${a.name}, ${a.id}`}
+            aria-label={`${a.name}, ${a.id}, ${states?.[a.id] ?? 'status unknown'}${a.id === props.selectedId ? ', selected' : ''}`}
             onClick={() => props.onSelect(a.id)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -1351,7 +1349,7 @@ export function TwinFallback(props: TwinSceneProps) {
               strokeWidth={a.id === props.selectedId ? 0.1 : 0.025}
             />
             <title>
-              {a.id} · {a.dimensionsM.join(' × ')} m
+              {a.id} · {states?.[a.id] ?? 'status unknown'} · {a.dimensionsM.join(' × ')} m
             </title>
           </g>
         ))}

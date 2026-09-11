@@ -23,8 +23,8 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
   const current = useMemo(() => state ? evaluator(state.modules, state.failedAssetIds) : null, [state, evaluator]);
   const selectedResources = installed.resources.filter(resource => resource.assetId === selectedId).sort((a, b) => (a.kind === 'switch' ? 0 : a.kind === 'port' ? 1 : 2) - (b.kind === 'switch' ? 0 : b.kind === 'port' ? 1 : 2));
   const powerEvaluator = useMemo(() => createNetworkPowerEvaluator(active), [active]);
-  const power = useMemo(() => powerEvaluator(state?.failedAssetIds), [powerEvaluator, state?.failedAssetIds]);
-  const selectedPower = power.allocations.find(allocation => allocation.assetId === selectedId);
+  const power = useMemo(() => state ? powerEvaluator(state.failedAssetIds) : null, [powerEvaluator, state]);
+  const selectedPower = power?.allocations.find(allocation => allocation.assetId === selectedId);
   const affectedDomains = [...new Set(selectedResources.flatMap(resource => resource.domainIds))];
   const links = design.connections.filter(edge => (edge.medium === 'cluster' || edge.medium === 'external-network') && (edge.from === selectedId || edge.to === selectedId));
   const networkAssets = design.assets.filter(asset => asset.type === 'network');
@@ -53,9 +53,10 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
       <p>Full inventory assessment, independent of current power allocation. {installed.blockedDomainIds.length} affected job domains.</p>
     </div>
     <div data-testid="network-current">
-      <strong>Current energized demand: {current?.status ?? 'initializing'}</strong>
-      <p>{current?.energizedNodes.toLocaleString('en-US') ?? '—'} energized nodes · cluster {current ? gb(current.clusterDemandBitS) : '—'} Gbit/s · external {current ? gb(current.externalDemandBitS) : '—'} Gbit/s.</p>
-      <p>{current?.blockedDomainIds.length ?? 0} affected domains. A capacity pass is not training performance or physical campus validation.</p>
+      <strong>Current energized demand: {current?.status ?? 'unavailable'}</strong>
+      {state && <p>At displayed simulation time {state.timeS} s.</p>}
+      <p>{current?.energizedNodes.toLocaleString('en-US') ?? 'Unavailable'} energized nodes · cluster {current ? gb(current.clusterDemandBitS) : 'unavailable'} Gbit/s · external {current ? gb(current.externalDemandBitS) : 'unavailable'} Gbit/s.</p>
+      <p>{current ? `${current.blockedDomainIds.length} affected domains.` : 'Affected domains unavailable: no resolved state is displayed.'} A capacity pass is not training performance or physical campus validation.</p>
     </div>
     <label className="twin-preset">Inspect network asset
       <select aria-label="Inspect network asset" value={networkAssets.some(asset => asset.id === selectedId) ? selectedId : ''} onChange={event => onSelect(event.target.value)}>
@@ -79,6 +80,7 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
       <p>Installed demand in the declared source-to-node direction. Shared switch budget counts each traversal once. Ports and links retain individual limits.</p>
     </details>}
     {selectedPower && <details open><summary>Selected switch supply</summary><p>{selectedPower.available ? 'Powered' : 'Unpowered'} · declared {selectedPower.requestedW.toLocaleString('en-US')} W; supplied {selectedPower.suppliedW.toLocaleString('en-US')} W; grid draw including conversion {selectedPower.gridW.toLocaleString('en-US', {maximumFractionDigits: 1})} W. No root/platform UPS is modeled.</p><p>Dependencies: {selectedPower.dependencyIds.join(' → ')}.</p></details>}
+    {!state && networkAssets.some(asset => asset.id === selectedId) && <details open><summary>Selected switch supply</summary><p>Power status, supplied watts and grid draw are unavailable because no resolved state is displayed. Installed ratings remain available separately.</p></details>}
     {links.length > 0 && <details>
       <summary>Network links · enable / disable</summary>
       <p>Changing a link saves the prior run and resets a new design revision. No alternate route is invented.</p>

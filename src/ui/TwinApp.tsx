@@ -1,3 +1,11 @@
+import { WalkthroughPanel } from './WalkthroughPanel';
+import { createResultWalkthrough, walkthroughSourceIdentity, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
+import type { InspectDecisionEvidence } from './DecisionExplanation';
+import type { DecisionCampaign, DecisionResult } from '../twin/decision/types';
+import { useInspection } from './useInspection';
+import type { OperatorEvent } from '../twin/presentation/history';
+import { AssetContext, WorkspaceGuide, InspectionContext, OperatorTimeline } from './OperatorExperience';
+import { assetOperatingStatus } from '../twin/presentation/assets';
 import { DecisionPanel } from './DecisionPanel';
 import { TransferPanel } from './TransferPanel';
 import { activePowerDesign } from '../twin/transfer/topology';
@@ -216,7 +224,28 @@ export default function TwinApp() {
     [notice, setNotice] = useState(''),
     [search, setSearch] = useState(''),
     [sceneReady, setSceneReady] = useState(false),
-    [demo, setDemo] = useState(false);
+    [demo, setDemo] = useState(false),
+    [inspectedEventId, setInspectedEventId] = useState<string | null>(null),
+    [walkthroughSession, setWalkthrough] = useState<(WalkthroughDefinition & { sourceIdentity: string; runGeneration: number }) | null>(null),
+    [walkthroughIndex, setWalkthroughIndex] = useState(0),
+    [walkthroughPaused, setWalkthroughPaused] = useState(false),
+    [walkthroughNavigation, setWalkthroughNavigation] = useState(0),
+    [walkthroughApplied, setWalkthroughApplied] = useState(-1),
+    [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number; boundary:'post'|'at-or-after'} | null>(null);
+  const appliedWalkthroughNavigation = useRef(-1);
+  const sourceIdentity = useMemo(() => walkthroughSession ? walkthroughSourceIdentity(design, state) : null, [walkthroughSession, design, state]);
+  const walkthrough = walkthroughSession?.runGeneration === sim.runGeneration && walkthroughSession.sourceIdentity === sourceIdentity ? walkthroughSession : null;
+  // Retire invalid guidance before rendering or scheduling another historical seek.
+  // The user's replacement/modified experiment remains the active source.
+  if (walkthroughSession && !walkthrough) {
+    setWalkthrough(null);
+    setNotice('Walkthrough ended because its original completed experiment is no longer active. Your current experiment is retained; start a result walkthrough explicitly to reload its original evidence.');
+  }
+  const sourceOrigin = sim.sourceOrigin;
+  const inspection = useInspection(design, state, selectedId, sim.runGeneration);
+  const displayState = inspection.displayState;
+  const inspectionController = useRef(inspection);
+  useEffect(()=>{inspectionController.current=inspection;},[inspection]);
   const [comparison, setComparison] = useState<Compared[]>([]),
     [comparisonDescription, setComparisonDescription] = useState(
       'Full load at 0s → selected duty pump trip at 30s → restore at 180s. Both runs use the same parameters through 240s.',
@@ -243,7 +272,7 @@ export default function TwinApp() {
       design.modules.find(
         (m) => selectedId === m.id || selectedId.startsWith(`${m.id}/`),
       ) ?? design.modules[0],
-    selectedState = state?.modules.find((m) => m.id === selectedModule.id);
+    selectedState = displayState?.modules.find((m) => m.id === selectedModule.id);
   const selectedModuleId = selectedModule.id;
   const computeSpec=resolveSpecification(design,'compute');
   const installedSpec=asset&&roleForAsset(asset.id)?resolveSpecification(design,asset.id):null;
@@ -253,15 +282,15 @@ export default function TwinApp() {
       [design, selectedModuleId],
     ),
     platform = selectedModule.platformId,
-    summary = state ? summarize(design, state) : null,
-    residuals = state ? conservationResiduals(design, state) : null,
+    summary = inspection.mode === 'history' ? inspection.resolution?.summary ?? null : displayState ? summarize(design, displayState) : null,
+    residuals = inspection.mode === 'history' ? inspection.resolution?.residuals ?? null : displayState ? conservationResiduals(design, displayState) : null,
     cost = useMemo(
       () => billOfEquipment(design, costScale),
       [design, costScale],
     );
   const topology = useMemo(
-    () => topologyForSelection(state?activePowerDesign(design,state):design, selectedId),
-    [design, selectedId, state],
+    () => topologyForSelection(displayState?activePowerDesign(design,displayState):design, selectedId),
+    [design, selectedId, displayState],
   );
   const powerPaths = upstreamConnections(
     topology.filter((e) => e.medium === 'power'),
@@ -271,11 +300,14 @@ export default function TwinApp() {
     (e) => e.from === selectedId || e.to === selectedId,
   );
   const select = (id: string, view: Focus = 'selection') => {
+    if (!resolveAsset(design, id)) { setNotice('Unsupported asset ID. Select an installed asset from the asset list.'); return; }
     setSelectedId(id);
+    if (walkthrough) setWalkthroughPaused(true);
     setFocus(view);
     setResetId((v) => v + 1);
     setDemo(false);
   };
+  const inspectEvent = (event: OperatorEvent, boundary: 'post' | 'previous' = 'post') => { select(event.assetId); setInspectedEventId(event.id); setWorkspace('Operate'); inspection.inspect(event.timeS, boundary); };
   const retainBeforeRevision = (label: string) => {
     if (!state || sim.busy) throw Error('Wait for the current worker operation to complete before changing the design.');
     const history = [...saved.slice(-(CONTRACT.maxSavedScenarios - 1)), {name: `${label} · ${state.timeS}s`, project: sim.captureProject()}];
@@ -284,6 +316,34 @@ export default function TwinApp() {
     localStorage.setItem('neptune-v2-scenarios', serialized);
     setSaved(history); sim.cancel(); setPendingProject(null);
   };
+  const inspectDecisionEvidence: InspectDecisionEvidence = (run, evidence, provenance, context) => {
+    if (!evidence.state || evidence.status !== 'completed') throw Error('No completed scenario is available for inspection.');
+    retainBeforeRevision('Before completed decision inspection'); inspection.returnToCurrent(); setWalkthrough(null);
+    const next = sim.restore(projectFile(run.design, evidence.state), provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config); setDemo(false); setWorkspace('Operate');
+    const assetId = context?.assetId ?? `${next.modules[0].id}/pump-duty`;
+    setSelectedId(assetId); setFocus('selection'); setResetId(value=>value+1);
+    setPendingEvidenceView({definitionId:run.definition.id,assetId,timeS:context?.timeS ?? evidence.state.timeS,boundary:context?.boundary ?? 'post'});
+    setNotice('Completed scenario loaded explicitly; previous active project saved in Compare. Event/history inspection does not modify the loaded result.');
+  };
+  const startResultWalkthrough = (campaign: DecisionCampaign, result: DecisionResult) => {
+    const prepared = createResultWalkthrough(campaign,result);
+    retainBeforeRevision('Before result walkthrough'); inspection.returnToCurrent();
+    const next = sim.restore(projectFile(prepared.run.design,prepared.evidence.state), result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config);
+    setWalkthrough({...prepared,sourceIdentity:walkthroughSourceIdentity(prepared.run.design,prepared.evidence.state)!,runGeneration:sim.runGeneration+1});setWalkthroughIndex(0);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);setDemo(false);setInside(false);setXray(true);
+    setNotice('Walkthrough loaded one completed scenario. Your previous project remains in saved scenarios; guidance only inspects history after this explicit load.');
+  };
+  useEffect(() => {
+    if (!walkthrough || walkthroughPaused || sim.busy || state?.experiment?.definition.id !== walkthrough.run.definition.id || appliedWalkthroughNavigation.current === walkthroughNavigation) return;
+    appliedWalkthroughNavigation.current = walkthroughNavigation;
+    const step = walkthrough.steps[walkthroughIndex];
+    const timer = setTimeout(() => {setWalkthroughApplied(walkthroughNavigation);setSelectedId(step.assetId);setFocus('selection');setResetId(value=>value+1);setInspectedEventId(step.eventId);setWorkspace(step.workspace);inspectionController.current.inspect(step.timeS,step.boundary);},0);
+    return () => {clearTimeout(timer);appliedWalkthroughNavigation.current=-1;};
+  },[walkthrough,walkthroughIndex,walkthroughPaused,walkthroughNavigation,sim.busy,state?.experiment?.definition.id]);
+  useEffect(() => {
+    if(!pendingEvidenceView||sim.busy||state?.experiment?.definition.id!==pendingEvidenceView.definitionId)return;
+    const timer=setTimeout(()=>{inspectionController.current.inspect(pendingEvidenceView.timeS,pendingEvidenceView.boundary);setPendingEvidenceView(null);},0);return()=>clearTimeout(timer);
+  },[pendingEvidenceView,sim.busy,state?.experiment?.definition.id]);
+  useEffect(() => {const hide=()=>{if(document.hidden)setWalkthroughPaused(true);};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[]);
   const setDesign = (patch: Partial<DesignConfig>, nominalPreset = false) => {
     try {
       const next = { ...config, ...patch };
@@ -397,10 +457,12 @@ export default function TwinApp() {
     id = selectedId,
     value?: number,
   ) => {
+    if (inspection.mode === 'history') { setNotice('Return to current state before issuing a simulated command.'); return; }
     sim.command(kind, id, value);
     setNotice(`${kind} recorded at ${state?.timeS ?? 0}s for ${id}.`);
   };
   const inspectOrRestore = (project: ProjectFile) => {
+    inspection.returnToCurrent();
     const compatibility = compatibilityFor(project);
     if (!compatibility.canResume) {
       setInspectionProject(project);
@@ -640,10 +702,10 @@ export default function TwinApp() {
       setCompareBusy(false);
     }
   };
-  const sceneProps = state
+  const sceneProps = displayState
     ? {
         design,
-        state,
+        state: displayState,
         selectedId,
         onSelect: (id: string) => select(id),
         xray: effectiveXray,
@@ -654,7 +716,7 @@ export default function TwinApp() {
         focus: effectiveFocus,
         resetId,
         reducedMotion,
-        onManual: () => setDemo(false),
+        onManual: () => {setDemo(false);setWalkthroughPaused(true);},
         onReady: () => setSceneReady(true),
       }
     : null;
@@ -666,6 +728,10 @@ export default function TwinApp() {
       data-selected={selectedId}
       data-workspace={workspace}
       data-time={state?.timeS ?? 0}
+      data-display-time={displayState?.timeS ?? ''}
+      data-inspection-mode={inspection.mode}
+      data-inspection-status={inspection.status}
+      onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"]')) setWalkthroughPaused(true);}}
       onWheelCapture={() => {
         if (demo) setDemo(false);
       }}
@@ -681,6 +747,7 @@ export default function TwinApp() {
           {(['Explore', 'Operate', 'Compare'] as const).map((w) => (
             <button
               className={workspace === w ? 'active' : ''}
+              aria-pressed={workspace === w}
               key={w}
               onClick={() => {
                 setWorkspace(w);
@@ -707,9 +774,10 @@ export default function TwinApp() {
           <i /> Design-stage digital twin · Simulated operation
         </span>
         <span>Public prototype — simulated, design-stage model</span>
-        <span>Simulated, design-stage prototype.</span>
+        <span>Simulated, design-stage prototype; physical validation pending.</span>
         <span>{design.revision} · 1 world unit = 1 m</span>
       </div>
+      <WorkspaceGuide workspace={workspace} onAssets={() => document.querySelector('.twin-tree')?.scrollIntoView({block:'start', behavior:reducedMotion?'instant':'smooth'})} onEquipment={() => document.querySelector('.twin-inspector')?.scrollIntoView({block:'start', behavior:reducedMotion?'instant':'smooth'})} onCampus={() => {setInside(false);setFocus('campus');setResetId(value=>value+1);setDemo(false);}} />
       <div className="twin-layout">
         <aside className="twin-design">
           <div className="twin-eyebrow">
@@ -949,6 +1017,8 @@ export default function TwinApp() {
           </div>
         </aside>
         <section className="twin-center">
+          <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
+          {walkthrough && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} displayTimeS={displayState?.timeS??null} status={walkthroughPaused?'paused':walkthroughApplied===walkthroughNavigation&&selectedId===walkthrough.steps[walkthroughIndex].assetId&&inspection.status==='resolved'&&inspection.resolution?.boundary===walkthrough.steps[walkthroughIndex].boundary&&inspection.requestedTimeS===walkthrough.steps[walkthroughIndex].timeS?(walkthroughIndex===walkthrough.steps.length-1?'completed':'ready'):'loading'} onStep={index=>{setWalkthroughIndex(index);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onPause={()=>setWalkthroughPaused(true)} onResume={()=>{setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onExit={()=>{setWalkthrough(null);inspection.returnToCurrent();setFocus('campus');setResetId(value=>value+1);}} onPreviousBoundary={()=>{setWalkthroughPaused(true);inspection.inspect(walkthrough.steps[walkthroughIndex].timeS,'previous');}} />}
           <div className="twin-scene-shell" ref={sceneRegion}>
             <div className="twin-scene-caption">
               <span>
@@ -975,7 +1045,7 @@ export default function TwinApp() {
               </Suspense>
             ) : (
               <div className="twin-loading">
-                Initializing the simulation worker… {sim.error}
+                {inspection.mode === 'history' ? (inspection.resolution?.reason ?? 'Resolving exact historical scene…') : `Initializing the simulation worker… ${sim.error}`}
               </div>
             )}
             <div className="twin-scene-toolbar" aria-label="Scene controls">
@@ -1044,13 +1114,13 @@ export default function TwinApp() {
               ],
               [
                 'Facility draw',
-                `${num((summary?.facilityW ?? 0) / 1e6, 2)} MW`,
+                summary ? `${num(summary.facilityW / 1e6, 2)} MW` : 'Unknown',
                 'IT + cooling + conversion',
               ],
               [
                 'Workload available',
-                num(summary?.availableAccelerators ?? 0, 0),
-                `${num(summary?.energizedAccelerators ?? 0, 0)} energized`,
+                num(summary?.availableAccelerators ?? NaN, 0),
+                `${num(summary?.energizedAccelerators ?? NaN, 0)} energized`,
               ],
               [
                 'Bulk coolant',
@@ -1078,7 +1148,7 @@ export default function TwinApp() {
           <div className="twin-clock">
             <button
               className="primary"
-              disabled={!state || (!sim.running && sim.busy)}
+              disabled={inspection.mode === 'history' || !state || (!sim.running && sim.busy)}
               onClick={() => {
                 setDemo(false);
                 sim.setRunning(!sim.running);
@@ -1087,7 +1157,7 @@ export default function TwinApp() {
               {sim.running ? <Pause size={16} /> : <Play size={16} />}{' '}
               {sim.running ? 'Pause' : 'Start'}
             </button>
-            <strong data-testid="sim-time">{state?.timeS ?? 0}s</strong>
+            <span>Current clock</span><strong data-testid="sim-time">{state?.timeS ?? 0}s</strong>
             <label>
               Speed
               <select
@@ -1103,7 +1173,7 @@ export default function TwinApp() {
               </select>
             </label>
             <button
-              disabled={sim.busy || !state}
+              disabled={inspection.mode === 'history' || sim.busy || !state}
               onClick={() => sim.advance(10)}
             >
               Step 10s
@@ -1127,7 +1197,7 @@ export default function TwinApp() {
               Replay
             </button>
             <label>
-              Replay to
+              Execution replay to
               <input
                 aria-label="Replay time in seconds"
                 type="number"
@@ -1150,6 +1220,7 @@ export default function TwinApp() {
               }
               onClick={() => {
                 if (state) {
+                  inspection.returnToCurrent();
                   setDemo(false);
                   if(sim.replay(state.events, replayTimeS, undefined, state.integrationStepS, state.experiment?.definition))setNotice('Seek created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
                 }
@@ -1277,12 +1348,14 @@ export default function TwinApp() {
               </button>
             </div>
           )}
-          <TransferPanel design={design} state={state} busy={sim.busy||compareBusy} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
-          {state && <ExperimentPanel design={design} state={state} busy={sim.busy} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
-          {state && !showComparison && <Trend history={sim.history} />}
-          <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy}
-            onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
-            onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
+          {workspace === 'Operate' && state && <OperatorTimeline design={design} source={state} display={displayState} assetId={selectedId} selectedEventId={inspectedEventId} resolution={inspection.resolution} onInspect={(timeS,boundary) => {setDemo(false);inspection.inspect(timeS,boundary);}} onEvent={inspectEvent} />}
+          <TransferPanel design={design} state={displayState} busy={sim.busy||compareBusy||inspection.mode==='history'} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
+          {state && !showComparison && <p className="operator-evidence-label">Active experiment controls and full-run evidence · current checkpoint {state.timeS} s. History inspection does not change this evidence.</p>}
+          {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
+          {state && !showComparison && inspection.mode==='current' && <Trend history={sim.history} />}
+          <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy} onInspectEvidence={inspectDecisionEvidence} onWalkthrough={startResultWalkthrough}
+            onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared), 'simulated initialization from evaluated campaign definition');setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
+            onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared), 'simulated initialization from evaluated campaign definition');setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
           {showComparison && (
             <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
               <div className="twin-section-line">
@@ -1498,11 +1571,11 @@ export default function TwinApp() {
           )}
           {state && (
             <div hidden={detail !== 'data'}>
-              <DataPanel key={design.revision} design={design} state={state} />
+              <p>Observation data panel · active current checkpoint {state.timeS} s; separate from historical scene inspection.</p><DataPanel key={design.revision} design={design} state={state} />
             </div>
           )}
           {state && detail === 'evidence' && (
-            <EvidencePanel design={design} state={state} />
+            <div><p>Engineering constraints for the active current checkpoint at {state.timeS} s; separate from the historical scene.</p><EvidencePanel design={design} state={state} /></div>
           )}
         </section>
         <aside className="twin-inspector">
@@ -1513,15 +1586,10 @@ export default function TwinApp() {
           </div>
           <h2>{asset?.name ?? 'Select an asset'}</h2>
           <code className="twin-id">{selectedId}</code>
-          <span
-            className={`twin-tag ${state?.failedAssetIds.includes(selectedId) ? 'failed' : ''}`}
-          >
-            {selectedState?.states[selectedId] ??
-              (state?.failedAssetIds.includes(selectedId)
-                ? 'failed'
-                : 'available')}{' '}
-            · simulated
+          <span className={`twin-tag ${assetOperatingStatus(displayState, selectedId)}`}>
+            {assetOperatingStatus(displayState, selectedId)} · simulated
           </span>
+          <AssetContext design={design} state={displayState} assetId={selectedId} onSelect={select} origin={sourceOrigin} />
           {asset && (
             <dl className="twin-properties">
               <dt>Envelope (W × H × D)</dt>
@@ -1554,7 +1622,7 @@ export default function TwinApp() {
               )}
             </dl>
           )}
-          <TwinNetworkPanel design={design} state={state} busy={sim.busy} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} />
+          <TwinNetworkPanel design={design} state={displayState} busy={sim.busy||inspection.mode==='history'} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} />
           {asset?.type==='pump'&&installedSpec&&(
             <section aria-label="Replace installed pump">
               <h3>Replace installed pump</h3>
@@ -1616,7 +1684,7 @@ export default function TwinApp() {
           )}
           {selectedState && (
             <>
-              <h3>Module operating point</h3>
+              <h3>Module operating point · {selectedModule.id}</h3>
               <dl className="twin-properties">
                 <dt>Technical / seawater flow</dt>
                 <dd data-testid="selected-flow">
@@ -1636,11 +1704,11 @@ export default function TwinApp() {
                 <dd>
                   {summary?.instantaneousPUE === null
                     ? 'Undefined'
-                    : num(summary?.instantaneousPUE ?? 0, 3)}{' '}
+                    : num(summary?.instantaneousPUE ?? NaN, 3)}{' '}
                   /{' '}
                   {summary?.energyPUE === null
                     ? 'Undefined'
-                    : num(summary?.energyPUE ?? 0, 3)}
+                    : num(summary?.energyPUE ?? NaN, 3)}
                 </dd>
               </dl>
             </>
@@ -1749,7 +1817,7 @@ export default function TwinApp() {
               </button>
               <h3>Causal event log</h3>
               <ol className="twin-log">
-                {state?.log
+                {displayState?.log
                   .slice(-18)
                   .reverse()
                   .map((e, i) => (
@@ -1757,7 +1825,7 @@ export default function TwinApp() {
                       <span>
                         {e.timeS}s · {e.kind}
                       </span>
-                      <button onClick={() => select(e.assetId)}>
+                      <button onClick={() => {select(e.assetId);inspection.inspect(e.timeS);}}>
                         {e.assetId}
                       </button>
                       <p>{e.message}</p>
@@ -1829,7 +1897,7 @@ export default function TwinApp() {
             <p className="twin-residuals">
               Residuals · electrical {num(summary.electricalResidualW, 5)} W ·
               thermal {num(summary.thermalResidualW, 5)} W · solver{' '}
-              {num(state?.solverMs ?? 0, 2)} ms
+              {num(displayState?.solverMs ?? NaN, 2)} ms
               <br />
               Normalized · electrical{' '}
               {residuals?.electricalNormalized.toExponential(2)} · thermal{' '}
