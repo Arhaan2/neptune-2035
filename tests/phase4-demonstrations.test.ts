@@ -4,6 +4,7 @@ import { summarize } from '../src/twin/engine/simulation';
 import { disturbanceFootprints } from '../src/twin/experiment/definition';
 import { referenceExperiment, signatureDemonstration } from '../src/twin/experiment/demonstrations';
 import { runExperiment } from '../src/twin/experiment/runner';
+import { recoveryReport } from '../src/twin/experiment/metrics';
 import type { ExperimentDefinition } from '../src/twin/experiment/types';
 import type { Design } from '../src/twin/types';
 
@@ -40,6 +41,9 @@ describe('PH4 real-engine signature and bounded execution envelope', () => {
     expect(protectedRun.experiment!.metrics.maxCoolant!.value).toBeCloseTo(303.67182668317, 6);
     expect(unprotected.experiment!.metrics.traceTruncated).toBe(true);
     expect(unprotected.experiment!.metrics.elapsedS).toBe(1800);
+    // The reference event predates the resulting service interruption by210seconds.
+    // Never misdate the t30 command as the t240 first violation in a recovery report.
+    expect(recoveryReport(unprotected.experiment!.metrics, 'completed')).toMatchObject({ referenceEventId: 'signature-duty-trip', referenceTimeS: 30, onsetTimeS: 364, confirmationTimeS: 369, onsetElapsedS: 334, confirmationElapsedS: 339 });
   });
   it('executes a real 100000-accelerator reference outage within the existing bounded runner', () => {
     const seed = withNetworkPreset(buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 }), 'scalable-reference');
