@@ -60,12 +60,22 @@ export function updateTransfer(design:Design,state:SimulationState,allocate:(can
       if(state.failedAssetIds.includes(route.isolatorId)){transition(design,state,a,'lockout','ISOLATION_UNCONFIRMED');continue;}
       a.originalClosed=false;transition(design,state,a,'isolated','ISOLATION_CONFIRMED');transition(design,state,a,'evaluating','EVALUATING');
       const refusal=transferRefusal(design,state,a.id);if(refusal){transition(design,state,a,'blocked',refusal);continue;}
-      a.deadlineS=state.timeS+design.transfer.delayS;transition(design,state,a,'waiting','WAITING');
     }
     if(a.status==='waiting'||a.status==='transferred'){
       const refusal=transferRefusal(design,state,a.id);
       if(refusal){a.tieClosed=false;a.admittedW=0;a.unservedW=a.requestedW;a.deadlineS=null;transition(design,state,a,'lockout',refusal);continue;}
       if(a.status==='waiting'&&!state.failedAssetIds.includes(route.originalFeederId)){a.originalClosed=true;a.deadlineS=null;a.unservedW=0;transition(design,state,a,'blocked','ORIGINAL_RESTORED');}
+    }
+  }
+  const evaluating=attempts.filter(a=>a.status==='evaluating');
+  if(evaluating.length){
+    // Dry admission considers this boundary's competing requests and live transfers
+    // together. Pending requests neither close switches nor retain reservations.
+    const eligibility=allocate(attempts.filter(a=>a.status==='evaluating'||a.status==='transferred'||a.status==='waiting'&&a.deadlineS!==null&&a.deadlineS<=state.timeS+1e-9));
+    for(const a of evaluating){
+      const result=eligibility.allocations.find(r=>r.id===a.id)!;a.headroomW=result.headroomW;a.bindingResourceId=result.bindingResourceId;a.admittedW=0;a.unservedW=a.requestedW;
+      if(result.unservedW>0)transition(design,state,a,'blocked',a.headroomW<=1e-7?'NO_HEADROOM':'INSUFFICIENT_HEADROOM');
+      else{a.deadlineS=state.timeS+design.transfer.delayS;transition(design,state,a,'waiting','WAITING');}
     }
   }
   const candidates=attempts.filter(a=>a.status==='transferred'||a.status==='waiting'&&a.deadlineS!==null&&a.deadlineS<=state.timeS+1e-9);
