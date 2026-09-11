@@ -10,6 +10,8 @@ An event opens the final canonical state after all engine observations at that t
 
 Pause allows inspection; camera or asset takeover and hidden tabs pause guidance. Resume reapplies the selected step. Exit cancels guided navigation and returns to the loaded current checkpoint. Ordinary history controls provide cancel and return-to-current; stepping requires returning to current. Reduced motion uses immediate framing. The non-WebGL list, narrative, metrics and tables retain the same identities and time context. Scene geometry and module-equivalent flow are representative, without CFD, sensor precision, or a seawater-to-GPU path.
 
+Explicit execution replay, a new run, changed recorded inputs or a replaced design retire guidance whose original completed source is no longer active. The user's changed experiment remains intact. Start result walkthrough again only when you explicitly want to reload its original evaluated evidence. Ordinary asset/camera/history inspection and economic-only edits do not change the source.
+
 Equipment health and switch position are separate facts: a transfer tie can have unknown equipment health while its actual controller record establishes that it is closed. Read the recorded switch state and projected topology separately; the application does not turn unknown health into a green measured indicator.
 
 ## Reproduce an actual recording

@@ -48,6 +48,10 @@ P7-09/P7-10. The requirement retained the correct9.375s confirmation marker, but
 
 P7-03/P7-08/P7-12. Independent Verification at15836e4 completed all eight steps, returned current, used execution Seek time6, added a supported shore/grid trip, stepped the run to12, then resumed the original walkthrough. The definition ID stayed unchanged while recorded inputs and displayed history changed; the original recovered/feasible narrative incorrectly remained completed. Directly adding an input to the already-closed terminal run was correctly rejected; the defect requires the supported seek/derived-execution path. This is a release blocker pending a source-identity guard, unchanged failing reproduction, and independent semantic closure.
 
+Fix af73752 integrated694daf5 binds guidance to the exact original complete source fingerprint (excluding only solver duration) and admitted run generation. Incompatible guidance is retired before rendering/scheduling; the modified active checkpoint is retained. Testing's original native regression failed on29a5bb5 and passed unchanged on the integrated1060978 production/test tree, including exact preservation of the modified checkpoint. Final independent closure belongs to the external candidate verdict.
+
 ## P7-D09 — legacy engineering explanation lacked exact qualification
 
 P7-10/P7-11. The default engineering Markdown report header retained older wording. Decision and whole-experiment explanations already contain the required sentence, but an uninstrumented/legacy engineering report did not. Add the exact mandated qualification in its visible header without altering model arithmetic or evidence. Independent Verification concurs that the wording must be fixed before acceptance.
+
+Fix d87eda1 integrated1060978 adds only the exact sentence to every engineering-report header. Testing's original uninstrumented/installed report assertion failed before the repair and passed unchanged after it. No numerical expectation or formula changed.
