@@ -106,8 +106,11 @@ export function withNetworkPreset(design:Design,preset:NetworkPreset):Design {
   if(!['scalable-reference','undersized-shared-core'].includes(preset))failure('unsupported-configuration','NETWORK_PRESET','Unknown network preset.');
   const equipment=structuredClone(equipmentFor(design));
   const current=createEquipmentConfiguration(design.config);
-  for(const spec of current.specifications)if(!equipment.specifications.some(s=>s.id===spec.id&&s.version===spec.version))equipment.specifications.push(spec);
-  equipment.economics.specificationUnitUSD={...current.economics.specificationUnitUSD,...equipment.economics.specificationUnitUSD};
+  for(const spec of current.specifications)if(!equipment.specifications.some(s=>s.id===spec.id&&s.version===spec.version)){
+    equipment.specifications.push(spec);
+    const key=`${spec.id}@${spec.version}`,price=current.economics.specificationUnitUSD[key];
+    if(price!==undefined)equipment.economics.specificationUnitUSD[key]=price;
+  }
   equipment.networkDesign={id:'rooted-reference-network',version:'1.0.0',preset};equipment.workloadProfile={...PHASE3_TRAFFIC_PROFILE};
   return carryDisabledNetworkConnections(design,buildDesign(design.config,equipment));
 }
