@@ -44,3 +44,6 @@
 .decision-import { display: flex; flex-direction: column; gap: .3rem; font-size: .8rem; max-width: 100%; }
 .decision-import input { max-width: 16rem; font-size: .75rem; }
 @media (max-width: 600px) { .decision-panel { padding: .8rem; } .decision-panel .experiment-fields { grid-template-columns: minmax(0,1fr); } .decision-panel .twin-actions { align-items: stretch; } }
+.decision-table-scroll:focus-visible { outline: 2px solid #83d8d1; outline-offset: 3px; }
+.decision-table td:nth-child(8) { min-width: 12rem; }
+.decision-panel > output { display: block; margin-block: .6rem; }
