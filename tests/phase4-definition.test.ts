@@ -93,10 +93,11 @@ describe('PH4 actual disturbance footprint fairness', () => {
     expect(footprint.installedAcceleratorsInScope).toBe(expectedAffected);
     expect(footprint.fractionOfInstalled).toBe(expectedAffected / 72);
   });
-  it('follows Generation II transformer power ancestry while preserving the unaffected second platform', () => {
-    const campus = buildDesign({ ...DEFAULT_CONFIG, generation: 2, requestedAccelerators: 5128 });
+  it.each([2, 3] as const)('follows existing generation %i transformer ancestry while preserving the unaffected second platform', generation => {
+    const campus = buildDesign({ ...DEFAULT_CONFIG, generation, requestedAccelerators: 5128, batteryWhPerModule: 0 });
     const definition = createExperimentDefinition(campus, { durationS: 20, disturbances: [{ id: 'transformer-trip', timeS: 0, assetId: 'platform-001/transformer', kind: 'trip' }] });
     const footprint = disturbanceFootprints(campus, definition)[0];
+    expect(summarize(campus, advance(campus, initialize(campus), 0, definition.disturbances)).availableAccelerators).toBe(8);
     expect(footprint.affectedModuleIds).toEqual(campus.modules.filter(module => module.platformId === 'platform-001').map(module => module.id));
     expect(footprint.installedAcceleratorsInScope).toBe(5120);
     expect(footprint.fractionOfInstalled).toBe(5120 / 5128);
