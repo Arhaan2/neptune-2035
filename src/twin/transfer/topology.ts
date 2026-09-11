@@ -14,8 +14,9 @@ export function powerPath(design:Design,startId:string):PowerPath {
     if(assetIds.includes(id))return{assetIds,resourceIds,supported:false,efficiency};
     assetIds.push(id);const asset=assets.get(id);if(!asset)return{assetIds,resourceIds,supported:false,efficiency};
     resourceIds.push(`asset:${id}`);if(asset.type==='transformer')efficiency*=asset.ratings.efficiency;
-    if(id==='shore/grid')return{assetIds,resourceIds,supported:true,efficiency};
     const edges=design.connections.filter(e=>e.medium==='power'&&e.enabled&&e.to===id);
+    // The sole supported source cannot also receive an energized power path.
+    if(id==='shore/grid')return{assetIds,resourceIds,supported:edges.length===0,efficiency};
     if(edges.length!==1)return{assetIds,resourceIds,supported:false,efficiency};
     const edge=edges[0];resourceIds.push(`edge:${edge.id}`,`port:${edge.from}:${edge.fromPort}`,`port:${edge.to}:${edge.toPort}`);id=edge.from;
   }
