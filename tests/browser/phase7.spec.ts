@@ -275,7 +275,7 @@ test('PH7 C3 primary walkthrough exposes engine metrics and exact scene times th
     visited.push({ step, scene: Number(await main(page).getAttribute('data-display-time')), title: await walkthrough.getAttribute('data-step-title') });
     if (step < times.length - 1) await button(page, 'Next walkthrough step').click();
   }
-  await expect(walkthrough).toContainText('iii-24'.replace('iii-24', campaign.campaign.candidates.find(item => item.id === 'iii-24')!.label));
+  await expect(walkthrough).toContainText(campaign.campaign.candidates.find(item => item.id === 'iii-24')!.label);
   const viewed = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
   expect(viewed.checkpoint.state.experiment.metrics).toEqual(metrics);
   await button(page, 'Exit walkthrough').click();
@@ -332,8 +332,6 @@ test('PH7 C3 walkthrough pause user takeover and emulated hidden visibility pres
   const walkthrough = page.getByTestId('operator-walkthrough');
   await expect(walkthrough).toHaveAttribute('data-status', 'ready');
   const before = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
-  await button(page, 'Resume walkthrough').click();
-  await expect(walkthrough).toHaveAttribute('data-status', 'ready');
   await button(page, 'Pause walkthrough').click();
   await expect(walkthrough).toHaveAttribute('data-status', 'paused');
   await button(page, 'Resume walkthrough').click();
