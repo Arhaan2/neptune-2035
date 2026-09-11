@@ -6,7 +6,8 @@ import { root, argument, sourceIdentity } from './results.mjs';
 
 const out = path.resolve(argument('out') ?? 'artifacts/phase-8-gate');
 const campaigns = argument('campaigns');
-if (!campaigns) throw Error('Pass --campaigns=DIR containing the six original historical campaign exports.');
+const legacyCheckout = argument('legacy-checkout');
+if (!campaigns || !legacyCheckout) throw Error('Pass --campaigns=DIR and --legacy-checkout=clean Phase7 checkout.');
 const identity = await sourceIdentity();
 if (!identity.trackedClean) throw Error('Freeze tracked changes before the acceptance gate.');
 await fs.mkdir(out, { recursive: true });
@@ -26,7 +27,7 @@ let error = null;
 try {
   await run('software', 'scripts/phase-7/gate.mjs', [`--out=${path.join(out, 'software')}`, '--base-path=/neptune-2035/', '--browser-file=tests/browser/phase8.spec.ts']);
   await run('numerical', 'scripts/phase-8/numerical.mjs', [`--out=${path.join(out, 'numerical')}`]);
-  await run('experiments', 'scripts/phase-8/experiments.mjs', [`--out=${path.join(out, 'experiments')}`, `--campaigns=${path.resolve(campaigns)}`]);
+  await run('experiments', 'scripts/phase-8/experiments.mjs', [`--out=${path.join(out, 'experiments')}`, `--campaigns=${path.resolve(campaigns)}`, `--legacy-checkout=${path.resolve(legacyCheckout)}`]);
 } catch (problem) { error = problem.stack ?? String(problem); console.error(error); }
 const finalIdentity = await sourceIdentity();
 const unchanged = identity.commit === finalIdentity.commit && identity.tree === finalIdentity.tree && finalIdentity.trackedClean;

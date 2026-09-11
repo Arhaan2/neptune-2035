@@ -1,13 +1,14 @@
 /** Complete-run regression and replay. Historical decision exports remain immutable inputs. */
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 import { createServer } from 'vite';
 import { root, argument, sha256, sourceIdentity, tolerances, resultSet, writeResults } from './results.mjs';
+import { recalculateHistorical } from './recalculate-historical.mjs';
 
 const out = path.resolve(argument('out') ?? 'artifacts/phase-8-experiments');
 const campaignDirectory = argument('campaigns');
-if (!campaignDirectory) throw Error('Pass --campaigns=DIR containing the six historical reproduce-FAMILY/campaign.json files. Generate no replacement expected values.');
+const legacyCheckout = argument('legacy-checkout');
+if (!campaignDirectory || !legacyCheckout) throw Error('Pass --campaigns=DIR with the six original exports and --legacy-checkout=clean Phase7 checkout.');
 const identity = await sourceIdentity(), results = resultSet(), experiments = [], campaigns = [];
 const startedAt = new Date().toISOString();
 await fs.mkdir(out, { recursive: true });
@@ -94,37 +95,23 @@ try {
 } catch (problem) { error = problem.stack ?? String(problem); }
 finally { await server.close(); }
 
-// Every portable historical campaign is recomputed by the existing command, with its native comparison.
-// A failure is retained and does not prevent collection of the remaining historical campaign evidence.
-for (const family of ['nominal', 'transfer', 'no-benefit-bus', 'no-benefit-source', 'sizing', 'sensitivity']) {
-  const input = path.resolve(campaignDirectory, `reproduce-${family}`, 'campaign.json');
-  const destination = path.join(out, `reproduce-${family}`);
-  const logName = `reproduce-${family}.log`;
-  try {
-    const before = await fs.readFile(input), supplied = JSON.parse(before);
-    results.exact(`P8-EXP/campaign/${family}/fixture-identity`, supplied.campaign.fixture, family);
-    const log = await fs.open(path.join(out, logName), 'w');
-    const command = [path.join(root, 'scripts/phase-6/reproduce.mjs'), `--input=${input}`, `--out=${destination}`];
-    let code;
-    try {
-      const child = spawn(process.execPath, command, { cwd: root, stdio: ['ignore', log.fd, log.fd] });
-      code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });
-    } finally { await log.close(); }
-    results.exact(`P8-EXP/campaign/${family}/native-exit`, code, 0, { log: logName });
-    results.exact(`P8-EXP/campaign/${family}/input-preserved`, sha256(await fs.readFile(input)), sha256(before));
-    const receipt = JSON.parse(await fs.readFile(path.join(destination, 'reproduction.json'), 'utf8'));
-    results.exact(`P8-EXP/campaign/${family}/full-evidence-comparison`, receipt.comparison?.matches, true, { differences: receipt.comparison?.differences });
-    results.exact(`P8-EXP/campaign/${family}/complete-coverage`, receipt.coverage.completed, receipt.coverage.planned);
-    results.exact(`P8-EXP/campaign/${family}/source`, receipt.sourceIdentity.commit, identity.commit);
-    campaigns.push({ family, originalSha256: sha256(before), originalSourceIdentity: supplied.sourceIdentity,
-      preservedInputs: supplied.campaign, originalRanking: supplied.result.ranking, reproducedRanking: receipt.ranking,
-      coverage: receipt.coverage, comparison: receipt.comparison, exitCode: code, log: logName,
-      command: ['node', 'scripts/phase-6/reproduce.mjs', `--input=HISTORICAL/reproduce-${family}/campaign.json`, `--out=OUTPUT/reproduce-${family}`] });
-    console.log(`Historical ${family}: exit ${code}; matches ${receipt.comparison?.matches}.`);
-  } catch (problem) {
-    results.exact(`P8-EXP/campaign/${family}/available-reproduction`, String(problem), 'successful historical comparison');
-    campaigns.push({ family, error: String(problem), log: logName });
+// V8-05 changes solver identity. Preserve exact original-solver replay before explicitly deriving current evidence.
+try {
+  const bridge = await recalculateHistorical({ campaigns: campaignDirectory, legacyCheckout, out: path.join(out, 'historical-bridge') });
+  results.exact('P8-EXP/historical-bridge/status', bridge.status, 'PASS', { error: bridge.error });
+  results.exact('P8-EXP/historical-bridge/originals-preserved', bridge.originalInputsUnchanged, true);
+  for (const row of bridge.campaigns) {
+    results.exact(`P8-EXP/campaign/${row.family}/original-solver-comparison`, row.legacyReplay.comparison.matches, true);
+    results.exact(`P8-EXP/campaign/${row.family}/current-cross-version-comparison`, row.comparison.matches, true);
+    results.exact(`P8-EXP/campaign/${row.family}/current-complete-coverage`, row.currentCoverage.completed, row.currentCoverage.planned);
+    results.exact(`P8-EXP/campaign/${row.family}/current-source`, row.sourceIdentity.commit, identity.commit);
+    campaigns.push({ family: row.family, originalSha256: row.parentOriginalSha256, originalSourceIdentity: row.originalSourceIdentity,
+      originalRanking: row.originalRanking, reproducedRanking: row.currentRanking, coverage: row.currentCoverage,
+      comparison: row.comparison, originalComparison: row.legacyReplay.comparison, bridge: row });
   }
+  results.exact('P8-EXP/historical-bridge/all-original-families', campaigns.length, 6);
+} catch (problem) {
+  results.exact('P8-EXP/historical-bridge/available-reproduction', String(problem), 'successful archived replay and current recalculation');
 }
 await writeResults(out, 'experiments', identity, results, { startedAt, completedAt: new Date().toISOString(), experiments, campaigns,
   limitations: ['Decision conclusions apply only to the original finite candidate set, included costs, and recorded assumptions.',
