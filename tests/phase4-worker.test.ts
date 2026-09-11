@@ -3,8 +3,9 @@ import { buildDesign, DEFAULT_CONFIG } from '../src/twin/assets/design';
 import { advance, initialize } from '../src/twin/engine/simulation';
 import { createWorkerHandler } from '../src/twin/engine/worker';
 import { createExperimentDefinition } from '../src/twin/experiment/definition';
-import { attachExperiment } from '../src/twin/experiment/runtime';
+import { attachExperiment, finishExperimentBoundary } from '../src/twin/experiment/runtime';
 import { replayExperimentState } from '../src/twin/experiment/runner';
+import { validateState } from '../src/twin/persistence/state';
 import { CONTRACT } from '../src/twin/persistence/limits';
 import type { WorkerRequest, WorkerResponse } from '../src/twin/types';
 
@@ -85,7 +86,12 @@ describe('PH4 authoritative metrics independent of worker grouping and delivery'
     Object.assign(custom.modules[0], { coolantK: 305, airK: 303, batteryWh: 200000 });
     custom = advance(design, custom, 0);
     attachExperiment(design, custom, definition);
-    const source = advance(design, custom, 20), initial = replayExperimentState(design, source);
+    finishExperimentBoundary(custom); // Commit the initial observation before creating the source run.
+    validateState(design, custom);
+    const source = advance(design, custom, 20);
+    validateState(design, source);
+    const initial = replayExperimentState(design, source);
+    expect(() => validateState(design, initial)).not.toThrow();
     expect(initial.experiment!.initialState).toEqual(source.experiment!.initialState);
     expect(initial.experiment!.initialState.modules[0].batteryWh).toBe(200000);
     expect(initial.experiment!.initialState.modules[0].coolantK).toBe(305);
@@ -93,6 +99,19 @@ describe('PH4 authoritative metrics independent of worker grouping and delivery'
     expect(replayed.at(-1)?.status).toBe('complete');
     expect(replayed.at(-1)?.state?.modules).toEqual(source.modules);
     expect(replayed.at(-1)?.state?.experiment?.metrics).toEqual(source.experiment!.metrics);
+  });
+  it.each([0, 20])('commits declared time-zero inputs before admitting a %is replay checkpoint', async durationS => {
+    const definition = createExperimentDefinition(design, { durationS, disturbances: [
+      { id: 'replay-initial-trip', timeS: 0, assetId: 'shore/cluster-core', kind: 'trip' },
+    ] });
+    const source = advance(design, initialize(design, definition), durationS);
+    const initial = replayExperimentState(design, source);
+    expect(() => validateState(design, initial)).not.toThrow();
+    expect(initial.appliedEventIds).toContain('replay-initial-trip');
+    const replayed = await run({ kind: 'replay', state: initial, experimentDefinition: undefined, durationS, events: [] });
+    expect(replayed.at(-1)?.status).toBe('complete');
+    expect(replayed.at(-1)?.state?.experiment).toEqual(source.experiment);
+    expect(replayed.at(-1)?.state?.modules).toEqual(source.modules);
   });
   it.each(['cold', 'settled'] as const)('replay retains all interactive inputs in an explicit derived %s definition', async mode => {
     const definition = createExperimentDefinition(design, { durationS: 20, disturbances: [
@@ -103,6 +122,7 @@ describe('PH4 authoritative metrics independent of worker grouping and delivery'
     const origin = prepared.experiment!.originTimeS!;
     const source = advance(design, prepared, 20, [{ id: 'recorded-interactive-workload', timeS: origin + 6, kind: 'workload', assetId: 'shore/grid', value: 0.3 }]);
     const initial = replayExperimentState(design, source);
+    expect(() => validateState(design, initial)).not.toThrow();
     expect(initial.experiment!.definition.provenance.parentDefinitionId).toBe(definition.id);
     expect(initial.experiment!.definition.disturbances.find(event => event.id === 'recorded-interactive-workload')).toMatchObject({ timeS: 6, kind: 'workload', value: 0.3 });
     const replayed = await run({ kind: 'replay', state: initial, experimentDefinition: undefined, durationS: source.timeS, events: [] });
