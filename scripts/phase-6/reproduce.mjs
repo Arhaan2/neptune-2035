@@ -26,7 +26,7 @@ try {
  const sourceIdentity={commit:git('rev-parse','HEAD'),sourceTree:git('rev-parse','HEAD^{tree}')};
  await fs.mkdir(output,{recursive:true});
  await fs.writeFile(path.join(output,'campaign.json'),api.exportDecisionCampaign(campaign,result,sourceIdentity));
- await fs.writeFile(path.join(output,'report.md'),api.decisionReport(campaign,result));
+ await fs.writeFile(path.join(output,'report.md'),api.decisionReport(campaign,result,sourceIdentity));
  const receipt={kind:'neptune-decision-reproduction',version:1,sourceIdentity,executedAt:new Date().toISOString(),inputKind:supplied?'imported-supplied-evidence':'named-fixture',coverage:result.coverage,status:result.status,ranking:result.ranking,sensitivityConclusion:result.sensitivityConclusion,comparison};
  await fs.writeFile(path.join(output,'reproduction.json'),JSON.stringify(receipt,null,2)+'\n');
  console.log(JSON.stringify(receipt,null,2));
