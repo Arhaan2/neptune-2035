@@ -28,6 +28,11 @@ Times above are minute-level orchestration records; native evidence records exac
 | PH5-T01 repair | Fixing `176e3e0` | `f171adc` | `controller.ts` exclusive lease; duplicate resource paths now rejected; independent retest pending |
 | PH5-T01 closure / topology review | Verification `e2bcff7`, `28914d1` | `ac74550` and subsequent review receipt | 32/32 independent plus direct probe; PH5-T02 and PH5-V01 reproduced |
 | 5B engine and checkpoint slice | Building `a9d15ad` | `bd3fab1` | Root typecheck passed; Building observed24 initial/final service, fault2/closure4.375 and19 accelerator-seconds; independent integrated acceptance pending |
+| T02 / V01 repair and closure | Fixing `38ab672`, `9ebec1e` | `e01edda`, `2c63099` | Testing and Verification independently confirmed both repairs; no test budgets/tolerances weakened |
+| UI / demonstrations | Building `a79f005` | `47f9cb2` | Actual worker comparisons, initial-state exports, live transfer inspection; root typecheck/lint/build and manual fallback UI check passed |
+| Independent engine / lifecycle / UI coverage | Testing successive commits | `1ca99cb`, `4b878c4`, `5a42878`, `c4ab4d5` and subsequent test additions | Engine/coupling and9 worker tests passed; checkpoint corruption findings remain open; native production browser run underway |
+
+Building completed all planned slices at `a79f005` and returned all production leases. Verification resumed alongside root, Testing and Fixing for the integrated engine/report review. It independently reproduced all eight declared comparisons (32 actual faulted/unfaulted runs), thermal/network coupling and stable shedding; PH5-V02 identified a real alternate-pump capacity underestimation. Root's manual production fallback interaction loaded the reference, ran the actual worker, observed19 accelerator-seconds and completed the four-run comparison with80/19 results. Browser matrices and the final repaired candidate remain separate gates.
 
 After Verification's completed initial review, `/root/fixing` started in a distinct worktree. The actual live-agent inventory showed root, Building, Testing and Fixing concurrently active, within the four-agent limit. Verification retains its identity for later independent review.
 
