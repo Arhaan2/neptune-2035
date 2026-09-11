@@ -54,9 +54,10 @@ jobs:
           env -u MOZ_HEADLESS NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 xvfb-run -a -s '-screen 0 1920x1200x24' npm test -- --reporter=default --reporter=json --outputFile=artifacts/prototype/unit.json
       - name: Independent numerical and historical campaign checks
         run: |
+          git worktree add --detach "$RUNNER_TEMP/neptune-phase8-legacy" c22964d48ddca0e7f7db18ede972125f79dad2df
           node scripts/phase-8/fetch-historical.mjs --out=artifacts/phase8/historical-inputs
           node scripts/phase-8/numerical.mjs --out=artifacts/phase8/numerical
-          node scripts/phase-8/experiments.mjs --campaigns=artifacts/phase8/historical-inputs --out=artifacts/phase8/experiments
+          node scripts/phase-8/experiments.mjs --campaigns=artifacts/phase8/historical-inputs --legacy-checkout="$RUNNER_TEMP/neptune-phase8-legacy" --out=artifacts/phase8/experiments
       - run: npm run build
       - name: Preserve tested production payload identity
         id: payload

@@ -6,6 +6,8 @@ import { execFileSync } from 'node:child_process';
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const sourceSha = git('rev-parse', 'HEAD');
+const solverVersion = (await fs.readFile('src/twin/types.ts', 'utf8')).match(/^export const SOLVER_VERSION = '([^']+)';/m)?.[1];
+if (!solverVersion) throw Error('Authoritative solver identity is unavailable.');
 const argument = key => process.argv.find(value => value.startsWith(`--${key}=`))?.slice(key.length + 3);
 const production = argument('channel') === 'production';
 const releaseEvidence = production ? {
@@ -89,7 +91,7 @@ const release = {
     transferTopology: 'single-hop-radial-1',
     transferAlgorithmId: 'transfer-boundary-1',
     transferExtensionSchema: 1,
-    solverVersion: '2.3.0',
+    solverVersion,
     projectSchema: 3,
     experimentSchema: 1,
     decisionSchema: 1,
