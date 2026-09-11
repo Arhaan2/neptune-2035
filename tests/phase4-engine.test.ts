@@ -70,6 +70,18 @@ describe('PH4 canonical execution path and boundary behavior', () => {
     for (let snapshot = 0; snapshot < 5; snapshot++) { summarize(design, stepped); projectFile(design, stepped); }
     expect(stepped.experiment).toEqual(before);
   });
+  it('uses fractional-interval dispatch rather than the conservative zero-duration battery display solve', () => {
+    const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8, workload: 1, batteryWhPerModule: 10, requireClusterNetwork: false, requireExternalNetwork: false });
+    const definition = createExperimentDefinition(design, { durationS: 1, integrationStepS: 0.5, disturbances: [{ id: 'reserve-trip', timeS: 0, kind: 'trip', assetId: 'shore/grid' }] });
+    const initial = beginExperiment(design, definition), final = advance(design, initial, 1);
+    expect(summarize(design, initial).availableAccelerators).toBe(0);
+    // The10Wh UPS can serve one12kW node for the first half-second, then
+    // reaches its critical-load limit. The pre-existing IT energy accumulator
+    // independently proves4 accelerator-seconds served despite zero initial display.
+    expect(final.itEnergyWh).toBeCloseTo(12000 * 0.5 / 3600, 10);
+    expect(final.experiment!.metrics).toMatchObject({ elapsedS: 1, shortfallAcceleratorS: 4, serviceViolationS: 0.5, firstServiceViolationS: 0.5, committedIntervals: 2 });
+    expect(final.experiment!.metrics.batteryDischargeWh).toBeGreaterThan(0);
+  });
 });
 
 describe('PH4 atomic persistence and operational continuity', () => {
