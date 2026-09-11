@@ -30,25 +30,47 @@ export function compareCrossVersion(original, current, identityChanges = []) {
   const physicalInitial = /^result\.(?:plan\.runs\[\d+\]\.initialState|runs\[\d+\]\.state\.experiment\.initialState)\./;
   const timing = /^result\.(?:plan\.runs\[\d+\]\.initialState|runs\[\d+\]\.state(?:\.experiment\.initialState)?)\.solverMs$/;
   function toleranceFor(location, parentUnit) {
-    const field = location.replace(/\[\d+\]/g, '').split('.').at(-1);
-    if (location.startsWith('campaign.') || /\.design\./.test(location) || /\.definition\./.test(location)) return 0;
-    if (location.startsWith('result.plan.') && !physicalInitial.test(location)) return 0;
-    if (['threshold', 'tolerance', 'version', 'schemaVersion', 'extensionVersion', 'integrationStepS'].includes(field)) return 0;
-    if (['workload', 'pumpSpeed', 'seawaterK', 'foulingResistanceKPerW', 'throttle'].includes(field)) return 0;
-    if (/Count$|^count$|^samples$|^stepIndex$|^committedIntervals$|^traceSamplesSeen$|^committedStepIndex$|^completedRuns$|^requiredRuns$|^completed$|^planned$|^fullyEvaluatedCandidates$|^workload$/.test(field)) return 0;
-    if (physicalInitial.test(location) && (field.endsWith('S') && !field.endsWith('M3S') && !field.endsWith('BitS') || location.includes('.startAtS.') || field === 'throttle' || field === 'capacityW' || field === 'accelerators' || field === 'priority')) return 0;
-    if (field.endsWith('Nodes') || field.endsWith('Accelerators') || field === 'requiredAccelerators' || field === 'serviceableAccelerators' || location.includes('.minServiceable.value')) return tol.accelerators;
-    if (['actual', 'margin'].includes(field) && parentUnit) {
-      const byUnit = { s: tol.seconds, W: tol.watts, USD: tol.USD, 'accelerator-s': tol.acceleratorSeconds, boolean: 0 };
-      if (parentUnit in byUnit) return byUnit[parentUnit];
+    const normalized = location.replace(/\[\d+\]/g, '[*]');
+    const physical = normalized.match(/^result\.(?:plan\.runs\[\*\]\.initialState|runs\[\*\]\.state(?:\.experiment\.initialState)?)\.(.+)$/)?.[1];
+    if (physical) {
+      if (/^(facilityEnergyWh|itEnergyWh|gridEnergyWh)$/.test(physical)) return 1e-6;
+      if (/^modules\[\*\]\.(coolantK|airK|technicalOutletK|seawaterOutletK)$/.test(physical)) return tol.kelvin;
+      if (/^modules\[\*\]\.(pumpPowerW|itW|facilityW|gridW|batteryDischargeW|batteryChargeW|rejectedHeatW|thermalResidualW|electricalResidualW)$/.test(physical)) return tol.watts;
+      if (/^modules\[\*\]\.(batteryWh|pressurePa|technicalFlowM3S|seawaterFlowM3S)$/.test(physical)) return 1e-6;
+      if (/^transfer\.(attempts|transitions)\[\*\]\.(admittedW|unservedW|headroomW|requestedW)$/.test(physical)
+        || /^transfer\.resources\[\*\]\.(headroomW|nativeW|transferredW)$/.test(physical)) return tol.watts;
+      // Initial-state clocks, controller inputs, inventory, capacities and unknown fields remain exact.
+      if (physicalInitial.test(location)) return 0;
+      if (/^transfer\.(attempts|transitions)\[\*\]\.(detectedAtS|deadlineS|timeS)$/.test(physical)
+        || /^transfer\.splitTimesS\[\*\]$/.test(physical) || /^log\[\*\]\.timeS$/.test(physical)) return tol.seconds;
     }
-    if (field.endsWith('AcceleratorS')) return tol.acceleratorSeconds;
-    if (field.endsWith('K') || /\.max(?:Coolant|Air)\.value$/.test(location)) return tol.kelvin;
-    if (field.endsWith('PerS') || field.endsWith('M3S') || field.endsWith('BitS')) return 1e-6;
-    if (field.endsWith('S') || location.includes('.startAtS.')) return tol.seconds;
-    if (field.endsWith('W') || location.endsWith('.peakSupply.value')) return tol.watts;
-    if (field.endsWith('USD') || location.includes('.includedCost.') && ['equipment', 'installation', 'contingency'].includes(field)) return tol.USD;
-    return 1e-6;
+    const metrics = normalized.match(/^result\.runs\[\*\]\.state\.experiment\.metrics\.(.+)$/)?.[1];
+    if (metrics) {
+      if (metrics === 'shortfallAcceleratorS') return tol.acceleratorSeconds;
+      if (/^(batteryDischargeWh|batteryChargeWh|batteryLossWh|initialBatteryWh|finalBatteryWh|batteryNetChangeWh)$/.test(metrics)) return 1e-6;
+      if (/^(maxCoolant|maxAir)\.value$/.test(metrics) || /^trace\[\*\]\.(maxCoolantK|maxAirK)$/.test(metrics)) return tol.kelvin;
+      if (/^(elapsedS|serviceViolationS|thermalViolationS|anyViolationS|unavailableS|firstServiceViolationS|firstThermalViolationS|firstViolationS|longestInterruptionS|openInterruptionStartS)$/.test(metrics)
+        || /^(minServiceable|maxCoolant|maxAir)\.timeS$/.test(metrics) || /^trace\[\*\]\.timeS$/.test(metrics)
+        || /^intervals\[\*\]\.(startS|endS)$/.test(metrics) || /^controllerTransitions\[\*\]\.timeS$/.test(metrics)
+        || /^(pendingRecovery|recoveryEpisodes\[\*\])\.(referenceTimeS|onsetTimeS|confirmationTimeS)$/.test(metrics)) return tol.seconds;
+      return 0;
+    }
+    if (/^result\.runs\[\*\]\.incrementalShortfallAcceleratorS$/.test(normalized)) return tol.acceleratorSeconds;
+    if (/^result\.runs\[\*\]\.peakSupply\.value$/.test(normalized)) return tol.watts;
+    if (/^result\.runs\[\*\]\.peakSupply\.timeS$/.test(normalized)
+      || /^result\.runs\[\*\]\.recovery\.(confirmationElapsedS|confirmationFromEventS|confirmationTimeS|onsetElapsedS|onsetFromEventS|onsetTimeS|referenceEventTimeS|referenceTimeS|violationOnsetTimeS)$/.test(normalized)
+      || /^result\.runs\[\*\]\.state\.experiment\.(committedTimeS|originTimeS|warmup\.(elapsedS|candidateSinceS|settledAtS))$/.test(normalized)) return tol.seconds;
+    if (/^result\.runs\[\*\]\.state\.experiment\.warmup\.maxObservedTemperatureRateKPerS$/.test(normalized)) return 1e-6;
+    const evaluation = normalized.match(/^result\.evaluations\[\*\]\.(.+)$/)?.[1];
+    if (evaluation) {
+      if (/^(budgetCostUSD|rankingCostUSD|includedCost\.(equipment|installation|contingency|totalUSD|rangeUSD\[\*\]|rows\[\*\]\.(unitUSD|totalUSD)))$/.test(evaluation)) return tol.USD;
+      if (/^requirements\[\*\]\.(actual|margin)$/.test(evaluation)) return ({ s: tol.seconds, W: tol.watts, USD: tol.USD, 'accelerator-s': tol.acceleratorSeconds, boolean: 0 })[parentUnit] ?? 0;
+      if (/^requirements\[\*\]\.timeS$/.test(evaluation) || /^worst\.(longestInterruptionS|recoveryConfirmationS|thermalViolationS|totalInterruptionS)$/.test(evaluation)) return tol.seconds;
+      if (evaluation === 'worst.shortfallAcceleratorS') return tol.acceleratorSeconds;
+      if (evaluation === 'worst.peakSupplyW') return tol.watts;
+    }
+    // No inferred tolerance from a field suffix: unknown numeric metadata and all unevaluated inputs are exact.
+    return 0;
   }
   function visit(a, b, location, parentUnit) {
     const identityChange = allowed.get(location);
