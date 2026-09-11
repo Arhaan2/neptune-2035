@@ -27,7 +27,7 @@ Open **Compare → Run signature demonstration**. This computes both existing su
 | First service violation s | 240 | none |
 | Unmet requirement, accelerator-seconds | 79,360 | 0 |
 
-The unprotected interruption spans `[240,364)`:640 unmet ×124 seconds. Final coolant differs by less than0.01 K and air by less than0.1 K, yet accumulated service impact differs materially. These are declared demonstration comparisons, not physical accuracy tolerances. Numerical fixture assertions use1e-6 K where exact observed extrema are checked. Retained trace detail is explicitly truncated at this duration; authoritative aggregates still include every accepted interval. Each comparison card can **Export reproducible run** with its complete definition, physical state and accumulated evidence.
+The fault occurs at30 s; qualifying violation begins at240 s, recovery at364 s and confirmation at369 s. Thus recovery/confirmation take334/339 s after the fault, or124/129 s after violation onset. Both clocks are labeled separately. The unprotected interruption spans `[240,364)`:640 unmet ×124 seconds. Final coolant differs by less than0.01 K and air by less than0.1 K, yet accumulated service impact differs materially. These are declared demonstration comparisons, not physical accuracy tolerances. Numerical fixture assertions use1e-6 K where exact observed extrema are checked. Retained trace detail is explicitly truncated at this duration; authoritative aggregates still include every accepted interval. Each comparison card can **Export reproducible run** with its complete definition, physical state and accumulated evidence.
 
 ## Measured execution envelope
 
