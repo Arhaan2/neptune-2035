@@ -2,10 +2,20 @@ import type { DecisionCampaign, DecisionResult, PlannedDecisionRun, DecisionRunE
 import { resolveAsset } from '../assets/design';
 import { experimentRecoveryReport } from '../experiment/report';
 import { operatorEvents } from './history';
+import { engineeringIdentity } from '../catalog/equipment';
+import { identity } from '../persistence/structure';
+import type { Design, SimulationState } from '../types';
 
 export interface WalkthroughStep { id: string; title: string; explanation: string; assetId: string; timeS: number; eventId: string | null; workspace: 'Operate' | 'Compare'; boundary: 'post' | 'at-or-after' }
 export interface WalkthroughDefinition { run: PlannedDecisionRun; evidence: DecisionRunEvidence & { state: NonNullable<DecisionRunEvidence['state']> }; campaign: DecisionCampaign; result: DecisionResult; steps: WalkthroughStep[] }
 const amount = (value: number | null | undefined, unit: string) => value == null ? `unavailable ${unit}` : `${value.toLocaleString('en-US', { maximumFractionDigits: 4 })} ${unit}`;
+
+/** Guidance belongs to one complete evidence state, not just a reusable definition ID. */
+export function walkthroughSourceIdentity(design: Design, state: SimulationState | null): string | null {
+  if (!state) return null;
+  const { solverMs: _solverMs, ...evidence } = state;
+  return identity({ design: engineeringIdentity(design), evidence });
+}
 
 /** Select from actual completed evidence. No fixture winner, timestamp or numerical outcome is encoded here. */
 export function createResultWalkthrough(campaign: DecisionCampaign, result: DecisionResult): WalkthroughDefinition {

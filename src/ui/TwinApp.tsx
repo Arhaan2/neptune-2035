@@ -1,5 +1,5 @@
 import { WalkthroughPanel } from './WalkthroughPanel';
-import { createResultWalkthrough, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
+import { createResultWalkthrough, walkthroughSourceIdentity, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
 import type { InspectDecisionEvidence } from './DecisionExplanation';
 import type { DecisionCampaign, DecisionResult } from '../twin/decision/types';
 import { useInspection } from './useInspection';
@@ -226,13 +226,21 @@ export default function TwinApp() {
     [sceneReady, setSceneReady] = useState(false),
     [demo, setDemo] = useState(false),
     [inspectedEventId, setInspectedEventId] = useState<string | null>(null),
-    [walkthrough, setWalkthrough] = useState<WalkthroughDefinition | null>(null),
+    [walkthroughSession, setWalkthrough] = useState<(WalkthroughDefinition & { sourceIdentity: string; runGeneration: number }) | null>(null),
     [walkthroughIndex, setWalkthroughIndex] = useState(0),
     [walkthroughPaused, setWalkthroughPaused] = useState(false),
     [walkthroughNavigation, setWalkthroughNavigation] = useState(0),
     [walkthroughApplied, setWalkthroughApplied] = useState(-1),
     [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number; boundary:'post'|'at-or-after'} | null>(null);
   const appliedWalkthroughNavigation = useRef(-1);
+  const sourceIdentity = useMemo(() => walkthroughSession ? walkthroughSourceIdentity(design, state) : null, [walkthroughSession, design, state]);
+  const walkthrough = walkthroughSession?.runGeneration === sim.runGeneration && walkthroughSession.sourceIdentity === sourceIdentity ? walkthroughSession : null;
+  // Retire invalid guidance before rendering or scheduling another historical seek.
+  // The user's replacement/modified experiment remains the active source.
+  if (walkthroughSession && !walkthrough) {
+    setWalkthrough(null);
+    setNotice('Walkthrough ended because its original completed experiment is no longer active. Your current experiment is retained; start a result walkthrough explicitly to reload its original evidence.');
+  }
   const sourceOrigin = sim.sourceOrigin;
   const inspection = useInspection(design, state, selectedId, sim.runGeneration);
   const displayState = inspection.displayState;
@@ -321,7 +329,7 @@ export default function TwinApp() {
     const prepared = createResultWalkthrough(campaign,result);
     retainBeforeRevision('Before result walkthrough'); inspection.returnToCurrent();
     const next = sim.restore(projectFile(prepared.run.design,prepared.evidence.state), result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config);
-    setWalkthrough(prepared);setWalkthroughIndex(0);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);setDemo(false);setInside(false);setXray(true);
+    setWalkthrough({...prepared,sourceIdentity:walkthroughSourceIdentity(prepared.run.design,prepared.evidence.state)!,runGeneration:sim.runGeneration+1});setWalkthroughIndex(0);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);setDemo(false);setInside(false);setXray(true);
     setNotice('Walkthrough loaded one completed scenario. Your previous project remains in saved scenarios; guidance only inspects history after this explicit load.');
   };
   useEffect(() => {
