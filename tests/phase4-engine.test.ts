@@ -107,6 +107,17 @@ describe('PH4 atomic persistence and operational continuity', () => {
 });
 
 describe('PH4 actual settling boundaries and state preservation', () => {
+  it('does not count an initially violating thermal interval toward continuous settled dwell', () => {
+    const design = small(), physicalInitial = initialize(design), afterOne = advance(design, physicalInitial, 1);
+    expect(afterOne.modules[0].coolantK).toBeLessThan(physicalInitial.modules[0].coolantK);
+    const coolantLimitK = (physicalInitial.modules[0].coolantK + afterOne.modules[0].coolantK) / 2;
+    const definition = createExperimentDefinition(design, { durationS: 1, recovery: { coolantLimitK }, initial: { mode: 'settled', settling: { dwellS: 1, maxWarmupS: 3, maxTemperatureRateKPerS: 100, maxBatteryRateWhPerS: 1000, requireControllerQuiescence: false, requireThermal: true, requireService: true } } });
+    const boundary = advance(design, beginExperiment(design, definition), 1);
+    expect(boundary.modules[0].coolantK).toBeLessThan(coolantLimitK);
+    expect(boundary.experiment!.originTimeS).toBeNull();
+    expect(boundary.experiment!.warmup.status).toBe('warming');
+    expect(advance(design, boundary, 1).experiment!.originTimeS).toBe(2);
+  });
   it('starts evaluation only after continuous physical settling and preserves the warmed physical state', () => {
     const design = small(), definition = createExperimentDefinition(design, { durationS: 20, initial: { mode: 'settled', settling: { dwellS: 2, maxWarmupS: 10, maxTemperatureRateKPerS: 1 } } });
     const initial = beginExperiment(design, definition), warmed = advance(design, initial, 2);

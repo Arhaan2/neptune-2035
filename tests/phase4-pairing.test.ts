@@ -6,6 +6,7 @@ import { referenceExperiment } from '../src/twin/experiment/demonstrations';
 import { beginExperiment, comparePair, counterfactualDefinition, runExperiment, runFaultPair } from '../src/twin/experiment/runner';
 import { wholeExperimentReport } from '../src/twin/experiment/report';
 import { setExperimentStatus } from '../src/twin/experiment/runtime';
+import { evaluateExperiment } from '../src/twin/experiment/metrics';
 import { parseProject, projectFile, restoreProject, serializeProject } from '../src/twin/persistence/project';
 
 const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 });
@@ -82,5 +83,14 @@ describe('PH4 fair faulted/unfaulted pairs and reported evidence', () => {
     const legacy = wholeExperimentReport(advance(design, initialize(design), 20));
     expect(legacy).toMatchObject({ available: false });
     expect(legacy.explanation).toMatch(/Whole-run metrics unavailable for this legacy run/);
+  });
+  it('refuses an incremental comparison when the imported terminal observation is unavailable', () => {
+    const { faulted, baseline } = runFaultPair(design, referenceExperiment(design));
+    const supplied = structuredClone(faulted);
+    supplied.experiment!.metrics.boundaryHealthy = null;
+    supplied.experiment!.evaluation = evaluateExperiment(supplied.experiment!);
+    expect(supplied.experiment!.evaluation.outcome).toBe('UNAVAILABLE');
+    const restored = restoreProject(parseProject(serializeProject(projectFile(design, supplied)))).state;
+    expect(comparePair(restored, baseline)).toMatchObject({ status: 'incomplete', absolute: null, difference: null });
   });
 });
