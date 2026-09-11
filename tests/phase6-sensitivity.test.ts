@@ -24,7 +24,7 @@ describe('PH6 sensitivities use actual versioned engineering/economic inputs', (
   });
   it('one sensitivity application cannot mutate the source or the next run initialization inputs', () => {
     const before = structuredClone(campaign);
-    for (const sensitivity of campaign.sensitivities.filter(s => s.parameter !== 'exchangerUAWPerK')) for (const candidate of campaign.candidates) applyDecisionSensitivity(candidate.design, sensitivity);
+    for (const sensitivity of campaign.sensitivities) for (const candidate of campaign.candidates) applyDecisionSensitivity(candidate.design, sensitivity);
     expect(campaign).toEqual(before);
   });
 });
