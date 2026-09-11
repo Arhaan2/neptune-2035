@@ -55,3 +55,11 @@ Fix af73752 integrated694daf5 binds guidance to the exact original complete sour
 P7-10/P7-11. The default engineering Markdown report header retained older wording. Decision and whole-experiment explanations already contain the required sentence, but an uninstrumented/legacy engineering report did not. Add the exact mandated qualification in its visible header without altering model arithmetic or evidence. Independent Verification concurs that the wording must be fixed before acceptance.
 
 Fix d87eda1 integrated1060978 adds only the exact sentence to every engineering-report header. Testing's original uninstrumented/installed report assertion failed before the repair and passed unchanged after it. No numerical expectation or formula changed.
+
+## P7-H01 — macOS archive included unintentional metadata
+
+Independent Verification rejected the first frozen c9c5229 tar: 98 regular entries included51 AppleDouble `._*` metadata files, while the actual tested dist had exactly47 files (45 payload entries and two manifests). The original archive and strict failed inventory comparison are retained. Faithful re-archiving with `COPYFILE_DISABLE=1` produced exactly the same47 paths and file hashes, independently verified, without modifying dist. Fix559840f integrated0903ee5 applies that environment setting to the gate's archive command. Existing Linux CI build-once and full-inventory protections remain intact. The candidate is refrozen and its full gate repeated.
+
+## P7-H02 — legacy qualifier assertion became ambiguous
+
+The first full c9c5229 browser gate completed121 passes,3 failures and the exact2 historical exclusions. All45 Phase7 positions passed. The three failures were the same retained Phase3 test in Chromium, Firefox and WebKit: its page-wide exact full-qualification locator matched three legitimate labels (global banner plus Phase5/6 panels), so strict mode rejected the locator before the rest of that journey. No duplicate product qualification was removed. Fixde9ff35 integrated1b04a46 scopes the unchanged exact-text `toBeVisible` assertion to the actual global `.twin-mode` banner. No `first()`, force click, skip, retry or numerical assertion change. Independent Verification approved the semantic target in principle; original three-engine retest and a fresh complete gate are required on the new candidate.
