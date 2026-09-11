@@ -283,8 +283,8 @@ export default function TwinApp() {
       if(Object.keys(patch).every(key=>key==='budgetUSD')) {
         setConfig(next);setDesignOverride({...design,config:next});setNotice('Economic budget updated. Physical state and engineering identity retained.');return;
       }
-      let nextDesign = reconfigureDesign(design,patch);
-      if (nominalPreset && !equipmentFor(design).networkDesign) nextDesign = withNetworkPreset(nextDesign, 'scalable-reference');
+      const startingDesign = nominalPreset && !equipmentFor(design).networkDesign ? withNetworkPreset(design, 'scalable-reference') : design;
+      const nextDesign = reconfigureDesign(startingDesign, patch);
       retainBeforeRevision('Before design change');
       if (!resolveAsset(nextDesign, selectedId))
         setSelectedId(`${nextDesign.modules[0].id}/pump-duty`);
