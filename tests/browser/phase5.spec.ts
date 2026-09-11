@@ -118,3 +118,26 @@ test('PH5 loaded experiment exports imports replays and invalidates stale compar
   await expect(panel(page)).toContainText('previous Phase 5 comparison is historical because engineering inputs changed');
   await evidence(info, 'phase5-replay-native-exports', { source, replayed, imported }, observed);
 });
+
+test('PH5 experiment draft survives Compare and Operate with the selected healthy run and exact duration', async ({ page }, info) => {
+  const observed = observe(page); await setup(page, true);
+  const whole = page.getByRole('region', { name: 'Whole experiment', exact: true });
+  await page.getByLabel('Experiment', { exact: true }).selectOption('healthy');
+  await page.getByLabel('Experiment duration seconds', { exact: true }).fill('40');
+  await page.getByLabel('Recovery dwell seconds', { exact: true }).fill('7');
+  await button(page, 'Compare').click();
+  await expect(page.getByRole('heading', { name: 'Compare reproducible scenarios', exact: true })).toBeVisible();
+  await expect(whole).toBeHidden();
+  await button(page, 'Operate').click(); await expect(whole).toBeVisible();
+  await expect(page.getByLabel('Experiment', { exact: true })).toHaveValue('healthy');
+  await expect(page.getByLabel('Experiment duration seconds', { exact: true })).toHaveValue('40');
+  await expect(page.getByLabel('Recovery dwell seconds', { exact: true })).toHaveValue('7');
+  await button(page, 'Start whole experiment').click();
+  await expect(whole.getByTestId('experiment-outcome')).toContainText('completed · PASS'); await ready(page);
+  const exported = await project(page), run = exported.checkpoint.state.experiment;
+  expect(exported.timeS).toBe(40);
+  expect(run.definition).toMatchObject({ name: 'Healthy reference experiment', durationS: 40, recovery: { dwellS: 7 }, disturbances: [] });
+  expect(run.metrics).toMatchObject({ elapsedS: 40, shortfallAcceleratorS: 0, serviceViolationS: 0 });
+  expect(run.evaluation.outcome).toBe('PASS');
+  await evidence(info, 'phase5-preserved-experiment-draft-native-export', exported, observed);
+});
