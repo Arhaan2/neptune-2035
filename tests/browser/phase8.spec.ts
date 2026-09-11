@@ -1,6 +1,71 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+import fs from 'node:fs/promises';
 import { buildDesign, DEFAULT_CONFIG } from '../../src/twin/assets/design';
 import type { WorkerRequest, WorkerResponse } from '../../src/twin/types';
+
+async function nativeJSON(page: Page, action: () => Promise<unknown>) {
+  const pending = page.waitForEvent('download');
+  await action();
+  const downloaded = await pending;
+  expect(await downloaded.failure()).toBeNull();
+  const file = await downloaded.path();
+  if (!file) throw Error('Native export has no artifact path.');
+  return JSON.parse(await fs.readFile(file, 'utf8'));
+}
+
+test('P8-S02 old active project requires explicit recalculation and old campaign rejection preserves the active session', async ({ page }, info) => {
+  const errors: string[] = [], workerURLs: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('worker', worker => workerURLs.push(worker.url()));
+  const oldText = await fs.readFile(new URL('../fixtures/phase-8/phase7-network-experiment.json', import.meta.url), 'utf8');
+  const oldProject = JSON.parse(oldText);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./?fallback=1');
+  const step = page.getByRole('button', { name: 'Step 10s', exact: true });
+  await expect(step).toBeEnabled(); await step.click();
+  await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '10');
+  await expect(step).toBeEnabled();
+  const exportProject = () => nativeJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const before = await exportProject();
+  const url = workerURLs.find(url => /(?:\/assets\/worker-|\/engine\/worker\.ts)/.test(url));
+  expect(url).toBeDefined();
+  const rejected = await page.evaluate(async ({ url, project }) => {
+    const worker = new Worker(url, { type: 'module' });
+    try {
+      return await new Promise<WorkerResponse>((resolve, reject) => {
+        worker.onerror = event => reject(Error(event.message));
+        worker.onmessage = (event: MessageEvent<WorkerResponse>) => { if (event.data.status !== 'progress') resolve(event.data); };
+        worker.postMessage({ version: 2, epoch: 1, requestId: 1, kind: 'advance', design: project.designSnapshot, state: project.checkpoint.state, durationS: 1 });
+      });
+    } finally { worker.terminate(); }
+  }, { url: url!, project: oldProject });
+  expect(rejected.status).toBe('failed'); expect(rejected.state).toBeUndefined();
+  await page.getByLabel('Import project', { exact: true }).setInputFiles({ name: 'old-active-project.json', mimeType: 'application/json', buffer: Buffer.from(oldText) });
+  await expect(page.getByTestId('project-compatibility')).toContainText('Exact continuation is unavailable');
+  expect(await nativeJSON(page, () => page.getByRole('button', { name: 'Export original project', exact: true }).click())).toEqual(oldProject);
+  expect(await exportProject()).toEqual(before);
+  await page.getByRole('button', { name: 'Recalculate with current model', exact: true }).click();
+  await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '5');
+  await expect(step).toBeEnabled();
+  const derived = await exportProject();
+  expect(derived.solverVersion).toBe('2.3.1');
+  expect(derived.provenance.parent).toMatchObject({ solverVersion: '2.3.0', action: 'recalculate-current-model' });
+  expect(derived.checkpoint.state.experiment.definition.solverVersion).toBe('2.3.1');
+  expect(await nativeJSON(page, () => page.getByRole('button', { name: 'Export original project', exact: true }).click())).toEqual(oldProject);
+  await page.getByRole('button', { name: 'Compare', exact: true }).click();
+  await page.getByLabel('Decision fixture', { exact: true }).selectOption('nominal');
+  await page.getByRole('button', { name: 'Start decision campaign', exact: true }).click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const exportCampaign = () => nativeJSON(page, () => page.getByRole('button', { name: 'Export decision campaign', exact: true }).click());
+  const currentCampaign = await exportCampaign();
+  const oldCampaign = await fs.readFile(new URL('../fixtures/phase-8/phase7-decision-nominal.json', import.meta.url), 'utf8');
+  await page.getByLabel('Import decision campaign', { exact: true }).setInputFiles({ name: 'old-campaign.json', mimeType: 'application/json', buffer: Buffer.from(oldCampaign) });
+  await expect(page.getByRole('region', { name: 'Phase 6 decision support', exact: true })).toContainText('Import rejected; current campaign retained.');
+  expect(await exportCampaign()).toEqual(currentCampaign);
+  expect((await exportProject()).checkpoint).toEqual(derived.checkpoint);
+  expect(errors).toEqual([]);
+  await info.attach('P8-S02-native-version-boundaries', { body: JSON.stringify({ rejected, oldSolver: oldProject.solverVersion, derivedSolver: derived.solverVersion, parent: derived.provenance.parent, oldCampaignSolver: JSON.parse(oldCampaign).campaign.versions.solver, currentCampaignSolver: currentCampaign.campaign.versions.solver, exactActiveCampaignPreservation: true, exactOriginalProjectPreservation: true }), contentType: 'application/json' });
+});
 
 test('P8-S02 legacy query and generated hash routes retain the saved aggregate scenario', async ({ page }) => {
   const errors: string[] = [];

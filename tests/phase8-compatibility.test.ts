@@ -8,6 +8,7 @@ import { identity } from '../src/twin/persistence/structure';
 import type { CurrentProject } from '../src/twin/persistence/types';
 import type { WorkerResponse } from '../src/twin/types';
 import manifest from './fixtures/phase-8/manifest.json';
+import { importDecisionCampaign } from '../src/twin/decision/evidence';
 
 const source = (name: string) => readFileSync(new URL(`./fixtures/phase-8/${name}`, import.meta.url), 'utf8');
 const original = (name: string) => JSON.parse(source(name)) as CurrentProject;
@@ -21,6 +22,7 @@ describe('P8-S02 V8-05 real Phase 7 solver 2.3.0 evidence after the numerical re
       expect(createHash('sha256').update(source(file.path)).digest('hex')).toBe(file.sha256);
       expect(original(file.path).solverVersion).toBe('2.3.0');
     }
+    expect(createHash('sha256').update(source(manifest.decisionFile.path)).digest('hex')).toBe(manifest.decisionFile.sha256);
   });
 
   it.each(names)('%s preserves full original export semantics and explicitly forbids direct or worker continuation', async name => {
@@ -83,5 +85,12 @@ describe('P8-S02 V8-05 real Phase 7 solver 2.3.0 evidence after the numerical re
       expect(derived.checkpoint).toBeNull();
       expect(derived.provenance.parent?.solverVersion).toBe(imported.solverVersion);
     }
+  });
+
+  it('rejects the old actual decision campaign numerical version without silently deriving a new campaign', () => {
+    const text = source('phase7-decision-nominal.json');
+    expect(JSON.parse(text).campaign.versions.solver).toBe('2.3.0');
+    expect(() => importDecisionCampaign(text)).toThrow(/version|solver/i);
+    expect(createHash('sha256').update(text).digest('hex')).toBe(manifest.decisionFile.sha256);
   });
 });

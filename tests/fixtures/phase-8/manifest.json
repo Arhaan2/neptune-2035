@@ -14,7 +14,7 @@
     "src/twin/experiment/validation.ts": "4c8c0ebb245176f7ac02f62996b6cba0192a8f37a902aca93656e0422e00ed8a"
   },
   "node": "v24.18.0",
-  "generatorSha256": "4be37e6e100303a05c47e8aae7c2c05ae9181d01d417ae52d2283c676ecd048a",
+  "generatorSha256": "4687009a4e211b7200bd1b6674bf4e25f0c8fd89a66e695430f4c30bfa37b27c",
   "sourceUnchanged": true,
   "files": [
     {
@@ -41,5 +41,11 @@
       "timeS": 5,
       "experimentStatus": "running"
     }
-  ]
+  ],
+  "decisionFile": {
+    "path": "phase7-decision-nominal.json",
+    "bytes": 99136,
+    "sha256": "aa03a6caba0cd9ad02b882d5f3605197e02618c0ced3b79ac0f7bfeb79468d74",
+    "purpose": "Generated one-candidate nominal compatibility fixture under accepted Phase7; not one of the six original released reference campaigns."
+  }
 }

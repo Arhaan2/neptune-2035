@@ -21,6 +21,9 @@ try {
   const { createExperimentDefinition } = await server.ssrLoadModule('/src/twin/experiment/definition.ts');
   const { transferDemonstration } = await server.ssrLoadModule('/src/twin/transfer/demonstrations.ts');
   const { projectFile, parseProject, serializeProject } = await server.ssrLoadModule('/src/twin/persistence/project.ts');
+  const { createDecisionCampaign } = await server.ssrLoadModule('/src/twin/decision/candidates.ts');
+  const { runDecisionCampaign } = await server.ssrLoadModule('/src/twin/decision/runner.ts');
+  const { exportDecisionCampaign, importDecisionCampaign } = await server.ssrLoadModule('/src/twin/decision/evidence.ts');
   const basicDesign = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 });
   const networkDesign = withNetworkPreset(buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8, requireExternalNetwork: true }), 'scalable-reference');
   const networkDefinition = createExperimentDefinition(networkDesign, { id: 'phase7-supplied-network', durationS: 12, disturbances: [{ id: 'network-fault', kind: 'trip', assetId: 'shore/cluster-core', timeS: 2 }, { id: 'network-recovery', kind: 'restore', assetId: 'shore/cluster-core', timeS: 8 }] });
@@ -38,10 +41,16 @@ try {
     await fs.writeFile(path.join(out, name), text);
     files.push({ path: name, bytes: Buffer.byteLength(text), sha256: hash(text), requestedAccelerators: design.config.requestedAccelerators, timeS: state.timeS, experimentStatus: state.experiment?.status ?? null });
   }
-  assert(files.reduce((sum, file) => sum + file.bytes, 0) < 1024 * 1024);
+  const campaign = createDecisionCampaign('nominal');
+  campaign.candidates = campaign.candidates.slice(0, 1);
+  const decisionText = exportDecisionCampaign(campaign, await runDecisionCampaign(campaign, { concurrency: 1 }), { commit: sourceCommit, sourceTree });
+  assert.equal(importDecisionCampaign(decisionText).campaign.versions.solver, '2.3.0');
+  const decisionFile = { path: 'phase7-decision-nominal.json', bytes: Buffer.byteLength(decisionText), sha256: hash(decisionText), purpose: 'Generated one-candidate nominal compatibility fixture under accepted Phase7; not one of the six original released reference campaigns.' };
+  await fs.writeFile(path.join(out, decisionFile.path), decisionText);
+  assert(files.reduce((sum, file) => sum + file.bytes, decisionFile.bytes) < 1024 * 1024);
   const sourceHashes = {};
   for (const file of ['package-lock.json', 'src/twin/types.ts', 'src/twin/solvers/thermal.ts', 'src/twin/catalog/equipment.ts', 'src/twin/persistence/project.ts', 'src/twin/persistence/state.ts', 'src/twin/experiment/definition.ts', 'src/twin/experiment/validation.ts']) sourceHashes[file] = hash(await fs.readFile(file));
   assert.equal(git('status', '--porcelain', '--untracked-files=no'), '');
-  await fs.writeFile(path.join(out, 'manifest.json'), JSON.stringify({ kind: 'neptune-phase8-original-project-fixtures', version: 1, sourceCommit, sourceTree, sourceHashes, node: process.version, generatorSha256: hash(await fs.readFile(new URL(import.meta.url))), sourceUnchanged: true, files }, null, 2) + '\n');
-  console.log(JSON.stringify({ sourceCommit, sourceTree, files, sourceUnchanged: true }));
+  await fs.writeFile(path.join(out, 'manifest.json'), JSON.stringify({ kind: 'neptune-phase8-original-project-fixtures', version: 1, sourceCommit, sourceTree, sourceHashes, node: process.version, generatorSha256: hash(await fs.readFile(new URL(import.meta.url))), sourceUnchanged: true, files, decisionFile }, null, 2) + '\n');
+  console.log(JSON.stringify({ sourceCommit, sourceTree, files, decisionFile, sourceUnchanged: true }));
 } finally { await server.close(); }
