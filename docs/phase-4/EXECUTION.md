@@ -33,6 +33,7 @@ The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `
 | `626d67a` | Building `bf9f18a` | Real experiment controls, reports, history comparison and exports |
 | `7311c42` | Testing `4b78440` | 12 independent pairing/signature/envelope cases passed |
 | `bdc8fbe` | Testing `72cae78` | Six real browser journeys and independently reproduced settling/pairing defects |
+| `6c6cad1` | Fixing `7bb04dc` | Warmup interval-start thermal predicate and unavailable-pair rejection; Testing28/28 on `d856c69` |
 
 No main/Pages publication or final acceptance has occurred. Commit identity in this ledger documents the actual integrated slice; it is not a claim that subsequent whole-phase gates passed.
 
