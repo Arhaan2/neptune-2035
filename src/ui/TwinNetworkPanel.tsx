@@ -1,3 +1,4 @@
+import { activePowerDesign } from '../twin/transfer/topology';
 import { useMemo, useState } from 'react';
 import { equipmentFor } from '../twin/catalog/equipment';
 import { NETWORK_PRESET_LABELS, type NetworkPreset } from '../twin/network-contract';
@@ -17,10 +18,11 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
   const equipment = equipmentFor(design);
   const [choice, setChoice] = useState<NetworkPreset>('scalable-reference');
   const installed = useMemo(() => assessNetworkProvisioning(design), [design]);
-  const evaluator = useMemo(() => createNetworkEvaluator(design), [design]);
+  const active=useMemo(()=>state?activePowerDesign(design,state):design,[design,state]);
+  const evaluator = useMemo(() => createNetworkEvaluator(active), [active]);
   const current = useMemo(() => state ? evaluator(state.modules, state.failedAssetIds) : null, [state, evaluator]);
   const selectedResources = installed.resources.filter(resource => resource.assetId === selectedId).sort((a, b) => (a.kind === 'switch' ? 0 : a.kind === 'port' ? 1 : 2) - (b.kind === 'switch' ? 0 : b.kind === 'port' ? 1 : 2));
-  const powerEvaluator = useMemo(() => createNetworkPowerEvaluator(design), [design]);
+  const powerEvaluator = useMemo(() => createNetworkPowerEvaluator(active), [active]);
   const power = useMemo(() => powerEvaluator(state?.failedAssetIds), [powerEvaluator, state?.failedAssetIds]);
   const selectedPower = power.allocations.find(allocation => allocation.assetId === selectedId);
   const affectedDomains = [...new Set(selectedResources.flatMap(resource => resource.domainIds))];

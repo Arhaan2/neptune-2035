@@ -1,3 +1,4 @@
+import { activePowerDesign } from '../twin/transfer/topology';
 import { engineeringIdentity } from '../twin/catalog/equipment';
 import {
   Component,
@@ -1372,7 +1373,9 @@ export function TwinFallback(props: TwinSceneProps) {
   );
 }
 /* oxlint-enable jsx-a11y/prefer-tag-over-role */
-export default function TwinScene(props: TwinSceneProps) {
+export default function TwinScene(input: TwinSceneProps) {
+  const supplyProjection=useMemo(()=>activePowerDesign(input.design,input.state),[input.design,input.state]);
+  const props={...input,design:supplyProjection};
   const sceneProps = props.inside ? { ...props, exploded: false } : props;
   const moduleSpec = useMemo(
     () => selectedModule(props.design, props.selectedId),

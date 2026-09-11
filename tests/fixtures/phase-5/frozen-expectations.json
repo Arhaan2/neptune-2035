@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "frozenBeforeCandidate": "1f7f16c4680d2839af8775fe75b96d3f2ce77cfa",
+  "capacity": {
+    "resources": [{ "id": "shared", "ratingW": 100000, "nativeW": 60000 }],
+    "bundles": [
+      { "id": "recipient-a", "priority": 1, "drawW": 30000, "resources": ["shared"] },
+      { "id": "recipient-b", "priority": 1, "drawW": 30000, "resources": ["shared"] }
+    ],
+    "expected": { "admittedIds": ["recipient-a"], "unservedIds": ["recipient-b"], "spareW": { "shared": 10000 } }
+  },
+  "service": {
+    "affectedDemand": 8,
+    "healthyNativeDemand": 16,
+    "faultS": 2,
+    "transferS": 4.375,
+    "horizonS": 12,
+    "dwellS": 5,
+    "generationIIShortfallAcceleratorS": 80,
+    "generationIIIShortfallAcceleratorS": 19,
+    "generationIIIInterruptionS": 2.375,
+    "recoveryOnsetS": 4.375,
+    "recoveryConfirmationS": 9.375
+  },
+  "partialService": {
+    "intervals": [
+      { "startS": 0, "endS": 2, "required": 24, "serviceable": 24 },
+      { "startS": 2, "endS": 4.375, "required": 24, "serviceable": 8 },
+      { "startS": 4.375, "endS": 12, "required": 24, "serviceable": 16 }
+    ],
+    "expected": { "shortfallAcceleratorS": 99, "serviceViolationS": 10, "firstServiceViolationS": 2, "minimumServiceable": 8 }
+  },
+  "absoluteTolerances": {
+    "syntheticPowerW": 0.0000001,
+    "syntheticTimeS": 0.00000001,
+    "serviceAcceleratorS": 0.00000001,
+    "coupledPowerW": 0.000001,
+    "checkpointTemperatureK": 0.000000001,
+    "checkpointEnergyWh": 0.00000001
+  }
+}

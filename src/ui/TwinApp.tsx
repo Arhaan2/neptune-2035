@@ -1,3 +1,6 @@
+import { TransferPanel } from './TransferPanel';
+import { activePowerDesign } from '../twin/transfer/topology';
+import type { ExperimentDefinition } from '../twin/experiment/types';
 import { ExperimentPanel, ExperimentReport, ExperimentComparison, CounterfactualReport } from './ExperimentPanel';
 import { signatureDemonstration, referenceExperiment } from '../twin/experiment/demonstrations';
 import { counterfactualDefinition } from '../twin/experiment/runner';
@@ -230,6 +233,8 @@ export default function TwinApp() {
     [replayTimeS, setReplayTimeS] = useState(0),
     [maxPlatforms, setMaxPlatforms] = useState(8),
     [sizing, setSizing] = useState('');
+  const [pendingPhase5,setPendingPhase5]=useState<ExperimentDefinition|null>(null);
+  useEffect(()=>{if(pendingPhase5&&state?.designRevision===pendingPhase5.designRevision&&!sim.busy){const timer=setTimeout(()=>{sim.prepareExperiment(pendingPhase5);setPendingPhase5(null);},0);return()=>clearTimeout(timer);}},[pendingPhase5,state?.designRevision,sim]);
   const costScale=equipmentFor(design).economics.unitCostScale;
   const setCostScale=(value:number)=>setDesignOverride(updateEconomicAssumptions(design,{unitCostScale:value}));
   const reducedMotion = useMemo(
@@ -258,8 +263,8 @@ export default function TwinApp() {
       [design, costScale],
     );
   const topology = useMemo(
-    () => topologyForSelection(design, selectedId),
-    [design, selectedId],
+    () => topologyForSelection(state?activePowerDesign(design,state):design, selectedId),
+    [design, selectedId, state],
   );
   const powerPaths = upstreamConnections(
     topology.filter((e) => e.medium === 'power'),
@@ -1302,7 +1307,8 @@ export default function TwinApp() {
               </button>
             </div>
           )}
-          {state && !showComparison && <ExperimentPanel design={design} state={state} busy={sim.busy} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
+          <TransferPanel design={design} state={state} busy={sim.busy||compareBusy} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
+          {state && <ExperimentPanel design={design} state={state} busy={sim.busy} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && <Trend history={sim.history} />}
           {showComparison && (
             <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>

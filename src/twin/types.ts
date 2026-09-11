@@ -1,6 +1,7 @@
 /** NEPTUNE design-stage contract v2. SI throughout; temperatures are kelvin. */
 export const TWIN_SCHEMA = 2 as const;
 export const SOLVER_VERSION = '2.3.0';
+import type { TransferDesign, TransferState } from './transfer/types';
 import type { EquipmentConfiguration } from './catalog/equipment';
 import type { ExperimentDefinition, ExperimentRun } from './experiment/types';
 import type { IntegrationStep } from './persistence/limits';
@@ -26,6 +27,7 @@ export interface DesignConfig {
 }
 export interface ModuleSpec { id: string; platformId: string; powerDomainId: string; networkDomainId: string; nodeCount: number; rackCount: number; positionM: Vec3 }
 export interface Design {
+  transfer?: TransferDesign;
   schemaVersion: 2; revision: string; config: DesignConfig; assets: Asset[]; connections: Connection[];
   modules: ModuleSpec[]; nodeCount: number; rackCount: number; provisionedAccelerators: number;
   installedPeakITW: number; sourceIds: string[];
@@ -44,6 +46,7 @@ export type EventKind = 'trip' | 'restore' | 'maintenance' | 'workload' | 'seawa
 export interface OperationEvent { id: string; timeS: number; kind: EventKind; assetId: string; value?: number; sequence?: number }
 export interface CausalEntry { timeS: number; assetId: string; message: string; affectedIds: string[]; kind: 'command' | 'controller' | 'warning' }
 export interface SimulationState {
+  transfer?: TransferState;
   experiment?: ExperimentRun;
   schemaVersion: 3; designRevision: string; designIdentity: string; solverVersion: string; timeS: number;
   integrationStepS: IntegrationStep; stepIndex: number;
