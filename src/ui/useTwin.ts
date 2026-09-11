@@ -35,6 +35,7 @@ export function runWorkerExperiment(
   durationS: number,
   integrationStepS: IntegrationStep = 1,
   experimentDefinition?: ExperimentDefinition,
+  onProgress?: (progress: NonNullable<WorkerResponse['progress']>) => void,
 ): Promise<SimulationState> {
   const definition = experimentDefinition ?? createExperimentDefinition(design, { name: 'Reproducible comparison', durationS, disturbances: events, integrationStepS });
   return new Promise((resolve, reject) => {
@@ -63,10 +64,10 @@ export function runWorkerExperiment(
       if (
         r.version !== 2 ||
         r.requestId !== 1 ||
-        r.epoch !== 1 ||
-        r.status === 'progress'
+        r.epoch !== 1
       )
         return;
+      if(r.status==='progress') { if(r.progress)onProgress?.(r.progress);return; }
       end();
       if (r.error || !r.state || r.status !== 'complete')
         reject(Error(r.error ?? 'No completed solver result'));

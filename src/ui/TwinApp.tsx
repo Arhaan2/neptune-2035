@@ -509,13 +509,19 @@ export default function TwinApp() {
   };
   const comparePhase4 = async (kind: 'signature' | 'pair') => {
     setDemo(false); setCompareBusy(true); setComparison([]);
+    setNotice('0/2 experiments completed. Running canonical worker execution.');
     setComparisonDescription(kind === 'signature'
       ? 'Signature: 1,280 requested accelerators, full workload, cold start, duty pump trip at 30 s and restore at 300 s; 1,800 s evaluation. Supported designs differ only by an installed standby pump. Close final coolant means ≤0.01 K difference; close final air means ≤0.1 K. Both absolute histories use identical disturbance scope; each design needs its own unfaulted baseline for incremental attribution.'
       : 'Faulted and unfaulted pair: identical initial physical state, workload, environment, policy and numerical settings. Core trip at 5 s and restore at 15 s; baseline suppresses only those declared faults. Both evaluate 20 s.');
     try {
       const result: Compared[] = [];
       if (kind === 'signature') {
-        for (const item of signatureDemonstration()) result.push({ label: item.definition.name, design: item.design, state: await runWorkerExperiment(item.design, [], item.definition.durationS, item.definition.integrationStepS, item.definition) });
+        for (const item of signatureDemonstration()) {
+          const state=await runWorkerExperiment(item.design, [], item.definition.durationS, item.definition.integrationStepS, item.definition, progress=>setNotice(`${result.length}/2 experiments completed. ${item.definition.name}: ${progress.completedTimeS}/${progress.targetTimeS} physical seconds committed.`));
+          result.push({label:item.definition.name,design:item.design,state});
+          setComparison([...result]);
+          setNotice(`${result.length}/2 experiments completed. Validated whole-run reports appear as each worker finishes.`);
+        }
       } else {
         const faulted = referenceExperiment(design), baseline = counterfactualDefinition(design, faulted);
         for (const [role, definition] of [['faulted', faulted], ['unfaulted', baseline]] as const) result.push({ role, label: role === 'faulted' ? 'Faulted experiment' : 'Unfaulted baseline', design, state: await runWorkerExperiment(design, [], definition.durationS, definition.integrationStepS, definition) });
@@ -1299,7 +1305,7 @@ export default function TwinApp() {
           {state && !showComparison && <ExperimentPanel design={design} state={state} busy={sim.busy} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && <Trend history={sim.history} />}
           {showComparison && (
-            <section className="twin-compare" ref={comparisonRegion}>
+            <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
               <div className="twin-section-line">
                 <h2>
                   {demo
