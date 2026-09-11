@@ -74,9 +74,14 @@ try {
   await expect(walkthrough).toHaveCount(0);
   assert.deepEqual(errors, []);
   video = page.video();
-} finally { await context.close(); await browser.close(); }
+} finally {
+  try {
+    await context.close();
+    if (video) await video.saveAs(path.join(out, 'neptune-phase7-walkthrough.webm'));
+  } finally { await browser.close(); }
+}
 assert(video && evidence, 'Recording did not complete. Raw failure media retained.');
-const outputVideo = path.join(out, 'neptune-phase7-walkthrough.webm'); await video.saveAs(outputVideo);
+const outputVideo = path.join(out, 'neptune-phase7-walkthrough.webm');
 const bytes = await fs.readFile(outputVideo);
 const receipt = { kind: 'actual-application-recording', url, startedAt, completedAt: new Date().toISOString(), source: { scriptCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), application: release }, experiment: { campaignId: evidence.campaign.id, campaignIdentity: evidence.result.campaignIdentity, coverage: evidence.result.coverage, winnerIds: evidence.result.ranking.winnerIds }, viewport: { width: 1600, height: 1050 }, device: 'emulated desktop browser; no real-device claim', provenance: 'simulated real application executed through public UI; no separate success model', qualification: 'Simulated, design-stage prototype; physical validation pending.', media: { file: path.basename(outputVideo), bytes: bytes.length, sha256: hash(bytes) }, steps, errors };
 await fs.writeFile(path.join(out, 'recording.json'), JSON.stringify(receipt, null, 2) + '\n');
