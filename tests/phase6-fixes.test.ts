@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createDecisionCampaign, PAIRED_SENSITIVITIES } from '../src/twin/decision/candidates';
 import { assembleDecisionResult, executeDecisionRun, planDecisionCampaign } from '../src/twin/decision/runner';
 import { createDecisionWorkerExecutor } from '../src/twin/decision/worker-client';
+import { advanceWithStep, initializeExperimentFromState, summarize } from '../src/twin/engine/simulation';
 import type { DecisionRunEvidence, PlannedDecisionRun } from '../src/twin/decision/types';
 
 class UnresponsiveWorker {
@@ -83,5 +84,23 @@ describe('Phase 6 focused repair regressions', () => {
     expect(result).toMatchObject({ status: 'incomplete', ranking: { scopeComplete: false, status: 'evaluation-incomplete', winnerIds: [] } });
     expect(result.coverage.completed).toBe(3);
     expect(result.coverage.planned).toBe(6);
+  });
+
+  it.each([1, 0.125] as const)('preserves whole-run transfer evidence and exact supply peak with bounded chunks at %s s integration', async integrationStepS => {
+    const campaign = createDecisionCampaign('transfer');
+    campaign.candidates = campaign.candidates.filter(candidate => candidate.id === 'iii-24');
+    campaign.execution.integrationStepS = integrationStepS;
+    const run = planDecisionCampaign(campaign).runs.find(run => run.scenarioId === 'eligible-feeder')!;
+    let reference = initializeExperimentFromState(run.design, run.initialState, run.definition);
+    const peak = { value: summarize(run.design, reference).gridW, timeS: 0 };
+    while (reference.timeS < run.definition.durationS) reference = advanceWithStep(run.design, reference, 1, [], integrationStepS, observation => {
+      if (observation.gridW > peak.value) { peak.value = observation.gridW; peak.timeS = observation.timeS; }
+    });
+    const actual = await executeDecisionRun(run, campaign.execution);
+    expect(actual.status).toBe('completed');
+    expect(actual.state!.experiment!.metrics).toEqual(reference.experiment!.metrics);
+    expect(actual.state!.transfer).toEqual(reference.transfer);
+    expect(actual.peakSupply).toMatchObject(peak);
+    expect(actual.state!.experiment!.metrics).toMatchObject({ shortfallAcceleratorS: 19, serviceViolationS: 2.375 });
   });
 });

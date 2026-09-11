@@ -4,6 +4,7 @@ import { experimentRecoveryReport } from '../experiment/report';
 import { experimentFinished, setExperimentStatus } from '../experiment/runtime';
 import { constraints } from '../analysis/reports';
 import { identity } from '../persistence/structure';
+import { CONTRACT } from '../persistence/limits';
 import { diagnosticFor } from '../safety';
 import { applyDecisionSensitivity } from './sensitivity';
 import { decisionCampaignIdentity, validateDecisionCampaign } from './contract';
@@ -42,9 +43,10 @@ export async function executeDecisionRun(run:PlannedDecisionRun,settings:Decisio
     evidence.peakSupply={value:summarize(run.design,state).gridW,timeS:0,assetId:'shore/grid',samples:1};
     while(!experimentFinished(state)&&state.timeS<run.definition.durationS){
       await yieldTask();if(signal?.aborted){state=setExperimentStatus(state,'cancelled','Decision campaign cancelled.');break;}
-      if(work+run.design.modules.length/settings.integrationStepS>settings.maxModuleSteps||performance.now()-started>120000){state=setExperimentStatus(state,'resource-limited','Bounded decision run reached its work or wall-clock limit.');break;}
-      state=advanceWithStep(run.design,state,1,[],settings.integrationStepS,observation=>{const peak=evidence.peakSupply!;peak.samples++;if(!Number.isFinite(observation.gridW))throw Error('Nonfinite upstream dispatch observation.');if(observation.gridW>peak.value){peak.value=observation.gridW;peak.timeS=observation.timeS;}});
-      work+=run.design.modules.length/settings.integrationStepS;
+      const chunkS=Math.min(CONTRACT.maxChunkS,run.definition.durationS-state.timeS),chunkWork=chunkS*run.design.modules.length/settings.integrationStepS;
+      if(work+chunkWork>settings.maxModuleSteps||performance.now()-started>120000){state=setExperimentStatus(state,'resource-limited','Bounded decision run reached its work or wall-clock limit.');break;}
+      state=advanceWithStep(run.design,state,chunkS,[],settings.integrationStepS,observation=>{const peak=evidence.peakSupply!;peak.samples++;if(!Number.isFinite(observation.gridW))throw Error('Nonfinite upstream dispatch observation.');if(observation.gridW>peak.value){peak.value=observation.gridW;peak.timeS=observation.timeS;}});
+      work+=chunkWork;
     }
     evidence.state=state;evidence.recovery=experimentRecoveryReport(state);
     evidence.status=state.experiment?.status==='completed'?'completed':state.experiment?.status==='cancelled'?'cancelled':state.experiment?.status==='resource-limited'?'resource-limited':state.experiment?.status==='numerical-failed'?'numerical-failure':'incomplete';
