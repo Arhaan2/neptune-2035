@@ -38,7 +38,7 @@ try{
  await run('package','npm',['run','package:preview']);
  await fs.copyFile('dist/build-manifest.json',path.join(out,'tested-build-manifest.json'));
  await fs.copyFile('dist/release.json',path.join(out,'tested-release.json'));
- await run('archive','tar',['-cf',path.join(out,'tested-build.tar'),'-C','dist','.']);
+ await run('archive','tar',['-cf',path.join(out,'tested-build.tar'),'-C','dist','.'],{COPYFILE_DISABLE:'1'});
  await server('production-server',['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4173','--strictPort'],'http://127.0.0.1:4173/');
  await run('browser','npx',['playwright','test','tests/browser/prototype.spec.ts','tests/browser/phase2.spec.ts','tests/browser/phase3.spec.ts','tests/browser/phase4.spec.ts','tests/browser/phase5.spec.ts','tests/browser/phase6.spec.ts','tests/browser/phase7.spec.ts','--retries=0'],{NEPTUNE_BASE_URL:'http://127.0.0.1:4173/',NEPTUNE_BROWSER_REPORT:path.join(out,'browser.json')});
 }catch(problem){error=String(problem);console.error(error);process.exitCode=1;}
