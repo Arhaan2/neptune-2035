@@ -117,6 +117,9 @@ test('PH4 genuine fault pair and supported two-design signature export exact com
   expect(faulted.checkpoint.state.experiment.initialState).toEqual(baseline.checkpoint.state.experiment.initialState);
   expect(faulted.checkpoint.state.experiment.metrics.shortfallAcceleratorS - baseline.checkpoint.state.experiment.metrics.shortfallAcceleratorS).toBe(80);
   await button(page, 'Run signature demonstration').click();
+  // Read the real comparison lifecycle before checking values. The existing
+  // 60-second test budget bounds execution; a ready control does not prove success.
+  await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(control => control.textContent === 'Run signature demonstration' && !control.disabled));
   const noStandby = cards.filter({ has: page.getByRole('heading', { name: 'No standby pump', exact: true }) }), standby = cards.filter({ has: page.getByRole('heading', { name: 'One standby pump', exact: true }) });
   await expect(noStandby.getByTestId('experiment-shortfall')).toHaveText('79,360 accelerator-seconds');
   await expect(standby.getByTestId('experiment-shortfall')).toHaveText('0 accelerator-seconds');
