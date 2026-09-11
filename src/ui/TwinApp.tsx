@@ -1,3 +1,7 @@
+import { WalkthroughPanel } from './WalkthroughPanel';
+import { createResultWalkthrough, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
+import type { InspectDecisionEvidence } from './DecisionExplanation';
+import type { DecisionCampaign, DecisionResult } from '../twin/decision/types';
 import { useInspection } from './useInspection';
 import type { OperatorEvent } from '../twin/presentation/history';
 import { AssetContext, WorkspaceGuide, InspectionContext, OperatorTimeline } from './OperatorExperience';
@@ -222,9 +226,18 @@ export default function TwinApp() {
     [sceneReady, setSceneReady] = useState(false),
     [demo, setDemo] = useState(false),
     [inspectedEventId, setInspectedEventId] = useState<string | null>(null),
-    [sourceOrigin, setSourceOrigin] = useState('simulated model');
+    [sourceOrigin, setSourceOrigin] = useState('simulated model'),
+    [walkthrough, setWalkthrough] = useState<WalkthroughDefinition | null>(null),
+    [walkthroughIndex, setWalkthroughIndex] = useState(0),
+    [walkthroughPaused, setWalkthroughPaused] = useState(false),
+    [walkthroughNavigation, setWalkthroughNavigation] = useState(0),
+    [walkthroughApplied, setWalkthroughApplied] = useState(-1),
+    [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number} | null>(null);
+  const appliedWalkthroughNavigation = useRef(-1);
   const inspection = useInspection(design, state, selectedId);
   const displayState = inspection.displayState;
+  const inspectionController = useRef(inspection);
+  useEffect(()=>{inspectionController.current=inspection;},[inspection]);
   const [comparison, setComparison] = useState<Compared[]>([]),
     [comparisonDescription, setComparisonDescription] = useState(
       'Full load at 0s → selected duty pump trip at 30s → restore at 180s. Both runs use the same parameters through 240s.',
@@ -281,6 +294,7 @@ export default function TwinApp() {
   const select = (id: string, view: Focus = 'selection') => {
     if (!resolveAsset(design, id)) { setNotice('Unsupported asset ID. Select an installed asset from the asset list.'); return; }
     setSelectedId(id);
+    if (walkthrough) setWalkthroughPaused(true);
     setFocus(view);
     setResetId((v) => v + 1);
     setDemo(false);
@@ -294,6 +308,35 @@ export default function TwinApp() {
     localStorage.setItem('neptune-v2-scenarios', serialized);
     setSaved(history); sim.cancel(); setPendingProject(null);
   };
+  const inspectDecisionEvidence: InspectDecisionEvidence = (run, evidence, context) => {
+    if (!evidence.state || evidence.status !== 'completed') throw Error('No completed scenario is available for inspection.');
+    retainBeforeRevision('Before completed decision inspection'); inspection.returnToCurrent(); setWalkthrough(null);
+    const next = sim.restore(projectFile(run.design, evidence.state)); setDesignOverride(next); setConfig(next.config); setDemo(false); setWorkspace('Operate');
+    const assetId = context?.assetId ?? `${next.modules[0].id}/pump-duty`;
+    setSelectedId(assetId); setFocus('selection'); setResetId(value=>value+1);
+    setPendingEvidenceView({definitionId:run.definition.id,assetId,timeS:context?.timeS ?? evidence.state.timeS});
+    setNotice('Completed scenario loaded explicitly; previous active project saved in Compare. Event/history inspection does not modify the loaded result.');
+  };
+  const startResultWalkthrough = (campaign: DecisionCampaign, result: DecisionResult) => {
+    const prepared = createResultWalkthrough(campaign,result);
+    retainBeforeRevision('Before result walkthrough'); inspection.returnToCurrent();
+    const next = sim.restore(projectFile(prepared.run.design,prepared.evidence.state)); setDesignOverride(next); setConfig(next.config);
+    setSourceOrigin(result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence');
+    setWalkthrough(prepared);setWalkthroughIndex(0);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);setDemo(false);setInside(false);setXray(true);
+    setNotice('Walkthrough loaded one completed scenario. Your previous project remains in saved scenarios; guidance only inspects history after this explicit load.');
+  };
+  useEffect(() => {
+    if (!walkthrough || walkthroughPaused || sim.busy || state?.experiment?.definition.id !== walkthrough.run.definition.id || appliedWalkthroughNavigation.current === walkthroughNavigation) return;
+    appliedWalkthroughNavigation.current = walkthroughNavigation;
+    const step = walkthrough.steps[walkthroughIndex];
+    const timer = setTimeout(() => {setWalkthroughApplied(walkthroughNavigation);setSelectedId(step.assetId);setFocus('selection');setResetId(value=>value+1);setInspectedEventId(step.eventId);setWorkspace(step.workspace);inspectionController.current.inspect(step.timeS,step.boundary);},0);
+    return () => {clearTimeout(timer);appliedWalkthroughNavigation.current=-1;};
+  },[walkthrough,walkthroughIndex,walkthroughPaused,walkthroughNavigation,sim.busy,state?.experiment?.definition.id]);
+  useEffect(() => {
+    if(!pendingEvidenceView||sim.busy||state?.experiment?.definition.id!==pendingEvidenceView.definitionId)return;
+    const timer=setTimeout(()=>{inspectionController.current.inspect(pendingEvidenceView.timeS);setPendingEvidenceView(null);},0);return()=>clearTimeout(timer);
+  },[pendingEvidenceView,sim.busy,state?.experiment?.definition.id]);
+  useEffect(() => {const hide=()=>{if(document.hidden)setWalkthroughPaused(true);};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[]);
   const setDesign = (patch: Partial<DesignConfig>, nominalPreset = false) => {
     try {
       const next = { ...config, ...patch };
@@ -667,7 +710,7 @@ export default function TwinApp() {
         focus: effectiveFocus,
         resetId,
         reducedMotion,
-        onManual: () => setDemo(false),
+        onManual: () => {setDemo(false);setWalkthroughPaused(true);},
         onReady: () => setSceneReady(true),
       }
     : null;
@@ -682,6 +725,7 @@ export default function TwinApp() {
       data-display-time={displayState?.timeS ?? ''}
       data-inspection-mode={inspection.mode}
       data-inspection-status={inspection.status}
+      onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"]')) setWalkthroughPaused(true);}}
       onWheelCapture={() => {
         if (demo) setDemo(false);
       }}
@@ -968,6 +1012,7 @@ export default function TwinApp() {
         </aside>
         <section className="twin-center">
           <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
+          {walkthrough && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} displayTimeS={displayState?.timeS??null} status={walkthroughPaused?'paused':walkthroughApplied===walkthroughNavigation&&selectedId===walkthrough.steps[walkthroughIndex].assetId&&inspection.status==='resolved'&&inspection.resolution?.boundary===walkthrough.steps[walkthroughIndex].boundary&&inspection.requestedTimeS===walkthrough.steps[walkthroughIndex].timeS?(walkthroughIndex===walkthrough.steps.length-1?'completed':'ready'):'loading'} onStep={index=>{setWalkthroughIndex(index);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onPause={()=>setWalkthroughPaused(true)} onResume={()=>{setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onExit={()=>{setWalkthrough(null);inspection.returnToCurrent();setFocus('campus');setResetId(value=>value+1);}} onPreviousBoundary={()=>{setWalkthroughPaused(true);inspection.inspect(walkthrough.steps[walkthroughIndex].timeS,'previous');}} />}
           <div className="twin-scene-shell" ref={sceneRegion}>
             <div className="twin-scene-caption">
               <span>
@@ -1302,7 +1347,7 @@ export default function TwinApp() {
           {state && !showComparison && <p className="operator-evidence-label">Active experiment controls and full-run evidence · current checkpoint {state.timeS} s. History inspection does not change this evidence.</p>}
           {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && inspection.mode==='current' && <Trend history={sim.history} />}
-          <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy}
+          <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy} onInspectEvidence={inspectDecisionEvidence} onWalkthrough={startResultWalkthrough}
             onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
             onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
           {showComparison && (

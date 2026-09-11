@@ -1,3 +1,4 @@
+import { DecisionRunExplanation, DecisionTimeComparison, type InspectDecisionEvidence } from './DecisionExplanation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   PAIRED_SENSITIVITIES, createDecisionCampaign, validateDecisionCampaign, planDecisionCampaign, runDecisionCampaign,
@@ -19,9 +20,10 @@ const fixtures: [DecisionFixture, string][] = [
   ['no-benefit-source', 'B · Include common-source failure'], ['nominal', 'C · Nominal only'],
   ['sizing', 'D · Discrete workload sizing'], ['sensitivity', 'E · Paired sensitivity and thermal observation'],
 ];
-export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}: {
+export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun, onInspectEvidence, onWalkthrough}: {
   hidden: boolean; activeDesign: Design; state: SimulationState | null; busy: boolean;
   onLoad: (run: PlannedDecisionRun) => void; onRun: (run: PlannedDecisionRun) => void;
+  onInspectEvidence: InspectDecisionEvidence; onWalkthrough: (campaign: DecisionCampaign, result: DecisionResult) => void;
 }) {
   const [campaign, setCampaign] = useState(() => createDecisionCampaign('transfer'));
   const [result, setResult] = useState<DecisionResult | null>(null);
@@ -144,6 +146,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
     <output data-testid="decision-coverage" data-status={running ? 'running' : result?.status ?? 'ready'} data-completed={result?.coverage.completed ?? 0} data-planned={result?.coverage.planned ?? current.plan?.totalRuns ?? 0} aria-live="polite">{result ? `${result.coverage.completed}/${result.coverage.planned} runs completed; ${result.coverage.fullyEvaluatedCandidates}/${result.plan.candidates} candidates fully evaluated. ${running ? 'Running' : result.status}.` : `Ready: ${current.plan?.totalRuns ?? 0} planned runs.`}</output>
     {stale && <output data-testid="decision-stale">Results are stale: campaign inputs changed. Export retains the original evaluated definitions. Rerun the current inputs before using a recommendation.</output>}
     {result && <>
+      <div className="twin-actions"><button disabled={running || busy || stale || result.status !== 'completed' || !result.ranking.scopeComplete} onClick={() => {try{onWalkthrough(evidenceCampaign,result);setProblem('');}catch(error){setProblem(String(error));}}}>Start result walkthrough</button></div><p>This explicit action saves the active project and loads one completed scenario from this campaign. Each walkthrough step then inspects its original history. Select eligible feeder, nominal-only or no-benefit coverage above and run the real campaign to explore their different outcomes.</p>
       <div data-testid="decision-recommendation" data-ranking-status={stale ? 'stale' : result.ranking.status} className="decision-recommendation">
         <strong>{stale ? 'Historical result — inputs changed' : result.ranking.status.replaceAll('-', ' ')}</strong>
         <p>{result.provenance === 'imported-supplied-evidence' && 'Imported supplied evidence. '}{evidenceCampaign.objective.mode === 'minimum-included-cost' ? 'Lowest included cost' : 'Largest passing requested workload'} across {result.plan.candidates} declared candidates and {result.plan.scenarios} scenarios. {result.ranking.winnerIds.length ? `Preferred evaluated candidate${result.ranking.winnerIds.length > 1 ? 's (tie)' : ''}: ${result.ranking.winnerIds.map(id => evidenceCampaign.candidates.find(item => item.id === id)?.label ?? id).join(', ')}.` : 'No compliant recommendation is available.'} {!result.ranking.scopeComplete && 'Evaluation is incomplete; any preferred candidates are provisional within completed coverage.'}</p>
@@ -161,6 +164,8 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       <label>Assumption case<select aria-label="Decision sensitivity" value={selectedRun?.sensitivityId ?? ''} onChange={event => setSensitivityId(event.target.value)}>{Array.from(new Set(choices.map(run => run.sensitivityId))).map(id => <option key={id} value={id}>{id}</option>)}</select></label>
       <p>Inspection does not replace the active project. Loading preserves its checkpoint in Compare. Running uses this exported scenario and actual initial conditions.</p>
       <div className="twin-actions"><button disabled={!selectedRun || busy || running} onClick={() => {try{onLoad(selectedRun!);setProblem('');}catch(error){setProblem(String(error));}}}>Load selected candidate</button><button disabled={!selectedRun || !loaded || busy || running} onClick={() => {try{onRun(selectedRun!);setProblem('');}catch(error){setProblem(String(error));}}}>Run selected experiment</button><button onClick={() => setSelected(null)}>Close candidate inspection</button></div>
+      {result && selectedRun && <DecisionRunExplanation campaign={evidenceCampaign} result={result} run={selectedRun} disabled={busy||running||stale} onInspect={onInspectEvidence} />}
+      {result && selectedRun && <DecisionTimeComparison campaign={evidenceCampaign} result={result} scenarioId={selectedRun.scenarioId} sensitivityId={selectedRun.sensitivityId} />}
       <details><summary>Resolved design, fault targets and actual initialization</summary><pre>{JSON.stringify(selectedRun ?? candidate,null,2)}</pre></details>
     </section>}
     {reproduction && <output data-testid="decision-reproduction">{reproduction}</output>}

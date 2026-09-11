@@ -84,3 +84,11 @@
 .asset-history text { fill: #bad0d3; font-size: 11px; }
 .asset-history details { overflow-x: auto; }
 @media (max-width: 620px) { .inspection-context { padding: 12px; } .operator-timeline { margin: 12px 6px; padding: 12px; } }
+.operator-walkthrough { padding: 14px 18px; background: #23433e; border-block: 1px solid #669c89; overflow-wrap: anywhere; }
+.operator-walkthrough h2 { margin: 8px 0; font-size: 18px; }
+.operator-walkthrough p { font-size: 12px; margin-bottom: 8px; }
+.operator-walkthrough small { display: block; margin-top: 9px; font-size: 10px; }
+.operator-evidence-label { padding: 8px 16px; font-size: 12px; color: var(--muted); }
+[data-testid='decision-time-comparison'] svg { width: 100%; height: auto; }
+[data-testid='decision-run-explanation'] article { padding: 9px 0; border-top: 1px solid var(--line); }
+@media (max-width: 620px) { .operator-walkthrough { padding: 12px; } .operator-walkthrough .twin-actions button { font-size: 11px; } }
