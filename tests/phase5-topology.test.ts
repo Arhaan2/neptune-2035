@@ -93,6 +93,12 @@ describe('PH5 H design admission distinguishes invalid from unsupported', () => 
     const edge = structuredClone(design.connections.find(edge => edge.id === route.originalConnectionId)!);
     edge.id = 'extra-energized-feed'; edge.from = route.donorBusId; design.connections.push(edge);
   }, 'unsupported-configuration'));
+  it('rejects an energized donor-to-source backfeed loop at design admission', () => invalid(design => {
+    const donorId = design.transfer!.routes[0].donorBusId;
+    const donor = design.assets.find(asset => asset.id === donorId)!, source = design.assets.find(asset => asset.id === 'shore/grid')!;
+    design.connections.push({ id: `${donorId}>shore/grid:power`, from: donorId, to: source.id, fromPort: 'power-out', toPort: 'power-in', medium: 'power', capacity: 8800000, enabled: true, routeM: [[...donor.positionM], [...source.positionM]], allowanceM: 0 });
+    design.revision = `source-backfeed-${engineeringIdentity(design)}`;
+  }, 'unsupported-configuration'));
   it.each([NaN, Infinity, -1])('rejects nonfinite or negative tie connection rating %s', capacity => invalid(design => { design.connections.find(edge => edge.id === design.transfer!.routes[0].tieConnectionIds[0])!.capacity = capacity; }, 'invalid-input'));
   it('rejects drift from a declared immutable tie rating', () => invalid(design => { design.assets.find(asset => asset.id === design.transfer!.routes[0].tieId)!.ratings.capacityW /= 2; }, 'invalid-input'));
   it('rejects duplicate recipient routes', () => invalid(design => { design.transfer!.routes.push(structuredClone(design.transfer!.routes[0])); }, 'invalid-input'));
