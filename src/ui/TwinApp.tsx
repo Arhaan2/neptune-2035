@@ -1282,7 +1282,7 @@ export default function TwinApp() {
           {state && !showComparison && <Trend history={sim.history} />}
           <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy}
             onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
-            onRun={run=>{setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
+            onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
           {showComparison && (
             <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
               <div className="twin-section-line">

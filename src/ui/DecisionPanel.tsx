@@ -5,6 +5,7 @@ import {
 } from '../twin/decision';
 import type { DecisionCampaign, DecisionFixture, DecisionResult, DecisionExport, PlannedDecisionRun } from '../twin/decision/types';
 import type { Design, SimulationState } from '../twin/types';
+import { identity } from '../twin/persistence/structure';
 import { readDecisionDraft, writeDecisionDraft } from './decisionStorage';
 
 const format = (value: number | null | undefined, digits = 3) => value == null ? 'unavailable' : value.toLocaleString('en-US', {maximumFractionDigits: digits});
@@ -43,7 +44,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
   const candidate = evidenceCampaign.candidates.find(item => item.id === selected) ?? campaign.candidates.find(item => item.id === selected);
   const choices = inspectedPlan?.runs.filter(run => run.candidateId === selected) ?? [];
   const selectedRun = choices.find(run => run.scenarioId === scenarioId && run.sensitivityId === sensitivityId) ?? choices[0];
-  const loaded = Boolean(selectedRun && activeDesign.revision === selectedRun.design.revision && state?.experiment?.definition.id === selectedRun.definition.id);
+  const loaded = Boolean(selectedRun && state?.experiment && identity(activeDesign) === identity(selectedRun.design) && identity(state.experiment.definition) === identity(selectedRun.definition) && identity(state.experiment.initialState) === identity(selectedRun.initialState));
   const inspect = (id: string) => {
     setSelected(id);
     const runs = inspectedPlan?.runs.filter(run => run.candidateId === id) ?? [];
@@ -154,7 +155,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       <label>Scenario<select aria-label="Decision scenario" value={selectedRun?.scenarioId ?? ''} onChange={event => setScenarioId(event.target.value)}>{Array.from(new Set(choices.map(run => run.scenarioId))).map(id => <option key={id} value={id}>{id}</option>)}</select></label>
       <label>Assumption case<select aria-label="Decision sensitivity" value={selectedRun?.sensitivityId ?? ''} onChange={event => setSensitivityId(event.target.value)}>{Array.from(new Set(choices.map(run => run.sensitivityId))).map(id => <option key={id} value={id}>{id}</option>)}</select></label>
       <p>Inspection does not replace the active project. Loading preserves its checkpoint in Compare. Running uses this exported scenario and actual initial conditions.</p>
-      <div className="twin-actions"><button disabled={!selectedRun || busy || running} onClick={() => {try{onLoad(selectedRun!);setProblem('');}catch(error){setProblem(String(error));}}}>Load selected candidate</button><button disabled={!selectedRun || !loaded || busy || running} onClick={() => onRun(selectedRun!)}>Run selected experiment</button><button onClick={() => setSelected(null)}>Close candidate inspection</button></div>
+      <div className="twin-actions"><button disabled={!selectedRun || busy || running} onClick={() => {try{onLoad(selectedRun!);setProblem('');}catch(error){setProblem(String(error));}}}>Load selected candidate</button><button disabled={!selectedRun || !loaded || busy || running} onClick={() => {try{onRun(selectedRun!);setProblem('');}catch(error){setProblem(String(error));}}}>Run selected experiment</button><button onClick={() => setSelected(null)}>Close candidate inspection</button></div>
       <details><summary>Resolved design, fault targets and actual initialization</summary><pre>{JSON.stringify(selectedRun ?? candidate,null,2)}</pre></details>
     </section>}
     {reproduction && <output data-testid="decision-reproduction">{reproduction}</output>}
