@@ -121,7 +121,7 @@ test('PH4 genuine fault pair and supported two-design signature export exact com
   await expect(noStandby.getByTestId('experiment-shortfall')).toHaveText('79,360 accelerator-seconds');
   await expect(standby.getByTestId('experiment-shortfall')).toHaveText('0 accelerator-seconds');
   await expect(noStandby).toContainText('signature-duty-trip at 30 s');
-  await expect(noStandby).toContainText('Qualifying violation onset 240 s');
+  await expect(noStandby.locator('dl > div').filter({ has: page.getByText('Qualifying violation onset', { exact: true }) }).locator('dd')).toContainText('240 s; recovery onset after violation 124 s; confirmation after violation 129 s');
   await expect(noStandby).toContainText('confirmation after fault 339 s');
   const a = await exportedComparison(page, noStandby), b = await exportedComparison(page, standby);
   expect(a.checkpoint.state.experiment.metrics).toMatchObject({ elapsedS: 1800, shortfallAcceleratorS: 79360, serviceViolationS: 124, minServiceable: { value: 640 }, traceTruncated: true });
