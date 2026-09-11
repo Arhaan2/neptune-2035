@@ -2,6 +2,29 @@ import { expect, test } from '@playwright/test';
 import { buildDesign, DEFAULT_CONFIG } from '../../src/twin/assets/design';
 import type { WorkerRequest, WorkerResponse } from '../../src/twin/types';
 
+test('P8-S02 legacy query and generated hash routes retain the saved aggregate scenario', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./?legacy=1&fallback=1');
+  await expect(page.locator('main')).toHaveAttribute('data-ready', 'true');
+  const accelerators = page.getByRole('spinbutton', { name: 'Accelerators', exact: true });
+  await accelerators.fill('2561');
+  await accelerators.press('Enter');
+  await expect(page.getByTestId('gpu-total')).toHaveText('2,568');
+  await page.getByRole('button', { name: 'Share scenario', exact: true }).click();
+  const link = await page.getByRole('textbox', { name: 'Shareable scenario URL', exact: true }).inputValue();
+  expect(link).toContain('#s=');
+  const legacyURL = new URL(link);
+  legacyURL.searchParams.delete('legacy');
+  await page.goto(legacyURL.href);
+  await expect(page.locator('main')).toHaveAttribute('data-ready', 'true');
+  await expect(accelerators).toHaveValue('2561');
+  await expect(page.getByTestId('gpu-total')).toHaveText('2,568');
+  await expect(page.locator('main.twin-app')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
 test('P8-ENV largest enabled campus completes native-worker one-second boundaries and rejects an oversized atomic event batch', async ({ page }, info) => {
   // Fixed before execution: 1,000,000 requested accelerators; 1 s cold + 1 s continuation.
   // This adds compatibility coverage, not a universal speed or 10 s campus claim.
