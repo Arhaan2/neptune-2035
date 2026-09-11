@@ -12,7 +12,7 @@ const request = (patch: Partial<WorkerRequest> = {}): WorkerRequest => ({ versio
 const expected = () => advance(design, initialize(design, definition), 12);
 
 describe('PH5 G actual worker protocol transfer lifecycle', () => {
-  it.each([1, 2, 3, 5, 12])('chunk size %is preserves exact transfer sequence/deadline and whole-run metrics', async chunkS => {
+  it.each([1, 2, 3, 5, 10])('chunk size %is preserves exact transfer sequence/deadline and whole-run metrics', async chunkS => {
     const responses: WorkerResponse[] = [];
     await createWorkerHandler(response => responses.push(structuredClone(response)), async () => {}, () => 0)(request({ chunkS }));
     expect(responses.at(-1)?.status).toBe('complete');
