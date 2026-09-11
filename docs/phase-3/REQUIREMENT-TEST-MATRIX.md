@@ -70,3 +70,16 @@ On untouched production code at `a6ad26c05d50ebab72d782dbcb3bde05da188b21`, `npm
 Initial mixed-class fixture incorrectly expected only a port bottleneck. Canonical module links inherit endpoint ratings, so its 100.5 Mbit/s endpoint also correctly clamps the outgoing edge. The test now asserts both physical resources each carry exactly 101 Mbit/s. This was a test expectation repair, not a production defect or a lowered demand assertion.
 
 The independent verifier reviewed this matrix as adequate planned coverage; that review does not constitute integrated-candidate acceptance. Final executed identities/results remain pending. New undersized Phase 3 combines external and cluster at the core; when external is required, its 400 Gbit/s budget is intentionally reached before the legacy cluster-only boundary.
+
+## Implemented test ownership and first integrated results
+
+- `tests/phase3-network.test.ts`: 12 original semantics, arithmetic, numerical and traffic aggregation cases.
+- `tests/phase3-topology.test.ts`: 17 fixed-tier, per-resource, shared-budget, nominal/undersized, ordering, failure, and malformed/zero-allocation cases.
+- `tests/phase3-persistence.test.ts`: 12 profile, authentic legacy compatibility, engineering checkpoint binding, price/state/observation and mapping cases.
+- `tests/phase3-equipment.test.ts`: 5 specification/projection/cost/supply/worker/restore and persisted-link cases.
+- `tests/browser/phase3.spec.ts`: 2 journeys per browser, 6 total. Every engine executes the ordinary 32,008-accelerator nominal/undersized, local-link disable/enable, shared-core trip/restore, old-run history, project export/import/reload, mobile and keyboard/fallback paths. The Firefox ordinary journey additionally executes the real 100,000-accelerator nominal/undersized campus. There are no new skips or retries.
+- `.github/workflows/phase-1.yml` explicitly includes the new browser file in the executed production command.
+
+First integrated production slice was Building `e67e115` plus root UI through `79d4a93` (testing worktree source checkpoint `2f8bc79`, with acceptance tests then uncommitted). All 6 Phase 3 browser journeys passed on the development server in their first runs: Chromium 2/2 in 9.8s; Firefox/WebKit 4/4 in 29.8s. These are early smoke results, not final production-build acceptance.
+
+The independent numerical/integration tests exposed four expected release blockers on that slice: zero-load multiple-parent and malformed-port graphs were incorrectly satisfied, and standalone network evaluation missed local power/common-grid dependencies although actual simulation correctly applied them. Fixing owns those repairs; assertions remain unchanged. The million-accelerator test initially took 5.538s and hit the default 5s test limit because it created a matcher for every field of every resource. Aggregating an invalid-resource list still inspects every resource, removes test-framework overhead, and makes all 7 finite-tier cases pass within the unchanged per-test limit. No production timeout was relaxed.
