@@ -1,4 +1,5 @@
 import { equipmentFor, engineeringIdentity } from '../catalog/equipment';
+import { HARDWARE } from '../catalog/reference';
 import { resolveAsset } from '../assets/design';
 import { SOLVER_VERSION, type Design, type OperationEvent } from '../types';
 import { CONTRACT, MODEL_ID, ALGORITHM_ID, INTEGRATION_STEPS } from '../persistence/limits';
@@ -78,10 +79,26 @@ export function requiredCapacityAt(definition: ExperimentDefinition, timeS: numb
 }
 /** Footprints describe actual installed scope; equal slot names alone imply no cross-design equivalence. */
 export function disturbanceFootprints(design: Design, definition: ExperimentDefinition) {
+  const incomingPower=new Map<string,string[]>();
+  for(const edge of design.connections)if(edge.medium==='power'&&edge.enabled)incomingPower.set(edge.to,[...(incomingPower.get(edge.to)??[]),edge.from]);
+  // Follow the same declared single-incoming power path used by the engine.
+  // Disabled transfer links do not widen an installed dependency footprint.
+  const powerDependencies=new Map(design.modules.map(module=>{
+    const ids=new Set<string>();let id=module.powerDomainId;
+    while(id!=='shore/grid'&&!ids.has(id)){
+      ids.add(id);const incoming=incomingPower.get(id)??[];
+      if(incoming.length!==1)break;
+      id=incoming[0];
+    }
+    ids.add('shore/grid');return [module.id,ids] as const;
+  }));
   return definition.disturbances.filter(event=>['trip','maintenance','restore'].includes(event.kind)).map(event=>{
     const asset=resolveAsset(design,event.assetId)!;
-    const affected=design.modules.filter(module=>event.assetId.startsWith('shore/') || module.id===event.assetId || module.id.startsWith(`${event.assetId}/`) || event.assetId.startsWith(`${module.id}/`) || [module.platformId,module.powerDomainId,module.networkDomainId].includes(event.assetId));
-    const accelerators=affected.reduce((sum,module)=>sum+module.nodeCount*8,0);
-    return { eventId:event.id, timeS:event.timeS, assetId:asset.id, equipment:`${asset.catalogId}@${asset.revision}`, affectedModuleIds:affected.map(module=>module.id), installedAcceleratorsInScope:accelerators, fractionOfInstalled:accelerators/design.provisionedAccelerators, ratings:asset.ratings, scope:'dependency footprint; actual service effects are evaluated by the canonical solver' };
+    const affected=design.modules.filter(module=>event.assetId==='shore/fiber'||event.assetId==='shore/cluster-core'||powerDependencies.get(module.id)!.has(event.assetId)||module.id===event.assetId||event.assetId.startsWith(`${module.id}/`)||[module.platformId,module.networkDomainId].includes(event.assetId));
+    // A rack or server command targets only its installed inventory. The containing
+    // module remains useful context, but is not the amount of failed capacity.
+    const directInventory=asset.type==='compute'||asset.type==='rack';
+    const accelerators=asset.type==='compute'?asset.ratings.accelerators:asset.type==='rack'?asset.ratings.nodes*HARDWARE.acceleratorsPerNode:affected.reduce((sum,module)=>sum+module.nodeCount*HARDWARE.acceleratorsPerNode,0);
+    return { eventId:event.id, timeS:event.timeS, assetId:asset.id, equipment:`${asset.catalogId}@${asset.revision}`, affectedModuleIds:affected.map(module=>module.id), installedAcceleratorsInScope:accelerators, fractionOfInstalled:accelerators/design.provisionedAccelerators, ratings:asset.ratings, scope:`${directInventory?'direct installed inventory':'potential shared dependency footprint'}; actual service effects are evaluated by the canonical solver` };
   });
 }
