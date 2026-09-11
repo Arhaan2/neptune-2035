@@ -277,8 +277,11 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
     const before=beginInterval(state);
     resolveStep(design,state,ctx,maxStepS,false);
     if(state.experiment){const energy={batteryDischargeWh:0,batteryChargeWh:0,batteryLossWh:0};for(let i=0;i<state.modules.length;i++){const m=state.modules[i],e=ctx.modules[i].equipment.electrical;energy.batteryDischargeWh+=m.batteryDischargeW*maxStepS/3600;energy.batteryChargeWh+=m.batteryChargeW*maxStepS/3600;energy.batteryLossWh+=(m.batteryDischargeW*(1/e.dischargeEfficiency-1)+m.batteryChargeW*(1-e.chargeEfficiency))*maxStepS/3600;}commitExperimentInterval(state,before,maxStepS,energy);}
-    state.timeS+=maxStepS;state.stepIndex++;prepareExperimentBoundary(design,state);
-    if(!applyEvents(design,state,ctx))resolveStep(design,state,ctx,0,true);
+    state.timeS+=maxStepS;state.stepIndex++;
+    const warming=state.experiment?.originTimeS===null;
+    if(warming)resolveStep(design,state,ctx,0,true);
+    prepareExperimentBoundary(design,state);
+    if(!applyEvents(design,state,ctx)&&!warming)resolveStep(design,state,ctx,0,true);
     finishExperimentBoundary(state);
     finiteOutputs(state,'simulation accumulators');
   }

@@ -44,9 +44,8 @@ export function commitExperimentInterval(state: SimulationState, before: ReturnT
     const conditions=sampleConditions(metricSample(state,0),run.definition.recovery);
     const good=rate<=criteria.maxTemperatureRateKPerS&&batteryRate<=criteria.maxBatteryRateWhPerS&&(!criteria.requireControllerQuiescence||controllersQuiet)&&(!criteria.requireService||conditions.service===true)&&(!criteria.requireThermal||conditions.thermal===true);
     if(good)run.warmup.candidateSinceS??=state.timeS;else run.warmup.candidateSinceS=null;
-    // External events/checkpoints retain the existing integer-second contract.
-    if(Number.isInteger(end)&&run.warmup.candidateSinceS!==null&&end-run.warmup.candidateSinceS>=criteria.dwellS){run.warmup.status='settled';run.warmup.settledAtS=end;run.originTimeS=end;run.status='running';}
-    else if(end>=criteria.maxWarmupS){run.warmup.status='timeout';run.status='warmup-timeout';run.reason='Settling predicates did not hold continuously before maximum warmup; evaluation did not start.';}
+    // Confirmation waits for the end-boundary controller solve. Its transition
+    // may invalidate quiescence even when the preceding interval was quiet.
   }else{
     const startS=state.timeS-run.originTimeS,sample=metricSample(state,startS,before.temperatures);sample.batteryWh=before.batteryWh.reduce((sum,value)=>sum+value,0);
     accumulateInterval(run.metrics,{startS,endS:startS+dtS,sample,...energy},run.definition.recovery);
@@ -62,6 +61,13 @@ export function admitExperimentInputs(state: SimulationState, incoming: Operatio
 }
 export function prepareExperimentBoundary(design: Design, state: SimulationState): void {
   const run=state.experiment;if(!run)return;
+  if(run.originTimeS===null){
+    const criteria=run.definition.initial.settling!,conditions=sampleConditions(metricSample(state,0),run.definition.recovery);
+    if((criteria.requireService&&conditions.service!==true)||(criteria.requireThermal&&conditions.thermal!==true))run.warmup.candidateSinceS=null;
+    // External events/checkpoints retain the existing integer-second contract.
+    if(Number.isInteger(state.timeS)&&run.warmup.candidateSinceS!==null&&state.timeS-run.warmup.candidateSinceS>=criteria.dwellS){run.warmup.status='settled';run.warmup.settledAtS=state.timeS;run.originTimeS=state.timeS;run.status='running';}
+    else if(state.timeS>=criteria.maxWarmupS){run.warmup.status='timeout';run.status='warmup-timeout';run.reason='Settling predicates did not hold continuously before maximum warmup; evaluation did not start.';}
+  }
   if(run.originTimeS===state.timeS&&run.warmup.status==='settled'&&state.events.length===0){
     state.events=mergeEventHistory(design,[],run.definition.disturbances.map(event=>({...event,timeS:event.timeS+state.timeS})),state.timeS);run.inputs=structuredClone(state.events);
   }
@@ -81,7 +87,11 @@ export function recordExperimentEvent(state: SimulationState, event: OperationEv
 }
 export function recordExperimentController(state: SimulationState, entry: CausalEntry): void {
   const run=state.experiment;
-  if(!run||run.originTimeS===null||entry.kind!=='controller')return;
+  if(!run||entry.kind!=='controller')return;
+  if(run.originTimeS===null){
+    if(run.definition.initial.settling?.requireControllerQuiescence)run.warmup.candidateSinceS=null;
+    return;
+  }
   run.metrics.controllerTransitionCount++;
   run.metrics.controllerTransitions.push({...entry,timeS:entry.timeS-run.originTimeS,affectedIds:[...entry.affectedIds]});
   if(run.metrics.controllerTransitions.length>EXPERIMENT_LIMITS.evidenceEntries){run.metrics.controllerTransitions.shift();run.metrics.controllerEvidenceTruncated=true;}

@@ -25,10 +25,12 @@ function validateSample(sample: MetricSample) {
 }
 export function sampleConditions(sample: MetricSample, criteria: RecoveryCriteria) {
   const service = sample.serviceableAccelerators === null ? null : sample.serviceableAccelerators + criteria.capacityToleranceAccelerators >= sample.requiredAccelerators;
-  const missing = sample.temperatures.length === 0 || sample.temperatures.some(value=>value.kelvin===null);
+  const observedDomains=new Map<string,Set<string>>();
+  for(const observation of sample.temperatures){const domains=observedDomains.get(observation.assetId)??new Set<string>();domains.add(observation.domain);observedDomains.set(observation.assetId,domains);}
+  const missing = observedDomains.size === 0 || [...observedDomains.values()].some(domains=>!domains.has('coolant')||!domains.has('air')) || sample.temperatures.some(value=>value.kelvin===null);
   const thermalViolation = sample.temperatures.some(value=>value.kelvin!==null && value.kelvin >= (value.domain==='coolant'?criteria.coolantLimitK:criteria.airLimitK) + criteria.temperatureToleranceK);
   const thermal = thermalViolation ? false : missing ? null : true;
-  return { service, thermal, healthy: service === false || thermal === false ? false : service === null || thermal === null ? null : true };
+  return { service, thermal, unavailable:service===null||missing, healthy: service === false || thermal === false ? false : service === null || thermal === null ? null : true };
 }
 function extrema(metrics: ExperimentMetrics, sample: MetricSample) {
   if (sample.serviceableAccelerators !== null && (!metrics.minServiceable || sample.serviceableAccelerators < metrics.minServiceable.value)) metrics.minServiceable = {value:sample.serviceableAccelerators,timeS:sample.timeS,assetId:'campus',domain:'serviceable-accelerators'};
@@ -70,7 +72,10 @@ export function observeBoundary(metrics: ExperimentMetrics, sample: MetricSample
     if (pending.confirmationTimeS !== null && Math.abs(pending.confirmationTimeS-sample.timeS)<EPS) { metrics.recoveryEpisodes.pop();pending.confirmationTimeS=null; }
     if (pending.confirmationTimeS === null) pending.onsetTimeS=null;
   }
-  if (conditions.healthy === true && pending && pending.confirmationTimeS === null && pending.onsetTimeS === null) pending.onsetTimeS=sample.timeS;
+  if (conditions.healthy === true && pending && pending.confirmationTimeS === null) {
+    pending.onsetTimeS??=sample.timeS;
+    if(criteria.dwellS===0)confirmRecovery(metrics,pending.onsetTimeS);
+  }
 }
 /** Mutates only an admitted candidate; duplicate/gapped intervals are rejected before any aggregate changes. */
 export function accumulateInterval(metrics: ExperimentMetrics, interval: MetricInterval, criteria: RecoveryCriteria): void {
@@ -78,7 +83,7 @@ export function accumulateInterval(metrics: ExperimentMetrics, interval: MetricI
   finiteNumber(interval.startS,'metric.interval.startS',{min:0});finiteNumber(interval.endS,'metric.interval.endS',{min:0});
   if (interval.endS <= interval.startS || Math.abs(interval.startS-metrics.elapsedS)>EPS || Math.abs(interval.sample.timeS-interval.startS)>EPS) failure('invalid-input','METRIC_INTERVAL','Metric intervals must be positive, contiguous, and committed exactly once.');
   for(const key of ['batteryDischargeWh','batteryChargeWh','batteryLossWh'] as const) quantity(interval[key],`metric.${key}`);
-  const dt=interval.endS-interval.startS, sample=interval.sample, conditions=sampleConditions(sample,criteria), service=conditions.service===false, thermal=conditions.thermal===false, unavailable=conditions.service===null||conditions.thermal===null;
+  const dt=interval.endS-interval.startS, sample=interval.sample, conditions=sampleConditions(sample,criteria), service=conditions.service===false, thermal=conditions.thermal===false, unavailable=conditions.unavailable;
   extrema(metrics,sample);
   if (metrics.committedIntervals===0 && metrics.initialBatteryWh===null) metrics.initialBatteryWh=sample.batteryWh;
   if (sample.serviceableAccelerators!==null) metrics.shortfallAcceleratorS+=Math.max(0,sample.requiredAccelerators-sample.serviceableAccelerators)*dt;
@@ -104,7 +109,7 @@ export function accumulateInterval(metrics: ExperimentMetrics, interval: MetricI
 }
 export function recoveryReport(metrics: ExperimentMetrics, status: ExperimentStatus): RecoveryReport {
   const pending=metrics.pendingRecovery, completed=status==='completed';
-  const result:RecoveryReport={status:!completed?'incomplete-observation':metrics.anyViolationS===0?'no-qualifying-interruption':pending?.confirmationTimeS!==null&&pending?.confirmationTimeS!==undefined&&metrics.boundaryHealthy===true?'recovered':'not-recovered',referenceTimeS:pending?.referenceTimeS??null,referenceEventId:pending?.referenceEventId??null,onsetTimeS:pending?.onsetTimeS??null,confirmationTimeS:pending?.confirmationTimeS??null,onsetElapsedS:null,confirmationElapsedS:null};
+  const result:RecoveryReport={status:!completed?'incomplete-observation':metrics.boundaryHealthy===false?'not-recovered':metrics.anyViolationS===0?'no-qualifying-interruption':pending?.confirmationTimeS!==null&&pending?.confirmationTimeS!==undefined&&metrics.boundaryHealthy===true?'recovered':'not-recovered',referenceTimeS:pending?.referenceTimeS??null,referenceEventId:pending?.referenceEventId??null,onsetTimeS:pending?.onsetTimeS??null,confirmationTimeS:pending?.confirmationTimeS??null,onsetElapsedS:null,confirmationElapsedS:null};
   if(result.referenceTimeS!==null&&result.onsetTimeS!==null)result.onsetElapsedS=result.onsetTimeS-result.referenceTimeS;
   if(result.referenceTimeS!==null&&result.confirmationTimeS!==null)result.confirmationElapsedS=result.confirmationTimeS-result.referenceTimeS;
   return result;
