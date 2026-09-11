@@ -106,6 +106,20 @@ describe('PH5 C/F complete path eligibility and changing faults', () => {
 });
 
 describe('PH5 D/H actual path limits and useful-service coupling', () => {
+  it('zero initial tie headroom blocks at fault detection without inventing a waiting authorization', () => {
+    const design = reference(), route = design.transfer!.routes[0];
+    design.connections.find(edge => edge.id === route.tieConnectionIds[0])!.capacity = 0;
+    design.revision = `test-initial-zero-${engineeringIdentity(design)}`;
+    const state = advance(design, initialize(design, definition(design)), 2);
+    expect(state.transfer!.attempts[0]).toMatchObject({ status: 'blocked', reason: 'NO_HEADROOM', deadlineS: null, admittedW: 0, tieClosed: false, bindingResourceId: `edge:${route.tieConnectionIds[0]}` });
+    expect(state.transfer!.transitions.some(transition => transition.reason === 'WAITING')).toBe(false);
+  });
+  it('eligible pending transfer exposes real headroom while reserving no transferred watts', () => {
+    const design = reference(), state = advance(design, initialize(design, definition(design)), 2), attempt = state.transfer!.attempts[0];
+    expect(attempt).toMatchObject({ status: 'waiting', deadlineS: 4.375, admittedW: 0, tieClosed: false, unservedW: attempt.requestedW });
+    expect(attempt.headroomW).toBeGreaterThanOrEqual(attempt.requestedW);
+    expect(state.transfer!.resources.every(resource => resource.transferredW === 0)).toBe(true);
+  });
   it.each([0, 1])('an unavailable/insufficient tie capacity %i W never admits a fractional platform', capacity => {
     const design = reference(), route = design.transfer!.routes[0];
     design.connections.find(edge => edge.id === route.tieConnectionIds[0])!.capacity = capacity;
