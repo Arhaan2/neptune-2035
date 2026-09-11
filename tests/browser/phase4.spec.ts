@@ -120,6 +120,9 @@ test('PH4 genuine fault pair and supported two-design signature export exact com
   const noStandby = cards.filter({ has: page.getByRole('heading', { name: 'No standby pump', exact: true }) }), standby = cards.filter({ has: page.getByRole('heading', { name: 'One standby pump', exact: true }) });
   await expect(noStandby.getByTestId('experiment-shortfall')).toHaveText('79,360 accelerator-seconds');
   await expect(standby.getByTestId('experiment-shortfall')).toHaveText('0 accelerator-seconds');
+  await expect(noStandby).toContainText('signature-duty-trip at 30 s');
+  await expect(noStandby).toContainText('Qualifying violation onset 240 s');
+  await expect(noStandby).toContainText('confirmation after fault 339 s');
   const a = await exportedComparison(page, noStandby), b = await exportedComparison(page, standby);
   expect(a.checkpoint.state.experiment.metrics).toMatchObject({ elapsedS: 1800, shortfallAcceleratorS: 79360, serviceViolationS: 124, minServiceable: { value: 640 }, traceTruncated: true });
   expect(b.checkpoint.state.experiment.metrics).toMatchObject({ elapsedS: 1800, shortfallAcceleratorS: 0, minServiceable: { value: 1280 } });

@@ -3,6 +3,8 @@ import { buildDesign, DEFAULT_CONFIG } from '../src/twin/assets/design';
 import { advance, initialize } from '../src/twin/engine/simulation';
 import { createWorkerHandler } from '../src/twin/engine/worker';
 import { createExperimentDefinition } from '../src/twin/experiment/definition';
+import { attachExperiment } from '../src/twin/experiment/runtime';
+import { replayExperimentState } from '../src/twin/experiment/runner';
 import { CONTRACT } from '../src/twin/persistence/limits';
 import type { WorkerRequest, WorkerResponse } from '../src/twin/types';
 
@@ -77,5 +79,36 @@ describe('PH4 authoritative metrics independent of worker grouping and delivery'
     expect(result.state?.experiment?.status).toBe('resource-limited');
     expect(result.state?.experiment?.evaluation.outcome).toBe('INCOMPLETE');
     expect(result.state?.experiment?.metrics.elapsedS).toBe(0);
+  });
+  it('replays an explicit custom initial physical checkpoint without refilling or resetting it', async () => {
+    let custom = initialize(design);
+    Object.assign(custom.modules[0], { coolantK: 305, airK: 303, batteryWh: 200000 });
+    custom = advance(design, custom, 0);
+    attachExperiment(design, custom, definition);
+    const source = advance(design, custom, 20), initial = replayExperimentState(design, source);
+    expect(initial.experiment!.initialState).toEqual(source.experiment!.initialState);
+    expect(initial.experiment!.initialState.modules[0].batteryWh).toBe(200000);
+    expect(initial.experiment!.initialState.modules[0].coolantK).toBe(305);
+    const replayed = await run({ kind: 'replay', state: initial, experimentDefinition: undefined, durationS: 20, events: [] });
+    expect(replayed.at(-1)?.status).toBe('complete');
+    expect(replayed.at(-1)?.state?.modules).toEqual(source.modules);
+    expect(replayed.at(-1)?.state?.experiment?.metrics).toEqual(source.experiment!.metrics);
+  });
+  it.each(['cold', 'settled'] as const)('replay retains all interactive inputs in an explicit derived %s definition', async mode => {
+    const definition = createExperimentDefinition(design, { durationS: 20, disturbances: [
+      { id: 'worker-trip', timeS: 5, assetId: 'shore/cluster-core', kind: 'trip' },
+      { id: 'worker-restore', timeS: 15, assetId: 'shore/cluster-core', kind: 'restore' },
+    ], initial: { mode, settling: { maxWarmupS: 10, dwellS: 2, maxTemperatureRateKPerS: 1 } } });
+    const prepared = mode === 'settled' ? advance(design, initialize(design, definition), 2) : initialize(design, definition);
+    const origin = prepared.experiment!.originTimeS!;
+    const source = advance(design, prepared, 20, [{ id: 'recorded-interactive-workload', timeS: origin + 6, kind: 'workload', assetId: 'shore/grid', value: 0.3 }]);
+    const initial = replayExperimentState(design, source);
+    expect(initial.experiment!.definition.provenance.parentDefinitionId).toBe(definition.id);
+    expect(initial.experiment!.definition.disturbances.find(event => event.id === 'recorded-interactive-workload')).toMatchObject({ timeS: 6, kind: 'workload', value: 0.3 });
+    const replayed = await run({ kind: 'replay', state: initial, experimentDefinition: undefined, durationS: source.timeS, events: [] });
+    expect(replayed.at(-1)?.status).toBe('complete');
+    expect(replayed.at(-1)?.state?.appliedEventIds).toEqual(source.appliedEventIds);
+    expect(replayed.at(-1)?.state?.modules).toEqual(source.modules);
+    expect(replayed.at(-1)?.state?.experiment?.metrics).toEqual(source.experiment!.metrics);
   });
 });
