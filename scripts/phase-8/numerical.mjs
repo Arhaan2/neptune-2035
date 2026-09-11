@@ -76,12 +76,13 @@ try {
   for (const [name, patch, expectedW] of [
     ['equal-capacity', {}, benchmarks.heatExchangerEqualCapacity.heatW],
     ['near-equal-capacity', { seawaterFlowM3S: 0.001000000000001 }, 10000],
+    ['near-equal-branch-boundary', { seawaterFlowM3S: 0.001 / (1 - 5e-9) }, 10000],
     ['reverse', { technicalInletK: 293.15, seawaterInletK: 313.15 }, -10000],
     ['zero-technical', { technicalFlowM3S: 0 }, 0], ['zero-seawater', { seawaterFlowM3S: 0 }, 0],
     ['zero-UA', { cleanUAWPerK: 0 }, 0], ['zero-difference', { seawaterInletK: 313.15 }, 0],
   ]) {
     const input = { ...hxBase, ...patch }, actual = thermal.solveExchanger(input);
-    results.numeric(`P8-NUM/HX/${name}/transfer`, actual.heatW, expectedW, name === 'near-equal-capacity' ? t.exchangerNearEqualW : t.exchangerBenchmarkW, 'W');
+    results.numeric(`P8-NUM/HX/${name}/transfer`, actual.heatW, expectedW, name.startsWith('near-equal') ? t.exchangerNearEqualW : t.exchangerBenchmarkW, 'W');
     const hotW = input.technicalFlowM3S * 1e6 * (input.technicalInletK - actual.technicalOutletK);
     const coldW = input.seawaterFlowM3S * 1e6 * (actual.seawaterOutletK - input.seawaterInletK);
     results.numeric(`P8-NUM/HX/${name}/hot-stream`, hotW, actual.heatW, t.exchangerStreamsW, 'W');
@@ -109,11 +110,12 @@ try {
   }
 
   const build = patch => designAPI.buildDesign({ ...designAPI.DEFAULT_CONFIG, requestedAccelerators: 1280, workload: 1, ...patch });
-  for (const [caseId, durationS, disturbances] of [
-    ['smooth', 120, []],
-    ['aligned-network-switch', 60, [{ id: 'core-trip', kind: 'trip', assetId: 'shore/cluster-core', timeS: 20 }, { id: 'core-restore', kind: 'restore', assetId: 'shore/cluster-core', timeS: 40 }]],
+  for (const [caseId, durationS, workload, disturbances] of [
+    ['smooth-0.6', 120, 0.6, []],
+    ['smooth-1', 120, 1, []],
+    ['aligned-network-switch', 60, 1, [{ id: 'core-trip', kind: 'trip', assetId: 'shore/cluster-core', timeS: 20 }, { id: 'core-restore', kind: 'restore', assetId: 'shore/cluster-core', timeS: 40 }]],
   ]) {
-    const design = build({}), runs = [];
+    const design = build({ workload }), runs = [];
     for (const stepS of [1, 0.5, 0.25]) {
       const def = definition.createExperimentDefinition(design, { id: `phase8-${caseId}-${stepS}`, name: caseId,
         durationS, integrationStepS: stepS, disturbances });
@@ -136,17 +138,17 @@ try {
       }
       runs.push({ stepS, matched, metrics: state.experiment.metrics, controllerTransitions: state.experiment.metrics.controllerTransitions });
     }
-    for (const coarse of runs.slice(0, -1)) {
-      const fine = runs.at(-1);
+    for (const [coarse, fine] of [[runs[0], runs[1]], [runs[0], runs[2]], [runs[1], runs[2]]]) {
+      const pairId = `${coarse.stepS}-vs-${fine.stepS}`;
       for (let index = 0; index < coarse.matched.length; index++) {
         const a = coarse.matched[index], b = fine.matched[index];
-        for (const key of ['facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'batteryWh']) results.numeric(`P8-NUM/timestep/${caseId}/${coarse.stepS}/${a.timeS}/${key}`, a[key], b[key], t.coupledEnergyWh, 'Wh');
-        for (let m = 0; m < a.modules.length; m++) for (const key of ['coolantK', 'airK']) results.numeric(`P8-NUM/timestep/${caseId}/${coarse.stepS}/${a.timeS}/${a.modules[m].id}/${key}`, a.modules[m][key], b.modules[m][key], t.coupledTemperatureK, 'K');
-        results.exact(`P8-NUM/timestep/${caseId}/${coarse.stepS}/${a.timeS}/service`, a.serviceableAccelerators, b.serviceableAccelerators);
+        for (const key of ['facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'batteryWh']) results.numeric(`P8-NUM/timestep/${caseId}/${pairId}/${a.timeS}/${key}`, a[key], b[key], t.coupledEnergyWh, 'Wh');
+        for (let m = 0; m < a.modules.length; m++) for (const key of ['coolantK', 'airK']) results.numeric(`P8-NUM/timestep/${caseId}/${pairId}/${a.timeS}/${a.modules[m].id}/${key}`, a.modules[m][key], b.modules[m][key], t.coupledTemperatureK, 'K');
+        results.exact(`P8-NUM/timestep/${caseId}/${pairId}/${a.timeS}/service`, a.serviceableAccelerators, b.serviceableAccelerators);
       }
-      results.exact(`P8-NUM/timestep/${caseId}/${coarse.stepS}/controller-transitions`, coarse.controllerTransitions, fine.controllerTransitions);
+      results.exact(`P8-NUM/timestep/${caseId}/${pairId}/controller-transitions`, coarse.controllerTransitions, fine.controllerTransitions);
     }
-    timestepCases.push({ id: caseId, requestedAccelerators: 1280, durationS, disturbances, interpretation: 'Same initial conditions and physical times; exact linear-node update with adequate supply and no thermal controller switching. Network event times align at every tested resolution.', runs });
+    timestepCases.push({ id: caseId, requestedAccelerators: 1280, workload, durationS, disturbances, interpretation: 'Same initial conditions and physical times; exact linear-node update with adequate supply and no thermal controller switching. Network event times align at every tested resolution.', runs });
   }
 
   for (const [accelerators, expectedNodes, expectedDemand, expectedStatus] of [[8, 1, 1e8, 'satisfied'], [32000, 4000, 400e9, 'satisfied'], [32008, 4001, 400.1e9, 'violated']]) {
