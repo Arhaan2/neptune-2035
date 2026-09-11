@@ -374,6 +374,9 @@ export default function TwinApp() {
   const showComparison =
     workspace === 'Compare' ||
     (demo && (state?.timeS ?? 0) >= 180 && (state?.timeS ?? 0) < 220);
+  const endpointTimes=comparison.map(item=>item.state.experiment?.metrics.elapsedS??item.state.timeS);
+  const endpointModules=comparison.map(item=>item.state.modules.find(module=>module.id===selectedModule.id));
+  const comparableEndpoint=comparison.length===2&&Boolean(comparison[0].state.experiment)===Boolean(comparison[1].state.experiment)&&endpointTimes[0]===endpointTimes[1]&&endpointModules.every(module=>module!==undefined);
   useEffect(() => {
     if (!demo || !state || state.timeS < 220 || sim.busy) return;
     const timer = setTimeout(() => {
@@ -1137,7 +1140,7 @@ export default function TwinApp() {
               disabled={sim.busy || !state}
               onClick={() => {
                 setDemo(false);
-                if (state) sim.replay(state.events, state.timeS);
+                if (state && sim.replay(state.events, state.timeS, undefined, state.integrationStepS, state.experiment?.definition)) setNotice('Replay created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
               }}
             >
               Replay
@@ -1167,7 +1170,7 @@ export default function TwinApp() {
               onClick={() => {
                 if (state) {
                   setDemo(false);
-                  sim.replay(state.events, replayTimeS);
+                  if(sim.replay(state.events, replayTimeS, undefined, state.integrationStepS, state.experiment?.definition))setNotice('Seek created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
                 }
               }}
             >
@@ -1317,9 +1320,7 @@ export default function TwinApp() {
               <div className="twin-comparison-grid">
                 {comparison.map((c) => {
                   const s = summarize(c.design, c.state),
-                    m =
-                      c.state.modules.find((m) => m.id === selectedModule.id) ??
-                      c.state.modules[0];
+                    m = c.state.modules.find((m) => m.id === selectedModule.id);
                   return (
                     <article className="twin-card" key={c.label}>
                       <h3>{c.label}</h3>
@@ -1342,10 +1343,10 @@ export default function TwinApp() {
                           />
                         </Suspense>
                       </div>
-                      <p>
+                      {m ? <p>
                         {num(m.coolantK - 273.15, 2)} °C ·{' '}
                         {num(m.technicalFlowM3S * 1000, 2)} L/s
-                      </p>
+                      </p> : <p>Selected module {selectedModule.id} is not installed in this design; its endpoint temperature and flow are unavailable.</p>}
                       <p>
                         {num(s.availableAccelerators, 0)} available /{' '}
                         {num(c.design.provisionedAccelerators, 0)}
@@ -1384,17 +1385,12 @@ export default function TwinApp() {
                   );
                 })}
               </div>
-              {comparison.length === 2 && (
+              {comparableEndpoint && (
                 <p className="twin-delta">
                   {comparison[1].label} minus {comparison[0].label} at{' '}
-                  {comparison[0].state.timeS}s:{' '}
+                  {comparison[0].state.experiment?'evaluation time ':'physical time '}{endpointTimes[0]}s:{' '}
                   {num(
-                    (comparison[1].state.modules.find(
-                      (m) => m.id === selectedModule.id,
-                    )?.coolantK ?? 0) -
-                      (comparison[0].state.modules.find(
-                        (m) => m.id === selectedModule.id,
-                      )?.coolantK ?? 0),
+                    endpointModules[1]!.coolantK-endpointModules[0]!.coolantK,
                     3,
                   )}{' '}
                   K coolant;{' '}
@@ -1408,6 +1404,7 @@ export default function TwinApp() {
                   available accelerators.
                 </p>
               )}
+              {comparison.length===2&&!comparableEndpoint&&<p role="note">Endpoint difference unavailable: matching observation times and the selected installed module in both designs are required. Each run retains its own time and full-run report.</p>}
               <div className="twin-actions">
                 <button
                   disabled={!state}

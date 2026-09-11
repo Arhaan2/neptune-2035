@@ -1,6 +1,7 @@
 import type { ExperimentDefinition } from '../twin/experiment/types';
 import { createExperimentDefinition } from '../twin/experiment/definition';
 import { experimentExecutionDuration, setExperimentStatus } from '../twin/experiment/runtime';
+import { replayExperimentState } from '../twin/experiment/runner';
 import { engineeringIdentity } from '../twin/catalog/equipment';
 import { diagnosticEvent, diagnosticsEnabled } from '../twin/diagnostics';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -233,6 +234,7 @@ export function useTwin(design: Design) {
       integrationStepS: IntegrationStep = current.current?.integrationStepS ??
         1,
       experimentDefinition?: ExperimentDefinition,
+      replayInitialState?: SimulationState,
     ) => {
       diagnosticEvent('ui.send-attempt', { kind, durationS, selectedRevision: designRef.current.revision, initializedRevision: current.current?.designRevision, pending: pending.current, hasWorker: Boolean(worker.current) });
       if (!worker.current || pending.current) return;
@@ -278,8 +280,8 @@ export function useTwin(design: Design) {
         durationS,
         events,
         integrationStepS,
-        ...(experimentDefinition ? { experimentDefinition } : {}),
-        ...((kind === 'advance' || kind === 'restore' || continuing) &&
+        ...(experimentDefinition && !replayInitialState ? { experimentDefinition } : {}),
+        ...(replayInitialState ? { state: replayInitialState } : (kind === 'advance' || kind === 'restore' || continuing) &&
         current.current
           ? { state: current.current }
           : {}),
@@ -395,10 +397,13 @@ export function useTwin(design: Design) {
       integrationStepS?: IntegrationStep,
       definition?: ExperimentDefinition,
     ) => {
+      const replaySource=current.current;
+      const initial=definition&&replaySource?.experiment?.definition.id===definition.id?replayExperimentState(designRef.current,replaySource):undefined;
       invalidate();
       if (source) provenance.current = source;
       setHistory([]);
-      send('replay', definition ? experimentExecutionDuration(definition) : timeS, definition ? [] : events, false, integrationStepS, definition);
+      send('replay', timeS, definition ? [] : events, false, definition?.integrationStepS??integrationStepS, definition, initial);
+      return initial?.experiment?.definition.id!==undefined&&initial.experiment.definition.id!==definition?.id;
     },
     [send, invalidate],
   );

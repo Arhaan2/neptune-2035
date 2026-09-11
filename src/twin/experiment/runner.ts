@@ -4,7 +4,7 @@ import { CONTRACT } from '../persistence/limits';
 import { identity } from '../persistence/structure';
 import { diagnosticFor } from '../safety';
 import { createExperimentDefinition, validateExperimentDefinition } from './definition';
-import { experimentExecutionDuration, experimentFinished, setExperimentStatus } from './runtime';
+import { attachExperiment, experimentExecutionDuration, experimentFinished, setExperimentStatus } from './runtime';
 import { evaluateExperiment } from './metrics';
 import type { ExperimentDefinition } from './types';
 
@@ -37,6 +37,18 @@ function comparisonAssumptions(definition: ExperimentDefinition) {
   const {id:_id,name:_name,disturbances:_disturbances,provenance:_provenance,...assumptions}=definition;return assumptions;
 }
 function operationContent(events: ExperimentDefinition['disturbances']) { return events.map(({sequence:_sequence,...event})=>event); }
+/** Replay starts from the saved physical initial state and retains declared-only definitions. */
+export function replayExperimentState(design: Design, source: SimulationState): SimulationState {
+  const run=source.experiment;if(!run)throw Error('Whole-run replay requires a recorded experiment.');
+  let definition=structuredClone(run.definition);
+  const declared=definition.disturbances.map(event=>({...event,timeS:event.timeS+(run.originTimeS??0)}));
+  if(run.originTimeS!==null&&identity(operationContent(run.inputs))!==identity(operationContent(declared))){
+    definition={...definition,id:`${definition.id.slice(0,120)}:replay-${identity(run.inputs)}`,name:`${definition.name.slice(0,135)} · recorded-input replay`,disturbances:run.inputs.map(event=>({...event,timeS:event.timeS-run.originTimeS!})),provenance:{source:'simulated-definition',parentDefinitionId:run.definition.id,note:'Explicit derived replay includes every recorded input at its evaluation time and preserves the source physical initial checkpoint and all experiment assumptions.'}};
+  }
+  const initial=structuredClone(run.initialState);
+  attachExperiment(design,initial,definition);
+  return initial;
+}
 export function comparePair(faulted: SimulationState, baseline: SimulationState) {
   const f=faulted.experiment,b=baseline.experiment,reasons:string[]=[];
   if(!f||!b)return{status:'mismatched' as const,reasons:['Whole-run metrics unavailable for a legacy or uninstrumented run.'],absolute:null,difference:null};

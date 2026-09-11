@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react';
 import type { Design, SimulationState } from '../twin/types';
 import type { ExperimentDefinition } from '../twin/experiment/types';
 import { createExperimentDefinition, disturbanceFootprints } from '../twin/experiment/definition';
-import { recoveryReport } from '../twin/experiment/metrics';
+import { experimentRecoveryReport } from '../twin/experiment/report';
 import { comparePair } from '../twin/experiment/runner';
 const number=(value:number|null|undefined,digits=2)=>value===null||value===undefined?'unavailable':value.toLocaleString('en-US',{maximumFractionDigits:digits});
 const when=(value:number|null|undefined)=>value===null||value===undefined?'none observed':`${number(value)} s`;
 export function ExperimentReport({state,compact=false}:{state:SimulationState;compact?:boolean}) {
   const run=state.experiment;
   if(!run)return <p className="muted" data-testid="legacy-whole-run-unavailable">Whole-run metrics unavailable for this legacy run. Start an explicit derived experiment to recalculate its full history.</p>;
-  const m=run.metrics,recovery=recoveryReport(m,run.status);
+  const m=run.metrics,recovery=experimentRecoveryReport(state)!;
   return <section className="experiment-report" aria-label="Whole-run report" data-testid="whole-run-report">
     <h3>Whole-run report</h3><output data-testid="experiment-outcome"><strong>{run.status} · {run.evaluation.outcome}</strong> · {number(m.elapsedS)} / {number(run.definition.durationS)} s evaluated</output>
     <p>{run.evaluation.reasons.join(' ')||'All declared whole-run success criteria satisfied.'}</p>{(m.unavailableS>0||m.boundaryHealthy===null)&&<p role="note">Measurements unavailable over {number(m.unavailableS)} s or at the terminal boundary. Numbers below are partial observed totals; whole-window interruption and thermal conclusions are unavailable.</p>}
@@ -23,7 +23,7 @@ export function ExperimentReport({state,compact=false}:{state:SimulationState;co
       <div><dt>Time with any violation</dt><dd>{number(m.anyViolationS)} s · campus union</dd></div>
       <div><dt>Service interruption episodes</dt><dd>{m.interruptionCount} · longest {number(m.longestInterruptionS)} s</dd></div>
       <div><dt>Sustained recovery</dt><dd data-testid="experiment-recovery">{recovery.status} · onset {when(recovery.onsetTimeS)} · confirmed {when(recovery.confirmationTimeS)}</dd></div>
-      <div><dt>Recovery reference</dt><dd>{recovery.referenceEventId??'no recorded fault reference'} at {when(recovery.referenceTimeS)}; confirmation elapsed {when(recovery.confirmationElapsedS)}</dd></div>
+      <div><dt>Recorded fault reference</dt><dd>{recovery.referenceEventId??'no recorded fault reference'} at {when(recovery.referenceEventTimeS)}; recovery onset after fault {when(recovery.onsetFromEventS)}; confirmation after fault {when(recovery.confirmationFromEventS)}</dd></div><div><dt>Qualifying violation onset</dt><dd>{when(recovery.violationOnsetTimeS)}; recovery onset after violation {when(recovery.onsetElapsedS)}; confirmation after violation {when(recovery.confirmationElapsedS)}</dd></div>
     </dl>
     {!compact&&<><p>Final state: {number(state.modules.reduce((sum,module)=>sum+module.availableAccelerators,0),0)} serviceable accelerators; {number(Math.max(...state.modules.map(module=>module.coolantK)),4)} K maximum coolant. A healthy endpoint cannot erase earlier interruption.</p><dl className="experiment-metrics">
       <div><dt>Storage discharge / charge</dt><dd>{number(m.batteryDischargeWh)} / {number(m.batteryChargeWh)} Wh at the bus</dd></div><div><dt>Storage conversion losses / net stored change</dt><dd>{number(m.batteryLossWh)} / {number(m.batteryNetChangeWh)} Wh</dd></div><div><dt>Controller transitions</dt><dd>{m.controllerTransitionCount} · {m.controllerEvidenceTruncated?'detail truncated, total retained':'bounded reason/asset evidence retained'}</dd></div><div><dt>Warmup</dt><dd>{run.warmup.status} · {number(run.warmup.elapsedS)} s excluded · evaluation origin {when(run.originTimeS)}</dd></div>
