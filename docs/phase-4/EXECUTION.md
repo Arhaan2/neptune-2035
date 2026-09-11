@@ -26,7 +26,10 @@ The API returned actual canonical agent IDs `/root/building`, `/root/testing`, `
 | `22cb8fd` | Building `4e7097bb` | Versioned definitions/criteria/types; builder and root typecheck passed |
 | `d32704c`, `e7b59a5`, `cf55820` | Testing | 23 definition checks; reproduced direct-inventory overstatement and upstream-transformer omission |
 | `46d6800` | Fixing `41c9281f` | Isolated footprint repair; Testing independently rechecked exact tree with 23/23 passed |
-| `4fb8fca` | Building `49c2890b` | Canonical interval metrics, pending recovery, atomic checkpoint extension and worker integration; root typecheck passed, focused numerical gate pending |
+| `4fb8fca` | Building `49c2890b` | Canonical metrics/checkpoint slice; focused gate42/46 passed, four genuine boundary defects reproduced |
+| `878305d` | Fixing `f72d257b` | Post-controller settling, terminal recovery and missing-measurement repair |
+| `4eccabf` | Testing + integrated repair | 102/102 focused Phase4 cases passed on an identical root/Testing source tree |
+| `64e0988` | Building `b1b1f68` | Bounded paired runner, signed comparisons, reports and reproducible signature definitions |
 
 No main/Pages publication or final acceptance has occurred. Commit identity in this ledger documents the actual integrated slice; it is not a claim that subsequent whole-phase gates passed.
 
@@ -37,3 +40,7 @@ Initial Verification recorded eight contract hazards V4-C01–C08, resolved into
 Final local acceptance must run the unchanged lockfile install, typecheck, lint, full unit/integration suite with both real telemetry flags, production build, and prototype/Phase2/Phase3/Phase4 browser journeys on all three engines at an identified frozen candidate. Retain actual counts and raw failures. Only the two historical non-Firefox500000 prototype Step10s exclusions remain; deferred Phase1 stress gates remain deferred.
 
 Then root obtains exact-candidate independent review and CI, rechecks main and the actual merge tree, merges via permitted mechanisms, rebuilds accepted source, compares tested/accepted bytes, preserves preview, publishes the established Pages branch, observes the actual deployment, verifies every tracked public artifact and runs hosted browser gates with identity checks before and after. The production [release marker](https://arhaan2.github.io/neptune-2035/release.json) and [artifact manifest](https://arhaan2.github.io/neptune-2035/build-manifest.json) identify the live release. Failed critical hosted gates require the verified rollback procedure; a successful upload alone is not acceptance.
+
+## Agent-resumption limitation observed during integration
+
+After the second Fixing checkpoint completed, three attempts to resume the existing independent `/root/verification` agent returned `agent thread limit reached`. Both relative and canonical targets were tried. Live-agent inventory showed root/Building/Testing running and Fixing completed. Interrupting the completed Fixing agent did not release the limit; no close-agent capability is exposed. No global settings or spending configuration were changed. This limitation does not invalidate the actual five-role overlap and prior verification receipts, but final independent core/candidate/public verification remains a required unmet gate until resumption succeeds. Implementation and independent Testing continue.
