@@ -186,13 +186,13 @@ export function reconfigureDesign(design:Design,patch:Partial<DesignConfig>,opti
   }
   return carryDisabledNetworkConnections(design,buildDesign(config,equipment));
 }
-export function moduleAssets(design:Design,moduleId:string):Asset[]{
+export function moduleAssets(design:Design,moduleId:string,options:{networkOnly?:boolean;attachmentOnly?:boolean}={}):Asset[]{
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
   const [x,,z]=m.positionM, id=m.id,dy=m.positionM[1]-4;
   const a=(suffix:string,t:AssetType,offset:Vec3,size:Vec3,mass:number|null,ratings:Record<string,number>={})=>asset(`${id}/${suffix}`,t,id,[x+offset[0],offset[1]+dy,z+offset[2]],size,mass,ratings,m.powerDomainId);
   const installed=(suffix:string,t:AssetType,offset:Vec3)=>{const spec=resolveSpecification(design,`${id}/${suffix}`);return a(suffix,t,offset,spec.dimensionsM!,spec.operationalMassKg,spec.ratings);};
   const pipe=resolveSpecification(design,'pipe').ratings;
-  const support=[
+  const support=options.networkOnly?[]:[
     installed('pump-duty','pump',[9,2.6,-3.5]),
     installed('pump-sea','pump',[10.5,2.6,-3.5]),
     installed('hx','exchanger',[10,3.1,1.5]),
@@ -203,10 +203,10 @@ export function moduleAssets(design:Design,moduleId:string):Asset[]{
     a('pipe-sea','pipe',[11.4,2.2,0],[0.18,0.18,8],120+loopGeometry(design,m).seawaterLengthM*Math.PI*(pipe.diameterM/2)**2*1025,{diameterM:pipe.diameterM,lengthM:loopGeometry(design,m).seawaterLengthM,roughnessM:pipe.roughnessM}),
     installed('battery','battery',[10,3,3.6]),
     installed('distribution','switchboard',[7.5,3,3.6]),
-    a('rack-network','network',[7.5,3,-3.6],[1.1,1.5,0.6],100,{capacityBitS:400e9,capacityW:3000}),
   ];
-  if(design.config.standbyPumps)support.push(installed('pump-standby','pump',[9,2.6,-2.5]));
-  for(let r=0;r<m.rackCount;r++){
+  support.push(a('rack-network','network',[7.5,3,-3.6],[1.1,1.5,0.6],100,{capacityBitS:400e9,capacityW:3000}));
+  if(!options.networkOnly&&design.config.standbyPumps)support.push(installed('pump-standby','pump',[9,2.6,-2.5]));
+  for(let r=0;!options.attachmentOnly&&r<m.rackCount;r++){
     const rid=`${id}/rack-${pad(r+1)}`,nx=Math.min(4,m.nodeCount-r*4),pos:Vec3=[x-9.1+(r%20)*0.8,3.1+dy,z+(r<20?-2.3:2.3)];
     const rack=asset(rid,'rack',id,pos,[0.6,2.2,1.2],150,{capacityW:48_000,slotsU:48,occupiedU:nx*10,nodes:nx},m.powerDomainId);support.push(rack);
     const nodeSpec=resolveSpecification(design,'compute');
@@ -219,17 +219,24 @@ export function resolveAsset(design:Design,id:string):Asset|undefined {
   const match=id.match(/^(platform-\d{3,}\/module-\d{2})\//);return match?moduleAssets(design,match[1]).find(a=>a.id===id):undefined;
 }
 export function* allAssets(design:Design):Iterable<Asset>{yield*design.assets;for(const m of design.modules)yield*moduleAssets(design,m.id);}
-export function connectionsForModule(design:Design,moduleId:string):Connection[]{
+export function connectionsForModule(design:Design,moduleId:string,options:{assets?:Asset[];networkOnly?:boolean;attachmentOnly?:boolean}={}):Connection[]{
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
-  const list=moduleAssets(design,moduleId),get=(suffix:string)=>list.find(a=>a.id===`${moduleId}/${suffix}`)!;
+  const list=options.assets??moduleAssets(design,moduleId),get=(suffix:string)=>list.find(a=>a.id===`${moduleId}/${suffix}`)!;
   const bus=resolveAsset(design,m.powerDomainId)!,net=resolveAsset(design,m.networkDomainId)!;
-  const c:Connection[]=[connect(bus,get('battery'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),4),connect(get('battery'),get('distribution'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),2),design.equipment?.networkDesign?networkConnection(net,get('rack-network'),design.modules.filter(n=>n.platformId===m.platformId).findIndex(n=>n.id===m.id)+1,4):connect(net,get('rack-network'),'cluster',400e9,4)];
-  for(const p of list.filter(a=>a.type==='pump'||a.type==='cdu'||a.type==='network'))c.push(connect(get('distribution'),p,'power',p.ratings.capacityW??3000,2));
+  const c:Connection[]=options.networkOnly?[]:[connect(bus,get('battery'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),4),connect(get('battery'),get('distribution'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),2)];
+  c.push(design.equipment?.networkDesign?networkConnection(net,get('rack-network'),design.modules.filter(n=>n.platformId===m.platformId).findIndex(n=>n.id===m.id)+1,4):connect(net,get('rack-network'),'cluster',400e9,4));
+  if(options.networkOnly&&options.attachmentOnly)return c;
+  if(!options.networkOnly)for(const p of list.filter(a=>a.type==='pump'||a.type==='cdu'||a.type==='network'))c.push(connect(get('distribution'),p,'power',p.ratings.capacityW??3000,2));
   for(const rack of list.filter(a=>a.type==='rack')){
-    c.push(connect(get('distribution'),rack,'power',48_000,2),design.equipment?.networkDesign?networkConnection(get('rack-network'),rack,Number(rack.id.split('/rack-')[1]),1):connect(get('rack-network'),rack,'cluster',100e9,1));
-    c.push(connect(get('cdu'),rack,'technical',0.005,1.2),connect(rack,get('hx'),'technical',0.005,1.2));
-    for(const n of list.filter(a=>a.parentId===rack.id))c.push(connect(rack,n,'power',n.ratings.capacityW,0.5),connect(rack,n,'cluster',100e9,0.5));
+    if(!options.networkOnly)c.push(connect(get('distribution'),rack,'power',48_000,2));
+    c.push(design.equipment?.networkDesign?networkConnection(get('rack-network'),rack,Number(rack.id.split('/rack-')[1]),1):connect(get('rack-network'),rack,'cluster',100e9,1));
+    if(!options.networkOnly)c.push(connect(get('cdu'),rack,'technical',0.005,1.2),connect(rack,get('hx'),'technical',0.005,1.2));
+    for(const n of list.filter(a=>a.parentId===rack.id)){
+      if(!options.networkOnly)c.push(connect(rack,n,'power',n.ratings.capacityW,0.5));
+      c.push(connect(rack,n,'cluster',100e9,0.5));
+    }
   }
+  if(options.networkOnly)return c;
   for(const pump of list.filter(a=>a.id.endsWith('pump-duty')||a.id.endsWith('pump-standby'))){c.push(connect(get('pipe-tech'),pump,'technical',0.1),connect(pump,get('valve-tech'),'technical',0.1));}
   c.push(connect(get('valve-tech'),get('cdu'),'technical',0.2),connect(get('cdu'),get('hx'),'technical',0.2),connect(get('hx'),get('pipe-tech'),'technical',0.2));
   c.push(connect(get('pipe-sea'),get('pump-sea'),'seawater',0.1),connect(get('pump-sea'),get('valve-sea'),'seawater',0.1),connect(get('valve-sea'),get('hx'),'seawater',0.1),connect(get('hx'),get('pipe-sea'),'seawater',0.1));

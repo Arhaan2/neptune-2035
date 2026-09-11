@@ -77,7 +77,7 @@ function validateNetworkDesign(design: Design) {
 }
 
 /** Compile exact graph edges and shared ports once; runtime traversals are linear in graph size. */
-function compile(design:Design){
+function compile(design:Design,validationOnly=false){
   const ids:string[]=[], index=new Map<string,number>(), resources:Resource[]=[], resourceIndex=new Map<string,number>();
   const edges:Edge[]=[], outgoing:number[][]=[], leaves=new Map<string,number[]>();
   const vertex=(id:string)=>{let n=index.get(id);if(n===undefined){n=ids.length;ids.push(id);index.set(id,n);outgoing.push([]);}return n;};
@@ -93,6 +93,7 @@ function compile(design:Design){
     const fromPort=fromAsset?.ports.find(p=>p.id===c.fromPort),toPort=toAsset?.ports.find(p=>p.id===c.toPort);
     const invalid=!fromPort||!toPort||fromPort.medium!==c.medium||toPort.medium!==c.medium||fromPort.unit!=='bit/s'||toPort.unit!=='bit/s'||!['out','bidirectional'].includes(fromPort.direction)||!['in','bidirectional'].includes(toPort.direction);
     if(invalid)failure('invalid-input','NETWORK_PORT_TOPOLOGY','Every network connection, including a disabled connection, requires existing compatible directional ports in bit/s.',{assetId:c.from,field:c.id});
+    if(validationOnly)return;
     const from=vertex(c.from),to=vertex(c.to),r=[resource(`edge:${c.id}`,c.from,c.capacity),resource(`port:${c.from}:${c.fromPort}`,c.from,fromPort?.capacity??0),resource(`port:${c.to}:${c.toPort}`,c.to,toPort?.capacity??0)];
     // A source-to-node traversal consumes its source switch once, on egress.
     // Ingress and egress are not counted twice; both required traffic classes share this budget.
@@ -101,9 +102,9 @@ function compile(design:Design){
   };
   for(const c of [...design.connections].sort((a,b)=>a.id.localeCompare(b.id)))add(c,rootAssets);
   for(const m of design.modules){
-    const assets=moduleAssets(design,m.id),local=new Map(assets.map(a=>[a.id,a]));
-    leaves.set(m.id,assets.filter(a=>a.type==='compute').map(a=>vertex(a.id)));
-    for(const c of connectionsForModule(design,m.id))add(c,local);
+    const assets=moduleAssets(design,m.id,{networkOnly:true,attachmentOnly:validationOnly}),local=new Map(assets.map(a=>[a.id,a]));
+    if(!validationOnly)leaves.set(m.id,assets.filter(a=>a.type==='compute').map(a=>vertex(a.id)));
+    for(const c of connectionsForModule(design,m.id,{assets,networkOnly:true,attachmentOnly:validationOnly}))add(c,local);
   }
   vertex('shore/cluster-core');vertex('shore/fiber');
   function tree(sourceId:string,external:boolean,failed:Set<string>,diagnostic=false):Tree{
@@ -174,6 +175,12 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
     for(const id of networkPower?.(failedAssetIds).unavailableAssetIds??[])failed.add(id);
     const energizedNodes=allocations.reduce((n,a)=>n+a.energizedNodes,0);
     const result:NetworkAssessment={assessmentBasis:'energized',resources:[],status:'satisfied',energizedNodes,clusterDemandBitS:energizedNodes*clusterRate,externalDemandBitS:energizedNodes*externalRate,blockedDomainIds:[],unreachableDomainIds:[],unsupportedDomainIds:[],bottlenecks:[],issues:[],maxUtilization:0};
+    // With no required class, compact simulation validates stored edges and
+    // each module attachment, but needs no generated leaf inventory or routes.
+    // Interior ports are the same canonical template from admitted specifications.
+    if(options.includeResources===false&&!design.config.requireClusterNetwork&&!design.config.requireExternalNetwork){
+      graph??=compile(design,true);lastKey=key;lastResult=result;return result;
+    }
     graph??=compile(design);const g=graph,resourceLoads=new Float64Array(g.resources.length),issues=new Map<string,NetworkIssue>(),blocked=new Set<string>(),unreachable=new Set<string>(),unsupported=new Set<string>();
     const record=(assetId:string,resourceId:string,reason:string,domainId:string)=>{
       let issue=issues.get(resourceId);if(!issue){issue={assetId,resourceId,reason,domainIds:[]};issues.set(resourceId,issue);}
