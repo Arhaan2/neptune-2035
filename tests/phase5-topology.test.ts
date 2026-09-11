@@ -82,6 +82,9 @@ describe('PH5 H design admission distinguishes invalid from unsupported', () => 
     expect(() => validateDesign(createTransferReferenceDesign(3, { delayS }))).not.toThrow();
   });
   it.each(['originalFeederId', 'receivingBusId', 'donorBusId', 'isolatorId', 'tieId'] as const)('rejects malformed %s asset reference', field => invalid(design => { design.transfer!.routes[0][field] = 'missing'; }, 'invalid-input'));
+  it.each(['tieId', 'isolatorId', 'receivingBusId'] as const)('rejects a valid same-owner %s asset masquerading as the original feeder', replacement => invalid(design => {
+    const route = design.transfer!.routes[0]; route.originalFeederId = route[replacement];
+  }, 'invalid-input'));
   it('rejects a physical owner mismatch', () => invalid(design => { design.assets.find(asset => asset.id === design.transfer!.routes[0].tieId)!.parentId = 'platform-001'; }, 'invalid-input'));
   it('rejects a normally closed tie before engine admission', () => invalid(design => { design.connections.find(edge => edge.id === design.transfer!.routes[0].tieConnectionIds[0])!.enabled = true; }, 'unsupported-configuration'));
   it('rejects a second energized original supply', () => invalid(design => {
