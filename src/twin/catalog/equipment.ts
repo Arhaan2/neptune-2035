@@ -26,7 +26,7 @@ export interface EquipmentConfiguration {
 }
 const units: Record<string, string> = {capacityW:'W',shutoffPa:'Pa',freeFlowM3S:'m³/s',efficiency:'1',energyWh:'Wh',storageMaxW:'W',chargeEfficiency:'1',dischargeEfficiency:'1',accelerators:'count',heightU:'U',liquidCaptureFraction:'1',UAWPerK:'W/K',diameterM:'m',roughnessM:'m',portCapacityBitS:'bit/s',switchingCapacityBitS:'bit/s',downlinkPortCount:'count'};
 function spec(id:string,name:string,type:AssetType,compatibility:string,dimensionsM:Vec3|null,operationalMassKg:number|null,ratings:Record<string,number>,assumptions='Synthetic reference values retained from the Phase 1 model; no vendor validation or physical calibration.'):ComponentSpecification {
-  return {id,version:'1.0.0',name,type,compatibility,dimensionsM,operationalMassKg,ratings,units:Object.fromEntries(Object.keys(ratings).map(k=>[k,units[k]])),evidence:'assumed',source:'equipment-v2',assumptions};
+  return {id,version:'1.0.0',name,type,compatibility,dimensionsM,operationalMassKg,ratings,units:Object.fromEntries(Object.keys(ratings).map(k=>[k,units[k]])),evidence:'assumed',source:id.startsWith('network-')?'network-reference-v3':'equipment-v2',assumptions};
 }
 const networkAssumptions='Synthetic fixed reference switch specification, not vendor validated. All network rates describe one source-to-node direction; shared fabric counts each traversal once. Shore equipment mass is outside floating-platform totals; root switch heat is outside the module thermal model. Link transceivers and cabling are included in the reference switch cost allowance; independent routing, installation and cooling certification are not assessed.';
 export const REFERENCE_CATALOG: readonly ComponentSpecification[] = [

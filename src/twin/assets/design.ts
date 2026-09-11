@@ -91,6 +91,7 @@ function networkConnection(a:Asset,b:Asset,portNumber:number,allowanceM:number):
   return edge;
 }
 function configureNetworkTopology(design:Design) {
+  if(!design.sourceIds.includes('network-reference-v3'))design.sourceIds.push('network-reference-v3');
   design.assets=design.assets.map(a=>a.type==='network'?resolveAssetSpecification(design,a):a);
   const core=design.assets.find(a=>a.id==='shore/cluster-core')!,fiber=design.assets.find(a=>a.id==='shore/fiber')!,grid=design.assets.find(a=>a.id==='shore/grid')!;
   design.connections=design.connections.filter(c=>c.medium!=='cluster'&&c.medium!=='external-network'&&!(c.medium==='power'&&design.assets.find(a=>a.id===c.to)?.type==='network'));

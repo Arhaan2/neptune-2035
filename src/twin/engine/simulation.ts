@@ -24,7 +24,7 @@ function context(design:Design):Context {
   const assets = new Map(design.assets.map(a => [a.id,a]));
   const incoming = new Map<string,typeof design.connections>();
   for (const edge of design.connections) if (edge.medium === 'power' && edge.enabled) incoming.set(edge.to,[...(incoming.get(edge.to)??[]),edge]);
-  return { assets, hydraulicCache:new Map(), network:createNetworkEvaluator(design), networkPower:createNetworkPowerEvaluator(design), modules:design.modules.map(module => {
+  return { assets, hydraulicCache:new Map(), network:createNetworkEvaluator(design,undefined,{includeResources:false}), networkPower:createNetworkPowerEvaluator(design), modules:design.modules.map(module => {
     const ancestors:string[]=[]; let id=module.powerDomainId, capacity=design.config.supplyW, supported=true;
     while (id !== 'shore/grid') {
       if (ancestors.includes(id)) { supported=false; break; }
