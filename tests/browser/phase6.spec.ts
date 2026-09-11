@@ -20,6 +20,7 @@ async function download(page: Page, trigger: () => Promise<unknown>) {
   return JSON.parse(await fs.readFile(path, 'utf8'));
 }
 async function exported(page: Page): Promise<DecisionExport> { return download(page, () => button(page, 'Export decision campaign').click()); }
+const metricsByRunId = (campaign: DecisionExport) => campaign.result.runs.map(run => ({ id: run.id, metrics: run.state?.experiment?.metrics })).sort((a, b) => a.id.localeCompare(b.id));
 async function run(page: Page, fixture: string) {
   await page.getByLabel('Decision fixture', { exact: true }).selectOption(fixture);
   await button(page, 'Start decision campaign').click();
@@ -103,7 +104,7 @@ test('PH6 F native import marks supplied evidence and recomputes through new wor
   const reproduced = await exported(page);
   expect(reproduced.result.provenance).toBe('executed');
   expect(reproduced.result.ranking).toEqual(source.result.ranking);
-  expect(reproduced.result.runs.map(r => r.state?.experiment?.metrics)).toEqual(source.result.runs.map(r => r.state?.experiment?.metrics));
+  expect(metricsByRunId(reproduced)).toEqual(metricsByRunId(source));
   expect(observed.workers.length).toBeGreaterThan(priorWorkers);
   await evidence(info, 'phase6-native-import-refresh-reproduction', { source, reproduced }, observed);
 });
@@ -186,6 +187,6 @@ test('PH6 E frozen50millionUSD budget passes central and rejects the upper inclu
     expect(original.feasibility).toBe('feasible'); expect(row.budgetCostUSD).toBe(original.includedCost.totalUSD * 1.5);
     expect(row.requirements.find(item => item.id === 'included-cost-budget')).toMatchObject({ status: 'violated', threshold: 50000000, unit: 'USD' });
   }
-  expect(upper.result.runs.map(run => run.state!.experiment!.metrics)).toEqual(central.result.runs.map(run => run.state!.experiment!.metrics));
+  expect(metricsByRunId(upper)).toEqual(metricsByRunId(central));
   await evidence(info, 'phase6-native-central-upper-budget-consequence', { central, upper }, observed);
 });
