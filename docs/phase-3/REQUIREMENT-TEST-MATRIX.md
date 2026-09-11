@@ -119,3 +119,21 @@ Local raw/native results are retained under the **Testing worktree**, not claime
 - `/private/tmp/neptune-phase3-testing/test-results/` (browser screenshots and runtime attachments)
 
 This local acceptance does not claim CI, merge, publication, hosted parity or physical validation. Root owns those remaining release gates and records their actual identities/results separately.
+
+## Initial CI timeouts and bounded diagnosis
+
+[CI run 34550958284](https://github.com/Arhaan2/neptune-2035/actions/runs/34550958284) tested GitHub's synthetic merge `5fb5283429b59803f00d216a2de3c3e7454e8728`, whose parents were accepted main `a6ad26c05d50ebab72d782dbcb3bde05da188b21` and candidate `1a418cc4d38a23674a73dc7b92055d72258748c8`. Its recorded tree `3c9f44543f43ab040c4067aea707708f44b7371a` exactly matched that candidate. CI executed both real telemetry integrations and passed 362 tests. Two tests exceeded the existing 5 s limit:
+
+| Case | Linux CI duration | Earlier macOS gate |
+| --- | ---: | ---: |
+| Phase 3 one-million-accelerator complete resource fixture | 7366.715 ms | 3201 ms |
+| Existing one-million-accelerator inventory/10 GW simulation | 7309.358 ms | 3233 ms |
+| Phase 3 500,000 accelerator resource fixture (passed) | 3522.916 ms | 1506 ms |
+
+The broad 2.26–2.34× execution difference and synchronous computation explain these failures; they were not observation timing races. No timeout or expected result was changed, and the failed CI job was not rerun hoping for a pass.
+
+Testing independently profiled each original large fixture once at exact source `1a418cc`, with no concurrent large profiling run. Local legacy stages were 938.49 ms build, 1726.61 ms initialize and 290.35 ms summary. Phase 3 stages were 866.57 ms discarded legacy build, 930.88 ms nominal build, 1323.85 ms assessment of **378,916 resources**, and 4.66 ms assertions. Native stage receipts remain at `/private/tmp/neptune-phase3-testing/artifacts/phase3-ci-profile/stages.jsonl`; the temporary diagnostic generator was removed.
+
+The existing legacy test performs only one required build and simulation, so its fixture remains unchanged and needs a production performance repair. The Phase 3 capacity fixture now selects its network on an eight-accelerator design and then uses the supported resize operation to build the requested full inventory once. Two added pilot/campus regression cases compare the **entire resulting Design**, including topology, specifications and revision, against the original large-legacy-then-convert construction; both passed. Every capacity/resource assertion, traffic rate, requested scale and the 5 s test limit remain unchanged. This removes redundant fixture setup; it does not reduce evaluated inventory or replace the solver.
+
+Fixing owns the separate production repair. Full acceptance and CI on the repaired candidate are required before release; the earlier local pass is not being substituted for the failed CI result.

@@ -1,19 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { buildDesign, DEFAULT_CONFIG, withNetworkPreset } from '../src/twin/assets/design';
+import { buildDesign, DEFAULT_CONFIG, reconfigureDesign, withNetworkPreset } from '../src/twin/assets/design';
 import { assessNetwork, assessNetworkProvisioning } from '../src/twin/solvers/network';
 import { initialize } from '../src/twin/engine/simulation';
 import type { Design } from '../src/twin/types';
 
 const full = (design: Design) => design.modules.map(module => ({ id: module.id, energizedNodes: module.nodeCount }));
-const nominal = (requestedAccelerators = 10_000, external = true) => withNetworkPreset(buildDesign({
-  ...DEFAULT_CONFIG, requestedAccelerators, requireExternalNetwork: external, supplyW: 10e9,
-}), 'scalable-reference');
+// Provision the selected network before scaling the fixture. This exercises the
+// supported resize path without constructing a large legacy campus to discard.
+const nominal = (requestedAccelerators = 10_000, external = true) => reconfigureDesign(withNetworkPreset(buildDesign({
+  ...DEFAULT_CONFIG, requestedAccelerators: 8, requireExternalNetwork: external, supplyW: 10e9,
+}), 'scalable-reference'), { requestedAccelerators });
 const budget = (design: Design, capacity: number): Design => ({ ...design, assets: design.assets.map(asset => asset.id === 'shore/cluster-core'
   ? { ...asset, ratings: { ...asset.ratings, switchingCapacityBitS: capacity } } : asset) });
 const structural = (design: Design) => assessNetwork(design, full(design));
 const sortedResources = (design: Design) => structural(design).resources.map(resource => ({ ...resource, domainIds: [...resource.domainIds].sort() })).sort((a, b) => a.resourceId.localeCompare(b.resourceId));
 
 describe('Phase 3 independent fixed equipment and resource arithmetic', () => {
+  it.each([10_000, 100_000])('retains the exact %i-accelerator design when choosing the network before resizing', requestedAccelerators => {
+    const legacyFirst = withNetworkPreset(buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators, requireExternalNetwork: true, supplyW: 10e9 }), 'scalable-reference');
+    expect(nominal(requestedAccelerators)).toEqual(legacyFirst);
+  });
+
   it.each([
     [8, 1, 8, 3.2e12], [10_000, 1_250, 8, 3.2e12], [31_992, 3_999, 8, 3.2e12],
     [32_001, 4_001, 8, 3.2e12], [100_000, 12_500, 32, 12.8e12],
