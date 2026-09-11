@@ -54,7 +54,7 @@ if (!selected) {
     const { projectFile, serializeProject, parseProject, normalizeProject, restoreProject } = await server.ssrLoadModule('/src/twin/persistence/project.ts');
     const { recoveryReport } = await server.ssrLoadModule('/src/twin/experiment/metrics.ts');
     const { CONTRACT } = await server.ssrLoadModule('/src/twin/persistence/limits.ts');
-    const { equipmentFor } = await server.ssrLoadModule('/src/twin/catalog/equipment.ts');
+    const { equipmentFor, resolveModuleEngineering } = await server.ssrLoadModule('/src/twin/catalog/equipment.ts');
     const normalized = (design, state) => normalizeProject(projectFile(design, state));
     record.contract = CONTRACT;
     for (let sample = 0; sample < 3; sample++) {
@@ -69,6 +69,11 @@ if (!selected) {
         : [{ id: 'feeder-loss', kind: 'trip', assetId: design.transfer.routes[0].originalFeederId, timeS: 5 }, { id: 'feeder-restored', kind: 'restore', assetId: design.transfer.routes[0].originalFeederId, timeS: 15 }, { id: 'network-loss', kind: 'trip', assetId: 'shore/cluster-core', timeS: 30 }, { id: 'network-restored', kind: 'restore', assetId: 'shore/cluster-core', timeS: 40 }];
       const definition = createExperimentDefinition(design, { id: `phase8-envelope-${selected}`, durationS, disturbances });
       const initial = await measure('initialize cold physical state', () => initialize(design, definition));
+      const equipment = resolveModuleEngineering(design, design.modules[0].id);
+      // Fixed pump speed and no pump faults: this is the same declared critical demand
+      // throughout the storage case. The indivisible circuit can stop above reserve.
+      const criticalReferenceW = initial.modules[0].pumpPowerW + equipment.cdu.ratings.capacityW + equipment.moduleSupport.ratings.capacityW + (equipment.network?.ratings.capacityW ?? 0);
+      const storageBounds = selected === 'storage-recovery' ? { reserveWh: 100, absoluteToleranceWh: 1e-8, criticalReferenceW, dischargeEfficiency: equipment.electrical.dischargeEfficiency, maximumStoppedEnergyWh: 100 + criticalReferenceW / (equipment.electrical.dischargeEfficiency * 3600) } : null;
       let minimumBatteryWh = Infinity;
       const final = await measure('production engine continuous run', () => advanceWithStep(design, initial, durationS, [], 1, undefined, (_timeS, copy) => { minimumBatteryWh = Math.min(minimumBatteryWh, ...copy().modules.map(module => module.batteryWh)); }));
       const checkpointTimeS = selected === 'storage-recovery' ? 100 : 7;
@@ -87,13 +92,14 @@ if (!selected) {
       if (selected === 'storage-recovery') {
         // Frozen from the documented 10% controller reserve before running this case.
         assert.equal(equipmentFor(design).controlPolicy.batteryReserveFraction, 0.1);
-        assert(Math.abs(minimumBatteryWh - 100) <= 1e-8, '1,000 Wh storage must stop at the declared 100 Wh reserve (1e-8 Wh accounting tolerance).');
+        assert(minimumBatteryWh >= storageBounds.reserveWh - storageBounds.absoluteToleranceWh, 'Storage must never cross its declared reserve.');
+        assert(minimumBatteryWh <= storageBounds.maximumStoppedEnergyWh + storageBounds.absoluteToleranceWh, 'Stopped energy must lie within one critical-circuit step above reserve.');
         assert.equal(summarize(design, checkpoint).availableAccelerators, 0);
         assert.equal(checkpoint.modules[0].batteryDischargeW, 0);
         assert(final.modules[0].batteryWh > 100);
       }
       else assert(final.transfer.transitions.some(transition => transition.reason === 'TRANSFERRED'));
-      record.samples.push({ sample, processCondition: sample === 0 ? 'first scenario after module import' : 'same-process warm; fresh design and cold physical initial state', requestedAccelerators: design.config.requestedAccelerators, modules: design.modules.length, simulatedDurationS: durationS, integrationStepS: 1, disturbances, definition, designIdentity: design.revision, wallMs: performance.now() - start, measurements: observations, minimumBatteryWh, summary: summarize(design, final), metrics: final.experiment.metrics, evaluation: final.experiment.evaluation, recovery: recoveryReport(final.experiment.metrics, final.experiment.status), transfer: final.transfer ?? null, checkpointTimeS, checkpointBytes: Buffer.byteLength(text), checkpointSHA256: hash(text), finalCheckpointSHA256: hash(serializeProject(projectFile(design, final))), normalizedRestoredTrajectoryExact: true, normalizedWorkerReplayExact: true, workerReplyStatuses: replies.map(reply => reply.status) });
+      record.samples.push({ sample, processCondition: sample === 0 ? 'first scenario after module import' : 'same-process warm; fresh design and cold physical initial state', requestedAccelerators: design.config.requestedAccelerators, modules: design.modules.length, simulatedDurationS: durationS, integrationStepS: 1, disturbances, definition, designIdentity: design.revision, wallMs: performance.now() - start, measurements: observations, minimumBatteryWh, storageBounds, summary: summarize(design, final), metrics: final.experiment.metrics, evaluation: final.experiment.evaluation, recovery: recoveryReport(final.experiment.metrics, final.experiment.status), transfer: final.transfer ?? null, checkpointTimeS, checkpointBytes: Buffer.byteLength(text), checkpointSHA256: hash(text), finalCheckpointSHA256: hash(serializeProject(projectFile(design, final))), normalizedRestoredTrajectoryExact: true, normalizedWorkerReplayExact: true, workerReplyStatuses: replies.map(reply => reply.status) });
     }
   } catch (error) { record.outcome = 'FAIL'; record.error = { name: error.name, message: error.message }; process.exitCode = 1; }
   finally {
