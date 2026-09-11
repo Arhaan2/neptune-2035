@@ -11,7 +11,8 @@ export function allocateTransferBundles(resources:TransferResource[],bundles:Tra
   const ids=new Set<string>();const allocations:TransferAllocation[]=[];
   for(const b of [...bundles].sort((a,b)=>a.priority-b.priority||stable(a.id,b.id))){
     finiteNumber(b.requestedW,'transfer.requestedW',{min:0});finiteNumber(b.priority,'transfer.priority',{min:0,max:1e6,integer:true});if(ids.has(b.id))failure('invalid-input','TRANSFER_BUNDLE_DUPLICATE','Duplicate transfer bundle.');ids.add(b.id);
-    const path=[...new Set(b.resourceIds)].map(id=>{const r=used.get(id);if(!r)failure('invalid-input','TRANSFER_RESOURCE_REFERENCE','Missing transfer resource.',{assetId:id});return r;});
+    if(new Set(b.resourceIds).size!==b.resourceIds.length)failure('invalid-input','TRANSFER_RESOURCE_PATH_DUPLICATE','A transfer bundle must reference each physical resource only once.',{assetId:b.id});
+    const path=b.resourceIds.map(id=>{const r=used.get(id);if(!r)failure('invalid-input','TRANSFER_RESOURCE_REFERENCE','Missing transfer resource.',{assetId:id});return r;});
     if(!path.length)failure('invalid-input','TRANSFER_RESOURCE_EMPTY','Transfer requires a complete resource path.');
     const binding=[...path].sort((a,b)=>a.headroomW-b.headroomW||stable(a.id,b.id))[0],headroomW=binding.headroomW,admitted=b.requestedW<=headroomW+1e-7;
     if(admitted)for(const r of path){r.transferredW+=b.requestedW;r.headroomW=Math.max(0,r.capacityW-r.nativeW-r.transferredW);}
