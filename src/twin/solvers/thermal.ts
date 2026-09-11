@@ -47,7 +47,8 @@ export function solveExchanger(input: ExchangerInput): ExchangerResult {
   if (cMin > 0 && ua > 0) {
     const ratio = cMin / cMax, ntu = checked(ua / cMin, 'ntu');
     if (Math.abs(1 - ratio) < 1e-8) effectiveness = ntu / (1 + ntu);
-    else { const z = Math.exp(-ntu * (1 - ratio)); effectiveness = -Math.expm1(-ntu * (1 - ratio)) / (1 - ratio * z); }
+    // Expand 1 - ratio * exp(-x) to avoid subtracting nearly equal terms near ratio = 1.
+    else { const transferred = -Math.expm1(-ntu * (1 - ratio)); effectiveness = transferred / ((1 - ratio) + ratio * transferred); }
   }
   const conductanceWPerK = effectiveness * cMin;
   const heatW = conductanceWPerK * (input.technicalInletK - input.seawaterInletK);

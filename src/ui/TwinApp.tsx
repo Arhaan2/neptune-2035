@@ -14,7 +14,7 @@ import { ExperimentPanel, ExperimentReport, ExperimentComparison, Counterfactual
 import { signatureDemonstration, referenceExperiment } from '../twin/experiment/demonstrations';
 import { counterfactualDefinition } from '../twin/experiment/runner';
 import { createExperimentDefinition } from '../twin/experiment/definition';
-import { REFERENCE_CATALOG, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity } from '../twin/catalog/equipment';
+import { REFERENCE_CATALOG, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity, engineeringIdentity } from '../twin/catalog/equipment';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Waves,
@@ -253,7 +253,7 @@ export default function TwinApp() {
     [compareBusy, setCompareBusy] = useState(false),
     [savedRead] = useState(readSavedScenarios),
     [saved, setSaved] = useState(savedRead.items),
-    [pendingProject, setPendingProject] = useState<CurrentProject | null>(null),
+    [pendingProject, setPendingProject] = useState<{project:CurrentProject;definition:ExperimentDefinition} | null>(null),
     [inspectionProject, setInspectionProject] = useState<ProjectFile | null>(
       null,
     ),
@@ -383,20 +383,20 @@ export default function TwinApp() {
     } catch (problem) { setNotice(`Link change was not applied; current run retained. ${String(problem)}`); }
   };
   useEffect(() => {
-    if (state && pendingProject) {
+    if (state && pendingProject && !sim.busy && state.designIdentity===engineeringIdentity(pendingProject.project.designSnapshot)) {
       const timer = setTimeout(() => {
         replaySimulation(
-          pendingProject.events,
-          pendingProject.timeS,
-          pendingProject.provenance,
-          1,
-          createExperimentDefinition(pendingProject.designSnapshot, { name: 'Explicit derived whole experiment', durationS: pendingProject.timeS, disturbances: pendingProject.events }),
+          pendingProject.project.events,
+          pendingProject.project.timeS,
+          pendingProject.project.provenance,
+          pendingProject.definition.integrationStepS,
+          pendingProject.definition,
         );
         setPendingProject(null);
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [state, pendingProject, replaySimulation]);
+  }, [state, pendingProject, replaySimulation, sim.busy]);
   const effectiveFocus: Focus = demo
     ? (state?.timeS ?? 0) < 10
       ? 'campus'
@@ -484,10 +484,19 @@ export default function TwinApp() {
     if (!inspectionProject) return;
     try {
       const derived = recalculateProject(inspectionProject);
+      const savedRun=inspectionProject.schemaVersion===3?inspectionProject.checkpoint?.state.experiment:undefined;
+      const originS=savedRun?.originTimeS??0;
+      // The replay target is a checkpoint, not the end of its retained future scenario.
+      const durationS=derived.events.reduce((end,event)=>Math.max(end,event.timeS),Math.max(derived.timeS,originS+(savedRun?.definition.durationS??0)));
+      const definition = createExperimentDefinition(derived.designSnapshot, {
+        name:'Explicit derived whole experiment',durationS,disturbances:derived.events,
+        ...(savedRun?{integrationStepS:savedRun.definition.integrationStepS,requiredAccelerators:savedRun.definition.workload.requiredAccelerators,requiredCapacitySchedule:savedRun.definition.workload.requiredCapacitySchedule.map(point=>({...point,timeS:point.timeS+originS})),recovery:savedRun.definition.recovery,success:savedRun.definition.success,parentDefinitionId:savedRun.definition.id}:{}),
+        note:'Separate current-model cold recalculation of recorded absolute event times. Saved workload, recovery and success criteria are retained when present; this new evaluation includes any original pre-evaluation interval. Original historical evidence and parent project remain unchanged.',
+      });
       sim.cancel();
       setConfig(derived.design);
       setDesignOverride(derived.designSnapshot);
-      setPendingProject(derived);
+      setPendingProject({project:derived,definition});
       setNotice(
         `Separate derived experiment: recalculating ${inspectionProject.solverVersion} with ${derived.solverVersion}. The original remains available for export.`,
       );

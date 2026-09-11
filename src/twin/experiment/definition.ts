@@ -1,5 +1,5 @@
 import { modelForDesign, algorithmForDesign } from '../transfer/version';
-import { equipmentFor, engineeringIdentity } from '../catalog/equipment';
+import { equipmentFor, engineeringIdentity, historicalEngineeringIdentity } from '../catalog/equipment';
 import { HARDWARE } from '../catalog/reference';
 import { resolveAsset } from '../assets/design';
 import { SOLVER_VERSION, type Design, type OperationEvent } from '../types';
@@ -42,10 +42,12 @@ export function validateRecoveryCriteria(value: unknown): asserts value is Recov
   finiteNumber(value.temperatureToleranceK, 'recovery.temperatureToleranceK', { min: 0, max: 10 });
   if (value.thermalComparator !== 'strictly-below' || value.scope !== 'all-modules-and-required-service') failure('unsupported-configuration', 'EXPERIMENT_CRITERIA', 'Only strict bulk thermal limits across all modules and required service are supported.');
 }
-export function validateExperimentDefinition(design: Design, value: unknown): asserts value is ExperimentDefinition {
+export function validateExperimentDefinition(design: Design, value: unknown, options:{inspectionSolverVersion?:'2.3.0'}={}): asserts value is ExperimentDefinition {
   record(value, 'experiment definition'); keys(value, ['version','id','name','designRevision','physicalIdentity','modelId','solverVersion','algorithmId','metricsVersion','integrationStepS','durationS','workload','environment','controllerPolicy','initial','disturbances','recovery','success','provenance'], 'experiment definition');
-  if (value.version !== 1 || value.metricsVersion !== METRICS_VERSION || value.modelId !== modelForDesign(design) || value.solverVersion !== SOLVER_VERSION || value.algorithmId !== algorithmForDesign(design)) failure('unsupported-configuration', 'EXPERIMENT_VERSION', 'Unsupported experiment or numerical version; preserve original and explicitly recalculate.');
-  if (value.designRevision !== design.revision || value.physicalIdentity !== engineeringIdentity(design)) failure('invalid-input', 'EXPERIMENT_DESIGN', 'Experiment belongs to a different physical design.');
+  const historical=options.inspectionSolverVersion;
+  if(historical!==undefined&&historical!=='2.3.0')failure('unsupported-configuration','EXPERIMENT_INSPECTION_VERSION','Only known 2.3.0 experiment snapshots support historical inspection.');
+  if (value.version !== 1 || value.metricsVersion !== METRICS_VERSION || value.modelId !== modelForDesign(design) || value.solverVersion !== (historical??SOLVER_VERSION) || value.algorithmId !== algorithmForDesign(design)) failure('unsupported-configuration', 'EXPERIMENT_VERSION', 'Unsupported experiment or numerical version; preserve original and explicitly recalculate.');
+  if (value.designRevision !== design.revision || value.physicalIdentity !== (historical?historicalEngineeringIdentity(design,historical):engineeringIdentity(design))) failure('invalid-input', 'EXPERIMENT_DESIGN', 'Experiment belongs to a different physical design.');
   for (const key of ['id','name']) { string(value[key], `experiment.${key}`, 160); if (!value[key]) failure('invalid-input','EXPERIMENT_NAME','Experiment identity and name are required.'); }
   finiteNumber(value.durationS, 'experiment.durationS', { min: 0, max: CONTRACT.horizonS, integer: true });
   if (!INTEGRATION_STEPS.includes(value.integrationStepS as never)) failure('invalid-input','EXPERIMENT_STEP','Unsupported integration step.');

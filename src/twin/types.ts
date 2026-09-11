@@ -1,6 +1,6 @@
 /** NEPTUNE design-stage contract v2. SI throughout; temperatures are kelvin. */
 export const TWIN_SCHEMA = 2 as const;
-export const SOLVER_VERSION = '2.3.0';
+export const SOLVER_VERSION = '2.3.1';
 import type { TransferDesign, TransferState } from './transfer/types';
 import type { EquipmentConfiguration } from './catalog/equipment';
 import type { ExperimentDefinition, ExperimentRun } from './experiment/types';

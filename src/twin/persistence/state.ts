@@ -1,6 +1,6 @@
 import { validateTransferState } from '../transfer/validation';
 import { validateExperimentRun } from '../experiment/validation';
-import { engineeringIdentity, resolveSpecification, equipmentFor } from '../catalog/equipment';
+import { engineeringIdentity, historicalEngineeringIdentity, resolveSpecification, equipmentFor } from '../catalog/equipment';
 import { moduleAssets } from '../assets/design';
 import { failure, finiteNumber } from '../safety';
 import { SOLVER_VERSION, type Design, type SimulationState } from '../types';
@@ -11,12 +11,14 @@ import { array, keys, record, string, validateStructure } from './structure';
 const equipmentStates = ['available', 'starting', 'running', 'standby', 'isolated', 'failed', 'maintenance', 'unknown'];
 const nonnegative = ['technicalFlowM3S', 'seawaterFlowM3S', 'pumpPowerW', 'itW', 'facilityW', 'gridW', 'batteryDischargeW', 'batteryChargeW', 'pressurePa'];
 const signed = ['rejectedHeatW', 'thermalResidualW', 'electricalResidualW'];
-export function validateState(design: Design, value: unknown, options: { allowDifferentSolver?: boolean } = {}): asserts value is SimulationState {
+export function validateState(design: Design, value: unknown, options: { allowDifferentSolver?: boolean; inspectionSolverVersion?: '2.3.0' } = {}): asserts value is SimulationState {
   validateStructure(value); record(value, 'state');
   keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs', 'experiment', 'transfer'], 'state');
   string(value.solverVersion, 'state.solverVersion', 100);
-  if (value.schemaVersion !== CONTRACT.stateSchema || value.designRevision !== design.revision || (!options.allowDifferentSolver && value.solverVersion !== SOLVER_VERSION)) failure('invalid-input', 'STATE_REVISION', 'Simulation revision mismatch; explicit model migration/recalculation required.');
-  if (value.designIdentity !== engineeringIdentity(design)) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
+  const historical=options.inspectionSolverVersion;
+  if(historical!==undefined&&(historical!=='2.3.0'||value.solverVersion!==historical))failure('invalid-input','STATE_INSPECTION_VERSION','Historical inspection requires the same known saved solver version throughout the checkpoint.');
+  if (value.schemaVersion !== CONTRACT.stateSchema || value.designRevision !== design.revision || (!options.allowDifferentSolver && !historical && value.solverVersion !== SOLVER_VERSION)) failure('invalid-input', 'STATE_REVISION', 'Simulation revision mismatch; explicit model migration/recalculation required.');
+  if (value.designIdentity !== (historical?historicalEngineeringIdentity(design,historical):engineeringIdentity(design))) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
   finiteNumber(value.timeS, 'state.timeS', { min: 0, max: CONTRACT.horizonS, integer: true, unit: 's' });
   if (!INTEGRATION_STEPS.includes(value.integrationStepS as never)) failure('invalid-input', 'INTEGRATION_STEP', 'Integration step must be 1, 0.5, 0.25, or 0.125 seconds.');
   finiteNumber(value.stepIndex, 'state.stepIndex', { min: 0, max: CONTRACT.horizonS / INTEGRATION_STEPS.at(-1)!, integer: true });
@@ -106,6 +108,6 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     array(entry.affectedIds, 'log.affectedIds', CONTRACT.maxModules);
     for (const id of entry.affectedIds) if (typeof id !== 'string' || !moduleIds.has(id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');
   }
-  validateTransferState(design,value as unknown as SimulationState);
-  validateExperimentRun(design, value as unknown as SimulationState);
+  validateTransferState(design,value as unknown as SimulationState,{inspectionSolverVersion:historical});
+  validateExperimentRun(design, value as unknown as SimulationState,{inspectionSolverVersion:historical});
 }

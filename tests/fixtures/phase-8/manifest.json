@@ -1,0 +1,51 @@
+{
+  "kind": "neptune-phase8-original-project-fixtures",
+  "version": 1,
+  "sourceCommit": "c22964d48ddca0e7f7db18ede972125f79dad2df",
+  "sourceTree": "ce6cd0c2009a7eb78e7b41230a8ab6a94cfe0226",
+  "sourceHashes": {
+    "package-lock.json": "87598dcf2ae3397b3b3112c21e67dab67f25cfcb2ce2dacee35de64e263593b9",
+    "src/twin/types.ts": "a9a56c7603c61683b95bc7364cc1cd2af4821dbd82a32b6890797e9d3cac922b",
+    "src/twin/solvers/thermal.ts": "b24c541cd45c77f06c67f09d9c7b0aba39b8fffa571257c355e89be22917e0d0",
+    "src/twin/catalog/equipment.ts": "ad205eac5f036e39f6615998d0cdf744a8d674eaa36ea82f55d57cfe6460fcc1",
+    "src/twin/persistence/project.ts": "1d18ebfa673922c732073f4eb4cd081b206200e2141473221a844246e7b1237f",
+    "src/twin/persistence/state.ts": "6a34e425e51132d6fb7dfb1e3cff2c433f0432b30603810848fbf93a63ea9346",
+    "src/twin/experiment/definition.ts": "f844330d6b7e5491d993005395327ea498410dd9d8ad81fadfa33e9de8247b7f",
+    "src/twin/experiment/validation.ts": "4c8c0ebb245176f7ac02f62996b6cba0192a8f37a902aca93656e0422e00ed8a"
+  },
+  "node": "v24.18.0",
+  "generatorSha256": "4687009a4e211b7200bd1b6674bf4e25f0c8fd89a66e695430f4c30bfa37b27c",
+  "sourceUnchanged": true,
+  "files": [
+    {
+      "path": "phase7-basic.json",
+      "bytes": 26812,
+      "sha256": "a432222d896604940555edd1835126b28e6027287bc8a6eced66b782fea48bf3",
+      "requestedAccelerators": 8,
+      "timeS": 3,
+      "experimentStatus": null
+    },
+    {
+      "path": "phase7-network-experiment.json",
+      "bytes": 34304,
+      "sha256": "bdec6dbf810506487941843afd6edc52618dad8fb80bb57c1a3d02075752f4ee",
+      "requestedAccelerators": 8,
+      "timeS": 5,
+      "experimentStatus": "running"
+    },
+    {
+      "path": "phase7-transfer.json",
+      "bytes": 88030,
+      "sha256": "1f10ddbe4432dff44ea32a197f484620ef4649e4590ad9d634832b45bcfffed1",
+      "requestedAccelerators": 24,
+      "timeS": 5,
+      "experimentStatus": "running"
+    }
+  ],
+  "decisionFile": {
+    "path": "phase7-decision-nominal.json",
+    "bytes": 99136,
+    "sha256": "aa03a6caba0cd9ad02b882d5f3605197e02618c0ced3b79ac0f7bfeb79468d74",
+    "purpose": "Generated one-candidate nominal compatibility fixture under accepted Phase7; not one of the six original released reference campaigns."
+  }
+}

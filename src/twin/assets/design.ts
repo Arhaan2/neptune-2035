@@ -138,9 +138,21 @@ function refreshDesign(design:Design) {
   validateEquipment(design);
   // Water surface is y=0. Float each complete inventory using its true two-pontoon waterplane.
   // Pipe water mass depends weakly on intake lift; four fixed-point updates resolve that geometry coupling.
+  const fixedModuleMasses=new Map<string,number[]>();
   for(let iteration=0;iteration<4;iteration++){
     const masses=new Map<string,number>();
-    for(const a of allAssets(design))if(a.id.startsWith('platform-')){const p=a.id.split('/')[0];masses.set(p,(masses.get(p)??0)+(a.operationalMassKg??0));}
+    for(const a of assets)if(a.id.startsWith('platform-')){const p=a.id.split('/')[0];masses.set(p,(masses.get(p)??0)+(a.operationalMassKg??0));}
+    for(const m of modules){
+      const fixed=fixedModuleMasses.get(m.id),inventory=moduleAssets(design,m.id,{attachmentOnly:fixed!==undefined});
+      const p=m.id.split('/')[0];
+      if(m.id.startsWith('platform-')){
+        for(const a of inventory)masses.set(p,(masses.get(p)??0)+(a.operationalMassKg??0));
+        // Resolved rack/server masses are invariant under these position-only updates.
+        // Keep their original addition order after the regenerated support/pipe prefix.
+        if(fixed)for(const mass of fixed)masses.set(p,(masses.get(p)??0)+mass);
+      }
+      if(!fixed)fixedModuleMasses.set(m.id,inventory.filter(a=>a.type==='rack'||a.type==='compute').map(a=>a.operationalMassKg??0));
+    }
     for(const [pid,mass] of masses){
       const hulls=assets.filter(a=>a.parentId===pid&&a.type==='hull');
       const area=hulls.reduce((s,a)=>s+a.dimensionsM[0]*a.dimensionsM[2],0),draft=mass/(1025*area);

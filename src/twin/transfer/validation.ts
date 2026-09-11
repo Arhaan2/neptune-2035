@@ -1,4 +1,4 @@
-import { engineeringIdentity } from '../catalog/equipment';
+import { engineeringIdentity, historicalEngineeringIdentity } from '../catalog/equipment';
 import { transferRestorationDemands } from '../engine/simulation';
 import { failure, finiteNumber } from '../safety';
 import { array, keys, record } from '../persistence/structure';
@@ -14,12 +14,14 @@ const legalNext:Record<string,string[]>={normal:['detected','blocked'],detected:
 const refusalReasons=['DISABLED','RECEIVING_BUS_FAILED','DOWNSTREAM_FAILED','COMMON_SOURCE_FAILED','DONOR_UNAVAILABLE','TIE_UNAVAILABLE','PATH_UNAVAILABLE'];
 const stateReasons:Record<string,string[]>={normal:['NORMAL'],detected:['FEEDER_FAULT'],isolated:['ISOLATION_CONFIRMED'],evaluating:['EVALUATING'],waiting:['WAITING'],transferred:['TRANSFERRED'],blocked:[...refusalReasons,'ORIGINAL_RESTORED','NO_HEADROOM','INSUFFICIENT_HEADROOM'],lockout:[...refusalReasons,'ISOLATION_UNCONFIRMED','CAPACITY_SHED']};
 const close=(a:number,b:number)=>Math.abs(a-b)<=1e-7;
-export function validateTransferState(design:Design,state:SimulationState):void {
+export function validateTransferState(design:Design,state:SimulationState,options:{inspectionSolverVersion?:'2.3.0'}={}):void {
   const t=state.transfer;
   if(!design.transfer){if(t!==undefined)failure('invalid-input','TRANSFER_LEGACY','Legacy design cannot contain active transfer state.');return;}
   if(!t)failure('invalid-input','TRANSFER_MISSING','Opt-in transfer design requires its complete controller checkpoint.');
   record(t,'transfer state');keys(t,['version','policy','topology','designIdentity','splitTimesS','attempts','sequence','transitions','transitionsTruncated','transitionCounts','resources'],'transfer state');
-  if(t.version!==1||t.policy!==TRANSFER_POLICY||t.topology!==TRANSFER_TOPOLOGY||t.designIdentity!==engineeringIdentity(design))failure('invalid-input','TRANSFER_STATE_BINDING','Transfer checkpoint does not match its design/policy/topology.');
+  const historical=options.inspectionSolverVersion;
+  if(historical!==undefined&&(historical!=='2.3.0'||state.solverVersion!==historical))failure('invalid-input','TRANSFER_INSPECTION_VERSION','Historical transfer inspection requires the same known saved solver version.');
+  if(t.version!==1||t.policy!==TRANSFER_POLICY||t.topology!==TRANSFER_TOPOLOGY||t.designIdentity!==(historical?historicalEngineeringIdentity(design,historical):engineeringIdentity(design)))failure('invalid-input','TRANSFER_STATE_BINDING','Transfer checkpoint does not match its design/policy/topology.');
   array(t.splitTimesS,'transfer split boundaries',256);let previous=0;
   for(const time of t.splitTimesS){finiteNumber(time,'transfer split time',{min:previous,max:state.timeS});if(time<=previous||Number.isInteger(time/state.integrationStepS)||!Number.isInteger(time/0.125))failure('invalid-input','TRANSFER_SPLIT','Transfer internal split boundaries must be ordered off-step eighth-second timestamps.');previous=time;}
   finiteNumber(t.sequence,'transfer sequence',{min:0,max:2560,integer:true});array(t.attempts,'transfer attempts',256);

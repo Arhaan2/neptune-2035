@@ -7,15 +7,16 @@ import { EXPERIMENT_LIMITS, METRICS_VERSION, type ExperimentRun } from './types'
 import { validateExperimentDefinition } from './definition';
 import { evaluateExperiment } from './metrics';
 const EPS=1e-8;
-export function validateExperimentRun(design: Design, state: SimulationState): void {
+export function validateExperimentRun(design: Design, state: SimulationState, options:{inspectionSolverVersion?:'2.3.0'}={}): void {
   const candidate:unknown=state.experiment;if(candidate===undefined)return;
   record(candidate,'experiment run');keys(candidate,['extensionVersion','definition','definitionIdentity','initialState','initialStateIdentity','status','evaluation','reason','originTimeS','committedTimeS','committedStepIndex','warmup','metrics','inputs','inputProvenance'],'experiment run');
   if(candidate.extensionVersion!==1)failure('unsupported-configuration','EXPERIMENT_EXTENSION','Unknown experiment checkpoint extension.');
-  validateExperimentDefinition(design,candidate.definition);
+  if(options.inspectionSolverVersion!==undefined&&(options.inspectionSolverVersion!=='2.3.0'||state.solverVersion!==options.inspectionSolverVersion))failure('invalid-input','EXPERIMENT_INSPECTION_VERSION','Historical experiment inspection requires the same known saved solver version.');
+  validateExperimentDefinition(design,candidate.definition,options);
   if(candidate.definitionIdentity!==identity(candidate.definition))failure('invalid-input','EXPERIMENT_DEFINITION_BINDING','Definition changed underneath accumulated metrics. Create a derived rerun.');
   record(candidate.initialState,'experiment initialState');
   if(Object.hasOwn(candidate.initialState,'experiment'))failure('invalid-input','EXPERIMENT_RECURSION','Initial physical state cannot contain an experiment.');
-  validateState(design,candidate.initialState);
+  validateState(design,candidate.initialState,{inspectionSolverVersion:options.inspectionSolverVersion});
   if(candidate.initialState.timeS!==0||candidate.initialState.events.length||candidate.initialState.integrationStepS!==candidate.definition.integrationStepS||candidate.initialStateIdentity!==identity(candidate.initialState))failure('invalid-input','EXPERIMENT_INITIAL_BINDING','Initial physical state or numerical settings disagree with the persisted identity.');
   if(candidate.committedTimeS!==state.timeS||candidate.committedStepIndex!==state.stepIndex||state.integrationStepS!==candidate.definition.integrationStepS)failure('invalid-input','EXPERIMENT_COMMIT_BINDING','Experiment metrics and physical state must share one committed boundary.');
   if(!['running','warming','paused','completed','cancelled','numerical-failed','resource-limited','warmup-timeout'].includes(String(candidate.status)))failure('invalid-input','EXPERIMENT_STATUS','Unknown lifecycle status.');

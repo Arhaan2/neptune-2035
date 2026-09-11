@@ -163,6 +163,14 @@ export function validateEquipment(design:Design):void {
 }
 /** Stable non-security run identity. Prices, formatting and unused catalog entries are excluded. */
 export function engineeringIdentity(design:Design):string {
+  return engineeringIdentityForVersion(design,SOLVER_VERSION);
+}
+/** Retained identity calculation only for inspecting known 2.3.0 snapshots, never for runtime dispatch. */
+export function historicalEngineeringIdentity(design:Design,solverVersion:'2.3.0'):string {
+  if(solverVersion!=='2.3.0')failure('unsupported-configuration','HISTORICAL_IDENTITY_VERSION','Only the archived 2.3.0 identity is available for historical inspection.');
+  return engineeringIdentityForVersion(design,solverVersion);
+}
+function engineeringIdentityForVersion(design:Design,solverVersion:string):string {
   if(!design.equipment)return identity(design); // Phase 1 checkpoint binding remains inspectable without reinterpretation.
   const {equipment,config}=design;
   const engineeringConfig={schemaVersion:config.schemaVersion,generation:config.generation,requestedAccelerators:config.requestedAccelerators,supplyW:config.supplyW,standbyPumps:config.standbyPumps,seawaterK:config.seawaterK,workload:config.workload,idleFraction:config.idleFraction,exchangerUAWPerK:config.exchangerUAWPerK,foulingResistanceKPerW:config.foulingResistanceKPerW,batteryWhPerModule:config.batteryWhPerModule,batteryMaxWPerModule:config.batteryMaxWPerModule,pumpSpeed:config.pumpSpeed,requireExternalNetwork:config.requireExternalNetwork,requireClusterNetwork:config.requireClusterNetwork};
@@ -171,7 +179,7 @@ export function engineeringIdentity(design:Design):string {
   if(equipment.networkDesign){for(const asset of design.assets){const id=networkSpecificationId(design,asset.id);if(id)installed.add(`${id}@1.0.0`);}installed.add('network-module@1.0.0');}
   const specifications=equipment.specifications.filter(s=>installed.has(`${s.id}@${s.version}`)).map(s=>({id:s.id,version:s.version,type:s.type,compatibility:s.compatibility,dimensionsM:s.dimensionsM,operationalMassKg:s.operationalMassKg,ratings:s.ratings,units:s.units})).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
   const workloadProfile=equipment.networkDesign?equipment.workloadProfile:{id:equipment.workloadProfile.id,revision:equipment.workloadProfile.revision,clusterBitSPerNode:equipment.workloadProfile.clusterBitSPerNode,externalBitSPerNode:equipment.workloadProfile.externalBitSPerNode};
-  return identity({...(design.transfer?{transfer:design.transfer,transferModel:'neptune-transfer-1'}:{}),schemaVersion:design.schemaVersion,assets,connections:design.connections,modules:design.modules,nodeCount:design.nodeCount,rackCount:design.rackCount,provisionedAccelerators:design.provisionedAccelerators,installedPeakITW:design.installedPeakITW,config:engineeringConfig,equipment:{schemaVersion:equipment.schemaVersion,defaults:equipment.defaults,overrides:equipment.overrides,specifications,controlPolicy:equipment.controlPolicy,workloadProfile,...(equipment.networkDesign?{networkDesign:equipment.networkDesign}:{})},modelBoundaries:MODEL_BOUNDARIES,modelId:equipment.networkDesign?MODEL_ID:'neptune-reference-2',algorithmId:ALGORITHM_ID,solverVersion:equipment.networkDesign?SOLVER_VERSION:'2.2.0'});
+  return identity({...(design.transfer?{transfer:design.transfer,transferModel:'neptune-transfer-1'}:{}),schemaVersion:design.schemaVersion,assets,connections:design.connections,modules:design.modules,nodeCount:design.nodeCount,rackCount:design.rackCount,provisionedAccelerators:design.provisionedAccelerators,installedPeakITW:design.installedPeakITW,config:engineeringConfig,equipment:{schemaVersion:equipment.schemaVersion,defaults:equipment.defaults,overrides:equipment.overrides,specifications,controlPolicy:equipment.controlPolicy,workloadProfile,...(equipment.networkDesign?{networkDesign:equipment.networkDesign}:{})},modelBoundaries:MODEL_BOUNDARIES,modelId:equipment.networkDesign?MODEL_ID:'neptune-reference-2',algorithmId:ALGORITHM_ID,solverVersion:equipment.networkDesign?solverVersion:'2.2.0'});
 }
 export function economicIdentity(design:Design):string { return identity({economics:equipmentFor(design).economics,budgetUSD:design.config.budgetUSD,costs:COST_ASSUMPTIONS}); }
 export function updateEconomicAssumptions(design:Design,patch:Partial<EconomicAssumptions>):Design {
