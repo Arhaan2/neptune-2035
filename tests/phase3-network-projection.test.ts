@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildDesign, connectionsForModule, DEFAULT_CONFIG, moduleAssets, withNetworkPreset } from '../src/twin/assets/design';
 import { createNetworkEvaluator } from '../src/twin/solvers/network';
+import { diagnosticFor } from '../src/twin/safety';
 import type { Design } from '../src/twin/types';
 
 const fixture = () => buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 1_288 });
@@ -42,5 +43,27 @@ describe('Phase 3 canonical network projection', () => {
     const compact = createNetworkEvaluator(design, undefined, { includeResources: false })(allocations(design));
     expect(complete.resources.length).toBeGreaterThan(0);
     expect(compact).toEqual({ ...complete, resources: [] });
+  });
+
+  it.each(['rack-01/node-01', 'rack-01'])('preserves optional compact allocation validation and recovery for failed %s', suffix => {
+    const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 40, requireClusterNetwork: false, requireExternalNetwork: false });
+    const complete = createNetworkEvaluator(design), compact = createNetworkEvaluator(design, undefined, { includeResources: false });
+    const failed = [`${design.modules[0].id}/${suffix}`];
+    const disposition = (evaluate: typeof compact, nodes: number, failures: string[]) => {
+      try { return { ...evaluate([{ id: design.modules[0].id, energizedNodes: nodes }], failures), resources: [] }; }
+      catch (error) { return diagnosticFor(error); }
+    };
+    // Reuse each evaluator: dormant validation must not cache an empty graph
+    // that a later failure query mistakes for the complete operable inventory.
+    expect(disposition(compact, 5, [])).toEqual(disposition(complete, 5, []));
+    const fullInvalid = disposition(complete, 5, failed);
+    expect(fullInvalid).toMatchObject({ kind: 'invalid-input', code: 'NETWORK_OPERABLE_INVENTORY' });
+    expect(disposition(compact, 5, failed)).toEqual(fullInvalid);
+    for (const nodes of [0, suffix.includes('/node-') ? 4 : 1]) {
+      const expected = disposition(complete, nodes, failed);
+      expect(expected).toMatchObject({ status: 'satisfied', energizedNodes: nodes });
+      expect(disposition(compact, nodes, failed)).toEqual(expected);
+    }
+    expect(disposition(compact, 5, [])).toEqual(disposition(complete, 5, []));
   });
 });

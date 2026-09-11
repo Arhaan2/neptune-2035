@@ -161,7 +161,7 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
   validateNetworkDesign(design);
   const networkPower=options.ignorePower?undefined:createNetworkPowerEvaluator(design);
   const clusterRate=design.config.requireClusterNetwork?profile.clusterBitSPerNode:0,externalRate=design.config.requireExternalNetwork?profile.externalBitSPerNode:0;
-  let graph:ReturnType<typeof compile>|undefined,lastKey='',lastResult:NetworkAssessment|undefined;
+  let graph:ReturnType<typeof compile>|undefined,dormantValidated=false,lastKey='',lastResult:NetworkAssessment|undefined;
   return (allocations:readonly NetworkAllocation[],failedAssetIds:readonly string[]=[]):NetworkAssessment=>{
     if(!Array.isArray(allocations)||allocations.length!==design.modules.length) failure('invalid-input', 'NETWORK_ALLOCATION', 'Network allocation must match the complete module inventory.', { field: 'allocations' });
     allocations.forEach((a, i) => {
@@ -175,11 +175,12 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
     for(const id of networkPower?.(failedAssetIds).unavailableAssetIds??[])failed.add(id);
     const energizedNodes=allocations.reduce((n,a)=>n+a.energizedNodes,0);
     const result:NetworkAssessment={assessmentBasis:'energized',resources:[],status:'satisfied',energizedNodes,clusterDemandBitS:energizedNodes*clusterRate,externalDemandBitS:energizedNodes*externalRate,blockedDomainIds:[],unreachableDomainIds:[],unsupportedDomainIds:[],bottlenecks:[],issues:[],maxUtilization:0};
-    // With no required class, compact simulation validates stored edges and
-    // each module attachment, but needs no generated leaf inventory or routes.
-    // Interior ports are the same canonical template from admitted specifications.
-    if(options.includeResources===false&&!design.config.requireClusterNetwork&&!design.config.requireExternalNetwork){
-      graph??=compile(design,true);lastKey=key;lastResult=result;return result;
+    // Without failures or a required class, compact simulation validates stored
+    // edges and module attachments without generating unused leaf inventory.
+    // Failure queries still need the complete graph to check operable inventory.
+    if(options.includeResources===false&&!failedAssetIds.length&&!design.config.requireClusterNetwork&&!design.config.requireExternalNetwork){
+      if(!graph&&!dormantValidated){compile(design,true);dormantValidated=true;}
+      lastKey=key;lastResult=result;return result;
     }
     graph??=compile(design);const g=graph,resourceLoads=new Float64Array(g.resources.length),issues=new Map<string,NetworkIssue>(),blocked=new Set<string>(),unreachable=new Set<string>(),unsupported=new Set<string>();
     const record=(assetId:string,resourceId:string,reason:string,domainId:string)=>{
