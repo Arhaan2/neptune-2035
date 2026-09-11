@@ -29,6 +29,8 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
   const [storage, setStorage] = useState('Recovering local decision draft…'), [recovered, setRecovered] = useState(false);
   const [selected, setSelected] = useState<string | null>(null), [scenarioId, setScenarioId] = useState(''), [sensitivityId, setSensitivityId] = useState('central');
   const [imported, setImported] = useState<DecisionExport | null>(null), [reproduction, setReproduction] = useState('');
+  const sourceIdentity = useRef({commit:'unpackaged-development',sourceTree:'unpackaged-development'});
+  const resultSource = useRef(sourceIdentity.current);
   const abort = useRef<AbortController | null>(null), epoch = useRef(0), edited = useRef(false);
   const current = useMemo(() => {
     try { validateDecisionCampaign(campaign); return {plan: planDecisionCampaign(campaign), error: ''}; }
@@ -54,6 +56,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
   };
   useEffect(() => {
     let active = true;
+    void fetch(new URL('release.json', window.location.href), {cache:'no-store'}).then(response => response.json()).then((release: {sourceSha?:string;sourceTree?:string}) => {if(active && /^[a-f0-9]{40}$/.test(release.sourceSha ?? '') && /^[a-f0-9]{40}$/.test(release.sourceTree ?? ''))sourceIdentity.current={commit:release.sourceSha!,sourceTree:release.sourceTree!};}).catch(() => {});
     void readDecisionDraft().then(text => {
       if (!active || edited.current || !text) return;
       const draft = JSON.parse(text) as {version: number; campaign: DecisionCampaign; evidence: string | null};
@@ -62,7 +65,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       setCampaign(draft.campaign);
       if (draft.evidence) {
         const saved = importDecisionCampaign(draft.evidence);
-        setResult(saved.result); setResultCampaign(saved.campaign); setImported(saved);
+        setResult(saved.result); setResultCampaign(saved.campaign); setImported(saved); resultSource.current=saved.sourceIdentity;
       }
       setStorage('Recovered local decision draft. Stored outcomes are supplied evidence; rerun to verify.');
     }).catch(error => { if (active) setStorage(`Saved draft retained but not loaded: ${String(error)}`); })
@@ -73,7 +76,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
     if (!recovered || running) return;
     const timer = setTimeout(() => {
       let text: string;
-      try { text = JSON.stringify({version: 1, campaign, evidence: result && resultCampaign ? exportDecisionCampaign(resultCampaign, result) : null}); }
+      try { text = JSON.stringify({version: 1, campaign, evidence: result && resultCampaign ? exportDecisionCampaign(resultCampaign, result, resultSource.current) : null}); }
       catch (error) { setStorage(`Evidence not saved: ${String(error)}`); return; }
       void writeDecisionDraft(text).then(() => setStorage('Decision draft and bounded evidence stored on this device.')).catch(error => setStorage(`Local storage unavailable: ${String(error)} Export the campaign to retain it.`));
     }, 250);
@@ -82,7 +85,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
   async function start(compare = false) {
     if (!current.plan || running) return;
     const snapshot = structuredClone(campaign), controller = new AbortController(), runEpoch = ++epoch.current;
-    abort.current?.abort(); abort.current = controller; setRunning(true); setProblem(''); setReproduction(''); setResult(null); setResultCampaign(snapshot);
+    abort.current?.abort(); abort.current = controller; resultSource.current=sourceIdentity.current; setRunning(true); setProblem(''); setReproduction(''); setResult(null); setResultCampaign(snapshot);
     const executor = createDecisionWorkerExecutor();
     try {
       const completed = await runDecisionCampaign(snapshot, {signal: controller.signal, executor, onProgress: progress => {if (runEpoch === epoch.current) setResult(progress);}});
@@ -101,7 +104,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       if (file.size > 64 * 1024 * 1024) throw Error('Decision import exceeds 64 MiB.');
       const evidence = importDecisionCampaign(await file.text());
       abort.current?.abort(); epoch.current++; edited.current = true; setRunning(false);
-      setCampaign(evidence.campaign); setResult(evidence.result); setResultCampaign(evidence.campaign); setImported(evidence);
+      setCampaign(evidence.campaign); setResult(evidence.result); setResultCampaign(evidence.campaign); setImported(evidence); resultSource.current=evidence.sourceIdentity;
       setSelected(null); setProblem(''); setReproduction('Imported supplied evidence; outcomes have not been independently rerun in this session.');
     } catch (error) { setProblem(`Import rejected; current campaign retained. ${String(error)}`); }
   }
@@ -130,7 +133,7 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun}
       <p>{campaign.sensitivityNote}</p><p>Only the declared observation horizon is assessed. Thermal settling is not requested; the 12-second transfer fixture does not establish long-term thermal adequacy.</p>
       <pre>{JSON.stringify({objective:campaign.objective, requirements:campaign.requirements,candidates:campaign.candidates.map(item => ({id:item.id,label:item.label,workload:item.workload,physicalIdentity:item.physicalIdentity,specificationIdentity:item.specificationIdentity,topology:item.topology,controllerPolicy:item.controllerPolicy})),scenarios:campaign.scenarios,sensitivities:campaign.sensitivities,execution:campaign.execution,costPolicy:campaign.costPolicy,tolerances:campaign.tolerances,versions:campaign.versions},null,2)}</pre>
     </details>
-    <div className="twin-actions"><button disabled={running || !current.plan || !recovered} onClick={() => void start()}>Start decision campaign</button><button disabled={!running} onClick={() => abort.current?.abort()}>Cancel decision campaign</button><button disabled={!result || !resultCampaign || running} onClick={() => download('neptune-decision-campaign.json',exportDecisionCampaign(resultCampaign!,result!))}>Export decision campaign</button><button disabled={!result || !resultCampaign || running} onClick={() => download('neptune-decision-report.md',decisionReport(resultCampaign!,result!),'text/markdown')}>Export decision report</button><label className="decision-import">Import decision campaign<input aria-label="Import decision campaign" type="file" accept=".json,application/json" onChange={event => {void importFile(event.target.files?.[0]);event.target.value='';}}/></label>{imported && <button disabled={running || stale || !current.plan} onClick={() => void start(true)}>Recompute imported campaign</button>}</div>
+    <div className="twin-actions"><button disabled={running || !current.plan || !recovered} onClick={() => void start()}>Start decision campaign</button><button disabled={!running} onClick={() => abort.current?.abort()}>Cancel decision campaign</button><button disabled={!result || !resultCampaign || running} onClick={() => download('neptune-decision-campaign.json',exportDecisionCampaign(resultCampaign!,result!,resultSource.current))}>Export decision campaign</button><button disabled={!result || !resultCampaign || running} onClick={() => download('neptune-decision-report.md',decisionReport(resultCampaign!,result!),'text/markdown')}>Export decision report</button><label className="decision-import">Import decision campaign<input aria-label="Import decision campaign" type="file" accept=".json,application/json" onChange={event => {void importFile(event.target.files?.[0]);event.target.value='';}}/></label>{imported && <button disabled={running || stale || !current.plan} onClick={() => void start(true)}>Recompute imported campaign</button>}</div>
     {(current.error || problem) && <p role="alert">{current.error || problem}</p>}
     <p className="muted">{storage}</p>
     <output data-testid="decision-coverage" data-status={running ? 'running' : result?.status ?? 'ready'} data-completed={result?.coverage.completed ?? 0} data-planned={result?.coverage.planned ?? current.plan?.totalRuns ?? 0} aria-live="polite">{result ? `${result.coverage.completed}/${result.coverage.planned} runs completed; ${result.coverage.fullyEvaluatedCandidates}/${result.plan.candidates} candidates fully evaluated. ${running ? 'Running' : result.status}.` : `Ready: ${current.plan?.totalRuns ?? 0} planned runs.`}</output>

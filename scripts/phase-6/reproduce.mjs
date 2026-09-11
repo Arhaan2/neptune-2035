@@ -14,7 +14,9 @@ try {
  const api = await server.ssrLoadModule('/src/twin/decision/index.ts');
  let supplied = null;
  if(input){const stat=await fs.stat(input);if(stat.size>64*1024*1024)throw Error('Input exceeds 64 MiB.');supplied=api.importDecisionCampaign(await fs.readFile(input,'utf8'));}
- const campaign = supplied?.campaign ?? api.createDecisionCampaign(fixture);
+ const budget=argument('budget'),basis=argument('budget-basis');
+ if(supplied&&(budget!==undefined||basis!==undefined))throw Error('Reproduction cannot override imported campaign inputs.');
+ const campaign = supplied?.campaign ?? api.createDecisionCampaign(fixture,{objective:{...(budget!==undefined?{budgetUSD:Number(budget)}:{}),...(basis!==undefined?{budgetBasis:basis}:{})}});
  api.validateDecisionCampaign(campaign);
  const plan = api.planDecisionCampaign(campaign);
  console.log(`Recomputing ${plan.totalRuns} declared runs: ${plan.candidates} candidates, ${plan.scenarios} scenarios, ${plan.sensitivities} cases. No stored winner is trusted.`);

@@ -20,6 +20,15 @@ npm run decision:reproduce -- --fixture=sizing --out=artifacts/sizing
 npm run decision:reproduce -- --fixture=sensitivity --out=artifacts/sensitivity
 ```
 
+The additional frozen budget demonstration uses a USD 50,000,000 included-cost cap, selected between the central and declared upper estimates, without changing operating requirements:
+
+```sh
+npm run decision:reproduce -- --fixture=sensitivity --budget=50000000 --budget-basis=central --out=artifacts/budget-central
+npm run decision:reproduce -- --fixture=sensitivity --budget=50000000 --budget-basis=upper-bound --out=artifacts/budget-upper
+```
+
+This deliberately tests a declared budget boundary; no architecture reversal is required. The full central/lower/upper suite is retained, including any changed feasible set. Imported reproduction cannot override these inputs.
+
 Each output directory contains `campaign.json` (all candidates and resolved runs, including infeasible/unresolved rows), `report.md` and `reproduction.json`. The latter identifies the actual checkout, coverage, ranking and comparison result. CLI execution is serial; browser campaigns use at most two workers over the identical run contract.
 
 The whole-run evidence retains the original Phase 4/5 success outcome. The separately versioned Phase 6 policy evaluates declared loss/interruption/recovery allowances without rewriting that outcome. Every sensitivity is a bounded exploratory assumption, not statistical confidence or manufacturer data. A cold 120-second thermal observation does not establish thermal settling or long-term adequacy.
