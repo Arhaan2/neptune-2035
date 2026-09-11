@@ -234,7 +234,7 @@ export default function TwinApp() {
     [walkthroughApplied, setWalkthroughApplied] = useState(-1),
     [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number} | null>(null);
   const appliedWalkthroughNavigation = useRef(-1);
-  const inspection = useInspection(design, state, selectedId);
+  const inspection = useInspection(design, state, selectedId, sim.runGeneration);
   const displayState = inspection.displayState;
   const inspectionController = useRef(inspection);
   useEffect(()=>{inspectionController.current=inspection;},[inspection]);

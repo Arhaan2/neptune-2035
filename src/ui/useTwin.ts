@@ -102,6 +102,8 @@ export function useTwin(design: Design) {
     [history, setHistory] = useState<Summary[]>([]),
     [progress, setProgress] = useState<WorkerResponse['progress']>(),
     [workerGeneration, setWorkerGeneration] = useState(0),
+    // View identity only: repeated executions of identical definitions are distinct runs.
+    [runGeneration, setRunGeneration] = useState(0),
     [recoveryRead] = useState(() => readCheckpoint()),
     [recovery, setRecovery] = useState<ProjectFile | null>(
       recoveryRead.project,
@@ -287,6 +289,8 @@ export function useTwin(design: Design) {
           ? { state: current.current }
           : {}),
       } satisfies WorkerRequest);
+      if (kind === 'initialize' || kind === 'restore' || kind === 'replay' && !continuing)
+        setRunGeneration(value => value + 1);
       diagnosticEvent('ui.dispatched', { requestId: requestId.current, epoch: epoch.current });
     },
     [stopClock],
@@ -427,6 +431,7 @@ export function useTwin(design: Design) {
       setProgress(undefined);
       setError('');
       accept(restored.state.experiment && !['completed','cancelled','warmup-timeout','numerical-failed'].includes(restored.state.experiment.status) ? setExperimentStatus(restored.state,'paused','Restored a complete physical and metric checkpoint; resume explicitly.') : restored.state);
+      setRunGeneration(value => value + 1);
       return restored.design;
     },
     [accept, invalidate],
@@ -485,6 +490,7 @@ export function useTwin(design: Design) {
     diagnosticEvent('ui.committed', { selectedRevision: design.revision, initializedRevision: state?.designRevision, timeS: state?.timeS, busy });
   }, [design.revision, state, busy]);
   return {
+    runGeneration,
     state: state?.designRevision === design.revision ? state : null,
     running: running && state?.designRevision === design.revision,
     setRunning,

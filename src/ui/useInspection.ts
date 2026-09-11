@@ -4,19 +4,19 @@ import { engineeringIdentity } from '../twin/catalog/equipment';
 import { INSPECTION_LIMITS, inspectionRunIdentity, type InspectionResolution } from '../twin/presentation/history';
 import type { HistoryWorkerRequest, HistoryWorkerResponse } from '../twin/presentation/worker';
 
-export function useInspection(design: Design, active: SimulationState | null, assetId: string) {
+export function useInspection(design: Design, active: SimulationState | null, assetId: string, runGeneration = 0) {
   const designIdentity = useMemo(() => engineeringIdentity(design), [design]);
   const compatibleActive = active?.designIdentity === designIdentity ? active : null;
   const runIdentity = useMemo(() => inspectionRunIdentity(design, active), [design, active]);
-  const [request, setRequest] = useState<{ source: SimulationState; runIdentity: string; timeS: number; boundary: 'post' | 'previous' | 'at-or-after' } | null>(null);
+  const [request, setRequest] = useState<{ source: SimulationState; runIdentity: string; runGeneration: number; timeS: number; boundary: 'post' | 'previous' | 'at-or-after' } | null>(null);
   const [reply, setReply] = useState<{ key: string; resolution: InspectionResolution } | null>(null);
   const [cancelled, setCancelled] = useState(false);
   const epoch = useRef(0), worker = useRef<Worker | null>(null);
-  const validRequest = compatibleActive && request?.runIdentity === runIdentity ? request : null;
+  const validRequest = compatibleActive && request?.runIdentity === runIdentity && request.runGeneration === runGeneration && compatibleActive.timeS >= request.source.timeS && compatibleActive.stepIndex >= request.source.stepIndex ? request : null;
   // Reject during render, before an effect or worker acknowledgement can run.
   // Remove the captured request so returning to an earlier design cannot revive it.
   if (request && !validRequest) { setRequest(null); setReply(null); setCancelled(false); }
-  const key = validRequest ? `${runIdentity}:${assetId}:${validRequest.timeS}:${validRequest.boundary}` : '';
+  const key = validRequest ? `${runGeneration}:${runIdentity}:${assetId}:${validRequest.timeS}:${validRequest.boundary}` : '';
   const resolution = reply?.key === key ? reply.resolution : null;
   useEffect(() => {
     worker.current?.terminate(); worker.current = null;
@@ -35,7 +35,7 @@ export function useInspection(design: Design, active: SimulationState | null, as
     instance.postMessage({ version: 1, epoch: mine, runIdentity, design, source: validRequest.source, request: { assetId, timeS: validRequest.timeS, boundary: validRequest.boundary } } satisfies HistoryWorkerRequest);
     return () => { clearTimeout(watchdog); instance.terminate(); };
   }, [validRequest, key, runIdentity, assetId, design]);
-  const inspect = (timeS: number, boundary: 'post' | 'previous' | 'at-or-after' = 'post') => { if (!compatibleActive) return; setCancelled(false); setReply(null); setRequest({ source: structuredClone(compatibleActive), runIdentity, timeS, boundary }); };
+  const inspect = (timeS: number, boundary: 'post' | 'previous' | 'at-or-after' = 'post') => { if (!compatibleActive) return; setCancelled(false); setReply(null); setRequest({ source: structuredClone(compatibleActive), runIdentity, runGeneration, timeS, boundary }); };
   const returnToCurrent = (wasCancelled = false) => { ++epoch.current; worker.current?.terminate(); worker.current = null; setRequest(null); setReply(null); setCancelled(wasCancelled); };
   return { mode: validRequest ? 'history' as const : 'current' as const, status: validRequest ? resolution?.status ?? 'loading' : cancelled ? 'cancelled' : compatibleActive ? 'current' : 'loading', displayState: validRequest ? resolution?.state ?? null : compatibleActive, requestedTimeS: validRequest?.timeS ?? null, resolution, inspect, returnToCurrent, runIdentity };
 }
