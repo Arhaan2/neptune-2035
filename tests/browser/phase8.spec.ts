@@ -71,7 +71,7 @@ test('P8-S02 legacy query and generated hash routes retain the saved aggregate s
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./?legacy=1&fallback=1');
+  await page.goto('./?legacy=1');
   await expect(page.locator('main')).toHaveAttribute('data-ready', 'true');
   const accelerators = page.getByRole('spinbutton', { name: 'Accelerators', exact: true });
   await accelerators.fill('2561');
