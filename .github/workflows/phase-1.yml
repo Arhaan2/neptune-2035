@@ -1,4 +1,4 @@
-name: Transfer, whole-experiment and prototype verification
+name: Decision campaigns, transfer and prototype verification
 on:
   pull_request:
     branches: [main]
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   acceptance:
-    name: Transfer and whole-experiment acceptance
+    name: Decision campaign and whole-experiment acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -56,7 +56,7 @@ jobs:
             if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
             sleep 1
           done
-          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts --retries=0
+          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts --retries=0
       - name: Retain actual prototype results and browser traces
         if: always()
         uses: actions/upload-artifact@v4

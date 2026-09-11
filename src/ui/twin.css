@@ -27,3 +27,20 @@
 .phase5-table-scroll { overflow-x: auto; }
 .phase5-panel table { width: 100%; border-collapse: collapse; text-align: left; }
 .phase5-panel th, .phase5-panel td { padding: .6rem; border-bottom: 1px solid #46606a; }
+
+/* Phase 6 uses the existing Compare surface and remains usable without WebGL. */
+.decision-panel { min-width: 0; }
+.decision-panel[hidden] { display: none; }
+.decision-panel pre { max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .75rem; }
+.decision-panel input, .decision-panel select { max-width: 100%; }
+.decision-table-scroll { width: 100%; overflow-x: auto; margin-block: 1rem; }
+.decision-table { border-collapse: collapse; width: 100%; min-width: 950px; text-align: left; font-size: .78rem; }
+.decision-table caption { text-align: left; padding-block: .7rem; font-weight: 600; }
+.decision-table th, .decision-table td { border-bottom: 1px solid #29444d; vertical-align: top; padding: .65rem; }
+.decision-table th { color: #b9e4e5; }
+.decision-table details { max-width: 22rem; }
+.decision-recommendation, .decision-inspection { padding: 1rem; margin-block: 1rem; background: #102a32; border: 1px solid #315863; border-radius: 10px; }
+.decision-inspection > label { display: inline-flex; flex-direction: column; gap: .3rem; margin: .5rem 1rem .5rem 0; }
+.decision-import { display: flex; flex-direction: column; gap: .3rem; font-size: .8rem; max-width: 100%; }
+.decision-import input { max-width: 16rem; font-size: .75rem; }
+@media (max-width: 600px) { .decision-panel { padding: .8rem; } .decision-panel .experiment-fields { grid-template-columns: minmax(0,1fr); } .decision-panel .twin-actions { align-items: stretch; } }
