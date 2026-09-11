@@ -135,6 +135,7 @@ export type ExperimentStatus = 'running' | 'warming' | 'paused' | 'completed' | 
 export interface ExperimentRun {
   extensionVersion: 1;
   definition: ExperimentDefinition;
+  definitionIdentity: string;
   initialState: PhysicalCheckpoint;
   initialStateIdentity: string;
   status: ExperimentStatus;

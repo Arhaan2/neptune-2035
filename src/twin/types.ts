@@ -2,6 +2,7 @@
 export const TWIN_SCHEMA = 2 as const;
 export const SOLVER_VERSION = '2.3.0';
 import type { EquipmentConfiguration } from './catalog/equipment';
+import type { ExperimentDefinition, ExperimentRun } from './experiment/types';
 import type { IntegrationStep } from './persistence/limits';
 import type { FailureDiagnostic } from './safety';
 export type Vec3 = [number, number, number];
@@ -43,6 +44,7 @@ export type EventKind = 'trip' | 'restore' | 'maintenance' | 'workload' | 'seawa
 export interface OperationEvent { id: string; timeS: number; kind: EventKind; assetId: string; value?: number; sequence?: number }
 export interface CausalEntry { timeS: number; assetId: string; message: string; affectedIds: string[]; kind: 'command' | 'controller' | 'warning' }
 export interface SimulationState {
+  experiment?: ExperimentRun;
   schemaVersion: 3; designRevision: string; designIdentity: string; solverVersion: string; timeS: number;
   integrationStepS: IntegrationStep; stepIndex: number;
   modules: ModuleState[]; events: OperationEvent[]; log: CausalEntry[];
@@ -56,7 +58,7 @@ export interface Summary {
   maxCoolantK: number; batteryWh: number; instantaneousPUE: number | null; energyPUE: number | null;
   electricalResidualW: number; thermalResidualW: number; warnings: string[];
 }
-export interface WorkerRequest { diagnostics?: boolean; version: 2; requestId: number; epoch: number; kind: 'initialize' | 'advance' | 'replay' | 'restore' | 'cancel'; design?: Design; state?: SimulationState; events?: OperationEvent[]; durationS?: number; chunkS?: number; integrationStepS?: IntegrationStep }
+export interface WorkerRequest { experimentDefinition?: ExperimentDefinition; diagnostics?: boolean; version: 2; requestId: number; epoch: number; kind: 'initialize' | 'advance' | 'replay' | 'restore' | 'cancel'; design?: Design; state?: SimulationState; events?: OperationEvent[]; durationS?: number; chunkS?: number; integrationStepS?: IntegrationStep }
 export interface WorkerResponse { version: 2; requestId: number; epoch: number; state?: SimulationState; error?: string; diagnostic?: FailureDiagnostic; status?: 'progress' | 'complete' | 'cancelled' | 'failed' | 'resource-limited'; progress?: { completedTimeS: number; targetTimeS: number; completedWork: number; totalWork: number } }
 export interface Observation {
   assetId: string; metric: string; value: number; unit: string; sourceId: string;

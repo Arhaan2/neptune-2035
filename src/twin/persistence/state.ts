@@ -1,3 +1,4 @@
+import { validateExperimentRun } from '../experiment/validation';
 import { engineeringIdentity, resolveSpecification, equipmentFor } from '../catalog/equipment';
 import { moduleAssets } from '../assets/design';
 import { failure, finiteNumber } from '../safety';
@@ -11,7 +12,7 @@ const nonnegative = ['technicalFlowM3S', 'seawaterFlowM3S', 'pumpPowerW', 'itW',
 const signed = ['rejectedHeatW', 'thermalResidualW', 'electricalResidualW'];
 export function validateState(design: Design, value: unknown, options: { allowDifferentSolver?: boolean } = {}): asserts value is SimulationState {
   validateStructure(value); record(value, 'state');
-  keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs'], 'state');
+  keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs', 'experiment'], 'state');
   string(value.solverVersion, 'state.solverVersion', 100);
   if (value.schemaVersion !== CONTRACT.stateSchema || value.designRevision !== design.revision || (!options.allowDifferentSolver && value.solverVersion !== SOLVER_VERSION)) failure('invalid-input', 'STATE_REVISION', 'Simulation revision mismatch; explicit model migration/recalculation required.');
   if (value.designIdentity !== engineeringIdentity(design)) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
@@ -100,4 +101,5 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     array(entry.affectedIds, 'log.affectedIds', CONTRACT.maxModules);
     for (const id of entry.affectedIds) if (typeof id !== 'string' || !moduleIds.has(id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');
   }
+  validateExperimentRun(design, value as unknown as SimulationState);
 }
