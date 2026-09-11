@@ -30,11 +30,15 @@ export function validateState(design: Design, value: unknown, options: { allowDi
   array(value.appliedEventIds, 'state.appliedEventIds', CONTRACT.maxEvents);
   const due = value.events.filter(e => e.timeS <= (value.timeS as number));
   if (due.length !== value.appliedEventIds.length || due.some((e, i) => e.id !== (value.appliedEventIds as unknown[])[i])) failure('invalid-input', 'STATE_EVENT_CURSOR', 'Checkpoint applied-event cursor must contain exactly the events due at this boundary, in order.');
-  const known = new Set(design.assets.map(a => a.id)), moduleIds = new Set(design.modules.map(m => m.id)), local = new Map<string, Set<string>>();
+  const known = new Set(design.assets.map(a => a.id)), moduleIds = new Set(design.modules.map(m => m.id)), local = new Map<string, Set<string>>(), expandedInventory = new Set<string>();
   const assetKnown = (id: string) => {
     if (known.has(id)) return true;
     const m = design.modules.find(m => id.startsWith(`${m.id}/`)); if (!m) return false;
-    if (!local.has(m.id)) local.set(m.id, new Set(moduleAssets(design, m.id).map(a => a.id)));
+    if (!local.has(m.id)) local.set(m.id, new Set(moduleAssets(design, m.id, { attachmentOnly: true }).map(a => a.id)));
+    if (!local.get(m.id)!.has(id) && !expandedInventory.has(m.id)) {
+      local.set(m.id, new Set(moduleAssets(design, m.id).map(a => a.id)));
+      expandedInventory.add(m.id);
+    }
     return local.get(m.id)!.has(id);
   };
   array(value.failedAssetIds, 'state.failedAssetIds', CONTRACT.maxEvents);
