@@ -226,7 +226,6 @@ export default function TwinApp() {
     [sceneReady, setSceneReady] = useState(false),
     [demo, setDemo] = useState(false),
     [inspectedEventId, setInspectedEventId] = useState<string | null>(null),
-    [sourceOrigin, setSourceOrigin] = useState('simulated model'),
     [walkthrough, setWalkthrough] = useState<WalkthroughDefinition | null>(null),
     [walkthroughIndex, setWalkthroughIndex] = useState(0),
     [walkthroughPaused, setWalkthroughPaused] = useState(false),
@@ -234,6 +233,7 @@ export default function TwinApp() {
     [walkthroughApplied, setWalkthroughApplied] = useState(-1),
     [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number} | null>(null);
   const appliedWalkthroughNavigation = useRef(-1);
+  const sourceOrigin = sim.sourceOrigin;
   const inspection = useInspection(design, state, selectedId, sim.runGeneration);
   const displayState = inspection.displayState;
   const inspectionController = useRef(inspection);
@@ -308,10 +308,10 @@ export default function TwinApp() {
     localStorage.setItem('neptune-v2-scenarios', serialized);
     setSaved(history); sim.cancel(); setPendingProject(null);
   };
-  const inspectDecisionEvidence: InspectDecisionEvidence = (run, evidence, context) => {
+  const inspectDecisionEvidence: InspectDecisionEvidence = (run, evidence, provenance, context) => {
     if (!evidence.state || evidence.status !== 'completed') throw Error('No completed scenario is available for inspection.');
     retainBeforeRevision('Before completed decision inspection'); inspection.returnToCurrent(); setWalkthrough(null);
-    const next = sim.restore(projectFile(run.design, evidence.state)); setDesignOverride(next); setConfig(next.config); setDemo(false); setWorkspace('Operate');
+    const next = sim.restore(projectFile(run.design, evidence.state), provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config); setDemo(false); setWorkspace('Operate');
     const assetId = context?.assetId ?? `${next.modules[0].id}/pump-duty`;
     setSelectedId(assetId); setFocus('selection'); setResetId(value=>value+1);
     setPendingEvidenceView({definitionId:run.definition.id,assetId,timeS:context?.timeS ?? evidence.state.timeS});
@@ -320,8 +320,7 @@ export default function TwinApp() {
   const startResultWalkthrough = (campaign: DecisionCampaign, result: DecisionResult) => {
     const prepared = createResultWalkthrough(campaign,result);
     retainBeforeRevision('Before result walkthrough'); inspection.returnToCurrent();
-    const next = sim.restore(projectFile(prepared.run.design,prepared.evidence.state)); setDesignOverride(next); setConfig(next.config);
-    setSourceOrigin(result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence');
+    const next = sim.restore(projectFile(prepared.run.design,prepared.evidence.state), result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config);
     setWalkthrough(prepared);setWalkthroughIndex(0);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);setDemo(false);setInside(false);setXray(true);
     setNotice('Walkthrough loaded one completed scenario. Your previous project remains in saved scenarios; guidance only inspects history after this explicit load.');
   };
@@ -455,7 +454,6 @@ export default function TwinApp() {
     setNotice(`${kind} recorded at ${state?.timeS ?? 0}s for ${id}.`);
   };
   const inspectOrRestore = (project: ProjectFile) => {
-    setSourceOrigin('imported or saved simulated checkpoint · supplied evidence');
     inspection.returnToCurrent();
     const compatibility = compatibilityFor(project);
     if (!compatibility.canResume) {
@@ -1348,8 +1346,8 @@ export default function TwinApp() {
           {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
           {state && !showComparison && inspection.mode==='current' && <Trend history={sim.history} />}
           <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy} onInspectEvidence={inspectDecisionEvidence} onWalkthrough={startResultWalkthrough}
-            onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
-            onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
+            onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared), 'simulated initialization from evaluated campaign definition');setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
+            onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared), 'simulated initialization from evaluated campaign definition');setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
           {showComparison && (
             <section className="twin-compare" ref={comparisonRegion} aria-busy={compareBusy}>
               <div className="twin-section-line">
