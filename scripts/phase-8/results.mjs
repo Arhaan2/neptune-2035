@@ -40,7 +40,7 @@ export function resultSet() {
     },
     residuals(id, components, context = {}) {
       for (const component of components) {
-        const denominatorW = Math.max(1, Math.abs(component.inputW), Math.abs(component.facilityW));
+        const denominatorW = Math.max(1, component.denominatorW);
         this.numeric(`${id}/${component.id}/absolute`, component.residualW, 0, tolerances.componentResidualW, 'W', { denominatorW });
         this.numeric(`${id}/${component.id}/normalized`, component.residualW / denominatorW, 0, tolerances.normalizedResidual, '1', { denominatorW });
       }
@@ -61,7 +61,7 @@ export async function writeResults(out, kind, startedIdentity, set, extra = {}, 
     evidenceBasis: 'numerical/software verification; generated simulation evidence, not measured equipment data',
     tolerances, ...extra, checks: set.checks, error, status };
   await fs.mkdir(out, { recursive: true });
-  await fs.writeFile(path.join(out, `${kind}.json`), JSON.stringify(report, null, 2) + '\n');
+  await fs.writeFile(path.join(out, `${kind}.json`), JSON.stringify(report, (_key, value) => typeof value === 'number' && !Number.isFinite(value) ? String(value) : value, 2) + '\n');
   const failed = set.checks.filter(check => check.outcome !== 'PASS');
   const lines = [`# ${kind}`, '', `Outcome: **${status}**; ${set.checks.length - failed.length}/${set.checks.length} checks passed.`, '',
     `Source: \`${startedIdentity.commit}\`; tree: \`${startedIdentity.tree}\`.`, '',

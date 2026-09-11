@@ -46,10 +46,10 @@ try {
     results.exact(`P8-NUM/electrical/${name}/exclusive-actions`, actual.batteryChargeW === 0 || actual.batteryDischargeW === 0, true);
     // Reconstruct the declared facility boundary independently of the solver's residual field.
     const inputW = actual.gridW + actual.batteryDischargeW / 0.95;
-    electricComponents.push({ id: name, inputW, facilityW: actual.facilityW,
+    electricComponents.push({ id: name, denominatorW: inputW,
       residualW: inputW - actual.batteryChargeW * 0.95 - actual.facilityW });
   }
-  residualSummaries.push(results.residuals('P8-NUM/electrical', electricComponents));
+  residualSummaries.push(results.residuals('P8-NUM/electrical', electricComponents, { normalization: 'max(1 W, total component input W)' }));
   const gridRequests = [{ domainId: 'A', requestedW: 80, moduleLimitW: 100 }, { domainId: 'A', requestedW: 20, moduleLimitW: 100 }, { domainId: 'B', requestedW: 100, moduleLimitW: 100 }];
   const allocated = electrical.allocateGrid(gridRequests, 90, new Map([['A', 50], ['B', 100]]));
   results.exact('P8-NUM/electrical/shared-upstream-and-domains', allocated, [24, 6, 60]);
@@ -100,12 +100,12 @@ try {
         technicalPumpW: 0, seawaterPumpW: 0, technicalFlowM3S: 0, seawaterFlowM3S: 0,
         seawaterK: 291.15, exchangerUAWPerK: 0, foulingResistanceKPerW: 0, fanPowered: true, dtS: stepS });
       const storedW = (actual.coolantK - coolantK) * 24e6 / stepS + (actual.airK - airK) * 12e6 / stepS;
-      components.push({ id: `time-${timeS}`, inputW: 100000, facilityW: 100000,
+      components.push({ id: `time-${timeS}`, denominatorW: 100000,
         residualW: 100000 - actual.rejectedHeatW - actual.ambientHeatW - storedW });
       ({ coolantK, airK } = actual);
     }
     results.numeric(`P8-NUM/air-RK4/${stepS}`, airK, benchmarks.airTransientRK4.finalK, t.independentAirK, 'K');
-    residualSummaries.push(results.residuals(`P8-NUM/thermal/${stepS}`, components));
+    residualSummaries.push(results.residuals(`P8-NUM/thermal/${stepS}`, components, { normalization: 'max(1 W, component facility W)' }));
   }
 
   const build = patch => designAPI.buildDesign({ ...designAPI.DEFAULT_CONFIG, requestedAccelerators: 1280, workload: 1, ...patch });
@@ -125,8 +125,8 @@ try {
           facilityEnergyWh: state.facilityEnergyWh, itEnergyWh: state.itEnergyWh, gridEnergyWh: state.gridEnergyWh,
           batteryWh: state.modules.reduce((sum, module) => sum + module.batteryWh, 0),
           serviceableAccelerators: state.modules.reduce((sum, module) => sum + module.availableAccelerators, 0) });
-        residualSummaries.push(results.residuals(`P8-NUM/coupled/${caseId}/${stepS}/${targetS}/electrical`, state.modules.map(module => ({ id: module.id, residualW: module.electricalResidualW, inputW: module.gridW + module.batteryDischargeW / 0.95, facilityW: module.facilityW }))));
-        residualSummaries.push(results.residuals(`P8-NUM/coupled/${caseId}/${stepS}/${targetS}/thermal`, state.modules.map(module => ({ id: module.id, residualW: module.thermalResidualW, inputW: module.facilityW, facilityW: module.facilityW }))));
+        residualSummaries.push(results.residuals(`P8-NUM/coupled/${caseId}/${stepS}/${targetS}/electrical`, state.modules.map(module => ({ id: module.id, residualW: module.electricalResidualW, denominatorW: module.gridW + module.batteryDischargeW / 0.95 })), { normalization: 'max(1 W, total component input W)' }));
+        residualSummaries.push(results.residuals(`P8-NUM/coupled/${caseId}/${stepS}/${targetS}/thermal`, state.modules.map(module => ({ id: module.id, residualW: module.thermalResidualW, denominatorW: module.facilityW })), { normalization: 'max(1 W, component facility W)' }));
       }
       results.exact(`P8-NUM/coupled/${caseId}/${stepS}/completed`, state.experiment.status, 'completed');
       if (caseId === 'aligned-network-switch') {
