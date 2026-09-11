@@ -5,7 +5,7 @@ import type { HistoryWorkerRequest, HistoryWorkerResponse } from '../twin/presen
 
 export function useInspection(design: Design, active: SimulationState | null, assetId: string) {
   const runIdentity = useMemo(() => inspectionRunIdentity(design, active), [design, active]);
-  const [request, setRequest] = useState<{ source: SimulationState; runIdentity: string; timeS: number; boundary: 'post' | 'previous' } | null>(null);
+  const [request, setRequest] = useState<{ source: SimulationState; runIdentity: string; timeS: number; boundary: 'post' | 'previous' | 'at-or-after' } | null>(null);
   const [reply, setReply] = useState<{ key: string; resolution: InspectionResolution } | null>(null);
   const [cancelled, setCancelled] = useState(false);
   const epoch = useRef(0), worker = useRef<Worker | null>(null);
@@ -29,7 +29,7 @@ export function useInspection(design: Design, active: SimulationState | null, as
     instance.postMessage({ version: 1, epoch: mine, runIdentity, design, source: validRequest.source, request: { assetId, timeS: validRequest.timeS, boundary: validRequest.boundary } } satisfies HistoryWorkerRequest);
     return () => { clearTimeout(watchdog); instance.terminate(); };
   }, [validRequest, key, runIdentity, assetId, design]);
-  const inspect = (timeS: number, boundary: 'post' | 'previous' = 'post') => { if (!active) return; setCancelled(false); setReply(null); setRequest({ source: structuredClone(active), runIdentity, timeS, boundary }); };
+  const inspect = (timeS: number, boundary: 'post' | 'previous' | 'at-or-after' = 'post') => { if (!active) return; setCancelled(false); setReply(null); setRequest({ source: structuredClone(active), runIdentity, timeS, boundary }); };
   const returnToCurrent = (wasCancelled = false) => { ++epoch.current; worker.current?.terminate(); worker.current = null; setRequest(null); setReply(null); setCancelled(wasCancelled); };
   return { mode: validRequest ? 'history' as const : 'current' as const, status: validRequest ? resolution?.status ?? 'loading' : cancelled ? 'cancelled' : active ? 'current' : 'loading', displayState: validRequest ? resolution?.state ?? null : active, requestedTimeS: validRequest?.timeS ?? null, resolution, inspect, returnToCurrent, runIdentity };
 }
