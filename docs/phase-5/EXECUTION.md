@@ -39,3 +39,9 @@ After Verification's completed initial review, `/root/fixing` started in a disti
 Baseline full-inventory verification matched 90 tracked files: 88 public HTTP files and two Git-only `.nojekyll` markers. These are observed baseline counts, not future fixed assertions. Rollback archive extraction matched every staged byte, including the preview; recovery bundle validation confirmed complete history. These checks do not replace the fresh pre-promotion recheck.
 
 Pages is configured for the root of `codex/pages` with legacy branch deployment. Merging main alone does not publish. The authenticated account has repository/workflow access and main currently has no required branch protections; all requested acceptance and independent review gates still apply.
+
+## Final repair handoffs
+
+Fixing completed T03 at `728bc0a` (integrated `45e8f26`) and V02 at `7ee2153` (integrated `5a0b349`) and returned all production leases by 07:56 UTC. Testing independently passed 146 Phase 5 tests at the repaired source, including nine corrupted checkpoint regressions and installed standby demand for both recipients and protected native donors. Verification resumed at integrated `6b48634` for independent closure and final engineering review. Root added only the missing explicit transfer assumption bibliography entry at `cc8cedc`; no calculation changed. The final clean local gate, exact-source CI and hosted acceptance are recorded in external native receipts so their results do not mutate the frozen source.
+
+All four specialist identities participated in actual independent work. Peak runtime concurrency remained four total including root. Building completed at 07:48 UTC (approximate); Testing and Verification continued after its handoff while Fixing repaired named defects. Final engineering review, release-evidence review and native artifact timestamps provide completion provenance.
