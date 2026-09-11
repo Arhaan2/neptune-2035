@@ -1,4 +1,6 @@
-import { AssetContext, WorkspaceGuide } from './OperatorExperience';
+import { useInspection } from './useInspection';
+import type { OperatorEvent } from '../twin/presentation/history';
+import { AssetContext, WorkspaceGuide, InspectionContext, OperatorTimeline } from './OperatorExperience';
 import { assetOperatingStatus } from '../twin/presentation/assets';
 import { DecisionPanel } from './DecisionPanel';
 import { TransferPanel } from './TransferPanel';
@@ -218,7 +220,11 @@ export default function TwinApp() {
     [notice, setNotice] = useState(''),
     [search, setSearch] = useState(''),
     [sceneReady, setSceneReady] = useState(false),
-    [demo, setDemo] = useState(false);
+    [demo, setDemo] = useState(false),
+    [inspectedEventId, setInspectedEventId] = useState<string | null>(null),
+    [sourceOrigin, setSourceOrigin] = useState('simulated model');
+  const inspection = useInspection(design, state, selectedId);
+  const displayState = inspection.displayState;
   const [comparison, setComparison] = useState<Compared[]>([]),
     [comparisonDescription, setComparisonDescription] = useState(
       'Full load at 0s → selected duty pump trip at 30s → restore at 180s. Both runs use the same parameters through 240s.',
@@ -245,7 +251,7 @@ export default function TwinApp() {
       design.modules.find(
         (m) => selectedId === m.id || selectedId.startsWith(`${m.id}/`),
       ) ?? design.modules[0],
-    selectedState = state?.modules.find((m) => m.id === selectedModule.id);
+    selectedState = displayState?.modules.find((m) => m.id === selectedModule.id);
   const selectedModuleId = selectedModule.id;
   const computeSpec=resolveSpecification(design,'compute');
   const installedSpec=asset&&roleForAsset(asset.id)?resolveSpecification(design,asset.id):null;
@@ -255,15 +261,15 @@ export default function TwinApp() {
       [design, selectedModuleId],
     ),
     platform = selectedModule.platformId,
-    summary = state ? summarize(design, state) : null,
-    residuals = state ? conservationResiduals(design, state) : null,
+    summary = inspection.mode === 'history' ? inspection.resolution?.summary ?? null : displayState ? summarize(design, displayState) : null,
+    residuals = inspection.mode === 'history' ? inspection.resolution?.residuals ?? null : displayState ? conservationResiduals(design, displayState) : null,
     cost = useMemo(
       () => billOfEquipment(design, costScale),
       [design, costScale],
     );
   const topology = useMemo(
-    () => topologyForSelection(state?activePowerDesign(design,state):design, selectedId),
-    [design, selectedId, state],
+    () => topologyForSelection(displayState?activePowerDesign(design,displayState):design, selectedId),
+    [design, selectedId, displayState],
   );
   const powerPaths = upstreamConnections(
     topology.filter((e) => e.medium === 'power'),
@@ -279,6 +285,7 @@ export default function TwinApp() {
     setResetId((v) => v + 1);
     setDemo(false);
   };
+  const inspectEvent = (event: OperatorEvent, boundary: 'post' | 'previous' = 'post') => { select(event.assetId); setInspectedEventId(event.id); setWorkspace('Operate'); inspection.inspect(event.timeS, boundary); };
   const retainBeforeRevision = (label: string) => {
     if (!state || sim.busy) throw Error('Wait for the current worker operation to complete before changing the design.');
     const history = [...saved.slice(-(CONTRACT.maxSavedScenarios - 1)), {name: `${label} · ${state.timeS}s`, project: sim.captureProject()}];
@@ -400,10 +407,13 @@ export default function TwinApp() {
     id = selectedId,
     value?: number,
   ) => {
+    if (inspection.mode === 'history') { setNotice('Return to current state before issuing a simulated command.'); return; }
     sim.command(kind, id, value);
     setNotice(`${kind} recorded at ${state?.timeS ?? 0}s for ${id}.`);
   };
   const inspectOrRestore = (project: ProjectFile) => {
+    setSourceOrigin('imported or saved simulated checkpoint · supplied evidence');
+    inspection.returnToCurrent();
     const compatibility = compatibilityFor(project);
     if (!compatibility.canResume) {
       setInspectionProject(project);
@@ -643,10 +653,10 @@ export default function TwinApp() {
       setCompareBusy(false);
     }
   };
-  const sceneProps = state
+  const sceneProps = displayState
     ? {
         design,
-        state,
+        state: displayState,
         selectedId,
         onSelect: (id: string) => select(id),
         xray: effectiveXray,
@@ -669,6 +679,9 @@ export default function TwinApp() {
       data-selected={selectedId}
       data-workspace={workspace}
       data-time={state?.timeS ?? 0}
+      data-display-time={displayState?.timeS ?? ''}
+      data-inspection-mode={inspection.mode}
+      data-inspection-status={inspection.status}
       onWheelCapture={() => {
         if (demo) setDemo(false);
       }}
@@ -954,6 +967,7 @@ export default function TwinApp() {
           </div>
         </aside>
         <section className="twin-center">
+          <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
           <div className="twin-scene-shell" ref={sceneRegion}>
             <div className="twin-scene-caption">
               <span>
@@ -980,7 +994,7 @@ export default function TwinApp() {
               </Suspense>
             ) : (
               <div className="twin-loading">
-                Initializing the simulation worker… {sim.error}
+                {inspection.mode === 'history' ? (inspection.resolution?.reason ?? 'Resolving exact historical scene…') : `Initializing the simulation worker… ${sim.error}`}
               </div>
             )}
             <div className="twin-scene-toolbar" aria-label="Scene controls">
@@ -1083,7 +1097,7 @@ export default function TwinApp() {
           <div className="twin-clock">
             <button
               className="primary"
-              disabled={!state || (!sim.running && sim.busy)}
+              disabled={inspection.mode === 'history' || !state || (!sim.running && sim.busy)}
               onClick={() => {
                 setDemo(false);
                 sim.setRunning(!sim.running);
@@ -1092,7 +1106,7 @@ export default function TwinApp() {
               {sim.running ? <Pause size={16} /> : <Play size={16} />}{' '}
               {sim.running ? 'Pause' : 'Start'}
             </button>
-            <strong data-testid="sim-time">{state?.timeS ?? 0}s</strong>
+            <span>Current clock</span><strong data-testid="sim-time">{state?.timeS ?? 0}s</strong>
             <label>
               Speed
               <select
@@ -1108,7 +1122,7 @@ export default function TwinApp() {
               </select>
             </label>
             <button
-              disabled={sim.busy || !state}
+              disabled={inspection.mode === 'history' || sim.busy || !state}
               onClick={() => sim.advance(10)}
             >
               Step 10s
@@ -1132,7 +1146,7 @@ export default function TwinApp() {
               Replay
             </button>
             <label>
-              Replay to
+              Execution replay to
               <input
                 aria-label="Replay time in seconds"
                 type="number"
@@ -1155,6 +1169,7 @@ export default function TwinApp() {
               }
               onClick={() => {
                 if (state) {
+                  inspection.returnToCurrent();
                   setDemo(false);
                   if(sim.replay(state.events, replayTimeS, undefined, state.integrationStepS, state.experiment?.definition))setNotice('Seek created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
                 }
@@ -1282,9 +1297,11 @@ export default function TwinApp() {
               </button>
             </div>
           )}
-          <TransferPanel design={design} state={state} busy={sim.busy||compareBusy} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
-          {state && <ExperimentPanel design={design} state={state} busy={sim.busy} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
-          {state && !showComparison && <Trend history={sim.history} />}
+          {workspace === 'Operate' && state && <OperatorTimeline design={design} source={state} display={displayState} assetId={selectedId} selectedEventId={inspectedEventId} resolution={inspection.resolution} onInspect={(timeS,boundary) => {setDemo(false);inspection.inspect(timeS,boundary);}} onEvent={inspectEvent} />}
+          <TransferPanel design={design} state={displayState} busy={sim.busy||compareBusy||inspection.mode==='history'} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
+          {state && !showComparison && <p className="operator-evidence-label">Active experiment controls and full-run evidence · current checkpoint {state.timeS} s. History inspection does not change this evidence.</p>}
+          {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
+          {state && !showComparison && inspection.mode==='current' && <Trend history={sim.history} />}
           <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy}
             onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
             onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared));setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
@@ -1503,11 +1520,11 @@ export default function TwinApp() {
           )}
           {state && (
             <div hidden={detail !== 'data'}>
-              <DataPanel key={design.revision} design={design} state={state} />
+              <p>Observation data panel · active current checkpoint {state.timeS} s; separate from historical scene inspection.</p><DataPanel key={design.revision} design={design} state={state} />
             </div>
           )}
           {state && detail === 'evidence' && (
-            <EvidencePanel design={design} state={state} />
+            <div><p>Engineering constraints for the active current checkpoint at {state.timeS} s; separate from the historical scene.</p><EvidencePanel design={design} state={state} /></div>
           )}
         </section>
         <aside className="twin-inspector">
@@ -1518,10 +1535,10 @@ export default function TwinApp() {
           </div>
           <h2>{asset?.name ?? 'Select an asset'}</h2>
           <code className="twin-id">{selectedId}</code>
-          <span className={`twin-tag ${assetOperatingStatus(state, selectedId)}`}>
-            {assetOperatingStatus(state, selectedId)} · simulated
+          <span className={`twin-tag ${assetOperatingStatus(displayState, selectedId)}`}>
+            {assetOperatingStatus(displayState, selectedId)} · simulated
           </span>
-          <AssetContext design={design} state={state} assetId={selectedId} onSelect={select} />
+          <AssetContext design={design} state={displayState} assetId={selectedId} onSelect={select} origin={sourceOrigin} />
           {asset && (
             <dl className="twin-properties">
               <dt>Envelope (W × H × D)</dt>
@@ -1554,7 +1571,7 @@ export default function TwinApp() {
               )}
             </dl>
           )}
-          <TwinNetworkPanel design={design} state={state} busy={sim.busy} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} />
+          <TwinNetworkPanel design={design} state={displayState} busy={sim.busy||inspection.mode==='history'} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} />
           {asset?.type==='pump'&&installedSpec&&(
             <section aria-label="Replace installed pump">
               <h3>Replace installed pump</h3>
@@ -1616,7 +1633,7 @@ export default function TwinApp() {
           )}
           {selectedState && (
             <>
-              <h3>Module operating point</h3>
+              <h3>Module operating point · {selectedModule.id}</h3>
               <dl className="twin-properties">
                 <dt>Technical / seawater flow</dt>
                 <dd data-testid="selected-flow">
@@ -1636,11 +1653,11 @@ export default function TwinApp() {
                 <dd>
                   {summary?.instantaneousPUE === null
                     ? 'Undefined'
-                    : num(summary?.instantaneousPUE ?? 0, 3)}{' '}
+                    : num(summary?.instantaneousPUE ?? NaN, 3)}{' '}
                   /{' '}
                   {summary?.energyPUE === null
                     ? 'Undefined'
-                    : num(summary?.energyPUE ?? 0, 3)}
+                    : num(summary?.energyPUE ?? NaN, 3)}
                 </dd>
               </dl>
             </>
@@ -1749,7 +1766,7 @@ export default function TwinApp() {
               </button>
               <h3>Causal event log</h3>
               <ol className="twin-log">
-                {state?.log
+                {displayState?.log
                   .slice(-18)
                   .reverse()
                   .map((e, i) => (
@@ -1757,7 +1774,7 @@ export default function TwinApp() {
                       <span>
                         {e.timeS}s · {e.kind}
                       </span>
-                      <button onClick={() => select(e.assetId)}>
+                      <button onClick={() => {select(e.assetId);inspection.inspect(e.timeS);}}>
                         {e.assetId}
                       </button>
                       <p>{e.message}</p>
@@ -1829,7 +1846,7 @@ export default function TwinApp() {
             <p className="twin-residuals">
               Residuals · electrical {num(summary.electricalResidualW, 5)} W ·
               thermal {num(summary.thermalResidualW, 5)} W · solver{' '}
-              {num(state?.solverMs ?? 0, 2)} ms
+              {num(displayState?.solverMs ?? NaN, 2)} ms
               <br />
               Normalized · electrical{' '}
               {residuals?.electricalNormalized.toExponential(2)} · thermal{' '}

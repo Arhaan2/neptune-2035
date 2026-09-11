@@ -109,8 +109,8 @@ export function resultsCSV(design:Design,state:SimulationState){
   return [columns,...state.modules.map(m=>[m.id,design.revision,state.solverVersion,state.timeS,m.coolantK,m.technicalFlowM3S,m.seawaterFlowM3S,m.itW,m.facilityW,m.batteryWh,m.electricalResidualW,m.thermalResidualW])].map(row=>row.map(csvCell).join(',')).join('\n');
 }
 export function inventoryCSV(design:Design){validateDesign(design);return [['assetId','type','parent','catalog','specificationVersion','widthM','heightM','depthM','massKg','ratingsSI','evidence'],...Array.from(allAssets(design),a=>[a.id,a.type,a.parentId??'',a.catalogId,a.revision,...a.dimensionsM,a.operationalMassKg??'unknown',JSON.stringify(a.ratings),'assumed'])].map(r=>r.map(csvCell).join(',')).join('\n');}
-export function conservationResiduals(design:Design,state:SimulationState){
-  const s=summarize(design,state),electricalInputW=state.modules.reduce((n,m)=>n+m.gridW+m.batteryDischargeW/resolveModuleEngineering(design,m.id).electrical.dischargeEfficiency,assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW);
+export function conservationResiduals(design:Design,state:SimulationState,observedSummary?:ReturnType<typeof summarize>){
+  const s=observedSummary??summarize(design,state),electricalInputW=state.modules.reduce((n,m)=>n+m.gridW+m.batteryDischargeW/resolveModuleEngineering(design,m.id).electrical.dischargeEfficiency,assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW);
   return {electricalResidualW:s.electricalResidualW,electricalNormalized:s.electricalResidualW/Math.max(1,electricalInputW),thermalResidualW:s.thermalResidualW,thermalNormalized:s.thermalResidualW/Math.max(1,s.facilityW),electricalDenominatorW:Math.max(1,electricalInputW),thermalDenominatorW:Math.max(1,s.facilityW)};
 }
 export function engineeringReport(design:Design,state:SimulationState,costScale=equipmentFor(design).economics.unitCostScale){

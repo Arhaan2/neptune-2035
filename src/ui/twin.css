@@ -69,3 +69,18 @@
   .operator-guide { padding: 12px; }
   .operator-guide .twin-actions button { font-size: 11px; }
 }
+.inspection-context { padding: 14px 20px; border-bottom: 1px solid var(--line); background: #163740; overflow-wrap: anywhere; }
+.inspection-context p { font-size: 12px; margin: 7px 0; }
+.inspection-context[data-status='loading'], .inspection-context[data-status='unavailable-history'] { background: #343d49; }
+.operator-timeline { margin: 18px 12px; min-width: 0; }
+.operator-timeline h2 { font-size: 18px; }
+.operator-event-list { list-style: none; padding: 0; max-height: 330px; overflow: auto; }
+.operator-event-list li { padding: 5px 0; }
+.operator-event-list button { display: flex; flex-direction: column; width: 100%; align-items: flex-start; text-align: left; overflow-wrap: anywhere; font-size: 12px; }
+.operator-event-list span, .operator-event-list small { display: block; max-width: 100%; }
+.operator-causal { border: 1px solid #779a87; padding: 14px; background: #1a383c; }
+.asset-history { margin-top: 20px; }
+.asset-history svg { width: 100%; height: auto; }
+.asset-history text { fill: #bad0d3; font-size: 11px; }
+.asset-history details { overflow-x: auto; }
+@media (max-width: 620px) { .inspection-context { padding: 12px; } .operator-timeline { margin: 12px 6px; padding: 12px; } }

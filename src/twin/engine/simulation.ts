@@ -299,8 +299,16 @@ export function advanceWork(design:Design,state:SimulationState,durationS:number
 export interface SimulationDispatchObservation { timeS:number; endTimeS:number; gridW:number; phase:'boundary'|'interval' }
 /** Optional observer reports canonical dispatch, including transfer substeps; it never changes state. */
 export type SimulationDispatchObserver=(observation:SimulationDispatchObservation)=>void;
+/** Read-only inspection: the accessor returns an owned copy and is valid only during this callback. */
+export type SimulationBoundaryObserver=(timeS:number,copySnapshot:()=>SimulationState)=>void;
+function observeInspectionBoundary(state:SimulationState,observer?:SimulationBoundaryObserver) {
+  if(!observer)return;
+  let active=true;
+  try { observer(state.timeS,()=>{if(!active)throw Error('Boundary snapshot accessor expired.');return structuredClone(state);}); }
+  finally { active=false; }
+}
 function upstreamGridW(design:Design,state:SimulationState):number {return state.modules.reduce((sum,module)=>sum+module.gridW,0)+assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW;}
-export function advanceWithStep(design:Design,input:SimulationState,durationS:number,events:OperationEvent[]=[],maxStepS?:number,observer?:SimulationDispatchObserver):SimulationState {
+export function advanceWithStep(design:Design,input:SimulationState,durationS:number,events:OperationEvent[]=[],maxStepS?:number,observer?:SimulationDispatchObserver,boundaryObserver?:SimulationBoundaryObserver):SimulationState {
   validateDesign(design);validateState(design,input);
   maxStepS ??= input.integrationStepS;
   finiteNumber(durationS,'advance.durationS',{min:0,max:CONTRACT.maxAdvanceS,integer:true,unit:'s'});
@@ -320,6 +328,7 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
   if(durationS===0&&!initiallyApplied)resolveStep(design,state,ctx,0,false);
   finishExperimentBoundary(state);
   observer?.({timeS:state.timeS,endTimeS:state.timeS,gridW:upstreamGridW(design,state),phase:'boundary'});
+  observeInspectionBoundary(state,boundaryObserver);
   while(state.timeS<end&&!experimentFinished(state)){
     // Each fixed step starts at a committed boundary; chunk endpoints add no controller transitions.
     const before=beginInterval(state);
@@ -335,6 +344,7 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
     if(!applyEvents(design,state,ctx)&&!warming)resolveStep(design,state,ctx,0,true);
     finishExperimentBoundary(state);
     observer?.({timeS:state.timeS,endTimeS:state.timeS,gridW:upstreamGridW(design,state),phase:'boundary'});
+    observeInspectionBoundary(state,boundaryObserver);
     finiteOutputs(state,'simulation accumulators');
   }
   validateCandidate(design,state);return state;
@@ -343,6 +353,10 @@ export function advance(design:Design,state:SimulationState,durationS:number,eve
 export function replay(design:Design,events:OperationEvent[],durationS:number):SimulationState{return advance(design,initialize(design),durationS,events);}
 export function summarize(design:Design,state:SimulationState):Summary {
   validateState(design,state);
+  return summarizeObservedBoundary(design,state);
+}
+/** Same summary formulas for an engine-observed boundary. This is not checkpoint admission. */
+export function summarizeObservedBoundary(design:Design,state:SimulationState):Summary {
   const sum=(key:keyof Pick<ModuleState,'itW'|'facilityW'|'gridW'|'pumpPowerW'|'availableAccelerators'|'batteryWh'|'electricalResidualW'|'thermalResidualW'>)=>state.modules.reduce((n,m)=>n+m[key],0);
   const rootNetworkW=assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW;
   const itW=sum('itW'),facilityW=sum('facilityW')+rootNetworkW,energizedAccelerators=state.modules.reduce((n,m)=>n+m.energizedNodes*8,0);
