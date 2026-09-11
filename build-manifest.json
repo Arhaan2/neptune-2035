@@ -7,24 +7,29 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "assets/index-B1XSQeLV.js",
-      "bytes": 565923,
-      "sha256": "ce46b6e9b3f0749b5589174e0019df571d69820dae0190092f6d5e99b7898f04"
+      "path": "assets/index-CfEDeDcj.js",
+      "bytes": 626380,
+      "sha256": "6fe409a84b4770ab60ba1876a780a654eb48432e074109902933e27637d3cc8d"
     },
     {
-      "path": "assets/index-B9KF9rsl.css",
-      "bytes": 209000,
-      "sha256": "e10c93aaf6cb263baee348331aa477c7432509f07ef8ad842c4f6cf2d44f2f5a"
+      "path": "assets/index-Dg1o4G0q.css",
+      "bytes": 210649,
+      "sha256": "de814b59e96d543b1b4310ff9d2f64a773204547309938fab1bf46025ef2ca52"
     },
     {
-      "path": "assets/OrbitControls-DddQITWp.js",
+      "path": "assets/OrbitControls-B-B6LbL9.js",
       "bytes": 934189,
-      "sha256": "36aa0c19c5ceeb47a85ed487f3277ac7a39792fc070eabf21a3134987658c6f3"
+      "sha256": "b28f1feec4b792f6a045f695d56b06a33a09a39adbddff1c3953907e29e77c78"
     },
     {
-      "path": "assets/Scene-BsLqtr2D.js",
+      "path": "assets/Scene-BGDydGia.js",
       "bytes": 16453,
-      "sha256": "1530a723539660afb2330d13609674bb23fb3f46ea4e37b61b2d6825e9808797"
+      "sha256": "1f0619b1f2f79f66563458dd7ca2916aab32bf9c7f41e036c54cddb591f36e8d"
+    },
+    {
+      "path": "assets/TwinScene-Db-T-fVV.js",
+      "bytes": 64175,
+      "sha256": "92ee5737178c2ce46c87095b5c5f5f174eb6c992deac5fa2ee7264109f187c31"
     },
     {
       "path": "assets/TwinScene-DkCf7rj3.css",
@@ -32,14 +37,9 @@
       "sha256": "180c5e2ef9f5324679a23caded3b2515234ccca40c72aa1ac1ec8ff82da823d4"
     },
     {
-      "path": "assets/TwinScene-SNDOw7eL.js",
-      "bytes": 64175,
-      "sha256": "d74d3e212db759006f8370c12b61c15610472c89874f677ff5f643e314d27a62"
-    },
-    {
-      "path": "assets/worker-CqEaU7vJ.js",
-      "bytes": 108274,
-      "sha256": "73414b8506839fc0a2bd43b9151d2ace7288f7e67229798576de370d68ddcc27"
+      "path": "assets/worker-BjFFDFG4.js",
+      "bytes": 140169,
+      "sha256": "96b65b9a2c9af7e37797ec12c8010e6fd711f40e3422503061336bfb030af2ba"
     },
     {
       "path": "experiments/cluster-link-loss-trace.json",
@@ -189,7 +189,7 @@
     {
       "path": "index.html",
       "bytes": 1234,
-      "sha256": "2a03702735c6b88ed20e6295e6c3bae5671312bb07cdd4d8d534eb15ac5a720a"
+      "sha256": "2407641d516c08d321242a7049aee12bbc07da690853f94120c629ea9c3f032c"
     },
     {
       "path": "samples/calibration-generated.json",
