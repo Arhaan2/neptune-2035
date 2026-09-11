@@ -23,6 +23,9 @@ Times above are minute-level orchestration records; native evidence records exac
 | 5A contract | Building `68b19b1` | `5f7a2bd` | Contract v1 frozen for independent review; implementation not yet accepted |
 | 5A expectations | Testing `dae3f23` | `bfe1b88` | Independent frozen capacity/service oracle: 8/8; retained baseline focused suite: 108/108 |
 | 5A independent review | Verification `115d862` | `c491a89` | Eight source-specific engineering review checkpoints; coherent contract, implementation acceptance pending |
+| Topology / allocator slice | Building `5ecc557` | `f4e63e7` | Installed transfer hardware, explicit one-hop route and atomic bundle allocator; engine integration pending |
+| Independent capacity tests | Testing `73d6ff1` | `8af798f` | Root and Testing reproduced 31/32 focused passes, one malformed-input failure; native failed JSON retained |
+| PH5-T01 repair | Fixing `176e3e0` | `f171adc` | `controller.ts` exclusive lease; duplicate resource paths now rejected; independent retest pending |
 
 After Verification's completed initial review, `/root/fixing` started in a distinct worktree. The actual live-agent inventory showed root, Building, Testing and Fixing concurrently active, within the four-agent limit. Verification retains its identity for later independent review.
 
