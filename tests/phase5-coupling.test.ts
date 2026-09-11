@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { engineeringIdentity } from '../src/twin/catalog/equipment';
-import { replaceEquipment } from '../src/twin/assets/design';
+import { buildDesign, DEFAULT_CONFIG, replaceEquipment } from '../src/twin/assets/design';
 import { advance, initialize, summarize } from '../src/twin/engine/simulation';
 import { createExperimentDefinition } from '../src/twin/experiment/definition';
 import { createTransferReferenceDesign } from '../src/twin/transfer/design';
+import { validateDesign } from '../src/twin/persistence/design';
+import { parseProject, projectFile, restoreProject, serializeProject } from '../src/twin/persistence/project';
 import type { Design, OperationEvent } from '../src/twin/types';
 import frozen from './fixtures/phase-5/frozen-expectations.json';
 
@@ -121,5 +123,40 @@ describe('PH5 V02 installed standby dependency and actual restoration demand', (
       expect(resource.nativeW + 1e-6).toBeGreaterThanOrEqual(native.gridW + platformNetworkW / efficiency);
       expect(resource.nativeW + resource.transferredW).toBeLessThanOrEqual(capacityW + 1e-6);
     }
+  });
+});
+
+describe('PH5 V03 complete proposed supply path conversion losses', () => {
+  it.each([63000, 65000])('accounts for an additional valid donor transformer under a %i W tie', capacityW => {
+    const design = createTransferReferenceDesign();
+    const central = buildDesign({ ...DEFAULT_CONFIG, generation: 1, requestedAccelerators: 24 });
+    const extraTransformer = structuredClone(central.assets.find(asset => asset.id === 'shore/transformer')!);
+    const sourceConnection = structuredClone(central.connections.find(edge => edge.from === 'shore/grid' && edge.to === extraTransformer.id)!);
+    design.assets.push(extraTransformer); design.connections.push(sourceConnection);
+    const donorConnection = design.connections.find(edge => edge.from === 'shore/grid' && edge.to === 'platform-001/transformer')!;
+    donorConnection.from = extraTransformer.id; donorConnection.id = `${extraTransformer.id}>platform-001/transformer:power`;
+    const route = design.transfer!.routes[0];
+    for (const edge of design.connections) if (route.tieConnectionIds.includes(edge.id)) edge.capacity = capacityW;
+    design.revision = `extra-conversion-${engineeringIdentity(design)}`;
+    expect(() => validateDesign(design)).not.toThrow();
+    const healthy = initialize(design), initialRecipient = healthy.modules.find(module => module.id.startsWith('platform-002/'))!;
+    const networkW = design.assets.find(asset => asset.id === 'platform-002/cluster')!.ratings.capacityW;
+    const originalEfficiency = design.assets.find(asset => asset.id === 'platform-002/transformer')!.ratings.efficiency;
+    // Independently add the declared extra conversion loss to healthy original
+    // module + platform-network demand. No production transfer allocator is used.
+    const expectedSourceW = (initialRecipient.gridW + networkW / originalEfficiency) / extraTransformer.ratings.efficiency;
+    expect(expectedSourceW).toBeGreaterThan(63000); expect(expectedSourceW).toBeLessThan(65000);
+    const definition = createExperimentDefinition(design, { id: `extra-conversion-${capacityW}`, durationS: 12, disturbances: [events(design)[0]] });
+    const initial = initialize(design, definition), state = advance(design, initial, 12), attempt = state.transfer!.attempts[0];
+    if (capacityW === 63000) {
+      expect(attempt).toMatchObject({ status: 'blocked', reason: 'INSUFFICIENT_HEADROOM', admittedW: 0, tieClosed: false });
+    } else {
+      expect(attempt).toMatchObject({ status: 'transferred', tieClosed: true, unservedW: 0 });
+      expect(attempt.admittedW).toBeCloseTo(expectedSourceW, 6);
+      expect(state.modules.find(module => module.id.startsWith('platform-002/'))!.availableAccelerators).toBe(8);
+    }
+    const checkpoint = advance(design, initial, 3), restored = restoreProject(parseProject(serializeProject(projectFile(design, checkpoint))));
+    const resumed = advance(design, restored.state, 9);
+    expect(resumed.transfer).toEqual(state.transfer); expect(resumed.modules).toEqual(state.modules); expect(resumed.experiment).toEqual(state.experiment);
   });
 });
