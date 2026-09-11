@@ -59,7 +59,7 @@ export function assembleDecisionResult(campaign:DecisionCampaign,plan:DecisionPl
   const sensitivityRankings=campaign.sensitivities.map(s=>rankCampaign(campaign,evaluations,s.id));
   const ranking={...sensitivityRankings.find(r=>r.sensitivityId==='central')!};
   const completed=paired.filter(r=>r.status==='completed').length,complete=paired.length===plan.totalRuns&&paired.every(r=>r.status==='completed')&&evaluations.every(e=>e.execution==='completed');
-  if(!complete&&ranking.status==='recommended'){ranking.status='provisional';ranking.scopeComplete=false;}
+  if(!complete){ranking.scopeComplete=false;if(ranking.status==='recommended')ranking.status='provisional';else if(ranking.status==='no-feasible-evaluated-candidate')ranking.status='evaluation-incomplete';}
   const central=sensitivityRankings.find(r=>r.sensitivityId==='central')!;
   const changedWinners=sensitivityRankings.filter(r=>identity(r.winnerIds)!==identity(central.winnerIds)).map(r=>r.sensitivityId),changedSets=sensitivityRankings.filter(r=>identity(r.feasibleCandidateIds)!==identity(central.feasibleCandidateIds)).map(r=>r.sensitivityId);
   const sensitivityConclusion=!complete?'Sensitivity assessment incomplete; no final whole-search recommendation.':campaign.sensitivities.length===1?'Central assumptions only; no paired sensitivity robustness assessed.':`Across the ${campaign.sensitivities.length} declared OFAT cases: ${changedWinners.length?`changed winners in ${changedWinners.join(', ')}`:'unchanged winner set'}; ${changedSets.length?`changed feasible sets in ${changedSets.join(', ')}`:'unchanged feasible set'}. ${sensitivityRankings.some(r=>r.ties.length)?'Ties occur within declared tolerance. ':''}Joint combinations untested; bounds are exploratory.`;
