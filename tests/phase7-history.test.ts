@@ -108,6 +108,12 @@ describe('PH7 isolated history resolves actual final boundaries without source m
     const edited = advance(design, initial, 1, [{ id: 'new-workload', timeS: 0, kind: 'workload', assetId: 'shore/grid', value: 0.3 }]);
     expect(inspectionRunIdentity(design, edited)).not.toBe(inspectionRunIdentity(design, initial));
   });
+  it('invalidates a captured history request when the selected design changes before active state catches up', () => {
+    const { design, source } = fixture();
+    const replacement = buildDesign({ ...design.config, requestedAccelerators: 48 });
+    expect(replacement.revision).not.toBe(design.revision);
+    expect(inspectionRunIdentity(replacement, source)).not.toBe(inspectionRunIdentity(design, source));
+  });
   it('bounds retained chart data and preserves sampled extrema without reducing exact aggregates', async () => {
     const d = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 8 }), id = `${d.modules[0].id}/pump-duty`;
     const def = createExperimentDefinition(d, { id: 'p7-retention', durationS: 200 });
