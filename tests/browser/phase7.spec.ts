@@ -201,6 +201,34 @@ test('PH7 C2 rapid history requests cancellation and design replacement discard 
   await info.attach('C2-history-source-isolation-after-replacement', { body: JSON.stringify({ original: project, replaced }), contentType: 'application/json' });
 });
 
+test('PH7 D04 loading the same experiment again clears the prior history source', async ({ page }, info) => {
+  const { project } = await recordedTransfer(page);
+  await page.getByLabel('Inspect history time in seconds', { exact: true }).fill('4.375');
+  await button(page, 'Inspect history time').click();
+  await expect(main(page)).toHaveAttribute('data-display-time', '4.375');
+  await button(page, 'Compare').click();
+  await button(page, 'Load selected candidate').click();
+  await expect(main(page)).toHaveAttribute('data-time', '0');
+  await expect(button(page, 'Run selected experiment')).toBeEnabled();
+  const current = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  await info.attach('D04-same-definition-current-and-displayed', { body: JSON.stringify({ project, current, mode: await main(page).getAttribute('data-inspection-mode'), displayedTime: await main(page).getAttribute('data-display-time') }), contentType: 'application/json' });
+  expect(current.checkpoint.state.experiment.definition).toEqual(project.checkpoint.state.experiment.definition);
+  await expect(main(page)).toHaveAttribute('data-inspection-mode', 'current');
+  await expect(main(page)).toHaveAttribute('data-display-time', '0');
+});
+
+test('PH7 D05 an unavailable historical network observation stays unknown rather than nominal powered', async ({ page }, info) => {
+  await recordedTransfer(page);
+  await page.getByLabel('Find asset ID', { exact: true }).fill('shore/cluster-core'); await button(page, 'Find').click();
+  await page.getByLabel('Inspect history time in seconds', { exact: true }).fill('3.3'); await button(page, 'Inspect history time').click();
+  await expect(main(page)).toHaveAttribute('data-inspection-status', 'unavailable-history');
+  const network = page.getByRole('region', { name: 'Network capacity', exact: true });
+  await info.attach('D05-unavailable-network-panel', { body: await network.innerText(), contentType: 'text/plain' });
+  await page.screenshot({ path: info.outputPath('D05-unavailable-network-panel.png'), fullPage: true });
+  await expect(network).not.toContainText('Powered');
+  await expect(network).toContainText(/unavailable|unknown/i);
+});
+
 for (const editedInput of ['fixture', 'recovery policy'] as const) {
   test(`PH7 D01 historical candidate inspection preserves original evidence after ${editedInput} edit`, async ({ page }, info) => {
     const errors: string[] = [];

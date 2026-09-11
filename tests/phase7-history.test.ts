@@ -65,6 +65,20 @@ describe('PH7 isolated history resolves actual final boundaries without source m
     expect(result.resolvedTimeS).toBe(expectedTime);
     expect(canonical(result.state)).toEqual(canonical(observations.get(expectedTime)));
   });
+  it('keeps recovery marker9.375 separate from exact preceding9 and explicit next observed10 scenes', async () => {
+    const { design, source, observations, assetId } = fixture(), before = structuredClone(source);
+    const marker = source.experiment!.metrics.pendingRecovery!.confirmationTimeS!;
+    expect(marker).toBe(9.375);
+    const exact = await resolveInspection(design, source, { assetId, timeS: marker, boundary: 'post' }, immediate);
+    expect(exact).toMatchObject({ status: 'unavailable-history', state: null, requestedTimeS: marker });
+    const prior = await resolveInspection(design, source, { assetId, timeS: marker, boundary: 'previous' }, immediate);
+    expect(prior.resolvedTimeS).toBe(9);
+    const after = await resolveInspection(design, source, { assetId, timeS: marker, boundary: 'at-or-after' }, immediate);
+    expect(after).toMatchObject({ status: 'resolved', requestedTimeS: marker, resolvedTimeS: 10 });
+    expect(after.reason).toContain('Metric marker at 9.375 s');
+    expect(canonical(after.state)).toEqual(canonical(observations.get(10)));
+    expect(source).toEqual(before);
+  });
   it.each([4.3, 4.374999, -1, NaN, 13])('time %s produces explicit unavailable history and no invented summary', async timeS => {
     const { design, source, assetId } = fixture();
     const result = await resolveInspection(design, source, { assetId, timeS, boundary: 'post' }, immediate);
