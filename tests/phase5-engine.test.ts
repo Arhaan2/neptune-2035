@@ -24,6 +24,15 @@ function invariant(design: Design, state: SimulationState) {
 }
 
 describe('PH5 A/B actual engine transfer versus same-assumption baselines', () => {
+  it.each([0, 0.125, 0.5, 2.375, 10, 60])('integrates interruption exactly for configured delay %s s including terminal and pending deadlines', delayS => {
+    const design = reference({ delayS }), state = run(design), interruptedS = Math.min(delayS, 10);
+    expect(state.experiment!.metrics.shortfallAcceleratorS).toBe(8 * interruptedS);
+    expect(state.experiment!.metrics.serviceViolationS).toBe(interruptedS);
+    expect(state.transfer!.attempts[0].status).toBe(delayS <= 10 ? 'transferred' : 'waiting');
+    if (delayS <= 10) expect(state.transfer!.transitions.find(transition => transition.reason === 'TRANSFERRED')!.timeS).toBe(2 + delayS);
+    if (delayS >= 10) expect(recoveryReport(state.experiment!.metrics, 'completed').status).toBe('not-recovered');
+    invariant(design, state);
+  });
   it('matches frozen constant-load interruption area and separate recovery onset/confirmation', () => {
     const ii = createTransferReferenceDesign(2), iii = reference();
     expect(ii.config.workload).toBe(iii.config.workload); expect(ii.config.requestedAccelerators).toBe(iii.config.requestedAccelerators);

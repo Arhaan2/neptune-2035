@@ -42,7 +42,10 @@ describe('PH5 D/E/F real shared donor competition and changing headroom', () => 
     expect(resource.nativeW + resource.transferredW).toBeLessThanOrEqual(fixture.capacityW + 1e-6);
   });
   it('permutes route/module/asset/connection collections without changing stable-priority admission', () => {
-    const a = donorFixture().design, b = structuredClone(a);
+    const a = donorFixture().design;
+    for (const route of a.transfer!.routes) route.priority = 0;
+    a.revision = `equal-priority-${engineeringIdentity(a)}`;
+    const b = structuredClone(a);
     b.transfer!.routes.reverse(); b.modules.reverse(); b.assets.reverse(); b.connections.reverse(); b.revision = `permuted-${engineeringIdentity(b)}`;
     const left = run(a), right = run(b);
     const allocations = (state: ReturnType<typeof run>) => state.transfer!.attempts.map(attempt => ({ id: attempt.id, status: attempt.status, reason: attempt.reason, admittedW: attempt.admittedW, unservedW: attempt.unservedW })).sort((a, b) => a.id.localeCompare(b.id));
