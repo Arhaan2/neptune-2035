@@ -24,7 +24,7 @@ export function evaluateCandidate(campaign:DecisionCampaign,candidateId:string,a
   const add=(id:string,actual:number|null,threshold:number,unit:RequirementEvaluation['unit'],tolerance:number,scenarioId:string|null,reason:string,assetIds:string[]=[],timeS:number|null=null,kind:RequirementEvaluation['class']='operating')=>requirements.push(evaluateRequirement({id,class:kind,actual,threshold,unit,tolerance,operator:'<=',scenarioId,sensitivityId,reason,assetIds,timeS},t.nearBindingFraction));
   for(const scenario of campaign.scenarios){
     const run=runs.find(r=>r.scenarioId===scenario.id),metrics=run?.state?.experiment?.metrics;
-    const available=!!metrics&&run?.status==='completed'&&run.state?.experiment?.status==='completed'&&metrics.elapsedS===scenario.durationS&&metrics.unavailableS===0&&metrics.boundaryHealthy!==null;
+    const available=!!metrics&&run?.status==='completed'&&run.state?.experiment?.status==='completed'&&metrics.elapsedS===scenario.durationS&&metrics.unavailableS===0&&typeof metrics.boundaryHealthy==='boolean';
     const metric=(field:'shortfallAcceleratorS'|'serviceViolationS'|'thermalViolationS')=>available&&Number.isFinite(metrics[field])?metrics[field]:null;
     const fault=scenario.disturbanceTimeS!==null,assets=run?.state?.events.map(e=>e.assetId)??[];
     add('unmet-demand',metric('shortfallAcceleratorS'),fault?p.faultUnmetAcceleratorS:p.nominalUnmetAcceleratorS,'accelerator-s',t.acceleratorSeconds,scenario.id,'Whole-run unmet requested useful service; required network remains enforced.',assets,metrics?.firstServiceViolationS??null);

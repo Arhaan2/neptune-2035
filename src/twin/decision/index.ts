@@ -5,3 +5,4 @@ export * from './sensitivity';
 export * from './evaluate';
 export * from './runner';
 export * from './worker-client';
+export * from './evidence';
