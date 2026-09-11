@@ -695,6 +695,7 @@ export default function TwinApp() {
         <span>
           <i /> Design-stage digital twin · Simulated operation
         </span>
+        <span>Public prototype — simulated, design-stage model</span>
         <span>Simulated, design-stage prototype.</span>
         <span>{design.revision} · 1 world unit = 1 m</span>
       </div>
