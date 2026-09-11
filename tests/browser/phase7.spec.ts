@@ -418,6 +418,49 @@ test('PH7 D07 confirmed recovery constraint preserves raw metric time while insp
   await info.attach('D07-raw-constraint-marker-and-observed-scene', { body: JSON.stringify({ requirement, marker, expectedTime, loaded }), contentType: 'application/json' });
 });
 
+test('PH7 D08 altered execution inputs invalidate the old walkthrough without overwriting the operator run', async ({ page }, info) => {
+  await setup(page);
+  await button(page, 'Start decision campaign').click();
+  await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
+  const campaign: DecisionExport = await downloadJSON(page, () => button(page, 'Export decision campaign').click());
+  await button(page, 'Start result walkthrough').click();
+  const walkthrough = page.getByTestId('operator-walkthrough');
+  const count = Number(await walkthrough.getAttribute('data-step-count'));
+  const runId = await walkthrough.getAttribute('data-run-id');
+  const originalRun = campaign.result.runs.find(run => run.id === runId)!;
+  expect(originalRun.state).toBeDefined();
+  for (let step = 0; step < count; step++) {
+    await expect(walkthrough).toHaveAttribute('data-status', step === count - 1 ? 'completed' : 'ready');
+    if (step < count - 1) await button(page, 'Next walkthrough step').click();
+  }
+  await button(page, 'Return to current state').click();
+  await page.getByLabel('Replay time in seconds', { exact: true }).fill('6');
+  await button(page, 'Seek time').click();
+  await expect(main(page)).toHaveAttribute('data-time', '6');
+  await expect(button(page, 'Step 10s')).toBeEnabled();
+  await page.getByLabel('Find asset ID', { exact: true }).fill('shore/grid'); await button(page, 'Find').click();
+  await button(page, 'Trip selected asset').click();
+  await expect(button(page, 'Step 10s')).toBeEnabled();
+  await button(page, 'Step 10s').click();
+  await expect(main(page)).toHaveAttribute('data-time', '12');
+  await expect(button(page, 'Step 10s')).toBeEnabled();
+  const modified = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  expect(modified.checkpoint.state.experiment.definition.id).toBe(originalRun.state!.experiment!.definition.id);
+  expect(modified.checkpoint.state.events).toContainEqual(expect.objectContaining({ kind: 'trip', assetId: 'shore/grid', timeS: 6 }));
+  expect(modified.checkpoint.state.failedAssetIds).toContain('shore/grid');
+  expect(modified.checkpoint.state.experiment.metrics).not.toEqual(originalRun.state!.experiment!.metrics);
+  const resume = button(page, 'Resume walkthrough');
+  if (await resume.isVisible() && await resume.isEnabled()) await resume.click();
+  const after = await downloadJSON(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const remaining = await walkthrough.count();
+  const status = remaining ? await walkthrough.getAttribute('data-status') : null;
+  await info.attach('D08-original-and-modified-run-binding', { body: JSON.stringify({ original: originalRun, modified, after, guidance: remaining ? await walkthrough.innerText() : null, status }), contentType: 'application/json' });
+  await page.screenshot({ path: info.outputPath('D08-modified-run-and-guidance.png'), fullPage: true });
+  expect(after.checkpoint).toEqual(modified.checkpoint);
+  expect(remaining === 0 || status === 'invalidated', 'Old guidance must be removed or explicitly invalidated after a source change').toBe(true);
+  if (remaining) await expect(resume).not.toBeEnabled();
+});
+
 for (const editedInput of ['fixture', 'recovery policy'] as const) {
   test(`PH7 D01 historical candidate inspection preserves original evidence after ${editedInput} edit`, async ({ page }, info) => {
     const errors: string[] = [];
