@@ -22,3 +22,18 @@ The full current Pages tree was archived as `pre-phase6-pages.tar` (SHA-256 `129
 ## Handoffs
 
 Pending implementation handoffs. Contract and requirement matrix must freeze before ranking implementation.
+
+### Implemented slice and review handoffs
+
+- Testing `ce334b0` froze the requirement matrix on baseline before Building ranked candidates; integrated `6a7366e`.
+- Testing `1dcdc76` delivered six independent real-engine policy tests; integrated `7c85c1b`. Baseline Phase 5 regression: 152/152.
+- Building `ee40a70` delivered contract/candidates (`decision-campaign-1`), integrated `6b940a2`; independently reviewed by Verification `fa647341`, integrated `e0b67a9`. Verification executed 16 native reference runs, 68 independent assertions and six-size upstream accounting oracle before reviewing production ranking.
+- Verification completed its initial turn and retained its identity/worktree. Distinct `/root/fixing` was then actually spawned in `neptune-phase6-fixing` / `codex/neptune-phase6-fixing`. Four active slots remained the observed ceiling. Fixing received exclusive `contract.ts` lease from Building for P6-T001 while Building continued evaluation.
+- Building `379727d` delivered pure evaluation/ranking and real assumption adapters, integrated `19bab14`.
+- Fixing `0f47b75` repaired P6-T001 and delivered a 74-field omission audit, integrated `5e2e7ad`; Testing independently retested all 42 contract assertions and closed it. Lease returned after handoff.
+- Building `cae0df34` delivered canonical per-interval supply observation, complete run planning/execution, bounded two-worker client and the P6-T002 terminal-missing guard, integrated `2a73be7`.
+- Orchestration `14f9fb9` delivered Compare UI/IndexedDB/explicit load/reproduction/release commands. Its first typecheck recorded only the four expected missing evidence exports from the still-pending next Building slice; that intermediate failure log is retained. `63d804b` adds source identity, selectable OFAT scope and frozen USD 50m budget demonstration commands.
+- Testing `ea1eb88` and `37b3634` delivered contract/ranking/assumption assertions, integrated `d47b667` and `cbb1a79`.
+- Building explicitly transferred `runner.ts` and `worker-client.ts` to Fixing for P6-T003/P6-T004 while continuing evidence import/export/report implementation. Fixing owns only those files plus isolated `tests/phase6-fixes.test.ts`; Testing owns all other Phase 6 tests and independently retests repairs.
+
+All handoff base/patch identities remain in Git history. No agent other than Orchestration publishes shared refs, integrates the release branch or deploys. Local and browser gates remain pending until all slices integrate; these incremental passes are not release acceptance.
