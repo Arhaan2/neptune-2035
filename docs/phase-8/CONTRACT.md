@@ -1,0 +1,46 @@
+# Phase 8 verification and release contract
+
+Asset-linked design-stage offshore infrastructure twin with coupled operation and failure simulation.
+
+**Simulated, design-stage prototype; physical validation pending.** Intended use is investigating modeled equipment dependencies, coupled operation, disturbances, recovery and bounded design comparisons under explicit assumptions. This is independent agent verification, not third-party physical validation, certification, commissioning, regulatory approval or a human GitHub review. No claim covers identified offshore installations, marine stability/mooring/environment/permitting, training throughput, reliability probabilities or global optimization.
+
+## Starting point and ownership
+
+Remote main was checked before implementation: `c22964d48ddca0e7f7db18ede972125f79dad2df`, tree `ce6cd0c2009a7eb78e7b41230a8ab6a94cfe0226`; it had not advanced beyond Phase 7. Production legacy Pages uses `codex/pages` at `/`, observed commit `67bd6e59769172ecf012ce298f9f5353cbb251f9`. Preview tree is `531d00a67da4c1f2f02a22bf249d93e683b2601b`. Initial anonymous verification matched 90 served files and two nonserved markers; all 45 preview files were inventoried. A preserved Pages archive was restored in isolation and all 92 files matched. These are starting receipts, not Phase 8 acceptance.
+
+The original Phase 1 user worktree and its two unrelated untracked files are untouched. An independent clone of the verified Phase 7 recovery bundle supplies isolated integration, building, testing, verification and fixing worktrees. Only Orchestration integrates shared commits and controls GitHub/Pages/releases/rollback. Building owns new `scripts/phase-8` tooling; Testing owns new acceptance tests and historical reproduction; Verification keeps production read-only and writes independent references/audits; Fixing owns explicit issue-scoped production repairs. Writers do not share files. Heavy measurements serialize separately from parallel reasoning.
+
+Actual native task names are `/root`, `/root/building`, `/root/testing`, `/root/verification`; the fourth worker launch initially returned `agent thread limit reached`. The Fixing role must be launched as a distinct actual agent after a slot becomes available; a final receipt records actual identities and overlap. This runtime limitation is not evidence of five simultaneous agents.
+
+Every handoff records requirement/issue IDs, immutable input commit/tree, changed files/output commit, native commands/exit codes/evidence, expected and observed behavior, open issues and PASS/FAIL/BLOCKED. No release with missing mandatory evidence or unresolved correctness findings.
+
+## Frozen numerical criteria
+
+Criteria were reviewed by the independent agent before judging new results. Existing model cards and Phase 4–6 definitions remain authoritative. Machine-readable rows must retain units, reference/observed values, absolute error, optional relative error, threshold and outcome. No tolerance is changed merely to accommodate an observed error.
+
+| Check | Acceptance and rationale |
+| --- | --- |
+| Independent reference regeneration | Existing Python fixture content unchanged; generator runs on a scratch copy. No production imports in the reference. |
+| Rational battery energy | Absolute error <= `1e-8 Wh`; efficiencies, W×s/3600 conversion, charge/discharge exclusivity, energy/reserve bounds. |
+| Electrical and thermal accounting | Every module absolute residual <= `1e-5 W` **and** normalized residual <= `1e-9`. Electrical input normalization `max(1 W, gridW + dischargeW/eta)`; thermal normalization `max(1 W, facilityW)`. Retain signed total, sum of absolute residuals and maximum absolute component residual. Near-zero denominators use the 1 W floor, never a division by zero or cancellation waiver. Accounting precision is not physical accuracy. |
+| Hydraulic operating points | Independent frictionless quadratic intersections: absolute flow error <= `1e-10 m³/s`, head residual <= `0.01 Pa`. Cover speeds 0/0.5/1/1.2 and supported pump counts 0/1/2, disabled circuit and invalid unsupported counts. Equivalent series continuity is true by construction; no arbitrary network claim. |
+| Counterflow exchanger | Existing 10 kW equal-capacity benchmark <= `1e-7 W`; other bounded normal-flow stream residuals <= `1e-6 W`. Zero UA/flow yields exact zero transfer; reversed temperature yields signed transfer; near-equal capacity remains bounded. |
+| Isolated transient | Existing independent RK4 air benchmark <= `1e-7 K`; production analytical integration is the implementation under test. |
+| Coupled timestep | Existing production `advanceWithStep` at h=1/0.5/0.25 s, equal initial conditions, policy/events and matched 30/60/120 s times. All module coolant/air differences <= `0.001 K`; facility/IT/grid/total-storage energy differences <= `0.001 Wh` for the smooth bounded case. This retains documented tolerances, not an invented convergence order. |
+| Aligned network outage | h=1/0.5/0.25, outage [20,40) s, 60 s run, adequate power and no thermal switch: unmet demand equals required accelerators×20 within `1e-8 accelerator-s`, interruption equals 20 within `1e-8 s`; event times and discrete counts exact. A one-second allowance is explicitly rejected. |
+| Switching sensitivity | Report pairwise differences separately from smooth integration; compare actual event/controller sequence and first-crossing semantics. No global smooth-order requirement through discrete admission or controller transitions. Unexplained discrepancies block acceptance. |
+| Portable decisions | Preserve original six campaign inputs/expected exports. Recompute complete plan, metrics, constraints, ranking and provenance with existing Phase 6 reproduction rules: seconds/accelerator-s `1e-8`, W/K `1e-6`, USD `.01`, counts/definitions/thresholds/versions exact. solverMs alone is nonphysical timing. |
+
+## Finite operating matrix
+
+Before expensive runs: one-node 86,401 s history crossing the old day boundary with 1,001 events using existing measurement machinery; 1,280-accelerator 1,800 s depletion/recovery and pump/thermal cases; representative 5,128-accelerator 60 s transfer/network cases; largest currently selectable 1,000,000 accelerators for 1 s plus 1 s continuation. Existing unit/worker atomic work limits remain unchanged. Phase 6 original campaign matrices retain their declared sizes/durations and constraints. Boundary/invalid cases must distinguish invalid input, unsupported configuration and completed but inadequate design.
+
+Standalone engine cases have a 180 s wall budget per scenario. Selected short measurements use one cold and two warm samples; long-history sample count is one. Record actual hardware/OS/runtime, size/duration/timestep, solver and wall time, process RSS separately from heap, cold/warm condition and contention. Browser tests retain 60 s operation/test limits and state-based waits, one worker and zero retries. No universal performance claim follows from this host. Unavailable memory observations are null, not zero. A case exceeding a budget is retained as a failed measurement, never silently relaxed.
+
+The retained `public prototype large-campus functional Step 10s` test runs in Firefox; its historical Chromium/WebKit exclusions are specific to that test, not general permission to skip large-campus correctness. Additional bounded cross-browser coverage does not prove the excluded 10 s case. No deferred path is re-enabled.
+
+## Candidate and release gates
+
+The requirement matrix defines the evidence join. Freeze source commit/tree/lock/build config and exact compiled manifest before final acceptance; receipts live outside the source tree. Testing and Verification approve the same source and artifact. Run clean install, typecheck, lint, full units plus both real telemetry integrations, independent references, historical regressions, integrated operating/decision experiments, bounded envelope, production build and retained Chromium/Firefox/WebKit acceptance. Test actual production base path locally; `/v2-preview/` is never staging.
+
+Use the normal PR process and required CI without bypasses. Recheck remote main before merge; an altered source tree invalidates approval. Promote only the accepted CI artifact, changing only documented release metadata. Preserve every preview byte, hosting marker and unrelated deployment content. The manifest excludes itself and release.json to avoid self-reference; verify both excluded identities separately. Run complete hosted browser acceptance, anonymous payload hashes and independent hosted review after deployment. Publish a new immutable Phase 8 release with sanitized evidence and anonymous download checks. Phase 7 recording remains historical. If working production is compromised, restore the verified prior payload through a successor commit and live verification; rollback does not complete Phase 8.
