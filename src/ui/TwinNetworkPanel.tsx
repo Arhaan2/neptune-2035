@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { equipmentFor } from '../twin/catalog/equipment';
 import { NETWORK_PRESET_LABELS, type NetworkPreset } from '../twin/network-contract';
 import { assessNetworkProvisioning, createNetworkEvaluator } from '../twin/solvers/network';
+import { createNetworkPowerEvaluator } from '../twin/solvers/network-power';
 import type { Design, SimulationState } from '../twin/types';
 
 const gb = (value: number) => (value / 1e9).toLocaleString('en-US', { maximumFractionDigits: 3 });
@@ -18,7 +19,11 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
   const installed = useMemo(() => assessNetworkProvisioning(design), [design]);
   const evaluator = useMemo(() => createNetworkEvaluator(design), [design]);
   const current = useMemo(() => state ? evaluator(state.modules, state.failedAssetIds) : null, [state, evaluator]);
-  const selectedResources = installed.resources.filter(resource => resource.assetId === selectedId);
+  const selectedResources = installed.resources.filter(resource => resource.assetId === selectedId).sort((a, b) => (a.kind === 'switch' ? 0 : a.kind === 'port' ? 1 : 2) - (b.kind === 'switch' ? 0 : b.kind === 'port' ? 1 : 2));
+  const powerEvaluator = useMemo(() => createNetworkPowerEvaluator(design), [design]);
+  const power = useMemo(() => powerEvaluator(state?.failedAssetIds), [powerEvaluator, state?.failedAssetIds]);
+  const selectedPower = power.allocations.find(allocation => allocation.assetId === selectedId);
+  const affectedDomains = [...new Set(selectedResources.flatMap(resource => resource.domainIds))];
   const links = design.connections.filter(edge => (edge.medium === 'cluster' || edge.medium === 'external-network') && (edge.from === selectedId || edge.to === selectedId));
   const networkAssets = design.assets.filter(asset => asset.type === 'network');
   const profile = equipment.workloadProfile;
@@ -66,10 +71,12 @@ export function TwinNetworkPanel({ design, state, busy, selectedId, onSelect, on
     {selectedResources.length > 0 && <details open>
       <summary>Selected resource budgets</summary>
       <div className="twin-network-table"><table><thead><tr><th>Resource</th><th>Demand / rating / headroom (Gbit/s)</th></tr></thead>
-        <tbody>{selectedResources.map(resource => <tr key={resource.resourceId}><td><code>{resource.resourceId}</code><br />{resource.domainIds.length} domains</td><td>{gb(resource.demandBitS)} / {gb(resource.capacityBitS)} / {gb(resource.headroomBitS)}</td></tr>)}</tbody>
+        <tbody>{selectedResources.map(resource => <tr key={resource.resourceId}><td><span title={resource.resourceId}>{resource.kind === 'switch' ? 'Shared switch budget' : resource.kind === 'port' ? resource.resourceId.split(':').at(-1) : `Link to ${resource.resourceId.split('>').at(-1)?.split(':')[0]}`}</span><br />{resource.domainIds.length} domains</td><td>{gb(resource.demandBitS)} / {gb(resource.capacityBitS)} / {gb(resource.headroomBitS)}</td></tr>)}</tbody>
       </table></div>
+      <details><summary>Affected job domains</summary>{affectedDomains.map(id => <p key={id}><button className="twin-text-button" onClick={() => onSelect(id)}>{id}</button></p>)}</details>
       <p>Installed demand in the declared source-to-node direction. Shared switch budget counts each traversal once. Ports and links retain individual limits.</p>
     </details>}
+    {selectedPower && <details open><summary>Selected switch supply</summary><p>{selectedPower.available ? 'Powered' : 'Unpowered'} · declared {selectedPower.requestedW.toLocaleString('en-US')} W; supplied {selectedPower.suppliedW.toLocaleString('en-US')} W; grid draw including conversion {selectedPower.gridW.toLocaleString('en-US', {maximumFractionDigits: 1})} W. No root/platform UPS is modeled.</p><p>Dependencies: {selectedPower.dependencyIds.join(' → ')}.</p></details>}
     {links.length > 0 && <details>
       <summary>Network links · enable / disable</summary>
       <p>Changing a link saves the prior run and resets a new design revision. No alternate route is invented.</p>
