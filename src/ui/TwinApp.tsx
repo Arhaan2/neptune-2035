@@ -1463,12 +1463,14 @@ export default function TwinApp() {
                   onChange={setCostScale}
                 />
                 <p>
-                  Included-scope estimate ${num(cost.totalUSD / 1e6, 1)} million
+                  {cost.completeWithinIncludedScope ? 'Included-scope estimate' : 'Known included-scope subtotal'} ${num(cost.totalUSD / 1e6, 1)} million
                   · dated {cost.date}. Editable cost multiplier explores
                   sensitivity; range {num(cost.rangeUSD[0] / 1e6)}–
                   {num(cost.rangeUSD[1] / 1e6)} million is not a confidence
                   interval.
                 </p>
+                {!cost.completeWithinIncludedScope && <p>Missing declared prices: {cost.missingCostAssetIds.join(', ')}. This subtotal is incomplete.</p>}
+                <p>{cost.networkAccounting}</p>
                 <table>
                   <thead>
                     <tr>
