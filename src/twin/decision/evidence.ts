@@ -63,13 +63,29 @@ export function importDecisionCampaign(text:string):DecisionExport {
 export function compareReproduction(expected:DecisionExport,recomputed:DecisionResult):{matches:boolean;differences:string[]} {
   const differences:string[]=[];const campaign=expected.campaign;
   if(recomputed.provenance!=='executed')differences.push('Reproduction requires newly executed evidence, not imported supplied results.');
-  const toleranceFor=(path:string)=>path.includes('USD')||path.includes('includedCost')?campaign.tolerances.USD:path.includes('AcceleratorS')||path.includes('acceleratorSeconds')?campaign.tolerances.acceleratorSeconds:path.includes('gridW')||path.includes('peakSupply')||path.endsWith('W')?campaign.tolerances.watts:path.includes('time')||path.includes('Time')||path.endsWith('S')?campaign.tolerances.seconds:1e-6;
-  const visit=(a:unknown,b:unknown,path:string):void=>{
+  const toleranceFor=(path:string,parentUnit?:string):number=>{
+    const field=path.replace(/\[\d+\]/g,'').split('.').at(-1)!;
+    // Definitions, actual initial states in the plan, thresholds and declared tolerances are identities.
+    if(path.startsWith('result.plan.')||['threshold','tolerance','version','schemaVersion','extensionVersion','integrationStepS'].includes(field))return 0;
+    if(/Count$|^count$|^samples$|^stepIndex$|^committedIntervals$|^traceSamplesSeen$|^committedStepIndex$|^completedRuns$|^requiredRuns$|^completed$|^planned$|^fullyEvaluatedCandidates$|^workload$/.test(field))return 0;
+    if(field.endsWith('Nodes')||field.endsWith('Accelerators')||field==='requiredAccelerators'||field==='serviceableAccelerators'||path.includes('.minServiceable.value'))return campaign.tolerances.accelerators;
+    if(['actual','margin'].includes(field)&&parentUnit){const units:Record<string,number>={'s':campaign.tolerances.seconds,'W':campaign.tolerances.watts,'USD':campaign.tolerances.USD,'accelerator-s':campaign.tolerances.acceleratorSeconds,'boolean':0};if(parentUnit in units)return units[parentUnit];}
+    if(field.endsWith('AcceleratorS'))return campaign.tolerances.acceleratorSeconds;
+    if(field.endsWith('K')||/\.max(?:Coolant|Air)\.value$/.test(path))return campaign.tolerances.kelvin;
+    if(field.endsWith('PerS')||field.endsWith('M3S')||field.endsWith('BitS'))return 1e-6;
+    if(field.endsWith('S')||path.includes('.startAtS.'))return campaign.tolerances.seconds;
+    if(field.endsWith('W')||path.endsWith('.peakSupply.value'))return campaign.tolerances.watts;
+    if(field.endsWith('USD')||path.includes('.includedCost.')&&['equipment','installation','contingency'].includes(field))return campaign.tolerances.USD;
+    // Wh, geometric coordinates, continuous controller values and residual rates use the declared
+    // absolute reproduction fallback. This never applies to counts, times, powers or money above.
+    return 1e-6;
+  };
+  const visit=(a:unknown,b:unknown,path:string,parentUnit?:string):void=>{
     if(differences.length>=100)return;
-    if(typeof a==='number'&&typeof b==='number'){if(!Number.isFinite(a)||!Number.isFinite(b)||Math.abs(a-b)>toleranceFor(path))differences.push(`${path}: ${a} != ${b}`);return;}
+    if(typeof a==='number'&&typeof b==='number'){if(!Number.isFinite(a)||!Number.isFinite(b)||Math.abs(a-b)>toleranceFor(path,parentUnit))differences.push(`${path}: ${a} != ${b}`);return;}
     if(a===b)return;
-    if(Array.isArray(a)&&Array.isArray(b)){if(a.length!==b.length){differences.push(`${path}: length ${a.length} != ${b.length}`);return;}a.forEach((v,i)=>visit(v,b[i],`${path}[${i}]`));return;}
-    if(a!==null&&b!==null&&typeof a==='object'&&typeof b==='object'){const aa=a as Record<string,unknown>,bb=b as Record<string,unknown>;const keys=[...new Set([...Object.keys(aa),...Object.keys(bb)])].sort();for(const key of keys){if(key==='solverMs')continue;visit(aa[key],bb[key],`${path}.${key}`);}return;}
+    if(Array.isArray(a)&&Array.isArray(b)){if(a.length!==b.length){differences.push(`${path}: length ${a.length} != ${b.length}`);return;}a.forEach((v,i)=>visit(v,b[i],`${path}[${i}]`,parentUnit));return;}
+    if(a!==null&&b!==null&&typeof a==='object'&&typeof b==='object'){const aa=a as Record<string,unknown>,bb=b as Record<string,unknown>;const keys=[...new Set([...Object.keys(aa),...Object.keys(bb)])].sort();for(const key of keys){if(key==='solverMs')continue;visit(aa[key],bb[key],`${path}.${key}`,typeof aa.unit==='string'?aa.unit:parentUnit);}return;}
     differences.push(`${path}: ${String(a)} != ${String(b)}`);
   };
   visit(normalizedResult(expected.result),normalizedResult(recomputed),'result');
