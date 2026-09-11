@@ -43,7 +43,7 @@ export function validateDesign(value: unknown): asserts value is Design {
     if (a.operationalMassKg !== null) finiteNumber(a.operationalMassKg, 'asset.operationalMassKg', { min: 0, unit: 'kg' });
     record(a.ratings, 'asset.ratings');
     if(a.type==='transformer')finiteNumber(a.ratings.efficiency,'transformer.efficiency',{min:Number.MIN_VALUE,max:1}); for (const [key, n] of Object.entries(a.ratings)) finiteNumber(n, `asset.ratings.${key}`, { min: 0 });
-    array(a.ports, 'asset.ports', 16); const ports = new Set<string>();
+    array(a.ports, 'asset.ports', 260); const ports = new Set<string>();
     for (const p of a.ports) {
       record(p, 'port'); keys(p, ['id', 'medium', 'direction', 'capacity', 'unit'], 'port'); string(p.id, 'port.id', 100); string(p.unit, 'port.unit', 60);
       if (ports.has(p.id)) failure('invalid-input', 'PORT_DUPLICATE', 'Duplicate asset port.'); ports.add(p.id);
