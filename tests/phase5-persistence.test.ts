@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { advance, initialize } from '../src/twin/engine/simulation';
+import { advance, initialize, initializeExperimentFromState } from '../src/twin/engine/simulation';
+import { replaceEquipment } from '../src/twin/assets/design';
 import { createExperimentDefinition } from '../src/twin/experiment/definition';
 import { replayExperimentState } from '../src/twin/experiment/runner';
 import { updateEconomicAssumptions, engineeringIdentity } from '../src/twin/catalog/equipment';
@@ -61,6 +62,24 @@ describe('PH5 G complete checkpoint and deterministic replay', () => {
     expect(physical(advance(design, replayExperimentState(design, source), 12))).toEqual(physical(source));
     expect(source.transfer!.attempts[0].status).toBe('transferred');
     if (changeS === 6) expect(source.transfer!.attempts[0].admittedW).toBeGreaterThan(source.transfer!.transitions.find(transition => transition.reason === 'TRANSFERRED')!.admittedW);
+  });
+  it('switching preserves finite existing battery energy and thermal state through an imported partial-charge trajectory', () => {
+    const recipientId = design.modules.find(module => module.platformId === 'platform-002')!.id;
+    const storageDesign = replaceEquipment(design, `${recipientId}/battery`, 'battery-reference');
+    const storageDefinition = createExperimentDefinition(storageDesign, { id: 'phase5-storage', durationS: 12, disturbances: definition.disturbances });
+    let physicalInitial = initialize(storageDesign);
+    physicalInitial.modules.find(module => module.id === recipientId)!.batteryWh = 100000;
+    physicalInitial = advance(storageDesign, physicalInitial, 0);
+    const initial = initializeExperimentFromState(storageDesign, physicalInitial, storageDefinition);
+    const continuous = advance(storageDesign, initial, 12), during = advance(storageDesign, initial, 3);
+    const restored = restoreProject(parseProject(serializeProject(projectFile(storageDesign, during))));
+    const resumed = advance(storageDesign, restored.state, 9);
+    expect(physical(resumed)).toEqual(physical(continuous));
+    expect(continuous.transfer!.attempts[0].status).toBe('transferred');
+    expect(continuous.modules.find(module => module.id === recipientId)!.batteryWh).toBeLessThan(110000);
+    expect(continuous.experiment!.initialState.modules.find(module => module.id === recipientId)!.batteryWh).toBe(100000);
+    expect(continuous.experiment!.metrics.batteryDischargeWh).toBeGreaterThan(0);
+    expect(continuous.experiment!.metrics.batteryNetChangeWh).toBeCloseTo(continuous.experiment!.metrics.batteryChargeWh! - continuous.experiment!.metrics.batteryDischargeWh! - continuous.experiment!.metrics.batteryLossWh!, 8);
   });
 });
 

@@ -81,6 +81,12 @@ describe('PH5 C/F complete path eligibility and changing faults', () => {
     expect(state.transfer!.attempts[0]).toMatchObject({ status: 'lockout', reason: field === 'tieId' ? 'TIE_UNAVAILABLE' : 'DONOR_UNAVAILABLE', tieClosed: false, admittedW: 0, deadlineS: null });
     expect(state.transfer!.transitions.some(transition => transition.reason === 'TRANSFERRED')).toBe(false); invariant(design, state);
   });
+  it('tie failure after closure opens the path and locks out the attempt', () => {
+    const design = reference(), route = design.transfer!.routes[0], state = run(design, [trip(feeder(design)), trip(route.tieId, 5)]);
+    expect(state.transfer!.attempts[0]).toMatchObject({ status: 'lockout', reason: 'TIE_UNAVAILABLE', tieClosed: false, admittedW: 0 });
+    expect(state.transfer!.transitions.filter(transition => transition.reason === 'TRANSFERRED')).toHaveLength(1);
+    expect(state.transfer!.transitionCounts.TIE_UNAVAILABLE).toBe(1); invariant(design, state);
+  });
   it.each([3, 4, 5])('orders a donor failure at t=%i around exact t4 closure without double supply', timeS => {
     const design = reference({ delayS: 2 }), route = design.transfer!.routes[0], state = run(design, [trip(feeder(design)), trip(route.donorBusId, timeS)]);
     expect(state.transfer!.transitions.filter(transition => transition.reason === 'TRANSFERRED')).toHaveLength(timeS <= 4 ? 0 : 1);
