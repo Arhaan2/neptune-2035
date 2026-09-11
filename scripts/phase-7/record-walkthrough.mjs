@@ -42,7 +42,7 @@ try {
   assert(Number.isSafeInteger(count) && count > 0 && count <= 20, 'Bounded declared step count required.');
   for (let index = 0; index < count; index++) {
     await expect(walkthrough).toHaveAttribute('data-step-index', String(index));
-    await expect.poll(async () => await page.locator('main.twin-app').getAttribute('data-inspection-status')).not.toBe('loading');
+    await expect(walkthrough).toHaveAttribute('data-status', index === count - 1 ? 'completed' : 'ready');
     const inspectionStatus = await page.locator('main.twin-app').getAttribute('data-inspection-status');
     assert(['resolved', 'current'].includes(inspectionStatus), `Walkthrough state unavailable: ${inspectionStatus}`);
     await page.locator('.twin-scene-shell').scrollIntoViewIfNeeded();
