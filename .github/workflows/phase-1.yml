@@ -1,4 +1,4 @@
-name: Decision campaigns, transfer and prototype verification
+name: Phase 8 independent numerical and prototype verification
 on:
   pull_request:
     branches: [main]
@@ -52,6 +52,11 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:5173/ > /dev/null
           env -u MOZ_HEADLESS NEPTUNE_TELEMETRY_BROWSER=1 NEPTUNE_TELEMETRY_APP=1 xvfb-run -a -s '-screen 0 1920x1200x24' npm test -- --reporter=default --reporter=json --outputFile=artifacts/prototype/unit.json
+      - name: Independent numerical and historical campaign checks
+        run: |
+          node scripts/phase-8/fetch-historical.mjs --out=artifacts/phase8/historical-inputs
+          node scripts/phase-8/numerical.mjs --out=artifacts/phase8/numerical
+          node scripts/phase-8/experiments.mjs --campaigns=artifacts/phase8/historical-inputs --out=artifacts/phase8/experiments
       - run: npm run build
       - name: Preserve tested production payload identity
         id: payload
@@ -84,6 +89,8 @@ jobs:
           name: prototype-core-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             artifacts/prototype
+            artifacts/phase8
+            !artifacts/phase8/historical-inputs/phase-7-evidence.zip
             !artifacts/prototype/tested-build.tar
             test-results
           include-hidden-files: true
@@ -182,7 +189,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4173/ > /dev/null
-          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts tests/browser/phase7.spec.ts --project="$TESTED_BROWSER" --workers=1 --retries=0
+          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts tests/browser/phase7.spec.ts tests/browser/phase8.spec.ts --project="$TESTED_BROWSER" --workers=1 --retries=0
       - name: Retain native browser results and traces even on failure
         if: always()
         uses: actions/upload-artifact@v4
@@ -195,7 +202,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   acceptance:
-    name: Decision campaign and whole-experiment acceptance
+    name: Phase 8 numerical, whole-experiment and browser acceptance
     if: always()
     needs: [core, browsers]
     runs-on: ubuntu-24.04
