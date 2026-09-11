@@ -67,6 +67,21 @@ describe('PH6 portable campaign import and independently rerun reproduction', ()
     expect(mismatch.matches).toBe(false); expect(mismatch.differences.join(' ')).toContain('shortfallAcceleratorS');
     changed.ranking.winnerIds = ['ii-24']; expect(compareReproduction(exported, changed).differences.join(' ')).toContain('winnerIds');
   });
+  it.each([
+    ['peak time uses seconds tolerance', (changed: DecisionResult) => { changed.runs[0].peakSupply!.timeS += 5e-7; }],
+    ['equipment counts compare exactly', (changed: DecisionResult) => { changed.evaluations[0].includedCost.rows[0].count += 0.001; }],
+  ] as const)('reproduction %s', (_label, mutate) => {
+    const changed = structuredClone(result); mutate(changed);
+    expect(compareReproduction(exported, changed).matches).toBe(false);
+  });
+  it('preserves declared tolerances for seconds, watts and USD using the field unit', () => {
+    const within = structuredClone(result); within.runs[0].peakSupply!.timeS += 0.5e-8; within.runs[0].peakSupply!.value += 0.5e-6; within.evaluations[0].includedCost.rows[0].totalUSD += 0.005;
+    expect(compareReproduction(exported, within).matches).toBe(true);
+    const aboveWatts = structuredClone(result); aboveWatts.runs[0].peakSupply!.value += 2e-6;
+    expect(compareReproduction(exported, aboveWatts).matches).toBe(false);
+    const aboveUSD = structuredClone(result); aboveUSD.evaluations[0].includedCost.rows[0].totalUSD += 0.02;
+    expect(compareReproduction(exported, aboveUSD).matches).toBe(false);
+  });
   it('cancelled export/import includes unresolved candidates and cannot acquire a final recommendation', async () => {
     const abort = new AbortController(); abort.abort();
     const cancelled = await runDecisionCampaign(campaign, { signal: abort.signal }), imported = importDecisionCampaign(exportDecisionCampaign(campaign, cancelled));
