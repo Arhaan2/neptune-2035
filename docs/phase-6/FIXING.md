@@ -1,0 +1,13 @@
+# Phase 6 fixing handoffs
+
+## P6-T001 — Missing mandatory requirement values
+
+- Role: distinct Fixing agent `/root/fixing`; repair branch `codex/neptune-phase6-fixing` in an isolated worktree. Building explicitly transferred the `src/twin/decision/contract.ts` lease before editing.
+- Affected contract commit: `ee40a702754478363bb7062bebf27d6b232eefcd`. Local repair base `6c7cb0f` is its cherry-pick onto accepted Phase 5 `42a03e171f1d722874328b54fbdb2d3520ff3cc6`.
+- Contract version: `decision-campaign-1` (unchanged). Required fields were already mandatory in the frozen contract.
+- Reproduction: delete any of `requirements.faultUnmetAcceleratorS`, `requirements.totalInterruptionS`, `requirements.thermalViolationS`, or `requirements.recoveryConfirmationDeadlineS`; validation previously accepted the malformed campaign because it iterated present entries only.
+- Repair: validate every declared numeric requirement by its explicit key, including absent values. Missing metrics/requirements cannot silently bypass the mandatory contract.
+- Audit: deleted each of 74 mandatory top-level and nested Phase 6 contract fields independently. Before repair, exactly the four reported omissions passed validation; after repair, all 74 deletions were rejected. Resolved `Design` validation remains delegated to its existing authoritative validator.
+- Local checks: 74-field deletion probe, typecheck, and lint passed. Testing owns committed regression tests and independent retesting/closure; this fixing handoff does not independently close the defect.
+- Native evidence: `contract-key-before.log`, `contract-key-after.log`, `typecheck.log`, and `lint.log` retained under the release evidence area `fixing/`. The initial direct Node probe could not resolve extensionless TypeScript imports; its native `contract-key-node-harness-failure.log` is retained separately. Rerunning the same probe through installed Jiti resolved the demonstrated harness issue without changing assertions.
+- Changed implementation file: `src/twin/decision/contract.ts`. This handoff documentation is the only other committed change.
