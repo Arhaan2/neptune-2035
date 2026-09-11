@@ -121,7 +121,19 @@ function circuit(ctx:ModuleContext,medium:'technical'|'seawater',active:Componen
 }
 /** Current full restoration demand only; no time integration or checkpoint validation. */
 export function transferRestorationDemands(design:Design,state:SimulationState,ctx:Context=context(design)):RestorableDemand[] {
-  return ctx.modules.map(c=>{const technical=circuit(c,'technical',[c.equipment.dutyPump],state.pumpSpeed,ctx.hydraulicCache),seawater=circuit(c,'seawater',[c.equipment.seaPump],state.pumpSpeed,ctx.hydraulicCache);return{id:c.module.id,platformId:c.module.platformId,domainId:c.module.powerDomainId,requestedW:(c.module.nodeCount*nodeDrawW(state.workload,design.config.idleFraction,true,c.equipment.electrical.nodePeakW)+technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW+(c.equipment.network?.ratings.capacityW??0))/c.equipment.electrical.gridEfficiency,moduleLimitW:c.equipment.moduleLimitW};});
+  const failed=new Set(state.failedAssetIds);
+  return ctx.modules.map((c,i)=>{
+    const id=c.module.id,m=state.modules[i],duty=`${id}/pump-duty`,standby=`${id}/pump-standby`,isFailed=(suffix:string)=>failed.has(`${id}/${suffix}`);
+    const disabled=failed.has(id)||failed.has(c.module.platformId)||isFailed('distribution')||isFailed('battery');
+    const techBlocked=disabled||isFailed('hx')||isFailed('cdu')||isFailed('valve-tech')||isFailed('pipe-tech'),seaBlocked=disabled||isFailed('hx')||isFailed('valve-sea')||isFailed('pipe-sea')||isFailed('pump-sea');
+    const dutyPending=m.states[duty]==='starting'&&state.timeS<(m.startAtS[duty]??0),standbyOperating=m.states[standby]==='running'||m.states[standby]==='starting'&&(m.startAtS[standby]??Infinity)<(m.startAtS[duty]??0);
+    const pumps=techBlocked?[]:[...(!failed.has(duty)?[c.equipment.dutyPump]:[]),...(c.equipment.standbyPump&&!failed.has(standby)&&(failed.has(duty)||dutyPending&&standbyOperating)?[c.equipment.standbyPump]:[])];
+    // Reserve full power for the installed pump that can restore this circuit,
+    // including its pending startup. Duty restart may replace an active standby;
+    // budget the larger of those successive loads, never invented parallel flow.
+    const technical=pumps.map(p=>circuit(c,'technical',[p],state.pumpSpeed,ctx.hydraulicCache)).reduce((a,b)=>a.electricalW>=b.electricalW?a:b,ZERO_HYDRAULIC),seawater=circuit(c,'seawater',seaBlocked?[]:[c.equipment.seaPump],state.pumpSpeed,ctx.hydraulicCache);
+    return{id,platformId:c.module.platformId,domainId:c.module.powerDomainId,requestedW:(c.module.nodeCount*nodeDrawW(state.workload,design.config.idleFraction,true,c.equipment.electrical.nodePeakW)+technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW+(c.equipment.network?.ratings.capacityW??0))/c.equipment.electrical.gridEfficiency,moduleLimitW:c.equipment.moduleLimitW};
+  });
 }
 function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,runController:boolean) {
   if(design.transfer&&state.transfer){
