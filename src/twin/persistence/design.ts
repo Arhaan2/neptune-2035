@@ -1,3 +1,4 @@
+import { validateTransferDesign } from '../transfer/design';
 import { validateEquipment, validateInstalledAsset, resolveSpecification } from '../catalog/equipment';
 import { validateConfig } from '../assets/design';
 import { failure, finiteNumber, SimulationError } from '../safety';
@@ -12,7 +13,7 @@ function vector(v: unknown, name: string, positive = false) {
 }
 export function validateDesign(value: unknown): asserts value is Design {
   validateStructure(value); record(value, 'design');
-  keys(value, ['schemaVersion', 'revision', 'config', 'assets', 'connections', 'modules', 'nodeCount', 'rackCount', 'provisionedAccelerators', 'installedPeakITW', 'sourceIds', 'equipment'], 'design');
+  keys(value, ['schemaVersion', 'revision', 'config', 'assets', 'connections', 'modules', 'nodeCount', 'rackCount', 'provisionedAccelerators', 'installedPeakITW', 'sourceIds', 'equipment', 'transfer'], 'design');
   if (value.schemaVersion !== 2) failure('unsupported-configuration', 'DESIGN_SCHEMA', 'Unsupported design schema.');
   string(value.revision, 'design.revision', 100);
   try { validateConfig(value.config); } catch (error) { if (error instanceof SimulationError) throw error; failure('invalid-input', 'DESIGN_CONFIG', error instanceof Error ? error.message : 'Invalid design configuration.', { field: 'design.config' }); }
@@ -76,5 +77,6 @@ export function validateDesign(value: unknown): asserts value is Design {
     finiteNumber(c.capacity, 'connection.capacity', { min: 0 }); finiteNumber(c.allowanceM, 'connection.allowanceM', { min: 0, unit: 'm' });
     array(c.routeM, 'connection.routeM', 64); c.routeM.forEach(v => vector(v, 'route point'));
   }
+  validateTransferDesign(value as unknown as Design);
   array(value.sourceIds, 'design.sourceIds', 32); value.sourceIds.forEach(s => string(s, 'design.sourceIds'));
 }

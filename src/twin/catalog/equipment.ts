@@ -30,6 +30,9 @@ function spec(id:string,name:string,type:AssetType,compatibility:string,dimensio
 }
 const networkAssumptions='Synthetic fixed reference switch specification, not vendor validated. All network rates describe one source-to-node direction; shared fabric counts each traversal once. Shore equipment mass is outside floating-platform totals; root switch heat is outside the module thermal model. Link transceivers and cabling are included in the reference switch cost allowance; independent routing, installation and cooling certification are not assessed.';
 export const REFERENCE_CATALOG: readonly ComponentSpecification[] = [
+  spec('transfer-tie-reference','Reference normally-open transfer tie','switchboard','transfer-switch-v1',[1.5,2,1],700,{capacityW:8.8e6},'Assumed generic rating, dimensions and mass. Zero incremental losses/auxiliaries in this bounded simulation; switching/protection/cable validation excluded.'),
+  spec('transfer-isolator-reference','Reference original-path isolator','switchboard','transfer-switch-v1',[1,2,1],400,{capacityW:8.8e6},'Assumed generic rating, dimensions and mass; physical isolation confirmation is simulated. Zero incremental losses/auxiliaries.'),
+  spec('transfer-bus-reference','Reference receiving bus','switchboard','transfer-switch-v1',[1,2,1],300,{capacityW:8.8e6},'Assumed generic receiving bus; no vendor specification. Zero incremental losses/auxiliaries.'),
   spec('transformer-reference','Reference platform transformer','transformer','reference-transformer-v1',[3,3,4],8000,{capacityW:8.8e6,efficiency:0.98}),
   spec('shoreTransformer-reference','Reference shore transformer','transformer','reference-shore-transformer-v1',[4,4,6],null,{capacityW:30e6,efficiency:0.98},'Shore mass unknown/outside floating boundary; nominal capacity follows the legacy source-sizing assumption. No independently validated transformer rating.'),
   spec('moduleSupport-reference','Reference module fan auxiliary','external','reference-module-support-v1',null,null,{capacityW:15000},'Existing 15 kW module fan auxiliary allowance. No standalone fan geometry or mass is modeled; both remain unknown.'),
@@ -96,6 +99,8 @@ export function roleForAsset(assetId:string):EquipmentRole|undefined {
 }
 export function resolveSpecification(design:Design,assetIdOrRole:string):ComponentSpecification {
   const equipment=equipmentFor(design),networkId=networkSpecificationId(design,assetIdOrRole);
+  const transferAsset=design.assets.find(a=>a.id===assetIdOrRole&&a.catalogId.startsWith('transfer-'));
+  if(transferAsset)return catalogSpecification(transferAsset.catalogId);
   if(networkId){const found=equipment.specifications.find(s=>s.id===networkId&&s.version==='1.0.0');if(!found)failure('unsupported-configuration','SPECIFICATION_REFERENCE',`Unavailable installed network specification ${networkId}@1.0.0.`);return found;}
   const role=roles.includes(assetIdOrRole as EquipmentRole)?assetIdOrRole as EquipmentRole:roleForAsset(assetIdOrRole);
   if(!role)failure('unsupported-configuration','SPECIFICATION_SLOT',`No supported specification slot for ${assetIdOrRole}.`);
@@ -114,6 +119,7 @@ export function resolveAssetSpecification(design:Design,asset:Asset):Asset {
 /** Persisted root equipment is a checked projection, never a second specification owner. */
 export function validateInstalledAsset(design:Design,asset:Asset):void {
   if(!design.equipment)return; // Preserve the original Phase 1 snapshot for explicit legacy inspection/recalculation.
+  if(asset.catalogId.startsWith('transfer-')){const s=catalogSpecification(asset.catalogId);for(const field of ['type','dimensionsM','operationalMassKg','ratings'] as const)if(identity(asset[field])!==identity(s[field]))failure('invalid-input','SPECIFICATION_ASSET_DRIFT','Transfer equipment differs from its immutable specification.',{assetId:asset.id,field});if(asset.revision!==s.version)failure('invalid-input','SPECIFICATION_ASSET_DRIFT','Transfer specification revision differs.');return;}
   const networkId=networkSpecificationId(design,asset.id);
   if(networkId){
     if(asset.id.endsWith('/rack-network'))failure('invalid-input','SPECIFICATION_ASSET_OVERRIDE','Module network equipment is generated from its immutable installed specification.',{assetId:asset.id});
@@ -165,7 +171,7 @@ export function engineeringIdentity(design:Design):string {
   if(equipment.networkDesign){for(const asset of design.assets){const id=networkSpecificationId(design,asset.id);if(id)installed.add(`${id}@1.0.0`);}installed.add('network-module@1.0.0');}
   const specifications=equipment.specifications.filter(s=>installed.has(`${s.id}@${s.version}`)).map(s=>({id:s.id,version:s.version,type:s.type,compatibility:s.compatibility,dimensionsM:s.dimensionsM,operationalMassKg:s.operationalMassKg,ratings:s.ratings,units:s.units})).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);
   const workloadProfile=equipment.networkDesign?equipment.workloadProfile:{id:equipment.workloadProfile.id,revision:equipment.workloadProfile.revision,clusterBitSPerNode:equipment.workloadProfile.clusterBitSPerNode,externalBitSPerNode:equipment.workloadProfile.externalBitSPerNode};
-  return identity({schemaVersion:design.schemaVersion,assets,connections:design.connections,modules:design.modules,nodeCount:design.nodeCount,rackCount:design.rackCount,provisionedAccelerators:design.provisionedAccelerators,installedPeakITW:design.installedPeakITW,config:engineeringConfig,equipment:{schemaVersion:equipment.schemaVersion,defaults:equipment.defaults,overrides:equipment.overrides,specifications,controlPolicy:equipment.controlPolicy,workloadProfile,...(equipment.networkDesign?{networkDesign:equipment.networkDesign}:{})},modelBoundaries:MODEL_BOUNDARIES,modelId:equipment.networkDesign?MODEL_ID:'neptune-reference-2',algorithmId:ALGORITHM_ID,solverVersion:equipment.networkDesign?SOLVER_VERSION:'2.2.0'});
+  return identity({...(design.transfer?{transfer:design.transfer,transferModel:'neptune-transfer-1'}:{}),schemaVersion:design.schemaVersion,assets,connections:design.connections,modules:design.modules,nodeCount:design.nodeCount,rackCount:design.rackCount,provisionedAccelerators:design.provisionedAccelerators,installedPeakITW:design.installedPeakITW,config:engineeringConfig,equipment:{schemaVersion:equipment.schemaVersion,defaults:equipment.defaults,overrides:equipment.overrides,specifications,controlPolicy:equipment.controlPolicy,workloadProfile,...(equipment.networkDesign?{networkDesign:equipment.networkDesign}:{})},modelBoundaries:MODEL_BOUNDARIES,modelId:equipment.networkDesign?MODEL_ID:'neptune-reference-2',algorithmId:ALGORITHM_ID,solverVersion:equipment.networkDesign?SOLVER_VERSION:'2.2.0'});
 }
 export function economicIdentity(design:Design):string { return identity({economics:equipmentFor(design).economics,budgetUSD:design.config.budgetUSD,costs:COST_ASSUMPTIONS}); }
 export function updateEconomicAssumptions(design:Design,patch:Partial<EconomicAssumptions>):Design {
