@@ -43,3 +43,9 @@ Keep ocean/platform geometry, legacy routes, X-ray/exploded views and direct cam
 ## Acceptance states
 
 Loading, empty, unsupported, unavailable-history, stale, cancelled and numerical-failure have explicit text. Completed infeasible experiments remain completed. No green/zero substitutes for unknown data. No recommendation before scope completion. No Phase 7 exclusions; preserve exact two historical exclusions. Freeze one clean source/tree/lock/artifact and obtain Testing plus Verification agreement before source CI/normal merge/Pages successor promotion and full public artifact/browser checks.
+
+### C2/C3 clarification: metric markers versus dispatched boundaries
+
+Persisted checkpoint admission remains integer-only. Fractional transfer boundaries are captured inside canonical engine execution as view-only observations; they are never resumed, restored or serialized as checkpoints. `summarize` retains its validator and delegates to the same formula body as the observer-only summary. Full-run/observation panels that intentionally retain the active checkpoint identify its current time explicitly.
+
+Recovery confirmation can be an interval-derived metric time with no dispatched physical boundary at that instant. The primary baseline's metric confirmation is9.375s, bracketed by actual canonical observations9s and10s. Do not create or interpolate a physical state at9.375. For a metric marker only, explicit `at-or-after` inspection selects the first actual observer boundary at/after the requested marker and reports both times and this resolution rule; `previous` selects its preceding actual boundary. Ordinary `post` inspection remains exact and reports non-boundary times unavailable. These baseline numbers are explanatory documentation, not production narrative constants. Verification independently approved this distinction; the application derives marker times and resolved boundaries from evidence.

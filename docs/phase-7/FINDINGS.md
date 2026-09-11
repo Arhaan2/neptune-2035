@@ -15,3 +15,9 @@ P7-D01 closure: Testing reran both original failing Chromium assertions unchange
 P7-13. Testing at85e356d recorded three passing Chromium C1/D01 cases and one native failure: `PH7 C1 keyboard 375px fallback exposes pump identity connections and failure without mutating view evidence`. Compare could not receive a normal click because `.twin-mode` intercepted pointer events over the workspace navigation. The original60-second timeout, screenshot and trace are retained; no force-click or exclusion is permitted.
 
 Exclusive `src/ui/twin.css` ownership transferred from Building to Fixing. Building retains its already-written C2 appended styles locally and pauses further CSS edits during this focused repair; TS/TSX history work continues independently. Original failing reproduction must pass after integration; Verification reviews core navigation and final accessibility acceptance.
+
+P7-D02 fix6b793a5 integrated54482c7 before C2. It lets the wrapped mobile navigation determine header height and preserves44px nav height; no stacking/pointer workaround. Fixing's original375px test passed, native measured navigation ends above the qualification banner; independent Testing confirmation remains part of integrated browser evidence.
+
+## P7-D03 — old inspection key survived a new design prop
+
+P7-03/P7-08. Testing atfbc19db independently reproduced the Orchestrator/Verification review concern: `inspectionRunIdentity(newDesign, oldState)` equals the old key because state.designIdentity takes precedence. During a design-change render, a previous inspection reply could remain compatible with the newly selected geometry before active initialization completes. The strict new-key regression fails; native D03-before JSON/log retained. Fixing receives history/useInspection ownership after Building's separately authorized metric-marker boundary extension is handed back. No weakened assertion or exclusion permitted.
