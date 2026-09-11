@@ -10,13 +10,14 @@ export interface TrafficProfile { clusterBitSPerNode:number; externalBitSPerNode
 export interface NetworkIssue { assetId:string; resourceId:string; reason:string; domainIds:string[] }
 export interface NetworkBottleneck extends NetworkIssue { demandBitS:number; capacityBitS:number }
 export interface NetworkAssessment {
-  status:'satisfied'|'violated'|'unsupported'; energizedNodes:number; clusterDemandBitS:number; externalDemandBitS:number;
+  assessmentBasis:'energized'|'installed'; resources:NetworkResource[]; status:'satisfied'|'violated'|'unsupported'; energizedNodes:number; clusterDemandBitS:number; externalDemandBitS:number;
   blockedDomainIds:string[]; unreachableDomainIds:string[]; unsupportedDomainIds:string[];
   /** null means positive offered load / zero capacity, or an unrepresentable ratio. */
   bottlenecks:NetworkBottleneck[]; issues:NetworkIssue[]; maxUtilization:number|null;
 }
+export interface NetworkResource { resourceId:string; assetId:string; kind:'edge'|'port'|'switch'; demandBitS:number; capacityBitS:number; headroomBitS:number; maxUtilization:number|null; domainIds:string[] }
 export interface NetworkAllocation { id:string; energizedNodes:number }
-interface Resource { id:string; assetId:string; capacity:number }
+interface Resource { id:string; assetId:string; capacity:number; kind:'edge'|'port'|'switch' }
 interface Edge { connection:Connection; from:number; to:number; resources:number[]; invalid:boolean }
 interface Tree { source:number; parent:Int32Array; order:number[]; reachable:Uint8Array; unsupported:Uint8Array }
 
@@ -38,9 +39,13 @@ function validateNetworkDesign(design: Design) {
     if (rootIds.has(asset.id)) failure('invalid-input', 'NETWORK_DUPLICATE_ID', 'Network graph asset identities must be unique.', { assetId: asset.id });
     rootIds.add(asset.id);
     asset.positionM.forEach((value, i) => finiteNumber(value, `${asset.id}.positionM.${i}`, { unit: 'm' }));
+    if (asset.ratings?.switchingCapacityBitS !== undefined) finiteNumber(asset.ratings.switchingCapacityBitS, `${asset.id}.switchingCapacityBitS`, {min:0,unit:'bit/s'});
+    const portIds = new Set<string>();
     for (const port of asset.ports) {
       if (!port) failure('invalid-input', 'NETWORK_PORT', 'Network graph contains an invalid port.', { assetId: asset.id });
       identity(port.id, `${asset.id}.port.id`);
+      if (portIds.has(port.id)) failure('invalid-input','NETWORK_DUPLICATE_PORT','Network port identities must be unique within each asset.',{assetId:asset.id});
+      portIds.add(port.id);
       if (port.medium === 'cluster' || port.medium === 'external-network') finiteNumber(port.capacity, `${asset.id}.${port.id}.capacity`, { min: 0, unit: 'bit/s' });
     }
   }
@@ -75,7 +80,7 @@ function compile(design:Design){
   const edges:Edge[]=[], outgoing:number[][]=[], leaves=new Map<string,number[]>();
   const vertex=(id:string)=>{let n=index.get(id);if(n===undefined){n=ids.length;ids.push(id);index.set(id,n);outgoing.push([]);}return n;};
   const resource=(id:string,assetId:string,capacity:number)=>{
-    let n=resourceIndex.get(id);if(n===undefined){n=resources.length;resources.push({id,assetId,capacity});resourceIndex.set(id,n);}
+    let n=resourceIndex.get(id);if(n===undefined){n=resources.length;resources.push({id,assetId,capacity,kind:id.startsWith('edge:')?'edge':id.startsWith('switch:')?'switch':'port'});resourceIndex.set(id,n);}
     else resources[n].capacity=Math.min(resources[n].capacity,capacity);
     return n;
   };
@@ -86,9 +91,12 @@ function compile(design:Design){
     const fromPort=fromAsset?.ports.find(p=>p.id===c.fromPort),toPort=toAsset?.ports.find(p=>p.id===c.toPort);
     const invalid=!fromPort||!toPort||fromPort.medium!==c.medium||toPort.medium!==c.medium||fromPort.unit!=='bit/s'||toPort.unit!=='bit/s'||!['out','bidirectional'].includes(fromPort.direction)||!['in','bidirectional'].includes(toPort.direction);
     const from=vertex(c.from),to=vertex(c.to),r=[resource(`edge:${c.id}`,c.from,c.capacity),resource(`port:${c.from}:${c.fromPort}`,c.from,fromPort?.capacity??0),resource(`port:${c.to}:${c.toPort}`,c.to,toPort?.capacity??0)];
+    // A source-to-node traversal consumes its source switch once, on egress.
+    // Ingress and egress are not counted twice; both required traffic classes share this budget.
+    if (fromAsset?.ratings.switchingCapacityBitS !== undefined) r.push(resource(`switch:${fromAsset.id}`,fromAsset.id,fromAsset.ratings.switchingCapacityBitS));
     outgoing[from].push(edges.length);edges.push({connection:c,from,to,resources:r,invalid});
   };
-  for(const c of design.connections)add(c,rootAssets);
+  for(const c of [...design.connections].sort((a,b)=>a.id.localeCompare(b.id)))add(c,rootAssets);
   for(const m of design.modules){
     const assets=moduleAssets(design,m.id),local=new Map(assets.map(a=>[a.id,a]));
     leaves.set(m.id,assets.filter(a=>a.type==='compute').map(a=>vertex(a.id)));
@@ -134,8 +142,7 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
     const failed=new Set<string>(failedAssetIds),key=`${allocations.map(a=>a.energizedNodes).join(',')}|${[...failed].sort().join(',')}`;
     if(lastResult&&key===lastKey)return lastResult;
     const energizedNodes=allocations.reduce((n,a)=>n+a.energizedNodes,0);
-    const result:NetworkAssessment={status:'satisfied',energizedNodes,clusterDemandBitS:energizedNodes*clusterRate,externalDemandBitS:energizedNodes*externalRate,blockedDomainIds:[],unreachableDomainIds:[],unsupportedDomainIds:[],bottlenecks:[],issues:[],maxUtilization:0};
-    if(energizedNodes===0||(!design.config.requireClusterNetwork&&!design.config.requireExternalNetwork)){lastKey=key;lastResult=result;return result;}
+    const result:NetworkAssessment={assessmentBasis:'energized',resources:[],status:'satisfied',energizedNodes,clusterDemandBitS:energizedNodes*clusterRate,externalDemandBitS:energizedNodes*externalRate,blockedDomainIds:[],unreachableDomainIds:[],unsupportedDomainIds:[],bottlenecks:[],issues:[],maxUtilization:0};
     graph??=compile(design);const g=graph,resourceLoads=new Float64Array(g.resources.length),issues=new Map<string,NetworkIssue>(),blocked=new Set<string>(),unreachable=new Set<string>(),unsupported=new Set<string>();
     const record=(assetId:string,resourceId:string,reason:string,domainId:string)=>{
       let issue=issues.get(resourceId);if(!issue){issue={assetId,resourceId,reason,domainIds:[]};issues.set(resourceId,issue);}
@@ -164,6 +171,9 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
       for(let q=t.order.length-1;q>=0;q--){const n=t.order[q],ei=t.parent[n];if(ei<0||t.unsupported[n]||loads[n]===0)continue;const e=g.edges[ei];loads[e.from]+=loads[n];for(const r of e.resources)resourceLoads[r]+=loads[n];}
     }
     const bottleneckByResource=new Map<number,NetworkBottleneck>();
+    const resourceDomains = new Map<number,Set<string>>();
+    for(const [,rate,,t] of channels){if(rate===0)continue;active.forEach((nodes,i)=>{const domain=design.modules[i].networkDomainId;for(const node of nodes){if(!t.reachable[node]||t.unsupported[node])continue;let cursor=node;while(t.parent[cursor]>=0){const edge=g.edges[t.parent[cursor]];for(const r of edge.resources){let domains=resourceDomains.get(r);if(!domains){domains=new Set();resourceDomains.set(r,domains);}domains.add(domain);}cursor=edge.from;}}});}
+    result.resources=g.resources.map((resource,r)=>({resourceId:resource.id,assetId:resource.assetId,kind:resource.kind,capacityBitS:resource.capacity,demandBitS:resourceLoads[r],headroomBitS:resource.capacity-resourceLoads[r],maxUtilization:resource.capacity>0?(Number.isFinite(resourceLoads[r]/resource.capacity)?resourceLoads[r]/resource.capacity:null):resourceLoads[r]>0?null:0,domainIds:[...(resourceDomains.get(r)??[])].sort()})).sort((a,b)=>a.resourceId.localeCompare(b.resourceId));
     for(let r=0;r<g.resources.length;r++){
       const resource=g.resources[r],load=resourceLoads[r];if(load===0)continue;
       finiteOutputs({load}, 'network resource demand');
@@ -171,8 +181,8 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
       result.maxUtilization=result.maxUtilization===null||utilization===null||!Number.isFinite(utilization)?null:Math.max(result.maxUtilization,utilization);
       if(utilization===null||!Number.isFinite(utilization)||load>resource.capacity+Math.max(1,resource.capacity*1e-9))bottleneckByResource.set(r,{assetId:resource.assetId,resourceId:resource.id,demandBitS:load,capacityBitS:resource.capacity,reason:`Declared offered demand ${(load/1e9).toFixed(3)} Gbit/s exceeds ${(resource.capacity/1e9).toFixed(3)} Gbit/s at ${resource.id}`,domainIds:[]});
     }
-    if(bottleneckByResource.size)for(const [,rate,,t] of channels){if(rate===0)continue;active.forEach((nodes,i)=>{const domain=design.modules[i].networkDomainId;for(const node of nodes){if(!t.reachable[node]||t.unsupported[node])continue;let cursor=node;while(t.parent[cursor]>=0){const e=g.edges[t.parent[cursor]];for(const r of e.resources){const bottleneck=bottleneckByResource.get(r);if(bottleneck&&!bottleneck.domainIds.includes(domain))bottleneck.domainIds.push(domain);}cursor=e.from;}}});}
-    result.bottlenecks=[...bottleneckByResource.values()];
+    for(const [r,bottleneck] of bottleneckByResource)bottleneck.domainIds=[...(resourceDomains.get(r)??[])].sort();
+    result.bottlenecks=[...bottleneckByResource.values()].sort((a,b)=>a.resourceId.localeCompare(b.resourceId));
     for(const b of result.bottlenecks)for(const domain of b.domainIds)record(b.assetId,b.resourceId,b.reason,domain);
     result.issues=[...issues.values()];result.blockedDomainIds=[...blocked].sort();result.unreachableDomainIds=[...unreachable].sort();result.unsupportedDomainIds=[...unsupported].sort();
     result.status=unsupported.size?'unsupported':blocked.size?'violated':'satisfied';finiteOutputs(result, 'assessNetwork');lastKey=key;lastResult=result;return result;
@@ -181,4 +191,9 @@ export function createNetworkEvaluator(design:Design,profile:TrafficProfile=equi
 
 export function assessNetwork(design:Design,allocations:readonly NetworkAllocation[],failedAssetIds:readonly string[]=[],profile:TrafficProfile=equipmentFor(design).workloadProfile):NetworkAssessment{
   return createNetworkEvaluator(design,profile)(allocations,failedAssetIds);
+}
+
+/** Capacity at the complete provisioned inventory, independently of instantaneous power dispatch. */
+export function assessNetworkProvisioning(design:Design):NetworkAssessment {
+  return {...assessNetwork(design,design.modules.map(m=>({id:m.id,energizedNodes:m.nodeCount}))),assessmentBasis:'installed'};
 }

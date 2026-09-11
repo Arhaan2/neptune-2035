@@ -1,4 +1,5 @@
 import { createEquipmentConfiguration, resolveAssetSpecification, resolveSpecification, engineeringIdentity, validateEquipment, catalogSpecification, equipmentFor, type EquipmentConfiguration, type EquipmentRole } from '../catalog/equipment';
+import { PHASE3_TRAFFIC_PROFILE, type NetworkPreset } from '../network-contract';
 import { HARDWARE as H } from '../catalog/reference';
 import type { Asset, AssetType, Connection, Design, DesignConfig, Medium, ModuleSpec, Vec3 } from '../types';
 import { failure, finiteNumber, finiteOutputs } from '../safety';
@@ -78,12 +79,56 @@ export function buildDesign(input:DesignConfig,equipment?:EquipmentConfiguration
     }
   }
   const design:Design={schemaVersion:2,revision:revisionFor(config),config,assets,connections,modules,nodeCount,rackCount,provisionedAccelerators:nodeCount*8,installedPeakITW:nodeCount*H.nodePeakW,sourceIds:['generic-hardware-v2','layout-v2','equipment-v2','entu','seawater'],equipment:equipment?structuredClone(equipment):createEquipmentConfiguration(config)};
+  if(design.equipment?.networkDesign)configureNetworkTopology(design);
   refreshDesign(design);
   return design;
 }
+/** Explicit fixed hardware and one deterministic port per downstream connection. */
+function networkConnection(a:Asset,b:Asset,portNumber:number,allowanceM:number):Connection {
+  const edge=connect(a,b,'cluster',400e9,allowanceM);
+  edge.fromPort=`cluster-out-${String(portNumber).padStart(3,'0')}`;
+  edge.capacity=Math.min(a.ports.find(p=>p.id===edge.fromPort)!.capacity,b.ports.find(p=>p.id===edge.toPort)!.capacity);
+  return edge;
+}
+function configureNetworkTopology(design:Design) {
+  design.assets=design.assets.map(a=>a.type==='network'?resolveAssetSpecification(design,a):a);
+  const core=design.assets.find(a=>a.id==='shore/cluster-core')!,fiber=design.assets.find(a=>a.id==='shore/fiber')!,grid=design.assets.find(a=>a.id==='shore/grid')!;
+  design.connections=design.connections.filter(c=>c.medium!=='cluster'&&c.medium!=='external-network'&&!(c.medium==='power'&&design.assets.find(a=>a.id===c.to)?.type==='network'));
+  design.connections.push(connect(fiber,core,'external-network',400e9,2),connect(grid,core,'power',core.ratings.capacityW,2));
+  const platforms=design.assets.filter(a=>a.type==='platform').sort((a,b)=>a.id.localeCompare(b.id));
+  platforms.forEach((p,index)=>{
+    const net=design.assets.find(a=>a.id===`${p.id}/cluster`)!,domain=design.modules.find(m=>m.platformId===p.id)!.powerDomainId;
+    design.connections.push(networkConnection(core,net,index+1,10),connect(design.assets.find(a=>a.id===domain)!,net,'power',net.ratings.capacityW,4));
+  });
+}
+/** An explicit engineering revision; caller preserves its preceding experiment. */
+export function withNetworkPreset(design:Design,preset:NetworkPreset):Design {
+  if(!['scalable-reference','undersized-shared-core'].includes(preset))failure('unsupported-configuration','NETWORK_PRESET','Unknown network preset.');
+  const equipment=structuredClone(equipmentFor(design));
+  const current=createEquipmentConfiguration(design.config);
+  for(const spec of current.specifications)if(!equipment.specifications.some(s=>s.id===spec.id&&s.version===spec.version))equipment.specifications.push(spec);
+  equipment.economics.specificationUnitUSD={...current.economics.specificationUnitUSD,...equipment.economics.specificationUnitUSD};
+  equipment.networkDesign={id:'rooted-reference-network',version:'1.0.0',preset};equipment.workloadProfile={...PHASE3_TRAFFIC_PROFILE};
+  return carryDisabledNetworkConnections(design,buildDesign(design.config,equipment));
+}
+function carryDisabledNetworkConnections(previous:Design,next:Design):Design {
+  let changed=false;
+  for(const edge of previous.connections.filter(c=>!c.enabled&&(c.medium==='cluster'||c.medium==='external-network'))){
+    const target=next.connections.find(c=>c.id===edge.id);
+    if(!target)failure('unsupported-configuration','NETWORK_LINK_MAPPING',`Disabled network link ${edge.id} has no mapping in the requested design; restore the link before deriving this topology.`,{field:edge.id});
+    target.enabled=false;changed=true;
+  }
+  if(changed)refreshDesign(next);return next;
+}
+export function withNetworkConnectionEnabled(design:Design,connectionId:string,enabled:boolean):Design {
+  if(typeof enabled!=='boolean')failure('invalid-input','NETWORK_LINK_STATE','Network link state must be boolean.');
+  const next=structuredClone(design),edge=next.connections.find(c=>c.id===connectionId&&(c.medium==='cluster'||c.medium==='external-network'));
+  if(!edge)failure('unsupported-configuration','NETWORK_LINK_MAPPING','Only an existing stored network link can be enabled or disabled.',{field:connectionId});
+  edge.enabled=enabled;refreshDesign(next);return next;
+}
 /** Refresh engineering summary and hydrostatic placement only at a design revision boundary. */
 function refreshDesign(design:Design) {
-  if(design.equipment)design.assets=design.assets.map(a=>a.type==='transformer'?resolveAssetSpecification(design,a):a);
+  if(design.equipment)design.assets=design.assets.map(a=>a.type==='transformer'||(a.type==='network'&&design.equipment?.networkDesign)?resolveAssetSpecification(design,a):a);
   const {assets,modules,connections}=design;
   design.installedPeakITW=design.nodeCount*resolveSpecification(design,'compute').ratings.capacityW;
   validateEquipment(design);
@@ -123,7 +168,7 @@ export function migrateLegacyDesign(design:Design):Design {
  */
 export function reconfigureDesign(design:Design,patch:Partial<DesignConfig>,options:{removedOverrides?:'reject'|'omit-in-derived-design'}={}):Design {
   const config=validateConfig({...design.config,...patch}),reference=createEquipmentConfiguration(config),previous=equipmentFor(design);
-  const equipment:EquipmentConfiguration={...reference,defaults:{...previous.defaults},overrides:{...previous.overrides},controlPolicy:structuredClone(previous.controlPolicy),workloadProfile:structuredClone(previous.workloadProfile),economics:structuredClone(previous.economics)};
+  const equipment:EquipmentConfiguration={...reference,defaults:{...previous.defaults},overrides:{...previous.overrides},controlPolicy:structuredClone(previous.controlPolicy),workloadProfile:structuredClone(previous.workloadProfile),...(previous.networkDesign?{networkDesign:structuredClone(previous.networkDesign)}:{}),economics:structuredClone(previous.economics)};
   if(patch.supplyW!==undefined)equipment.defaults.shoreTransformer=reference.defaults.shoreTransformer;
   if(patch.batteryWhPerModule!==undefined||patch.batteryMaxWPerModule!==undefined)equipment.defaults.battery=reference.defaults.battery;
   if(patch.exchangerUAWPerK!==undefined)equipment.defaults.exchanger=reference.defaults.exchanger;
@@ -135,7 +180,7 @@ export function reconfigureDesign(design:Design,patch:Partial<DesignConfig>,opti
     const slots=buildDesign(config);
     equipment.overrides=Object.fromEntries(Object.entries(equipment.overrides).filter(([slot])=>resolveAsset(slots,slot)!==undefined));
   }
-  return buildDesign(config,equipment);
+  return carryDisabledNetworkConnections(design,buildDesign(config,equipment));
 }
 export function moduleAssets(design:Design,moduleId:string):Asset[]{
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
@@ -174,10 +219,10 @@ export function connectionsForModule(design:Design,moduleId:string):Connection[]
   const m=design.modules.find(m=>m.id===moduleId);if(!m)return[];
   const list=moduleAssets(design,moduleId),get=(suffix:string)=>list.find(a=>a.id===`${moduleId}/${suffix}`)!;
   const bus=resolveAsset(design,m.powerDomainId)!,net=resolveAsset(design,m.networkDomainId)!;
-  const c:Connection[]=[connect(bus,get('battery'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),4),connect(get('battery'),get('distribution'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),2),connect(net,get('rack-network'),'cluster',400e9,4)];
+  const c:Connection[]=[connect(bus,get('battery'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),4),connect(get('battery'),get('distribution'),'power',Math.min(get('battery').ratings.capacityW,get('distribution').ratings.capacityW),2),design.equipment?.networkDesign?networkConnection(net,get('rack-network'),design.modules.filter(n=>n.platformId===m.platformId).findIndex(n=>n.id===m.id)+1,4):connect(net,get('rack-network'),'cluster',400e9,4)];
   for(const p of list.filter(a=>a.type==='pump'||a.type==='cdu'||a.type==='network'))c.push(connect(get('distribution'),p,'power',p.ratings.capacityW??3000,2));
   for(const rack of list.filter(a=>a.type==='rack')){
-    c.push(connect(get('distribution'),rack,'power',48_000,2),connect(get('rack-network'),rack,'cluster',100e9,1));
+    c.push(connect(get('distribution'),rack,'power',48_000,2),design.equipment?.networkDesign?networkConnection(get('rack-network'),rack,Number(rack.id.split('/rack-')[1]),1):connect(get('rack-network'),rack,'cluster',100e9,1));
     c.push(connect(get('cdu'),rack,'technical',0.005,1.2),connect(rack,get('hx'),'technical',0.005,1.2));
     for(const n of list.filter(a=>a.parentId===rack.id))c.push(connect(rack,n,'power',n.ratings.capacityW,0.5),connect(rack,n,'cluster',100e9,0.5));
   }
