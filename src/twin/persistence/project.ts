@@ -1,10 +1,11 @@
+import { modelForDesign, algorithmForDesign } from '../transfer/version';
 import { engineeringIdentity } from '../catalog/equipment';
 import { buildDesign, migrateLegacyDesign, validateConfig } from '../assets/design';
 import { failure, finiteNumber, SimulationError } from '../safety';
 import { SOLVER_VERSION, type Design, type SimulationState } from '../types';
 import { validateDesign } from './design';
 import { eventOrder, validateEvents } from './events';
-import { ALGORITHM_ID, CONTRACT, MODEL_ID } from './limits';
+import { CONTRACT } from './limits';
 import { validateState } from './state';
 import { array, identity, keys, preflightJSON, record, safeJSON, string, validateStructure } from './structure';
 import type { CurrentProject, ProjectCompatibility, ProjectFile, ProjectProvenance } from './types';
@@ -59,7 +60,7 @@ export function projectFile(design: Design, state: SimulationState, options: { p
   const project: CurrentProject = {
     schemaVersion: CONTRACT.projectSchema, kind: 'neptune-project', design: design.config, designSnapshot: design,
     events: state.events, timeS: state.timeS, sourceMode: 'simulated', solverVersion: state.solverVersion,
-    modelId: MODEL_ID, algorithmId: ALGORITHM_ID,
+    modelId: modelForDesign(design), algorithmId: algorithmForDesign(design),
     checkpoint: { boundary: 'after-events-and-controller', configIdentity: engineeringIdentity(design), state: { ...state, solverMs: 0 } },
     provenance: options.provenance ?? { origin: 'simulated', sourceIds: design.sourceIds, assumptions: 'design-stage-reference' },
     ...(options.execution ? { execution: options.execution } : {}),
@@ -85,7 +86,7 @@ export function normalizeProject(project: ProjectFile): ProjectFile {
 export function compatibilityFor(project: ProjectFile): ProjectCompatibility {
   validateProject(project);
   if (project.schemaVersion === 2) return { mode: 'scenario-only', canResume: false, canRecalculate: true, explanation: `Legacy schema 2 / solver ${project.solverVersion} contains scenario inputs and history, without battery/controller continuation state. Inspect or export the original; explicitly recalculate a separate experiment with the current model.` };
-  if (project.modelId !== MODEL_ID || project.algorithmId !== ALGORITHM_ID || project.solverVersion !== SOLVER_VERSION) return { mode: 'inspection-only', canResume: false, canRecalculate: true, explanation: `Saved model ${project.modelId}, algorithm ${project.algorithmId}, solver ${project.solverVersion} is unavailable in this runtime. Exact resume/replay is disabled. Archived source is not executable compatibility; explicit recalculation creates a separate derived experiment.` };
+  if (project.modelId !== modelForDesign(project.designSnapshot) || project.algorithmId !== algorithmForDesign(project.designSnapshot) || project.solverVersion !== SOLVER_VERSION) return { mode: 'inspection-only', canResume: false, canRecalculate: true, explanation: `Saved model ${project.modelId}, algorithm ${project.algorithmId}, solver ${project.solverVersion} is unavailable in this runtime. Exact resume/replay is disabled. Archived source is not executable compatibility; explicit recalculation creates a separate derived experiment.` };
   if (!project.checkpoint) return { mode: 'scenario-only', canResume: false, canRecalculate: true, explanation: 'Scenario inputs and events are preserved. No dynamic checkpoint exists; calculation starts from declared initial conditions.' };
   return { mode: 'exact-checkpoint', canResume: true, canRecalculate: true, explanation: 'Compatible model, algorithm and complete checkpoint. Resume preserves physical state, controllers, integration settings and event position.' };
 }
@@ -101,7 +102,7 @@ export function recalculateProject(project: ProjectFile): CurrentProject {
   const events = project.events.map((e, i) => ({ ...e, sequence: project.schemaVersion === 2 ? i : e.sequence! })).sort(eventOrder);
   const derived: CurrentProject = {
     schemaVersion: 3, kind: 'neptune-project', design: design.config, designSnapshot: design, events, timeS: project.timeS,
-    sourceMode: 'simulated', solverVersion: SOLVER_VERSION, modelId: MODEL_ID, algorithmId: ALGORITHM_ID, checkpoint: null,
+    sourceMode: 'simulated', solverVersion: SOLVER_VERSION, modelId: modelForDesign(design), algorithmId: algorithmForDesign(design), checkpoint: null,
     provenance: { origin: 'simulated', sourceIds: design.sourceIds, assumptions: 'design-stage-reference', parent: {
       identity: identity(normalizeProject(project)), schemaVersion: project.schemaVersion, solverVersion: project.solverVersion,
       modelId: project.schemaVersion === 3 ? project.modelId : 'legacy-unspecified', algorithmId: project.schemaVersion === 3 ? project.algorithmId : 'legacy-unspecified', action: 'recalculate-current-model',

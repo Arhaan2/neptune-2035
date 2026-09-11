@@ -1,3 +1,4 @@
+import { activePowerDesign } from '../transfer/topology';
 import { wholeExperimentReport } from '../experiment/report';
 import { COST_ASSUMPTIONS, resolveModuleEngineering, resolveSpecification, equipmentFor, engineeringIdentity, economicIdentity } from '../catalog/equipment';
 export { COST_ASSUMPTIONS } from '../catalog/equipment';
@@ -29,6 +30,7 @@ export function billOfEquipment(design:Design,unitCostScale=equipmentFor(design)
   const rows=[['Compute',design.nodeCount,c.computeUSD],['Racks',design.rackCount,c.rackUSD],['Platform + assumed hull scope',platforms,c.platformUSD],['Cooling base (duty + seawater pumps, HX, CDU)',design.modules.length,c.coolingPerModuleUSD],['Optional standby pumps',standbyPumps,c.standbyPumpUSD],['Electrical base (excludes battery storage)',design.modules.length,c.electricalPerModuleUSD],['Installed battery storage (kWh)',storageKWh,storageKWh>0?storagePriceUSD/storageKWh:0],...(phase3?[]:[['Networking',design.modules.length,c.networkingPerModuleUSD]])].map(([scope,count,unitUSD])=>({scope:String(scope),count:Number(count),unitUSD:Number(unitUSD)*unitCostScale,totalUSD:Number(count)*Number(unitUSD)*unitCostScale}));
   for(const item of networkItems.values())rows.push({scope:`Network: ${item.name} (link allowance included)`,count:item.count,unitUSD:item.unitUSD*unitCostScale,totalUSD:item.count*item.unitUSD*unitCostScale});
   if(pumpPriceAdjustmentUSD!==0)rows.push({scope:'Installed pump specification price adjustment',count:1,unitUSD:pumpPriceAdjustmentUSD*unitCostScale,totalUSD:pumpPriceAdjustmentUSD*unitCostScale});
+  for(const asset of design.assets.filter(a=>a.catalogId.startsWith('transfer-'))){const price=economics.specificationUnitUSD[`${asset.catalogId}@${asset.revision}`];if(price===undefined)missingCostAssetIds.push(asset.id);else rows.push({scope:`Transfer: ${asset.name}`,count:1,unitUSD:price*unitCostScale,totalUSD:price*unitCostScale});}
   const equipment=rows.reduce((s,r)=>s+r.totalUSD,0),installation=equipment*c.installationFraction,contingency=(equipment+installation)*c.contingencyFraction;
   rows.forEach(row=>finiteOutputs(row,'cost row'));
   const rangeUSD=[(equipment+installation+contingency)*0.7,(equipment+installation+contingency)*1.5];finiteOutputs(rangeUSD,'cost range');
@@ -73,7 +75,7 @@ function peakCooling(design:Design,state:SimulationState){
   });
 }
 export function constraints(design:Design,state:SimulationState):Constraint[]{
-  const s=summarize(design,state),packing=packingIssues(design),marine=marineScreen(design),peak=peakAllocation(design),cooling=peakCooling(design,state),network=assessNetwork(design,state.modules,state.failedAssetIds),provisioning=assessNetworkProvisioning(design),traffic=equipmentFor(design).workloadProfile;
+  const s=summarize(design,state),packing=packingIssues(design),marine=marineScreen(design),peak=peakAllocation(design),cooling=peakCooling(design,state),network=assessNetwork(activePowerDesign(design,state),state.modules,state.failedAssetIds),provisioning=assessNetworkProvisioning(design),traffic=equipmentFor(design).workloadProfile;
   const marineKnown=marine.length>0&&marine.every(m=>m.supportedGeometry&&m.missing.length===0),freeboards=marine.flatMap(m=>m.freeboardM===null?[]:[m.freeboardM]);
   const electricalUnsupported=peak.warnings.some(w=>w.includes('Unsupported power topology'));
   return [
@@ -108,7 +110,7 @@ export function resultsCSV(design:Design,state:SimulationState){
 }
 export function inventoryCSV(design:Design){validateDesign(design);return [['assetId','type','parent','catalog','specificationVersion','widthM','heightM','depthM','massKg','ratingsSI','evidence'],...Array.from(allAssets(design),a=>[a.id,a.type,a.parentId??'',a.catalogId,a.revision,...a.dimensionsM,a.operationalMassKg??'unknown',JSON.stringify(a.ratings),'assumed'])].map(r=>r.map(csvCell).join(',')).join('\n');}
 export function conservationResiduals(design:Design,state:SimulationState){
-  const s=summarize(design,state),electricalInputW=state.modules.reduce((n,m)=>n+m.gridW+m.batteryDischargeW/resolveModuleEngineering(design,m.id).electrical.dischargeEfficiency,assessNetworkPower(design,state.failedAssetIds).gridW);
+  const s=summarize(design,state),electricalInputW=state.modules.reduce((n,m)=>n+m.gridW+m.batteryDischargeW/resolveModuleEngineering(design,m.id).electrical.dischargeEfficiency,assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW);
   return {electricalResidualW:s.electricalResidualW,electricalNormalized:s.electricalResidualW/Math.max(1,electricalInputW),thermalResidualW:s.thermalResidualW,thermalNormalized:s.thermalResidualW/Math.max(1,s.facilityW),electricalDenominatorW:Math.max(1,electricalInputW),thermalDenominatorW:Math.max(1,s.facilityW)};
 }
 export function engineeringReport(design:Design,state:SimulationState,costScale=equipmentFor(design).economics.unitCostScale){

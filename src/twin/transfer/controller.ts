@@ -22,7 +22,7 @@ export function allocateTransferBundles(resources:TransferResource[],bundles:Tra
 }
 export function initializeTransfer(design:Design):TransferState|undefined {
   if(!design.transfer)return;
-  return{version:1,policy:TRANSFER_POLICY,topology:TRANSFER_TOPOLOGY,designIdentity:engineeringIdentity(design),sequence:0,transitions:[],transitionsTruncated:false,transitionCounts:{},resources:[],attempts:design.transfer.routes.map(r=>({id:r.id,attemptId:null,status:'normal',reason:'NORMAL',detectedAtS:null,deadlineS:null,originalClosed:true,tieClosed:false,requestedW:0,accelerators:design.modules.filter(m=>m.platformId===r.recipientPlatformId).reduce((n,m)=>n+m.nodeCount*8,0),originalPath:powerPath(design,r.receivingBusId).assetIds,donorPath:powerPath(design,r.donorBusId).assetIds,admittedW:0,unservedW:0,bindingResourceId:null,headroomW:0}))};
+  return{version:1,policy:TRANSFER_POLICY,topology:TRANSFER_TOPOLOGY,designIdentity:engineeringIdentity(design),splitTimesS:[],sequence:0,transitions:[],transitionsTruncated:false,transitionCounts:{},resources:[],attempts:design.transfer.routes.map(r=>({id:r.id,attemptId:null,status:'normal',reason:'NORMAL',detectedAtS:null,deadlineS:null,originalClosed:true,tieClosed:false,requestedW:0,accelerators:design.modules.filter(m=>m.platformId===r.recipientPlatformId).reduce((n,m)=>n+m.nodeCount*8,0),originalPath:powerPath(design,r.receivingBusId).assetIds,donorPath:powerPath(design,r.donorBusId).assetIds,admittedW:0,unservedW:0,bindingResourceId:null,headroomW:0}))};
 }
 export function nextTransferDeadline(state:SimulationState):number {return Math.min(Infinity,...(state.transfer?.attempts.filter(a=>a.status==='waiting'&&a.deadlineS!==null&&a.deadlineS>state.timeS).map(a=>a.deadlineS!)??[]));}
 function transition(design:Design,state:SimulationState,a:TransferAttempt,status:TransferStatus,reason:TransferReason){
@@ -52,6 +52,9 @@ export function updateTransfer(design:Design,state:SimulationState,allocate:(can
   const attempts=[...state.transfer.attempts].sort((a,b)=>{const ar=design.transfer!.routes.find(r=>r.id===a.id)!,br=design.transfer!.routes.find(r=>r.id===b.id)!;return ar.priority-br.priority||stable(a.id,b.id);});
   for(const a of attempts){
     a.requestedW=requested(a.id);const route=design.transfer.routes.find(r=>r.id===a.id)!;
+    if(a.status==='normal'&&!state.failedAssetIds.includes(route.originalFeederId)&&(state.failedAssetIds.includes(route.receivingBusId)||state.failedAssetIds.includes('shore/grid'))){
+      a.attemptId=`${a.id}:attempt-1`;a.detectedAtS=state.timeS;a.unservedW=a.requestedW;transition(design,state,a,'blocked',state.failedAssetIds.includes('shore/grid')?'COMMON_SOURCE_FAILED':'RECEIVING_BUS_FAILED');
+    }
     if(a.status==='normal'&&state.failedAssetIds.includes(route.originalFeederId)){
       a.attemptId=`${a.id}:attempt-1`;a.detectedAtS=state.timeS;a.unservedW=a.requestedW;transition(design,state,a,'detected','FEEDER_FAULT');
       if(state.failedAssetIds.includes(route.isolatorId)){transition(design,state,a,'lockout','ISOLATION_UNCONFIRMED');continue;}

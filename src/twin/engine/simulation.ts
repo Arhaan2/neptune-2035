@@ -1,3 +1,6 @@
+import { activePowerDesign } from '../transfer/topology';
+import { initializeTransfer, nextTransferDeadline, updateTransfer } from '../transfer/controller';
+import { allocateActiveGrid, planTransfers, restorationRequestedW, type RestorableDemand } from '../transfer/dispatch';
 import type { ExperimentDefinition } from '../experiment/types';
 import { attachExperiment, beginInterval, commitExperimentInterval, admitExperimentInputs, prepareExperimentBoundary, finishExperimentBoundary, recordExperimentEvent, recordExperimentController, experimentFinished } from '../experiment/runtime';
 import { resolveModuleEngineering, resolveSpecification, equipmentFor, engineeringIdentity, MODEL_BOUNDARIES as B, type ComponentSpecification } from '../catalog/equipment';
@@ -21,12 +24,12 @@ export { validateEvent } from '../persistence/events';
 const MAX_LOG = CONTRACT.maxLogEntries;
 const ZERO_HYDRAULIC: HydraulicResult = { flowM3S:0, pressurePa:0, electricalW:0, reynolds:0, darcyFactor:0, headResidualPa:0, massResidualKgS:0, iterations:0 };
 interface ModuleContext { equipment:ReturnType<typeof resolveModuleEngineering>; module:ModuleSpec; ancestors:string[]; pathCapacityW:number; supported:boolean; technicalLengthM:number; seawaterLengthM:number }
-interface Context { modules:ModuleContext[]; assets:Map<string,Asset>; hydraulicCache:Map<string,HydraulicResult>; network:ReturnType<typeof createNetworkEvaluator>; networkPower:ReturnType<typeof createNetworkPowerEvaluator> }
+interface Context { activeKey?:string; active?:Context; modules:ModuleContext[]; assets:Map<string,Asset>; hydraulicCache:Map<string,HydraulicResult>; network:ReturnType<typeof createNetworkEvaluator>; networkPower:ReturnType<typeof createNetworkPowerEvaluator> }
 function context(design:Design):Context {
   const assets = new Map(design.assets.map(a => [a.id,a]));
   const incoming = new Map<string,typeof design.connections>();
   for (const edge of design.connections) if (edge.medium === 'power' && edge.enabled) incoming.set(edge.to,[...(incoming.get(edge.to)??[]),edge]);
-  return { assets, hydraulicCache:new Map(), network:createNetworkEvaluator(design,undefined,{includeResources:false}), networkPower:createNetworkPowerEvaluator(design), modules:design.modules.map(module => {
+  return { assets, hydraulicCache:new Map(), network:createNetworkEvaluator(design,undefined,{includeResources:false,...(design.transfer?{ignorePower:true}:{})}), networkPower:createNetworkPowerEvaluator(design), modules:design.modules.map(module => {
     const ancestors:string[]=[]; let id=module.powerDomainId, capacity=design.config.supplyW, supported=true;
     while (id !== 'shore/grid') {
       if (ancestors.includes(id)) { supported=false; break; }
@@ -69,8 +72,9 @@ function applyEvents(design:Design,state:SimulationState,ctx:Context) {
     const affected=affectedModules(ctx,event.assetId);
     appendLog(state,event.assetId,`${event.kind}${event.value===undefined?'':` = ${event.value} ${event.kind==='seawater'?'K':event.kind==='fouling'?'K/W':'fraction'}`}; ${affected.length} module(s) in dependency scope`,'command',affected);
     state.appliedEventIds.push(event.id);
-    resolveStep(design,state,ctx,0,true);count++;
+    if(!design.transfer)resolveStep(design,state,ctx,0,true);count++;
   }
+  if(count&&design.transfer)resolveStep(design,state,ctx,0,true);
   return count;
 }
 type EquipmentTransition={next:ModuleState['states'][string];message:string};
@@ -116,6 +120,17 @@ function circuit(ctx:ModuleContext,medium:'technical'|'seawater',active:Componen
   cache.set(key,result);return result;
 }
 function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,runController:boolean) {
+  if(design.transfer&&state.transfer){
+    if(runController){
+      const restoration:RestorableDemand[]=ctx.modules.map(c=>{const technical=circuit(c,'technical',[c.equipment.dutyPump],state.pumpSpeed,ctx.hydraulicCache),seawater=circuit(c,'seawater',[c.equipment.seaPump],state.pumpSpeed,ctx.hydraulicCache);return{id:c.module.id,platformId:c.module.platformId,domainId:c.module.powerDomainId,requestedW:(c.module.nodeCount*nodeDrawW(state.workload,design.config.idleFraction,true,c.equipment.electrical.nodePeakW)+technical.electricalW+seawater.electricalW+c.equipment.cdu.ratings.capacityW+c.equipment.moduleSupport.ratings.capacityW+(c.equipment.network?.ratings.capacityW??0))/c.equipment.electrical.gridEfficiency,moduleLimitW:c.equipment.moduleLimitW};});
+      const previous=state.transfer.sequence;
+      updateTransfer(design,state,candidates=>planTransfers(design,state,restoration,candidates),id=>restorationRequestedW(design,restoration,id));
+      for(const e of state.transfer.transitions.filter(e=>e.sequence>previous)){const route=design.transfer.routes.find(r=>r.id===e.id)!;appendLog(state,route.tieId,`Transfer ${e.previous} → ${e.status}: ${e.reason}; admitted ${e.admittedW} W; unserved ${e.unservedW} W`,'controller',design.modules.filter(m=>m.platformId===route.recipientPlatformId).map(m=>m.id));}
+    }
+    const key=state.transfer.attempts.map(a=>`${a.id}:${a.originalClosed}:${a.tieClosed}`).join('|');
+    if(ctx.activeKey!==key){ctx.activeKey=key;ctx.active=context(activePowerDesign(design,state));}
+    design=activePowerDesign(design,state);ctx=ctx.active!;
+  }
   const failed=new Set(state.failedAssetIds);
   const demands=ctx.modules.map((c,i)=>{
     const m=state.modules[i],id=m.id;
@@ -154,6 +169,7 @@ function resolveStep(design:Design,state:SimulationState,ctx:Context,dtS:number,
     const remainingDomains=new Map([...domainLimits].map(([id,limit])=>[id,Math.max(0,limit-(spentByDomain.get(id)??0))]));
     const charging=allocateGrid(demands.map((d,i)=>({domainId:d.c.module.powerDomainId,requestedW:d.gridLive?d.maxChargeW:0,moduleLimitW:Math.max(0,d.c.equipment.moduleLimitW-grid[i])})),Math.max(0,supply-grid.reduce((a,b)=>a+b,0)),remainingDomains);
     grid=grid.map((p,i)=>p+charging[i]);
+    if(design.transfer)grid=allocateActiveGrid(design,state,demands.map((d,i)=>({id:d.m.id,platformId:d.c.module.platformId,domainId:d.c.module.powerDomainId,requestedW:requests[i].requestedW,moduleLimitW:d.c.equipment.moduleLimitW,gridLive:d.gridLive,maxChargeW:d.maxChargeW})),networkPower.allocations);
     return demands.map((d,i)=>solveElectrical({equipment:d.c.equipment.electrical,desiredNodes:d.desiredNodes,workload:state.workload,idleFraction:design.config.idleFraction,networkAvailable:d.networkAvailable,
       criticalLoadW:d.criticalW,gridAvailableW:grid[i],batteryWh:d.m.batteryWh,batteryCapacityWh:d.c.equipment.battery.ratings.energyWh,
       batteryMaxW:d.c.equipment.battery.ratings.storageMaxW,batteryAvailable:!failed.has(`${d.m.id}/battery`),isolated:d.disabled,dtS}));
@@ -239,6 +255,7 @@ export function initialize(design:Design,definition?:ExperimentDefinition):Simul
   const state:SimulationState={schemaVersion:CONTRACT.stateSchema,designRevision:design.revision,designIdentity:engineeringIdentity(design),solverVersion:SOLVER_VERSION,timeS:0,integrationStepS:1,stepIndex:0,modules,events:[],log:[],
     facilityEnergyWh:0,itEnergyWh:0,gridEnergyWh:0,appliedEventIds:[],workload:design.config.workload,seawaterK:design.config.seawaterK,
     foulingResistanceKPerW:design.config.foulingResistanceKPerW,pumpSpeed:design.config.pumpSpeed,failedAssetIds:[],solverMs:0};
+  if(design.transfer)state.transfer={...initializeTransfer(design)!,splitTimesS:[]};
   const ctx=context(design);resolveStep(design,state,ctx,0,true);
   if(definition){state.integrationStepS=definition.integrationStepS;attachExperiment(design,state,definition);applyEvents(design,state,ctx);finishExperimentBoundary(state);}
   validateCandidate(design,state);return state;
@@ -274,7 +291,7 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
   const work=advanceWork(design,input,durationS,events,maxStepS);
   if(work>CONTRACT.maxJobModuleSteps)failure('resource-limit','ADVANCE_WORK','Valid scenario exceeds the per-call execution budget; retain/export it and use bounded worker chunks.',{details:{work,max:CONTRACT.maxJobModuleSteps}});
   // Validate project allocation before numerical work. New events are validated history, not yet applied.
-  const state:SimulationState={...input,integrationStepS:maxStepS as IntegrationStep,modules:input.modules.map(m=>({...m,states:{...m.states},startAtS:{...m.startAtS},warnings:[...m.warnings]})),events:history,log:input.log.map(e=>({...e,affectedIds:[...e.affectedIds]})),appliedEventIds:[...input.appliedEventIds],failedAssetIds:[...input.failedAssetIds],solverMs:0,...(input.experiment?{experiment:structuredClone(input.experiment)}:{})};
+  const state:SimulationState={...input,integrationStepS:maxStepS as IntegrationStep,modules:input.modules.map(m=>({...m,states:{...m.states},startAtS:{...m.startAtS},warnings:[...m.warnings]})),events:history,log:input.log.map(e=>({...e,affectedIds:[...e.affectedIds]})),appliedEventIds:[...input.appliedEventIds],failedAssetIds:[...input.failedAssetIds],solverMs:0,...(input.experiment?{experiment:structuredClone(input.experiment)}:{}),...(input.transfer?{transfer:structuredClone(input.transfer)}:{})};
   admitExperimentInputs(state,events);
   if(state.experiment&&['paused','resource-limited'].includes(state.experiment.status)){state.experiment.status=state.experiment.originTimeS===null?'warming':'running';state.experiment.reason=null;}
   safeJSON({designSnapshot:design,events:history,checkpoint:{state}});
@@ -285,9 +302,11 @@ export function advanceWithStep(design:Design,input:SimulationState,durationS:nu
   while(state.timeS<end&&!experimentFinished(state)){
     // Each fixed step starts at a committed boundary; chunk endpoints add no controller transitions.
     const before=beginInterval(state);
-    resolveStep(design,state,ctx,maxStepS,false);
-    if(state.experiment){const energy={batteryDischargeWh:0,batteryChargeWh:0,batteryLossWh:0};for(let i=0;i<state.modules.length;i++){const m=state.modules[i],e=ctx.modules[i].equipment.electrical;energy.batteryDischargeWh+=m.batteryDischargeW*maxStepS/3600;energy.batteryChargeWh+=m.batteryChargeW*maxStepS/3600;energy.batteryLossWh+=(m.batteryDischargeW*(1/e.dischargeEfficiency-1)+m.batteryChargeW*(1-e.chargeEfficiency))*maxStepS/3600;}commitExperimentInterval(state,before,maxStepS,energy);}
-    state.timeS+=maxStepS;state.stepIndex++;
+    const dtS=design.transfer?Math.min(end-state.timeS,maxStepS-(state.timeS%maxStepS),nextTransferDeadline(state)-state.timeS):maxStepS;
+    resolveStep(design,state,ctx,dtS,false);
+    if(state.experiment){const energy={batteryDischargeWh:0,batteryChargeWh:0,batteryLossWh:0};for(let i=0;i<state.modules.length;i++){const m=state.modules[i],e=ctx.modules[i].equipment.electrical;energy.batteryDischargeWh+=m.batteryDischargeW*dtS/3600;energy.batteryChargeWh+=m.batteryChargeW*dtS/3600;energy.batteryLossWh+=(m.batteryDischargeW*(1/e.dischargeEfficiency-1)+m.batteryChargeW*(1-e.chargeEfficiency))*dtS/3600;}commitExperimentInterval(state,before,dtS,energy);}
+    state.timeS+=dtS;
+    if(design.transfer){state.stepIndex=Math.floor(state.timeS/maxStepS);if(state.timeS%maxStepS!==0&&!state.transfer!.splitTimesS.includes(state.timeS))state.transfer!.splitTimesS.push(state.timeS);}else state.stepIndex++;
     const warming=state.experiment?.originTimeS===null;
     if(warming)resolveStep(design,state,ctx,0,true);
     prepareExperimentBoundary(design,state);
@@ -302,7 +321,7 @@ export function replay(design:Design,events:OperationEvent[],durationS:number):S
 export function summarize(design:Design,state:SimulationState):Summary {
   validateState(design,state);
   const sum=(key:keyof Pick<ModuleState,'itW'|'facilityW'|'gridW'|'pumpPowerW'|'availableAccelerators'|'batteryWh'|'electricalResidualW'|'thermalResidualW'>)=>state.modules.reduce((n,m)=>n+m[key],0);
-  const rootNetworkW=assessNetworkPower(design,state.failedAssetIds).gridW;
+  const rootNetworkW=assessNetworkPower(activePowerDesign(design,state),state.failedAssetIds).gridW;
   const itW=sum('itW'),facilityW=sum('facilityW')+rootNetworkW,energizedAccelerators=state.modules.reduce((n,m)=>n+m.energizedNodes*8,0);
   return finiteOutputs({timeS:state.timeS,itW,facilityW,gridW:sum('gridW')+rootNetworkW,pumpPowerW:sum('pumpPowerW'),availableAccelerators:sum('availableAccelerators'),energizedAccelerators,
     curtailedAccelerators:Math.max(0,design.provisionedAccelerators-energizedAccelerators),maxCoolantK:Math.max(...state.modules.map(m=>m.coolantK)),batteryWh:sum('batteryWh'),

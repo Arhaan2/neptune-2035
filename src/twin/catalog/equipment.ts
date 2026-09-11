@@ -99,7 +99,7 @@ export function roleForAsset(assetId:string):EquipmentRole|undefined {
 }
 export function resolveSpecification(design:Design,assetIdOrRole:string):ComponentSpecification {
   const equipment=equipmentFor(design),networkId=networkSpecificationId(design,assetIdOrRole);
-  const transferAsset=design.assets.find(a=>a.id===assetIdOrRole&&a.catalogId.startsWith('transfer-'));
+  const transferAsset=design.transfer&&design.assets.find(a=>a.id===assetIdOrRole&&a.catalogId.startsWith('transfer-'));
   if(transferAsset)return catalogSpecification(transferAsset.catalogId);
   if(networkId){const found=equipment.specifications.find(s=>s.id===networkId&&s.version==='1.0.0');if(!found)failure('unsupported-configuration','SPECIFICATION_REFERENCE',`Unavailable installed network specification ${networkId}@1.0.0.`);return found;}
   const role=roles.includes(assetIdOrRole as EquipmentRole)?assetIdOrRole as EquipmentRole:roleForAsset(assetIdOrRole);

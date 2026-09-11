@@ -40,7 +40,7 @@ export function validateExperimentRun(design: Design, state: SimulationState): v
   finiteNumber(m.elapsedS,'metrics.elapsedS',{min:0,max:candidate.definition.durationS});
   if(Math.abs(m.elapsedS-(candidate.originTimeS===null?0:state.timeS-candidate.originTimeS))>EPS)failure('invalid-input','EXPERIMENT_COVERAGE','Metric coverage does not match physical time and evaluation origin.');
   finiteNumber(m.committedIntervals,'metrics.committedIntervals',{min:0,integer:true});
-  if(Math.abs(m.committedIntervals*state.integrationStepS-m.elapsedS)>EPS)failure('invalid-input','EXPERIMENT_INTERVAL_COUNT','Metric interval count disagrees with the committed numerical grid.');
+  if(Math.abs((m.committedIntervals-(state.transfer?.splitTimesS.filter(t=>t>((candidate.originTimeS as number|null)??state.timeS)&&t<state.timeS).length??0))*state.integrationStepS-m.elapsedS)>EPS)failure('invalid-input','EXPERIMENT_INTERVAL_COUNT','Metric interval count disagrees with the committed numerical grid.');
   for(const key of ['shortfallAcceleratorS','serviceViolationS','thermalViolationS','anyViolationS','unavailableS','longestInterruptionS'])finiteNumber(m[key],`metrics.${key}`,{min:0,max:key==='shortfallAcceleratorS'?1_000_000*m.elapsedS:m.elapsedS});
   if((m.anyViolationS as number)+EPS<Math.max(m.serviceViolationS as number,m.thermalViolationS as number)||(m.anyViolationS as number)>(m.serviceViolationS as number)+(m.thermalViolationS as number)+EPS)failure('invalid-input','EXPERIMENT_UNION','Campus violation duration must be a union, bounded by individual durations.');
   for(const key of ['interruptionCount','controllerTransitionCount','traceSamplesSeen','recoveryEpisodeCount'])finiteNumber(m[key],`metrics.${key}`,{min:0,integer:true});

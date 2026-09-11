@@ -1,8 +1,9 @@
+import { modelForDesign, algorithmForDesign } from '../transfer/version';
 import { equipmentFor, engineeringIdentity } from '../catalog/equipment';
 import { HARDWARE } from '../catalog/reference';
 import { resolveAsset } from '../assets/design';
 import { SOLVER_VERSION, type Design, type OperationEvent } from '../types';
-import { CONTRACT, MODEL_ID, ALGORITHM_ID, INTEGRATION_STEPS } from '../persistence/limits';
+import { CONTRACT, INTEGRATION_STEPS } from '../persistence/limits';
 import { mergeEventHistory, validateEvents } from '../persistence/events';
 import { array, identity, keys, record, string } from '../persistence/structure';
 import { failure, finiteNumber } from '../safety';
@@ -23,7 +24,7 @@ export function createExperimentDefinition(design: Design, options: ExperimentOp
   const equipment = equipmentFor(design);
   const definition: ExperimentDefinition = {
     version: 1, id: options.id ?? `experiment-${identity({ physical: engineeringIdentity(design), options })}`, name: options.name ?? 'Whole experiment',
-    designRevision: design.revision, physicalIdentity: engineeringIdentity(design), modelId: MODEL_ID, solverVersion: SOLVER_VERSION, algorithmId: ALGORITHM_ID, metricsVersion: METRICS_VERSION,
+    designRevision: design.revision, physicalIdentity: engineeringIdentity(design), modelId: modelForDesign(design), solverVersion: SOLVER_VERSION, algorithmId: algorithmForDesign(design), metricsVersion: METRICS_VERSION,
     integrationStepS: options.integrationStepS ?? 1, durationS: options.durationS,
     workload: { requiredAccelerators: options.requiredAccelerators ?? design.config.requestedAccelerators, requiredCapacitySchedule: structuredClone(options.requiredCapacitySchedule ?? []), utilization: design.config.workload, profile: identity(equipment.workloadProfile), requireClusterNetwork: design.config.requireClusterNetwork, requireExternalNetwork: design.config.requireExternalNetwork },
     environment: { seawaterK: design.config.seawaterK, foulingResistanceKPerW: design.config.foulingResistanceKPerW, pumpSpeed: design.config.pumpSpeed }, controllerPolicy: identity(equipment.controlPolicy),
@@ -43,7 +44,7 @@ export function validateRecoveryCriteria(value: unknown): asserts value is Recov
 }
 export function validateExperimentDefinition(design: Design, value: unknown): asserts value is ExperimentDefinition {
   record(value, 'experiment definition'); keys(value, ['version','id','name','designRevision','physicalIdentity','modelId','solverVersion','algorithmId','metricsVersion','integrationStepS','durationS','workload','environment','controllerPolicy','initial','disturbances','recovery','success','provenance'], 'experiment definition');
-  if (value.version !== 1 || value.metricsVersion !== METRICS_VERSION || value.modelId !== MODEL_ID || value.solverVersion !== SOLVER_VERSION || value.algorithmId !== ALGORITHM_ID) failure('unsupported-configuration', 'EXPERIMENT_VERSION', 'Unsupported experiment or numerical version; preserve original and explicitly recalculate.');
+  if (value.version !== 1 || value.metricsVersion !== METRICS_VERSION || value.modelId !== modelForDesign(design) || value.solverVersion !== SOLVER_VERSION || value.algorithmId !== algorithmForDesign(design)) failure('unsupported-configuration', 'EXPERIMENT_VERSION', 'Unsupported experiment or numerical version; preserve original and explicitly recalculate.');
   if (value.designRevision !== design.revision || value.physicalIdentity !== engineeringIdentity(design)) failure('invalid-input', 'EXPERIMENT_DESIGN', 'Experiment belongs to a different physical design.');
   for (const key of ['id','name']) { string(value[key], `experiment.${key}`, 160); if (!value[key]) failure('invalid-input','EXPERIMENT_NAME','Experiment identity and name are required.'); }
   finiteNumber(value.durationS, 'experiment.durationS', { min: 0, max: CONTRACT.horizonS, integer: true });

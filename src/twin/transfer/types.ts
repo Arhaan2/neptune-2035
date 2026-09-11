@@ -9,7 +9,7 @@ export type TransferReason = 'NORMAL'|'FEEDER_FAULT'|'ISOLATION_CONFIRMED'|'EVAL
 export interface TransferAllocation { id:string; admittedW:number; unservedW:number; bindingResourceId:string|null; headroomW:number }
 export interface TransferAttempt extends TransferAllocation { attemptId:string|null; status:TransferStatus; reason:TransferReason; detectedAtS:number|null; deadlineS:number|null; originalClosed:boolean; tieClosed:boolean; requestedW:number; accelerators:number; originalPath:string[]; donorPath:string[] }
 export interface TransferTransition extends TransferAttempt { sequence:number; transitionId:string; timeS:number; previous:TransferStatus; affectedAssetIds:string[] }
-export interface TransferState { version:1; policy:typeof TRANSFER_POLICY; topology:typeof TRANSFER_TOPOLOGY; designIdentity:string; attempts:TransferAttempt[]; sequence:number; transitions:TransferTransition[]; transitionsTruncated:boolean; transitionCounts:Partial<Record<TransferReason,number>>; resources:TransferResourceUsage[] }
+export interface TransferState { version:1; policy:typeof TRANSFER_POLICY; topology:typeof TRANSFER_TOPOLOGY; designIdentity:string; splitTimesS:number[]; attempts:TransferAttempt[]; sequence:number; transitions:TransferTransition[]; transitionsTruncated:boolean; transitionCounts:Partial<Record<TransferReason,number>>; resources:TransferResourceUsage[] }
 export interface TransferResource { id:string; capacityW:number; nativeW:number }
 export interface TransferResourceUsage extends TransferResource { transferredW:number; headroomW:number }
 export interface TransferBundle { id:string; priority:number; requestedW:number; resourceIds:string[] }

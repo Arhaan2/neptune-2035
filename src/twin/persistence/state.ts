@@ -1,3 +1,4 @@
+import { validateTransferState } from '../transfer/validation';
 import { validateExperimentRun } from '../experiment/validation';
 import { engineeringIdentity, resolveSpecification, equipmentFor } from '../catalog/equipment';
 import { moduleAssets } from '../assets/design';
@@ -12,7 +13,7 @@ const nonnegative = ['technicalFlowM3S', 'seawaterFlowM3S', 'pumpPowerW', 'itW',
 const signed = ['rejectedHeatW', 'thermalResidualW', 'electricalResidualW'];
 export function validateState(design: Design, value: unknown, options: { allowDifferentSolver?: boolean } = {}): asserts value is SimulationState {
   validateStructure(value); record(value, 'state');
-  keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs', 'experiment'], 'state');
+  keys(value, ['schemaVersion', 'designRevision', 'designIdentity', 'solverVersion', 'timeS', 'integrationStepS', 'stepIndex', 'modules', 'events', 'log', 'facilityEnergyWh', 'itEnergyWh', 'gridEnergyWh', 'appliedEventIds', 'workload', 'seawaterK', 'foulingResistanceKPerW', 'pumpSpeed', 'failedAssetIds', 'solverMs', 'experiment', 'transfer'], 'state');
   string(value.solverVersion, 'state.solverVersion', 100);
   if (value.schemaVersion !== CONTRACT.stateSchema || value.designRevision !== design.revision || (!options.allowDifferentSolver && value.solverVersion !== SOLVER_VERSION)) failure('invalid-input', 'STATE_REVISION', 'Simulation revision mismatch; explicit model migration/recalculation required.');
   if (value.designIdentity !== engineeringIdentity(design)) failure('invalid-input', 'STATE_DESIGN_BINDING', 'Checkpoint belongs to a different complete design; restore its saved design or start a separate experiment.');
@@ -83,7 +84,7 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     for (const [id, deadline] of Object.entries(m.startAtS)) {
       if (![`${spec.id}/pump-duty`, `${spec.id}/pump-standby`].includes(id) || !assetKnown(id)) failure('invalid-input', 'STATE_DEADLINE_ASSET', 'Invalid startup deadline asset.', { assetId: id });
       finiteNumber(deadline, 'startup deadline', { min: 0, max: CONTRACT.horizonS + CONTRACT.maxPendingStartupS, unit: 's' });
-      if (!Number.isInteger(deadline / (value.integrationStepS as number))) failure('invalid-input', 'STATE_DEADLINE_GRID', 'Startup deadline must lie on the persisted integration grid.', { assetId: id, unit: 's' });
+      if (!Number.isInteger(deadline / (design.transfer ? 0.125 : value.integrationStepS as number))) failure('invalid-input', 'STATE_DEADLINE_GRID', 'Startup deadline must lie on the persisted integration grid.', { assetId: id, unit: 's' });
       if (deadline > value.timeS + CONTRACT.maxPendingStartupS) failure('invalid-input', 'STATE_DEADLINE', 'Startup deadline exceeds the supported pending delay.');
     }
     for (const [id, state] of Object.entries(m.states)) if (state === 'starting') {
@@ -105,5 +106,6 @@ export function validateState(design: Design, value: unknown, options: { allowDi
     array(entry.affectedIds, 'log.affectedIds', CONTRACT.maxModules);
     for (const id of entry.affectedIds) if (typeof id !== 'string' || !moduleIds.has(id)) failure('invalid-input', 'STATE_LOG_SCOPE', 'Invalid causal trace module scope.');
   }
+  validateTransferState(design,value as unknown as SimulationState);
   validateExperimentRun(design, value as unknown as SimulationState);
 }
