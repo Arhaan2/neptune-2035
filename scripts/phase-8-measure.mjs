@@ -54,6 +54,7 @@ if (!selected) {
     const { projectFile, serializeProject, parseProject, normalizeProject, restoreProject } = await server.ssrLoadModule('/src/twin/persistence/project.ts');
     const { recoveryReport } = await server.ssrLoadModule('/src/twin/experiment/metrics.ts');
     const { CONTRACT } = await server.ssrLoadModule('/src/twin/persistence/limits.ts');
+    const { equipmentFor } = await server.ssrLoadModule('/src/twin/catalog/equipment.ts');
     const normalized = (design, state) => normalizeProject(projectFile(design, state));
     record.contract = CONTRACT;
     for (let sample = 0; sample < 3; sample++) {
@@ -83,7 +84,14 @@ if (!selected) {
       assert.deepEqual(normalized(design, worker.state), normalized(design, final));
       assert.equal(final.timeS, durationS);
       assert(final.experiment.metrics.shortfallAcceleratorS > 0);
-      if (selected === 'storage-recovery') assert.equal(minimumBatteryWh, 0);
+      if (selected === 'storage-recovery') {
+        // Frozen from the documented 10% controller reserve before running this case.
+        assert.equal(equipmentFor(design).controlPolicy.batteryReserveFraction, 0.1);
+        assert(Math.abs(minimumBatteryWh - 100) <= 1e-8, '1,000 Wh storage must stop at the declared 100 Wh reserve (1e-8 Wh accounting tolerance).');
+        assert.equal(summarize(design, checkpoint).availableAccelerators, 0);
+        assert.equal(checkpoint.modules[0].batteryDischargeW, 0);
+        assert(final.modules[0].batteryWh > 100);
+      }
       else assert(final.transfer.transitions.some(transition => transition.reason === 'TRANSFERRED'));
       record.samples.push({ sample, processCondition: sample === 0 ? 'first scenario after module import' : 'same-process warm; fresh design and cold physical initial state', requestedAccelerators: design.config.requestedAccelerators, modules: design.modules.length, simulatedDurationS: durationS, integrationStepS: 1, disturbances, definition, designIdentity: design.revision, wallMs: performance.now() - start, measurements: observations, minimumBatteryWh, summary: summarize(design, final), metrics: final.experiment.metrics, evaluation: final.experiment.evaluation, recovery: recoveryReport(final.experiment.metrics, final.experiment.status), transfer: final.transfer ?? null, checkpointTimeS, checkpointBytes: Buffer.byteLength(text), checkpointSHA256: hash(text), finalCheckpointSHA256: hash(serializeProject(projectFile(design, final))), normalizedRestoredTrajectoryExact: true, normalizedWorkerReplayExact: true, workerReplyStatuses: replies.map(reply => reply.status) });
     }
