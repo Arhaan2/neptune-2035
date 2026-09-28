@@ -68,7 +68,8 @@ const artifactSha256 = createHash('sha256').update(manifestText).digest('hex');
 await fs.writeFile('dist/build-manifest.json', manifestText);
 const release = {
   product: 'NEPTUNE',
-  description: 'Asset-linked design-stage offshore infrastructure twin with coupled operation and failure simulation.',
+  description: 'NEPTUNE Blue Hour — Visual V1 of the asset-linked design-stage offshore infrastructure twin.',
+  visualRelease: 'blue-hour-v1',
   version: pkg.version,
   channel: production ? 'production' : 'separate-preview',
   sourceSha,
@@ -84,7 +85,7 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Phase 8 independent agent verification of asset-linked coupled operation, failures, whole-run evidence, numerical accounting, bounded operating comparisons and release identity; retained Phase 7 workspaces/history/walkthrough and Phase 4–6 contracts. Simulated, design-stage prototype; physical validation pending. Physical equipment, marine stability/mooring/environment/permitting, meshed/parallel sources, global optimization, training throughput, reliability probabilities and previously deferred stress gates remain outside scope',
+    releaseScope: 'Visual V1 / Blue Hour: presentation-only materials, environment, camera and interface; unchanged solver and engineering contracts. Retains Phase 8 independent agent verification of asset-linked coupled operation, failures, whole-run evidence, numerical accounting, bounded operating comparisons and release identity; retained Phase 7 workspaces/history/walkthrough and Phase 4–6 contracts. Simulated, design-stage prototype; physical validation pending. Physical equipment, marine stability/mooring/environment/permitting, meshed/parallel sources, global optimization, training throughput, reliability probabilities and previously deferred stress gates remain outside scope',
     modelId: 'neptune-reference-3',
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',
