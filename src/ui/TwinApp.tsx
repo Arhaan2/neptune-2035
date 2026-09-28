@@ -749,7 +749,7 @@ export default function TwinApp() {
         <a className="twin-brand" href="./">
           <Waves size={27} />
           <span>
-            NEPTUNE <small>v2</small>
+            NEPTUNE <small>Blue Hour</small>
           </span>
         </a>
         <nav aria-label="Workspaces">
@@ -1588,6 +1588,7 @@ export default function TwinApp() {
           )}
         </section>
         <aside className="twin-inspector">
+          <div className="twin-inspector-identity">
           <div className="twin-eyebrow">
             {workspace === 'Operate'
               ? 'OPERATE / SELECTED ASSET'
@@ -1598,7 +1599,39 @@ export default function TwinApp() {
           <span className={`twin-tag ${assetOperatingStatus(displayState, selectedId)}`}>
             {assetOperatingStatus(displayState, selectedId)} · simulated
           </span>
+          </div>
           <AssetContext design={design} state={displayState} assetId={selectedId} onSelect={select} origin={sourceOrigin} />
+          {selectedState && (
+            <>
+              <h3>Module operating point · {selectedModule.id}</h3>
+              <dl className="twin-properties twin-readings">
+                <dt>Technical / seawater flow</dt>
+                <dd data-testid="selected-flow">
+                  {num(selectedState.technicalFlowM3S * 1000, 2)} /{' '}
+                  {num(selectedState.seawaterFlowM3S * 1000, 2)} L/s
+                </dd>
+                <dt>Hydraulic pressure</dt>
+                <dd>{num(selectedState.pressurePa / 1000)} kPa</dd>
+                <dt>Coolant / residual air</dt>
+                <dd>
+                  {num(selectedState.coolantK - 273.15, 2)} /{' '}
+                  {num(selectedState.airK - 273.15, 2)} °C
+                </dd>
+                <dt>Stored battery energy</dt>
+                <dd>{num(selectedState.batteryWh / 1000, 2)} kWh</dd>
+                <dt>Instantaneous / energy PUE</dt>
+                <dd>
+                  {summary?.instantaneousPUE === null
+                    ? 'Undefined'
+                    : num(summary?.instantaneousPUE ?? NaN, 3)}{' '}
+                  /{' '}
+                  {summary?.energyPUE === null
+                    ? 'Undefined'
+                    : num(summary?.energyPUE ?? NaN, 3)}
+                </dd>
+              </dl>
+            </>
+          )}
           {asset && (
             <dl className="twin-properties">
               <dt>Envelope (W × H × D)</dt>
@@ -1690,37 +1723,6 @@ export default function TwinApp() {
                 canonical model.
               </p>
             </details>
-          )}
-          {selectedState && (
-            <>
-              <h3>Module operating point · {selectedModule.id}</h3>
-              <dl className="twin-properties">
-                <dt>Technical / seawater flow</dt>
-                <dd data-testid="selected-flow">
-                  {num(selectedState.technicalFlowM3S * 1000, 2)} /{' '}
-                  {num(selectedState.seawaterFlowM3S * 1000, 2)} L/s
-                </dd>
-                <dt>Hydraulic pressure</dt>
-                <dd>{num(selectedState.pressurePa / 1000)} kPa</dd>
-                <dt>Coolant / residual air</dt>
-                <dd>
-                  {num(selectedState.coolantK - 273.15, 2)} /{' '}
-                  {num(selectedState.airK - 273.15, 2)} °C
-                </dd>
-                <dt>Stored battery energy</dt>
-                <dd>{num(selectedState.batteryWh / 1000, 2)} kWh</dd>
-                <dt>Instantaneous / energy PUE</dt>
-                <dd>
-                  {summary?.instantaneousPUE === null
-                    ? 'Undefined'
-                    : num(summary?.instantaneousPUE ?? NaN, 3)}{' '}
-                  /{' '}
-                  {summary?.energyPUE === null
-                    ? 'Undefined'
-                    : num(summary?.energyPUE ?? NaN, 3)}
-                </dd>
-              </dl>
-            </>
           )}
           <div className="twin-inspector-actions">
             <button
