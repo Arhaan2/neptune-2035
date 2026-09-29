@@ -1,0 +1,442 @@
+/* Presentation only: every panel keeps its existing model and event handlers. */
+.twin-app .asset-context {
+  margin: 0;
+  padding: 12px 0;
+  min-width: 0;
+}
+.twin-app .asset-context-status,
+.twin-app .inspection-context-heading,
+.twin-app .operator-history-strip,
+.twin-app .decision-heading,
+.twin-app .decision-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.twin-app .asset-context-status {
+  color: var(--blue-hour-secondary);
+}
+.twin-app .asset-time-context,
+.twin-app .asset-reading-scope {
+  color: var(--blue-hour-secondary);
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+}
+.twin-app .asset-location {
+  margin-block: 10px;
+}
+.twin-app .twin-dock .asset-context .asset-location {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  margin-block: 8px;
+}
+.twin-app .twin-dock .asset-location dd {
+  margin-block: 0;
+}
+.twin-app .asset-context .twin-properties dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.twin-app .asset-context h3 {
+  margin-block: 14px 4px;
+  font-size: 0.875rem;
+}
+.twin-app .asset-context details,
+.twin-app .operator-timeline > details {
+  border-top: 1px solid var(--blue-hour-border);
+}
+.twin-app .asset-context summary,
+.twin-app .operator-timeline summary,
+.twin-app .decision-panel summary {
+  padding-block: 12px;
+  line-height: 1.5;
+  min-height: 44px;
+  cursor: pointer;
+}
+.twin-app .asset-context-warnings > summary {
+  color: var(--blue-hour-warning);
+}
+.twin-app .asset-connection-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+.twin-app .asset-connection-list li {
+  padding: 8px 0;
+  border-top: 1px solid var(--blue-hour-border);
+}
+.twin-app .asset-connection-list button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.twin-app .inspection-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 16px;
+  padding: 9px 20px;
+  font-size: 0.75rem;
+}
+.twin-app .inspection-mode-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.twin-app .inspection-context[data-mode='history'] {
+  border-left: 3px solid var(--blue-hour-focus);
+}
+.twin-app .inspection-clock-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  color: var(--blue-hour-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 0;
+}
+.twin-app .inspection-clock-context > span {
+  min-width: 0;
+}
+.twin-app .inspection-provenance {
+  margin: 0;
+}
+.twin-app .inspection-provenance summary {
+  color: var(--blue-hour-secondary);
+  padding-block: 4px;
+  font-size: 0.75rem;
+  min-height: 28px;
+}
+.twin-app .inspection-provenance[open] {
+  flex-basis: 100%;
+}
+.twin-app .inspection-boundary-status {
+  color: var(--blue-hour-text);
+  flex-basis: 100%;
+}
+.twin-app .operator-timeline {
+  padding: 16px;
+  margin: 12px;
+  background: var(--blue-hour-panel);
+}
+.twin-app .operator-history-strip {
+  align-items: end;
+  padding-bottom: 12px;
+}
+.twin-app .operator-history-strip > div {
+  min-width: 0;
+}
+.twin-app .operator-history-strip h2 {
+  margin: 4px 0;
+  font-size: 1rem;
+}
+.twin-app .operator-history-strip p {
+  margin: 0;
+  color: var(--blue-hour-secondary);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.twin-app .operator-history-strip label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.75rem;
+}
+.twin-app .operator-history-strip input {
+  max-width: 180px;
+}
+.twin-app .operator-history-strip .twin-actions {
+  align-items: end;
+}
+.twin-app .operator-event-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 8px;
+  max-height: 340px;
+  overscroll-behavior: contain;
+  margin-block: 8px;
+}
+.twin-app .operator-event-list li {
+  padding: 0;
+  min-width: 0;
+}
+.twin-app .operator-event-list button {
+  min-height: 88px;
+  height: 100%;
+  gap: 4px;
+  padding: 10px;
+  background: var(--blue-hour-inset);
+}
+.twin-app .operator-event-list button[aria-pressed='true'] {
+  border-color: var(--blue-hour-focus);
+  background: var(--blue-hour-selected);
+}
+.twin-app .operator-event-list small {
+  color: var(--blue-hour-secondary);
+}
+.twin-app .operator-causal {
+  border-radius: var(--blue-hour-radius);
+  margin-block: 12px;
+  overflow-wrap: anywhere;
+}
+.twin-app .decision-panel {
+  padding: 20px;
+  background: var(--blue-hour-panel);
+  overflow-wrap: anywhere;
+}
+.twin-app .decision-heading {
+  align-items: start;
+  border-bottom: 1px solid var(--blue-hour-border);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+.twin-app .decision-heading h2 {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+}
+.twin-app .decision-heading > p {
+  max-width: 290px;
+  margin: 0;
+  color: var(--blue-hour-secondary);
+  font-size: 0.75rem;
+}
+.twin-app .decision-run-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding-block: 4px 14px;
+}
+.twin-app .decision-run-controls > output {
+  display: block;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.twin-app .decision-run-controls > [data-testid='decision-stale'],
+.twin-app .decision-storage-warning,
+.twin-app .decision-run-controls > [role='alert'] {
+  flex-basis: 100%;
+  border-left: 2px solid var(--blue-hour-warning);
+  padding: 8px 12px;
+  background: var(--blue-hour-warning-background);
+}
+.twin-app .decision-results,
+.twin-app .decision-inspection,
+.twin-app .decision-run-explanation,
+.twin-app .decision-time-comparison,
+.twin-app .decision-setup,
+.twin-app .decision-files {
+  min-width: 0;
+}
+.twin-app .decision-evaluated-scope h3 {
+  margin: 5px 0;
+  font-size: 1rem;
+}
+.twin-app .decision-evaluated-scope p,
+.twin-app .decision-planned-scope {
+  color: var(--blue-hour-secondary);
+  font-size: 0.75rem;
+}
+.twin-app .decision-recommendation {
+  margin-block: 12px;
+  background: var(--blue-hour-inset);
+  border-left: 3px solid var(--blue-hour-focus);
+}
+.twin-app .decision-recommendation[data-ranking-status='no-feasible-evaluated-candidate'],
+.twin-app .decision-recommendation[data-ranking-status='no-admissible-candidates'],
+.twin-app .decision-recommendation[data-ranking-status='evaluation-incomplete'],
+.twin-app .decision-recommendation[data-ranking-status='provisional'],
+.twin-app .decision-recommendation[data-ranking-status='stale'] {
+  border-left-color: var(--blue-hour-warning);
+}
+.twin-app .decision-recommendation[data-ranking-status='numerical-execution-failed'] {
+  border-left-color: var(--blue-hour-failure);
+}
+.twin-app .decision-recommendation > strong {
+  text-transform: capitalize;
+  font-size: 1rem;
+}
+.twin-app .decision-walkthrough {
+  padding: 12px 0;
+  border-top: 1px solid var(--blue-hour-border);
+}
+.twin-app .decision-walkthrough p {
+  color: var(--blue-hour-secondary);
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+}
+.twin-app .decision-empty {
+  padding: 12px 14px;
+  margin-top: 0;
+  background: var(--blue-hour-inset);
+  border-radius: var(--blue-hour-radius);
+}
+.twin-app .decision-setup,
+.twin-app .decision-files {
+  border-top: 1px solid var(--blue-hour-border);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.twin-app .decision-section-heading h3,
+.twin-app .decision-files h3 {
+  font-size: 0.9375rem;
+  margin: 0 0 8px;
+}
+.twin-app .decision-section-heading p {
+  margin: 0 0 8px;
+  color: var(--blue-hour-secondary);
+  font-size: 0.75rem;
+}
+.twin-app .decision-setup .experiment-fields {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+}
+.twin-app .decision-requirements {
+  border-block: 1px solid var(--blue-hour-border);
+  margin-block: 12px;
+}
+.twin-app .decision-requirements > summary {
+  font-weight: 600;
+}
+.twin-app .decision-table-scroll,
+.twin-app .decision-evidence-scroll {
+  max-width: 100%;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--blue-hour-border);
+  border-radius: var(--blue-hour-radius);
+  background: var(--blue-hour-inset);
+}
+.twin-app .decision-evidence-scroll table {
+  min-width: 620px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.twin-app .decision-evidence-scroll :is(th, td, caption) {
+  padding: 12px;
+  border-bottom: 1px solid var(--blue-hour-border);
+  text-align: left;
+  vertical-align: top;
+}
+.twin-app .decision-table-scroll caption {
+  padding-inline: 12px;
+}
+.twin-app .decision-table {
+  min-width: 1320px;
+  overflow-wrap: normal;
+}
+.twin-app .decision-table :is(th, td):first-child {
+  min-width: 160px;
+}
+.twin-app .decision-table button {
+  white-space: nowrap;
+}
+.twin-app .decision-run-explanation,
+.twin-app .decision-time-comparison {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--blue-hour-border);
+}
+.twin-app .decision-time-comparison svg {
+  background: var(--blue-hour-inset);
+  border-radius: var(--blue-hour-radius);
+}
+.twin-app .decision-panel :is(input, select),
+.twin-app .decision-panel button,
+.twin-app .operator-timeline :is(input, button),
+.twin-app .inspection-context button {
+  min-height: 44px;
+}
+.twin-app .decision-evidence-scroll:focus-visible,
+.twin-app .decision-panel summary:focus-visible,
+.twin-app .operator-timeline summary:focus-visible,
+.twin-app .asset-context summary:focus-visible {
+  outline: 2px solid var(--blue-hour-focus);
+  outline-offset: 3px;
+}
+/* Density hides form surfaces, never the campaign owner or active status. */
+.twin-app[data-presentation-focus='true'] .decision-setup,
+.twin-app[data-presentation-focus='true'] .decision-files,
+.twin-app[data-presentation-focus='true'] .decision-panel > .twin-actions,
+.twin-app[data-presentation-focus='true'] .decision-panel > details,
+.twin-app[data-presentation-focus='true'] .decision-inspection,
+.twin-app[data-presentation-focus='true'] .decision-assessed-limits,
+.twin-app[data-presentation-focus='true'] .decision-results > :not(.decision-evaluated-scope, .decision-recommendation),
+.twin-app .decision-panel[data-background='true'] > :not(.decision-heading, .decision-run-controls) {
+  display: none;
+}
+.twin-app[data-presentation-focus='true'] .decision-panel,
+.twin-app .decision-panel[data-background='true'] {
+  padding: 10px 20px;
+}
+.twin-app[data-presentation-focus='true'] .decision-heading,
+.twin-app .decision-panel[data-background='true'] .decision-heading {
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+.twin-app[data-presentation-focus='true'] .decision-heading :is(.twin-eyebrow, p),
+.twin-app .decision-panel[data-background='true'] .decision-heading :is(.twin-eyebrow, p) {
+  display: none;
+}
+.twin-app[data-presentation-focus='true'] .decision-heading h2,
+.twin-app .decision-panel[data-background='true'] .decision-heading h2 {
+  font-size: 0.9375rem;
+  margin: 0;
+}
+.twin-app[data-presentation-focus='true'] .decision-run-controls,
+.twin-app .decision-panel[data-background='true'] .decision-run-controls {
+  padding-block: 0;
+}
+.twin-app[data-presentation-focus='true'] .decision-evaluated-scope h3 {
+  display: none;
+}
+.twin-app[data-presentation-focus='true'] .decision-evaluated-scope p {
+  margin: 8px 0;
+}
+.twin-app[data-presentation-focus='true'] .decision-recommendation {
+  margin-block: 8px 0;
+  padding: 10px 12px;
+}
+.twin-app[data-presentation-focus='true'] .decision-recommendation :is(strong, p) {
+  font-size: 0.8125rem;
+  margin-block: 4px;
+}
+@media (max-width: 620px) {
+  .twin-app .inspection-context,
+  .twin-app .decision-panel {
+    padding: 12px;
+  }
+  .twin-app .operator-timeline {
+    margin: 10px 0;
+    padding: 12px;
+  }
+  .twin-app .operator-history-strip {
+    display: grid;
+  }
+  .twin-app .operator-history-strip .twin-actions {
+    align-items: stretch;
+  }
+  .twin-app .operator-history-strip input {
+    width: 100%;
+    max-width: 100%;
+  }
+  .twin-app .decision-inspection > label {
+    display: flex;
+    margin-right: 0;
+  }
+  .twin-app .decision-panel .twin-actions {
+    gap: 8px;
+  }
+  .twin-app .decision-run-controls > .twin-actions,
+  .twin-app .inspection-context-heading .twin-actions {
+    width: 100%;
+  }
+  .twin-app .inspection-provenance summary {
+    min-height: 44px;
+    padding-block: 12px;
+  }
+}
