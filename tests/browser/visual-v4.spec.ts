@@ -354,10 +354,16 @@ test('VIS4 normal-motion panel reflow settles named framing and preserves subseq
   expect(manual.camera).not.toEqual(named.camera);
   await focus(page, true); await page.setViewportSize({ width: 768, height: 1024 });
   await focus(page, false); await openPanel(page, 'Inspector');
-  await expect.poll(async () => {
-    const value = await scene(page), rect = await canvas.boundingBox();
-    return Boolean(value && rect && value.canvasSize.width === rect.width && value.canvasSize.height === rect.height && !value.cameraTransitioning);
-  }).toBe(true);
+  await expect.poll(() => canvas.evaluate(element => {
+    const value = window.__NEPTUNE_TWIN_SCENE__;
+    const rect = element.getBoundingClientRect();
+    const parent = element.parentElement?.getBoundingClientRect();
+    // Compare the DOM geometry used by R3F; Firefox protocol quads can round
+    // differently even when the canvas, parent and completed frame agree.
+    return Boolean(value && parent && rect.width > 0 && rect.height > 0 &&
+      value.canvasSize.width === rect.width && value.canvasSize.height === rect.height &&
+      parent.width === rect.width && parent.height === rect.height && !value.cameraTransitioning);
+  })).toBe(true);
   const reframed = await settledCamera(page);
   expect(reframed.cameraControl).toBe('manual');
   expect(reframed.camera).toEqual(manual.camera.map(value => expect.closeTo(value, 5)));
