@@ -213,6 +213,7 @@ async function runSoak() {
   receipt.resourceBaseline = baseline;
   const compare = value => {
     check(value.scene.geometries === baseline.scene.geometries && value.scene.textures === baseline.scene.textures, 'Post-warm renderer allocation inventory changed at identical end pose', { baseline, value });
+    check(JSON.stringify(value.scene.visualKit.cache) === JSON.stringify(baseline.scene.visualKit.cache), 'Post-warm kit cache inventory changed at identical end pose', { baseline, value });
     check(value.scene.simulationTimeS === baseline.scene.simulationTimeS, 'View path advanced paused simulation', value);
   };
   receipt.cycles = [];
