@@ -1,0 +1,160 @@
+/* V4 density is CSS and session-local UI state. Stateful application owners never
+   move between responsive trees or portals. Constrained heights scroll normally. */
+.twin-app { font-size: 0.875rem; }
+.twin-header { min-height: 64px; height: auto; padding: 8px 20px; gap: 12px 20px; flex-wrap: wrap; }
+.twin-brand { font-size: 1.1875rem; gap: 10px; }
+.twin-brand small { font-size: 0.75rem; }
+.twin-header nav { height: auto; min-height: 44px; }
+.twin-header nav button { min-height: 36px; font-size: 0.875rem; padding: 4px 18px; }
+.twin-header-end { display: flex; gap: 8px; margin-left: auto; }
+.twin-header-end button { border: 1px solid var(--blue-hour-border-strong); background: var(--blue-hour-panel); min-height: 44px; }
+.twin-header-status { color: var(--muted); font-size: 0.875rem; }
+.twin-mode { padding: 6px 20px; gap: 8px 24px; flex-wrap: wrap; font-size: 0.75rem; }
+.twin-mode span:last-child { display: inline; }
+.twin-panel-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--line); }
+.twin-panel-nav > button { font-size: 0.875rem; min-height: 44px; padding: 6px 12px; background: transparent; }
+.twin-workspace-help { margin-left: auto; position: relative; }
+.twin-project-menu { position: relative; }
+.twin-app summary { cursor: pointer; min-height: 44px; align-content: center; line-height: 1.5; }
+.twin-project-menu > summary, .twin-workspace-help > summary { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; }
+.twin-project-content, .twin-workspace-help > .operator-guide { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; width: min(380px, calc(100vw - 24px)); max-height: 65vh; overflow: auto; padding: 16px; border: 1px solid var(--blue-hour-border-strong); border-radius: 8px; background: var(--blue-hour-panel); box-shadow: var(--blue-hour-shadow); }
+.twin-project-content { display: grid; gap: 12px; }
+.twin-project-content .twin-file { display: block; }
+.twin-project-content input[type='file'] { width: 100%; font-size: 0.875rem; margin-top: 8px; }
+.twin-project-content select { width: 100%; min-height: 44px; }
+.twin-workspace-help .operator-guide { display: block; margin: 0; }
+.twin-workspace-help .operator-guide .twin-actions { display: flex; flex-wrap: wrap; }
+.twin-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; min-height: 0; align-items: start; }
+.twin-app[data-panel-open='false'] .twin-layout { grid-template-columns: minmax(0, 1fr); }
+.twin-center { grid-column: 1; grid-row: 1; min-width: 0; }
+.twin-dock { grid-column: 2; grid-row: 1; min-width: 0; background: var(--blue-hour-panel); border-left: 1px solid var(--line); position: sticky; top: 0; max-height: 100svh; display: flex; flex-direction: column; }
+.twin-dock-header { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--blue-hour-panel); border-bottom: 1px solid var(--line); flex: none; }
+.twin-dock-header strong { font-size: 0.9375rem; margin-right: auto; }
+.twin-dock-header button { min-width: 44px; min-height: 44px; }
+.twin-dock-body { overflow: auto; overscroll-behavior: contain; min-height: 0; }
+.twin-panel-expand { display: none !important; }
+.twin-dock .twin-design, .twin-dock .twin-inspector, .twin-dock .twin-tree, .twin-dock [data-panel='data'], .twin-dock [data-panel='evidence'] { display: block; padding: 18px; border: 0; margin: 0; min-width: 0; }
+.twin-dock [hidden], .twin-app [hidden] { display: none !important; }
+.twin-dock .twin-data, .twin-dock .twin-evidence { padding: 0; }
+.twin-dock .twin-data-grid, .twin-dock .twin-constraints { grid-template-columns: minmax(0, 1fr); }
+.twin-dock .twin-properties { display: block; padding: 12px; }
+.twin-dock .twin-properties dt { color: var(--muted); font-size: 0.8125rem; }
+.twin-dock .twin-properties dd { margin: 3px 0 12px; font-size: 0.875rem; overflow-wrap: anywhere; }
+.twin-dock .twin-properties dd:last-child { margin-bottom: 0; }
+.twin-dock .twin-inspector-identity { padding-bottom: 12px; }
+.twin-dock .twin-inspector-identity h2 { font-size: 1.5rem; }
+.twin-dock .twin-inspector-identity .twin-eyebrow { margin-bottom: 8px; font-size: 0.75rem; }
+.twin-dock .twin-inspector-identity .twin-id { font-size: 0.75rem; margin-bottom: 8px; }
+.twin-dock .twin-installed-summary, .twin-dock .twin-inspector-time { font-size: 0.8125rem; margin: 8px 0 0; color: var(--muted); }
+.twin-dock p, .twin-dock label, .twin-dock button, .twin-dock input, .twin-dock select { font-size: 0.875rem; }
+.twin-dock button, .twin-dock input, .twin-dock select { min-height: 44px; }
+.twin-dock .twin-number { align-items: start; gap: 8px; }
+.twin-dock .twin-tree form input { font-size: 0.875rem !important; }
+.twin-dock details { border-top: 1px solid var(--line); margin-top: 10px; }
+.twin-dock details > summary { font-size: 0.875rem; font-weight: 500; }
+.twin-dock .twin-edit-context { padding: 10px; border-left: 2px solid var(--blue-hour-warning); background: var(--blue-hour-warning-background); }
+.twin-app .twin-scene-shell, .twin-app .twin-scene-shell[data-detail-view='true'] { height: clamp(490px, calc(100svh - 395px), 780px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.twin-app .twin-scene-shell > .twin-scene-caption { position: static; max-width: none; box-shadow: none; border-radius: 0; border-width: 0 0 1px; padding: 10px 18px; background: var(--blue-hour-panel); }
+.twin-app .twin-scene-caption > span { font-size: 0.75rem; }
+.twin-app .twin-scene-caption > strong { font-size: 1rem; }
+.twin-app .twin-scene-selected { font-size: 0.75rem; gap: 3px 12px; }
+.twin-app .twin-scene-selected .twin-scene-state { font-size: 0.75rem; }
+.twin-app .twin-scene-shell > .twin-scene-toolbar { position: static; transform: none; width: 100%; max-width: 100%; border-radius: 0; border-width: 1px 0 0; padding: 6px 10px; gap: 4px; box-shadow: none; justify-content: flex-start; background: var(--blue-hour-panel); }
+.twin-app .twin-scene-toolbar button { font-size: 0.875rem; min-height: 44px; padding: 6px 10px; border: 1px solid transparent; }
+.twin-app .twin-scene-shell > .twin-scene { min-height: 0; }
+.twin-app .twin-scene-shell .twin-canvas-viewport { min-height: 180px; }
+.twin-app .twin-scene-shell > .twin-loading { min-height: 180px; padding: 24px; }
+.twin-metric-context { font-size: 0.75rem; padding: 6px 18px; color: var(--muted); background: var(--blue-hour-inset); overflow-wrap: anywhere; }
+.twin-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 12px 0; gap: 0; }
+.twin-metrics > div { padding: 0 18px; }
+.twin-metrics span, .twin-metrics small { font-size: 0.75rem; }
+.twin-metrics strong { font-size: 1.5rem; line-height: 1.4; white-space: normal; }
+.twin-clock { gap: 8px; padding: 10px 18px; }
+.twin-clock button, .twin-clock select, .twin-clock label { font-size: 0.875rem; min-height: 44px; }
+.twin-clock > span { display: inline; font-size: 0.75rem; margin-left: 0; }
+.twin-clock > span:last-child { margin-left: auto; }
+.twin-clock strong { font-size: 1.125rem; min-width: 0; }
+.twin-execution-details { position: relative; }
+.twin-execution-details > summary { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.twin-execution-details[open] { flex: 1 1 100%; }
+.twin-execution-details > .twin-actions { padding: 12px 0; }
+.twin-center > .twin-warnings { margin: 10px 18px; }
+.twin-notice { flex-wrap: wrap; overflow-wrap: anywhere; }
+.twin-footer { min-height: 44px; padding: 10px 20px; font-size: 0.75rem; }
+.twin-comparison-workspace { min-width: 0; }
+.twin-comparison-workspace .twin-compare { padding: 20px; }
+.twin-app table { font-size: 0.8125rem; }
+.twin-dock table { display: block; overflow: auto; max-width: 100%; }
+.twin-app pre { overflow: auto; max-width: 100%; }
+.twin-app[data-presentation-focus='true'] .twin-scene-shell { height: clamp(520px, calc(100svh - 245px), 1000px); }
+.twin-app[data-presentation-focus='true'] .twin-metrics { padding: 8px 0; }
+.twin-app[data-presentation-focus='true'] .twin-comparison-workspace .twin-compare[aria-busy='false'] { display: none; }
+.twin-app[data-presentation-focus='true'] .twin-comparison-workspace .twin-compare[aria-busy='true'] > :not(.twin-section-line) { display: none; }
+@media (max-width: 1100px) {
+  .twin-header-status { display: none; }
+  .twin-layout { grid-template-columns: minmax(0, 1fr) 340px; }
+  .twin-metrics > div { padding: 0 10px; }
+}
+@media (max-width: 900px) {
+  .twin-layout { display: flex; flex-direction: column; }
+  .twin-center { order: 1; width: 100%; }
+  .twin-dock { order: 2; position: relative; top: auto; width: 100%; max-height: none; border: 1px solid var(--blue-hour-border-strong); border-radius: 14px 14px 0 0; }
+  .twin-dock-header { position: sticky; top: 0; z-index: 6; border-radius: 14px 14px 0 0; }
+  .twin-panel-expand { display: inline-flex !important; }
+  .twin-app[data-panel-expanded='false'] .twin-dock-body { display: none; }
+  .twin-app .twin-scene-shell, .twin-app .twin-scene-shell[data-detail-view='true'] { height: 570px; }
+  .twin-dock-body { overflow: visible; }
+  .twin-workspace-help { margin-left: 0; }
+}
+@media (max-width: 620px) {
+  .twin-header { justify-content: flex-start; padding: 10px 12px; gap: 8px; }
+  .twin-brand { flex: 1 1 auto; justify-content: flex-start; font-size: 1.125rem; }
+  .twin-header nav { width: 100%; order: 3; }
+  .twin-header nav button { flex: 1; min-height: 44px; font-size: 0.875rem; }
+  .twin-header-end { flex: 1 0 100%; justify-content: space-between; margin: 0; font-size: 0.875rem; }
+  .twin-project-menu { position: static; }
+  .twin-project-content { left: 12px; right: 12px; top: auto; width: auto; }
+  .twin-mode { padding: 6px 12px; font-size: 0.75rem; }
+  .twin-mode span:last-child { display: none; }
+  .twin-panel-nav { padding: 8px 12px; gap: 4px; }
+  .twin-panel-nav > button { padding: 6px 8px; }
+  .twin-workspace-help > .operator-guide { position: fixed; top: 12px; left: 12px; right: 12px; width: auto; max-height: calc(100svh - 24px); }
+  .twin-app .twin-scene-shell, .twin-app .twin-scene-shell[data-detail-view='true'] { height: 590px; }
+  .twin-app .twin-scene-shell > .twin-scene-caption { padding: 10px 12px; }
+  .twin-app .twin-scene-shell > .twin-scene-toolbar { gap: 3px; padding: 6px; }
+  .twin-app .twin-scene-toolbar button { font-size: 0.875rem; padding: 6px 8px; }
+  .twin-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 12px; padding: 12px 0; }
+  .twin-metrics strong { font-size: 1.375rem; }
+  .twin-metric-context, .twin-clock { padding: 8px 12px; }
+  .twin-clock > span:last-child { flex: 1 1 100%; margin: 0; }
+  .twin-dock .twin-design { display: block; padding: 16px; }
+  .twin-dock .twin-generations { margin: 16px 0; }
+  .twin-app td { max-width: none; }
+  .twin-app[data-presentation-focus='true'] .twin-scene-shell { height: 590px; }
+}
+@media (max-height: 600px) and (min-width: 901px) {
+  .twin-dock { position: relative; max-height: none; }
+  .twin-dock-body { overflow: visible; }
+}
+
+/* Keep the sheet reachable without mounting a second mobile inspector. */
+.twin-dock-selection { display: none; }
+.twin-app h1 { font-size: 1.625rem; }
+.twin-app h2 { font-size: 1.25rem; }
+.twin-app h3 { font-size: .875rem; }
+.twin-app code { font-size: .75rem; }
+.twin-app :is(input, button, select, textarea) { font-family: inherit; }
+@media (max-width: 900px) {
+  .twin-app[data-panel-open='true'] { padding-bottom: 90px; }
+  .twin-app[data-panel-open='true'][data-panel-expanded='true'] { padding-bottom: calc(55svh + 16px); }
+  .twin-dock { position: fixed; bottom: 0; top: auto; left: 0; right: 0; z-index: 10; max-height: 55svh; box-shadow: 0 -8px 24px #0003; }
+  .twin-dock-body { overflow: auto; overscroll-behavior: contain; }
+  .twin-dock-header { position: static; padding: 8px 12px; }
+  .twin-dock-header strong { min-width: 0; }
+  .twin-dock-selection { display: block; font-size: .75rem; font-weight: 400; overflow-wrap: anywhere; }
+  .twin-dock-header button { font-size: .875rem; }
+  html:has(.twin-app[data-panel-open='true']) { scroll-padding-bottom: 90px; }
+  html:has(.twin-app[data-panel-open='true'][data-panel-expanded='true']) { scroll-padding-bottom: calc(55svh + 16px); }
+}
+
+.twin-stream-status { display: block; padding: 6px 20px; font-size: .8125rem; color: var(--blue-hour-warning); background: var(--blue-hour-panel); border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }

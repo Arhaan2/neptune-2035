@@ -24,9 +24,7 @@ import {
   Layers,
   Box,
   Droplets,
-  ArrowUpRight,
   Download,
-  Activity,
   X,
 } from 'lucide-react';
 import {
@@ -78,6 +76,7 @@ import {
   validateStructure,
 } from '../twin/persistence/structure';
 import './twin.css';
+import './visuals/shell-v4.css';
 const TwinScene = lazy(() => import('../scene/TwinScene'));
 const romans = ['I', 'II', 'III'],
   titles = ['Shore-connected pilot', 'Modular campus', 'Segmented archipelago'];
@@ -203,9 +202,21 @@ export default function TwinApp() {
     [workspace, setWorkspace] = useState<'Explore' | 'Operate' | 'Compare'>(
       'Explore',
     ),
-    [detail, setDetail] = useState<'inspection' | 'data' | 'evidence'>(
+    [detail, setDetail] = useState<'inspection' | 'assets' | 'design' | 'data' | 'evidence'>(
       'inspection',
     );
+  // UI density lives outside project persistence and never changes engine inputs.
+  const [presentationFocus, setPresentationFocus] = useState(false);
+  const [streamSummary, setStreamSummary] = useState('');
+  const activeOverlay = useRef<HTMLDetailsElement | null>(null);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelExpanded, setPanelExpanded] = useState(false);
+  const openPanel = (panel: typeof detail) => {
+    setDetail(panel);
+    setPanelOpen(true);
+    setPanelExpanded(true);
+  };
+  const panelTitle = detail === 'inspection' ? 'Inspector' : detail === 'data' ? 'Data & replay' : detail === 'evidence' ? 'Constraints & sources' : detail === 'assets' ? 'Assets' : 'Design';
   const design = useMemo(
       () => designOverride ?? buildDesign(config),
       [config, designOverride],
@@ -732,6 +743,9 @@ export default function TwinApp() {
   return (
     <main
       className="twin-app"
+      data-presentation-focus={presentationFocus}
+      data-panel-open={panelOpen && !presentationFocus}
+      data-panel-expanded={panelExpanded}
       data-ready={state !== null}
       data-scene-ready={sceneReady}
       data-selected={selectedId}
@@ -740,7 +754,22 @@ export default function TwinApp() {
       data-display-time={displayState?.timeS ?? ''}
       data-inspection-mode={inspection.mode}
       data-inspection-status={inspection.status}
-      onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"]')) setWalkthroughPaused(true);}}
+      onClickCapture={(event) => {
+        const overlay = (event.target as HTMLElement).closest('summary')?.parentElement;
+        if (overlay?.matches('details[data-ui-overlay]')) activeOverlay.current = overlay as HTMLDetailsElement;
+      }}
+      onKeyDownCapture={(event) => {
+        if (event.key !== 'Escape') return;
+        const visible = (element: HTMLDetailsElement | null) => element?.open && element.getClientRects().length > 0 ? element : null;
+        const overlay = visible((event.target as HTMLElement).closest<HTMLDetailsElement>('details[data-ui-overlay][open]'))
+          ?? visible(activeOverlay.current)
+          ?? Array.from(event.currentTarget.querySelectorAll<HTMLDetailsElement>('details[data-ui-overlay][open]')).reverse().find(element => visible(element));
+        if (overlay) {
+          event.preventDefault(); event.stopPropagation(); overlay.open = false;
+          overlay.querySelector<HTMLElement>('summary')?.focus();
+        }
+      }}
+      onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"], [data-layout-control]')) setWalkthroughPaused(true);}}
       onWheelCapture={() => {
         if (demo) setDemo(false);
       }}
@@ -767,611 +796,129 @@ export default function TwinApp() {
             </button>
           ))}
         </nav>
+        <span className="twin-header-status">{sim.error ? 'Simulation error' : sim.busy ? 'Solving' : sim.running ? 'Running' : 'Paused'} · {state?.timeS ?? 0} s</span>
         <div className="twin-header-end">
-          <button
-            onClick={() =>
-              setDetail(detail === 'evidence' ? 'inspection' : 'evidence')
-            }
+          <details className="twin-project-menu" data-ui-overlay data-layout-control>
+            <summary>Project actions</summary>
+        <div className="twin-project-content">
+          <label className="twin-file">
+            Import project
+            <input
+              type="file"
+              accept=".json"
+              onChange={async (e) => {
+                try {
+                  if (e.target.files?.[0]) {
+                    if (e.target.files[0].size > CONTRACT.maxProjectBytes)
+                      throw Error(
+                        `Project exceeds ${CONTRACT.maxProjectBytes} UTF-8 bytes.`,
+                      );
+                    const p = parseProject(await e.target.files[0].text());
+                    inspectOrRestore(p);
+                  }
+                } catch (err) {
+                  setNotice(String(err));
+                }
+                e.target.value = '';
+              }}
+            />
+          </label>
+          <select
+            aria-label="Export artifact"
+            defaultValue=""
+            disabled={!state}
+            onChange={async (e) => {
+              if (!state) return;
+              const kind = e.target.value;
+              e.target.value = '';
+              try {
+                if (kind === 'project')
+                  download(
+                    'neptune-v3-project.json',
+                    serializeProject(sim.captureProject()),
+                  );
+                if (kind === 'events')
+                  download(
+                    'neptune-v2-events.json',
+                    JSON.stringify(
+                      {
+                        schemaVersion: 2,
+                        designRevision: design.revision,
+                        solverVersion: state.solverVersion,
+                        events: state.events,
+                      },
+                      null,
+                      2,
+                    ),
+                  );
+                if (kind === 'results')
+                  download(
+                    'neptune-v2-results.csv',
+                    resultsCSV(design, state),
+                    'text/csv',
+                  );
+                if (kind === 'inventory')
+                  download(
+                    'neptune-v2-inventory.csv',
+                    inventoryCSV(design),
+                    'text/csv',
+                  );
+                if (kind === 'report')
+                  download(
+                    'neptune-v2-engineering.md',
+                    engineeringReport(design, state, costScale),
+                    'text/markdown',
+                  );
+                if (kind === 'gltf') {
+                  const { geometryGLTF } = await import('../scene/TwinScene');
+                  download(
+                    'neptune-v2-dimensioned.gltf',
+                    JSON.stringify(await geometryGLTF(design)),
+                  );
+                }
+              } catch (err) {
+                setNotice(String(err));
+              }
+            }}
           >
-            Evidence <ArrowUpRight size={14} />
+            <option value="" disabled>
+              Export…
+            </option>
+            <option value="project">Versioned project JSON</option>
+            <option value="events">Experiment events JSON</option>
+            <option value="results">Results CSV</option>
+            <option value="inventory">Equipment inventory CSV</option>
+            <option value="report">Engineering report</option>
+            <option value="gltf">Dimensioned glTF</option>
+          </select>
+          <Download size={14} />
+        </div>
+          </details>
+          <button type="button" data-layout-control aria-pressed={presentationFocus} onClick={(event) => {
+            if (!presentationFocus) event.currentTarget.closest('main')?.querySelectorAll<HTMLDetailsElement>('details[data-ui-overlay][open]').forEach(element => { element.open = false; });
+            setPresentationFocus(value => !value);
+          }}>
+            {presentationFocus ? 'Exit presentation focus' : 'Presentation focus'}
           </button>
-          <a href="?legacy=1">Legacy v0.1</a>
         </div>
       </header>
       <div className="twin-mode">
-        <span>
-          <i /> Design-stage digital twin · Simulated operation
-        </span>
-        <span>Public prototype — simulated, design-stage model</span>
-        <span>Simulated, design-stage prototype; physical validation pending.</span>
+        <span><i />Simulated, design-stage prototype; physical validation pending.</span>
         <span>{design.revision} · 1 world unit = 1 m</span>
       </div>
-      <WorkspaceGuide workspace={workspace} onAssets={() => document.querySelector('.twin-tree')?.scrollIntoView({block:'start', behavior:reducedMotion?'instant':'smooth'})} onEquipment={() => document.querySelector('.twin-inspector')?.scrollIntoView({block:'start', behavior:reducedMotion?'instant':'smooth'})} onCampus={() => {setInside(false);setFocus('campus');setResetId(value=>value+1);setDemo(false);}} />
+      {compareBusy && <output className="twin-stream-status" aria-live="polite">Paired scenario comparison is evaluating · active project retained.</output>}
+      {streamSummary && <output className="twin-stream-status" data-testid="stream-summary" aria-live="polite">{streamSummary}</output>}
+      <div className="twin-panel-nav" aria-label="Working panels" hidden={presentationFocus} data-layout-control>
+        {([['inspection', 'Inspector'], ['assets', 'Assets'], ['design', 'Design'], ['data', 'Data & replay'], ['evidence', 'Constraints & sources']] as const).map(([id, label]) =>
+          <button type="button" key={id} aria-pressed={panelOpen && detail === id} aria-controls={`panel-${id}`} onClick={() => openPanel(id)}>{label}</button>)}
+        <details className="twin-workspace-help" data-ui-overlay><summary>Workspace help</summary>
+          <WorkspaceGuide workspace={workspace} onAssets={() => openPanel('assets')} onEquipment={() => openPanel('inspection')} onCampus={() => {setInside(false);setFocus('campus');setResetId(value=>value+1);setDemo(false);}} />
+        </details>
+      </div>
       <div className="twin-layout">
-        <aside className="twin-design">
-          <div className="twin-eyebrow">
-            REFERENCE DESIGN / {String(config.generation).padStart(2, '0')}
-          </div>
-          <h1>NEPTUNE {romans[config.generation - 1]}</h1>
-          <p>{titles[config.generation - 1]}</p>
-          <div className="twin-generations">
-            {[1, 2, 3].map((g) => (
-              <button
-                key={g}
-                className={config.generation === g ? 'active' : ''}
-                disabled={sim.busy || !state}
-                onClick={() => setDesign({ generation: g as 1 | 2 | 3 })}
-                aria-label={`Design family ${romans[g - 1]}`}
-              >
-                {romans[g - 1]}
-              </button>
-            ))}
-          </div>
-          <label className="twin-preset">
-            Starting scenario
-            <select
-              aria-label="Starting scenario"
-              disabled={sim.busy || !state}
-              value=""
-              onChange={(e) => {
-                const count = Number(e.target.value);
-                setDesign({
-                  requestedAccelerators: count,
-                  supplyW:
-                    count <= 10000
-                      ? 30e6
-                      : count === 100000
-                        ? 300e6
-                        : count === 500000
-                          ? 1.2e9
-                          : 10e9,
-                }, true);
-              }}
-            >
-              <option value="" disabled>
-                Choose capacity…
-              </option>
-              <option value="8">8 accelerator fast reference</option>
-              <option value="1280">1,280 accelerator module</option>
-              <option value="10000">10,000 accelerator pilot</option>
-              <option value="100000">100,000 campus</option>
-              <option value="500000">500,000 archipelago</option>
-              <option value="1000000">1,000,000 bounded scale test</option>
-            </select>
-          </label>
-          <NumberField
-            label="Requested accelerators"
-            value={config.requestedAccelerators}
-            unit="units"
-            min={8}
-            max={1000000}
-            onChange={(v) => setDesign({ requestedAccelerators: v })}
-          />
-          <NumberField
-            label="Supply ceiling"
-            value={config.supplyW / 1e6}
-            unit="MW"
-            min={0}
-            max={10000}
-            onChange={(v) => setDesign({ supplyW: v * 1e6 })}
-          />
-          <label className="twin-number">
-            <span>Standby cooling</span>
-            <select
-              aria-label="Standby cooling"
-              value={config.standbyPumps}
-              onChange={(e) =>
-                setDesign({ standbyPumps: Number(e.target.value) as 0 | 1 })
-              }
-            >
-              <option value={0}>No standby</option>
-              <option value={1}>One standby / module</option>
-            </select>
-          </label>
-          <details className="twin-assumptions">
-            <summary>Design assumptions</summary>
-            <NumberField
-              label="Initial seawater"
-              value={Number((config.seawaterK - 273.15).toFixed(2))}
-              unit="°C"
-              min={2}
-              max={38}
-              onChange={(v) => setDesign({ seawaterK: v + 273.15 })}
-            />
-            <NumberField
-              label="Initial workload"
-              value={config.workload}
-              unit="fraction"
-              min={0}
-              max={1}
-              step={0.05}
-              onChange={(v) => setDesign({ workload: v })}
-            />
-            <NumberField
-              label="Idle draw"
-              value={config.idleFraction}
-              unit="fraction"
-              min={0.1}
-              max={0.8}
-              step={0.05}
-              onChange={(v) => setDesign({ idleFraction: v })}
-            />
-            <NumberField
-              label="Exchanger UA"
-              value={config.exchangerUAWPerK / 1000}
-              unit="kW/K"
-              min={10}
-              max={2000}
-              onChange={(v) => setDesign({ exchangerUAWPerK: v * 1000 })}
-            />
-            <NumberField
-              label="Storage per module"
-              value={config.batteryWhPerModule / 1000}
-              unit="kWh"
-              min={0}
-              max={2000}
-              onChange={(v) => setDesign({ batteryWhPerModule: v * 1000 })}
-            />
-            <label className="twin-checkbox">
-              <input
-                type="checkbox"
-                checked={config.requireExternalNetwork}
-                onChange={(e) =>
-                  setDesign({ requireExternalNetwork: e.target.checked })
-                }
-              />{' '}
-              Workload requires external access
-            </label>
-            <label className="twin-checkbox">
-              <input
-                type="checkbox"
-                checked={config.requireClusterNetwork}
-                onChange={(e) =>
-                  setDesign({ requireClusterNetwork: e.target.checked })
-                }
-              />{' '}
-              Workload requires cluster connectivity
-            </label>
-            <p>
-              Changing physical design reinitializes operation. Installed whole-server reference: {num(computeSpec.ratings.capacityW/1000)} kW / {computeSpec.ratings.accelerators} accelerators, {computeSpec.name} v{computeSpec.version}; hardware envelopes are assumed.
-            </p>
-          </details>
-          <div className="twin-tree">
-            <h2>Asset hierarchy</h2>
-            <label>
-              Platform
-              <select
-                aria-label="Select platform"
-                value={platform}
-                onChange={(e) =>
-                  select(
-                    design.modules.find((m) => m.platformId === e.target.value)!
-                      .id,
-                    'platform',
-                  )
-                }
-              >
-                {design.assets
-                  .filter((a) => a.type === 'platform')
-                  .map((a) => (
-                    <option key={a.id}>{a.id}</option>
-                  ))}
-              </select>
-            </label>
-            <div role="tree" aria-label="Asset hierarchy">
-              {design.modules
-                .filter((m) => m.platformId === platform)
-                .map((m) => (
-                  <button
-                    role="treeitem"
-                    aria-selected={m.id === selectedModule.id}
-                    key={m.id}
-                    onClick={() => select(m.id, 'module')}
-                  >
-                    <Box size={14} /> {m.id.split('/').at(-1)}{' '}
-                    <small>{m.rackCount} racks</small>
-                  </button>
-                ))}
-            </div>
-            <label>
-              Exact equipment
-              <select
-                aria-label="Select equipment"
-                value={
-                  selectedId.startsWith(selectedModule.id + '/')
-                    ? selectedId
-                    : ''
-                }
-                onChange={(e) => select(e.target.value)}
-              >
-                <option value="">Module assembly</option>
-                {details
-                  .filter((a) => a.type !== 'compute')
-                  .map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} · {a.type}
-                    </option>
-                  ))}
-                {details
-                  .filter(
-                    (a) =>
-                      a.type === 'compute' &&
-                      (selectedId === a.id || selectedId === a.parentId),
-                  )
-                  .map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.id.split('/').slice(-2).join('/')} · compute
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (resolveAsset(design, search)) select(search);
-                else
-                  setNotice(
-                    'Unknown asset ID. Exact IDs are available in the inventory export.',
-                  );
-              }}
-            >
-              <input
-                aria-label="Find asset ID"
-                placeholder="Resolve exact asset ID"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button type="submit">Find</button>
-            </form>
-          </div>
-        </aside>
+
         <section className="twin-center">
-          <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
-          {walkthrough && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} displayTimeS={displayState?.timeS??null} status={walkthroughPaused?'paused':walkthroughApplied===walkthroughNavigation&&selectedId===walkthrough.steps[walkthroughIndex].assetId&&inspection.status==='resolved'&&inspection.resolution?.boundary===walkthrough.steps[walkthroughIndex].boundary&&inspection.requestedTimeS===walkthrough.steps[walkthroughIndex].timeS?(walkthroughIndex===walkthrough.steps.length-1?'completed':'ready'):'loading'} onStep={index=>{setWalkthroughIndex(index);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onPause={()=>setWalkthroughPaused(true)} onResume={()=>{setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onExit={()=>{setWalkthrough(null);inspection.returnToCurrent();setFocus('campus');setResetId(value=>value+1);}} onPreviousBoundary={()=>{setWalkthroughPaused(true);inspection.inspect(walkthrough.steps[walkthroughIndex].timeS,'previous');}} />}
-          <div className="twin-scene-shell" ref={sceneRegion}
-            data-detail-view={!inside && (effectiveFocus === 'cooling' || (effectiveFocus === 'selection' && ['pump', 'exchanger', 'cdu'].includes(asset?.type ?? '')))}>
-            <div className="twin-scene-caption">
-              <span>
-                {focus === 'campus'
-                  ? 'FACILITY / DIMENSIONED MODEL'
-                  : `INSPECT / ${asset?.type.toUpperCase() ?? 'MODULE'}`}
-              </span>
-              <strong>
-                {focus === 'campus'
-                  ? `${design.modules.length} modules · ${num(design.rackCount, 0)} exact racks`
-                  : asset?.type === 'cdu' ? 'Coolant distribution unit' : asset?.name ?? selectedId}
-              </strong>
-              {focus !== 'campus' && <div className="twin-scene-selected" data-testid="scene-selected-identity">
-                <code>{selectedId}</code>
-                <span className={`twin-scene-state ${assetOperatingStatus(displayState, selectedId)}`}>
-                  {assetOperatingStatus(displayState, selectedId)} · simulated
-                </span>
-              </div>}
-            </div>
-            {sceneProps ? (
-              <Suspense
-                fallback={
-                  <div className="twin-loading">
-                    Loading the dimensioned scene. Asset inspection and
-                    calculations remain available.
-                  </div>
-                }
-              >
-                <TwinScene {...sceneProps} />
-              </Suspense>
-            ) : (
-              <div className="twin-loading">
-                {inspection.mode === 'history' ? (inspection.resolution?.reason ?? 'Resolving exact historical scene…') : `Initializing the simulation worker… ${sim.error}`}
-              </div>
-            )}
-            <div className="twin-scene-toolbar" aria-label="Scene controls">
-              <button aria-pressed={xray} onClick={() => setXray(!xray)}>
-                <Layers size={15} /> X-ray
-              </button>
-              <button
-                aria-pressed={exploded}
-                onClick={() => setExploded(!exploded)}
-              >
-                Explode
-              </button>
-              <button
-                aria-pressed={dimensions}
-                onClick={() => setDimensions(!dimensions)}
-              >
-                Dimensions
-              </button>
-              <button
-                title="Inspect the selected module’s cooling system"
-                aria-pressed={focus === 'cooling' && !inside}
-                onClick={() => {
-                  setInside(false);
-                  setFocus('cooling');
-                  setXray(true);
-                  setResetId((v) => v + 1);
-                  setDemo(false);
-                }}
-              >
-                <Droplets size={15} /> Cooling close-up
-              </button>
-              <button
-                onClick={() => {
-                  setInside(!inside);
-                  setXray(true);
-                  setDemo(false);
-                }}
-              >
-                {inside ? 'Exit interior' : 'Inside module'}
-              </button>
-              <button
-                aria-label="Campus view"
-                onClick={() => {
-                  setInside(false);
-                  setFocus('campus');
-                  setResetId((v) => v + 1);
-                  setDemo(false);
-                }}
-              >
-                <RotateCcw size={15} />
-              </button>
-              <button
-                onClick={() => {
-                  setFocus('top');
-                  setDimensions(true);
-                  setResetId((v) => v + 1);
-                }}
-              >
-                Plan
-              </button>
-            </div>
-          </div>
-          <div className="twin-metrics">
-            {[
-              [
-                'Provisioned',
-                `${num(design.provisionedAccelerators, 0)}`,
-                `${design.nodeCount} whole servers`,
-              ],
-              [
-                'Facility draw',
-                summary ? `${num(summary.facilityW / 1e6, 2)} MW` : 'Unknown',
-                'IT + cooling + conversion',
-              ],
-              [
-                'Workload available',
-                num(summary?.availableAccelerators ?? NaN, 0),
-                `${num(summary?.energizedAccelerators ?? NaN, 0)} energized`,
-              ],
-              [
-                'Bulk coolant',
-                summary ? `${num(summary.maxCoolantK - 273.15, 2)} °C` : '—',
-                'Maximum modeled module',
-              ],
-            ].map(([label, value, note]) => (
-              <div key={label}>
-                <span>{label}</span>
-                <strong
-                  data-testid={
-                    label === 'Facility draw'
-                      ? 'twin-power'
-                      : label === 'Bulk coolant'
-                        ? 'twin-temperature'
-                        : undefined
-                  }
-                >
-                  {value}
-                </strong>
-                <small>{note}</small>
-              </div>
-            ))}
-          </div>
-          <div className="twin-clock">
-            <button
-              className="primary"
-              disabled={inspection.mode === 'history' || !state || (!sim.running && sim.busy)}
-              onClick={() => {
-                setDemo(false);
-                sim.setRunning(!sim.running);
-              }}
-            >
-              {sim.running ? <Pause size={16} /> : <Play size={16} />}{' '}
-              {sim.running ? 'Pause' : 'Start'}
-            </button>
-            <span>Current clock</span><strong data-testid="sim-time">{state?.timeS ?? 0}s</strong>
-            <label>
-              Speed
-              <select
-                aria-label="Simulation speed"
-                value={sim.speed}
-                onChange={(e) => sim.setSpeed(Number(e.target.value))}
-              >
-                {[1, 5, 20, 60].map((v) => (
-                  <option key={v} value={v}>
-                    {v}×
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              disabled={inspection.mode === 'history' || sim.busy || !state}
-              onClick={() => sim.advance(10)}
-            >
-              Step 10s
-            </button>
-            <button
-              disabled={sim.busy || !state}
-              onClick={() => {
-                sim.reset();
-                setDemo(false);
-              }}
-            >
-              Reset state
-            </button>
-            <button
-              disabled={sim.busy || !state}
-              onClick={() => {
-                setDemo(false);
-                if (state && sim.replay(state.events, state.timeS, undefined, state.integrationStepS, state.experiment?.definition)) setNotice('Replay created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
-              }}
-            >
-              Replay
-            </button>
-            <label>
-              Execution replay to
-              <input
-                aria-label="Replay time in seconds"
-                type="number"
-                min={0}
-                max={CONTRACT.horizonS}
-                step={1}
-                value={replayTimeS}
-                onChange={(e) => setReplayTimeS(Number(e.target.value))}
-                style={{ width: 76 }}
-              />
-              s
-            </label>
-            <button
-              disabled={
-                sim.busy ||
-                !state ||
-                !Number.isInteger(replayTimeS) ||
-                replayTimeS < 0 ||
-                replayTimeS > CONTRACT.horizonS
-              }
-              onClick={() => {
-                if (state) {
-                  inspection.returnToCurrent();
-                  setDemo(false);
-                  if(sim.replay(state.events, replayTimeS, undefined, state.integrationStepS, state.experiment?.definition))setNotice('Seek created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
-                }
-              }}
-            >
-              Seek time
-            </button>
-            {sim.busy && (
-              <button
-                onClick={() => {
-                  setDemo(false);
-                  sim.cancel();
-                }}
-              >
-                Cancel run
-              </button>
-            )}
-            {!sim.busy &&
-              sim.resumeTarget !== null &&
-              state &&
-              sim.resumeTarget > state.timeS && (
-                <button onClick={() => sim.resume()}>
-                  Resume to {sim.resumeTarget}s
-                </button>
-              )}
-            <span>
-              {sim.busy ? 'Solving…' : sim.running ? 'Running' : 'Paused'} ·
-              fixed {state?.integrationStepS ?? 1}s steps
-            </span>
-          </div>
-          {sim.progress && sim.busy && (
-            <output>
-              Replay progress: {sim.progress.completedTimeS}s /{' '}
-              {sim.progress.targetTimeS}s. Completed checkpoints can be exported
-              while running.
-            </output>
-          )}
-          {savedRead.error && <output>{savedRead.error}</output>}
-          {sim.storageStatus && (
-            <output data-testid="checkpoint-storage">
-              {sim.storageStatus}
-              {sim.durableTimeS !== null &&
-                ` Last successful local checkpoint: ${sim.durableTimeS}s.`}
-            </output>
-          )}
-          {sim.recoveryBlocked && (
-            <div className="twin-notice">
-              Automatic saving is paused because the previous recovery data
-              could not be read. The stored value has been retained.
-              <button onClick={() => sim.dismissRecovery()}>
-                Clear unavailable recovery and enable saving
-              </button>
-            </div>
-          )}
-          {sim.recovery && (
-            <div className="twin-notice" data-testid="checkpoint-recovery">
-              Local checkpoint available at {sim.recovery.timeS}s. Progress
-              after that saved checkpoint may have been lost. Recovery is
-              paused.
-              <button
-                disabled={sim.busy}
-                onClick={() => {
-                  try {
-                    inspectOrRestore(sim.recovery!);
-                  } catch (problem) {
-                    setNotice(String(problem));
-                  }
-                }}
-              >
-                Recover saved checkpoint
-              </button>
-              <button
-                onClick={() =>
-                  download(
-                    'neptune-recovery-project.json',
-                    serializeProject(sim.recovery!),
-                  )
-                }
-              >
-                Export recovery project
-              </button>
-              <button onClick={() => sim.dismissRecovery()}>
-                Discard recovery and keep current session
-              </button>
-            </div>
-          )}
-          {inspectionProject && (
-            <div className="twin-notice" data-testid="project-compatibility">
-              <p>{compatibilityFor(inspectionProject).explanation}</p>
-              <p>
-                Saved scenario: {inspectionProject.timeS}s,{' '}
-                {inspectionProject.events.length} events, solver{' '}
-                {inspectionProject.solverVersion}. Exact continuation is{' '}
-                {compatibilityFor(inspectionProject).canResume
-                  ? 'available'
-                  : 'unavailable'}
-                .
-              </p>
-              <button
-                onClick={() =>
-                  download(
-                    'neptune-original-project.json',
-                    serializeProject(inspectionProject),
-                  )
-                }
-              >
-                Export original project
-              </button>
-              <button
-                disabled={!compatibilityFor(inspectionProject).canRecalculate}
-                onClick={recalculateInspected}
-              >
-                Recalculate with current model
-              </button>
-              <button onClick={() => setInspectionProject(null)}>
-                Close project inspection
-              </button>
-            </div>
-          )}
-          {(notice || sim.error) && (
-            <div className={`twin-notice ${sim.error ? 'error' : ''}`}>
-              {sim.error || notice}
-              <button aria-label="Dismiss notice" onClick={() => setNotice('')}>
-                <X size={14} />
-              </button>
-            </div>
-          )}
-          {workspace === 'Operate' && state && <OperatorTimeline design={design} source={state} display={displayState} assetId={selectedId} selectedEventId={inspectedEventId} resolution={inspection.resolution} onInspect={(timeS,boundary) => {setDemo(false);inspection.inspect(timeS,boundary);}} onEvent={inspectEvent} />}
-          <TransferPanel design={design} state={displayState} busy={sim.busy||compareBusy||inspection.mode==='history'} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
-          {state && !showComparison && <p className="operator-evidence-label">Active experiment controls and full-run evidence · current checkpoint {state.timeS} s. History inspection does not change this evidence.</p>}
-          {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
-          {state && !showComparison && inspection.mode==='current' && <Trend history={sim.history} />}
+          <div data-workspace-panel="Compare" className="twin-comparison-workspace">
           <DecisionPanel hidden={!showComparison} activeDesign={design} state={state} busy={sim.busy||compareBusy} onInspectEvidence={inspectDecisionEvidence} onWalkthrough={startResultWalkthrough}
             onLoad={run=>{retainBeforeRevision('Before Phase 6 candidate');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared), 'simulated initialization from evaluated campaign definition');setDesignOverride(next);setConfig(next.config);setDemo(false);select(next.modules[0].id);setNotice('Selected decision candidate loaded with its exact scenario and physical initial state. Previous project saved in Compare; run explicitly when ready.');}}
             onRun={run=>{retainBeforeRevision('Before running Phase 6 selected experiment');const prepared=initializeExperimentFromState(run.design,run.initialState,run.definition);const next=sim.restore(projectFile(run.design,prepared), 'simulated initialization from evaluated campaign definition');setDesignOverride(next);setConfig(next.config);setDemo(false);sim.replay([],run.definition.durationS,undefined,run.definition.integrationStepS,run.definition);setWorkspace('Operate');}} />
@@ -1588,16 +1135,615 @@ export default function TwinApp() {
               </details>
             </section>
           )}
-          {state && (
-            <div hidden={detail !== 'data'}>
-              <p>Observation data panel · active current checkpoint {state.timeS} s; separate from historical scene inspection.</p><DataPanel key={design.revision} design={design} state={state} />
+
+          </div>
+          <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
+          {walkthrough && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} displayTimeS={displayState?.timeS??null} status={walkthroughPaused?'paused':walkthroughApplied===walkthroughNavigation&&selectedId===walkthrough.steps[walkthroughIndex].assetId&&inspection.status==='resolved'&&inspection.resolution?.boundary===walkthrough.steps[walkthroughIndex].boundary&&inspection.requestedTimeS===walkthrough.steps[walkthroughIndex].timeS?(walkthroughIndex===walkthrough.steps.length-1?'completed':'ready'):'loading'} onStep={index=>{setWalkthroughIndex(index);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onPause={()=>setWalkthroughPaused(true)} onResume={()=>{setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onExit={()=>{setWalkthrough(null);inspection.returnToCurrent();setFocus('campus');setResetId(value=>value+1);}} onPreviousBoundary={()=>{setWalkthroughPaused(true);inspection.inspect(walkthrough.steps[walkthroughIndex].timeS,'previous');}} />}
+          <div className="twin-scene-shell" ref={sceneRegion}
+            data-detail-view={!inside && (effectiveFocus === 'cooling' || (effectiveFocus === 'selection' && ['pump', 'exchanger', 'cdu'].includes(asset?.type ?? '')))}>
+            <div className="twin-scene-caption">
+              <span>
+                {focus === 'campus'
+                  ? 'FACILITY / DIMENSIONED MODEL'
+                  : `INSPECT / ${asset?.type.toUpperCase() ?? 'MODULE'}`}
+              </span>
+              <strong>
+                {focus === 'campus'
+                  ? `${design.modules.length} modules · ${num(design.rackCount, 0)} exact racks`
+                  : asset?.type === 'cdu' ? 'Coolant distribution unit' : asset?.name ?? selectedId}
+              </strong>
+              {<div className="twin-scene-selected" data-testid="scene-selected-identity">
+                <code>{selectedId}</code>
+                <span className={`twin-scene-state ${assetOperatingStatus(displayState, selectedId)}`}>
+                  {assetOperatingStatus(displayState, selectedId)} · simulated
+                </span>
+              </div>}
+            </div>
+            {sceneProps ? (
+              <Suspense
+                fallback={
+                  <div className="twin-loading">
+                    Loading the dimensioned scene. Asset inspection and
+                    calculations remain available.
+                  </div>
+                }
+              >
+                <TwinScene {...sceneProps} />
+              </Suspense>
+            ) : (
+              <div className="twin-loading">
+                {inspection.mode === 'history' ? (inspection.resolution?.reason ?? 'Resolving exact historical scene…') : `Initializing the simulation worker… ${sim.error}`}
+              </div>
+            )}
+            <div className="twin-scene-toolbar" aria-label="Scene controls">
+              <button aria-pressed={xray} onClick={() => setXray(!xray)}>
+                <Layers size={15} /> X-ray
+              </button>
+              <button
+                aria-pressed={exploded}
+                onClick={() => setExploded(!exploded)}
+              >
+                Explode
+              </button>
+              <button
+                aria-pressed={dimensions}
+                onClick={() => setDimensions(!dimensions)}
+              >
+                Dimensions
+              </button>
+              <button
+                title="Inspect the selected module’s cooling system"
+                aria-pressed={focus === 'cooling' && !inside}
+                onClick={() => {
+                  setInside(false);
+                  setFocus('cooling');
+                  setXray(true);
+                  setResetId((v) => v + 1);
+                  setDemo(false);
+                }}
+              >
+                <Droplets size={15} /> Cooling close-up
+              </button>
+              <button
+                onClick={() => {
+                  setInside(!inside);
+                  setXray(true);
+                  setDemo(false);
+                }}
+              >
+                {inside ? 'Exit interior' : 'Inside module'}
+              </button>
+              <button
+                aria-label="Campus view"
+                onClick={() => {
+                  setInside(false);
+                  setFocus('campus');
+                  setResetId((v) => v + 1);
+                  setDemo(false);
+                }}
+              >
+                <RotateCcw size={15} /> Campus view
+              </button>
+              <button
+                onClick={() => {
+                  setFocus('top');
+                  setDimensions(true);
+                  setResetId((v) => v + 1);
+                }}
+              >
+                Plan
+              </button>
+            </div>
+          </div>
+          <div className="twin-metric-context">Campus metrics · {inspection.mode === 'history' ? 'displayed historical boundary' : 'current model'} · {displayState ? `${displayState.timeS} s` : 'unavailable'} · {sourceOrigin}</div>
+          <div className="twin-metrics">
+            {[
+              [
+                'Provisioned',
+                `${num(design.provisionedAccelerators, 0)}`,
+                `${design.nodeCount} whole servers`,
+              ],
+              [
+                'Facility draw',
+                summary ? `${num(summary.facilityW / 1e6, 2)} MW` : 'Unknown',
+                'IT + cooling + conversion',
+              ],
+              [
+                'Workload available',
+                num(summary?.availableAccelerators ?? NaN, 0),
+                `${num(summary?.energizedAccelerators ?? NaN, 0)} energized`,
+              ],
+              [
+                'Bulk coolant',
+                summary ? `${num(summary.maxCoolantK - 273.15, 2)} °C` : '—',
+                'Maximum modeled module',
+              ],
+            ].map(([label, value, note]) => (
+              <div key={label}>
+                <span>{label}</span>
+                <strong
+                  data-testid={
+                    label === 'Facility draw'
+                      ? 'twin-power'
+                      : label === 'Bulk coolant'
+                        ? 'twin-temperature'
+                        : undefined
+                  }
+                >
+                  {value}
+                </strong>
+                <small>{note}</small>
+              </div>
+            ))}
+          </div>
+          <div className="twin-clock" aria-label="Current simulation controls">
+            <button
+              className="primary"
+              disabled={inspection.mode === 'history' || !state || (!sim.running && sim.busy)}
+              onClick={() => {
+                setDemo(false);
+                sim.setRunning(!sim.running);
+              }}
+            >
+              {sim.running ? <Pause size={16} /> : <Play size={16} />}{' '}
+              {sim.running ? 'Pause' : 'Start'}
+            </button>
+            <span>Current clock</span><strong data-testid="sim-time">{state?.timeS ?? 0}s</strong>
+            <label>
+              Speed
+              <select
+                aria-label="Simulation speed"
+                value={sim.speed}
+                onChange={(e) => sim.setSpeed(Number(e.target.value))}
+              >
+                {[1, 5, 20, 60].map((v) => (
+                  <option key={v} value={v}>
+                    {v}×
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              disabled={inspection.mode === 'history' || sim.busy || !state}
+              onClick={() => sim.advance(10)}
+            >
+              Step 10s
+            </button>
+            <details className="twin-execution-details" data-ui-overlay><summary>Execution & replay</summary><div className="twin-actions">
+            <button
+              disabled={sim.busy || !state}
+              onClick={() => {
+                sim.reset();
+                setDemo(false);
+              }}
+            >
+              Reset state
+            </button>
+            <button
+              disabled={sim.busy || !state}
+              onClick={() => {
+                setDemo(false);
+                if (state && sim.replay(state.events, state.timeS, undefined, state.integrationStepS, state.experiment?.definition)) setNotice('Replay created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
+              }}
+            >
+              Replay
+            </button>
+            <label>
+              Execution replay to
+              <input
+                aria-label="Replay time in seconds"
+                type="number"
+                min={0}
+                max={CONTRACT.horizonS}
+                step={1}
+                value={replayTimeS}
+                onChange={(e) => setReplayTimeS(Number(e.target.value))}
+                style={{ width: 76 }}
+              />
+              s
+            </label>
+            <button
+              disabled={
+                sim.busy ||
+                !state ||
+                !Number.isInteger(replayTimeS) ||
+                replayTimeS < 0 ||
+                replayTimeS > CONTRACT.horizonS
+              }
+              onClick={() => {
+                if (state) {
+                  inspection.returnToCurrent();
+                  setDemo(false);
+                  if(sim.replay(state.events, replayTimeS, undefined, state.integrationStepS, state.experiment?.definition))setNotice('Seek created an explicit derived experiment containing all recorded interactive inputs and the saved physical initial state.');
+                }
+              }}
+            >
+              Seek time
+            </button>
+            </div></details>
+            {sim.busy && (
+              <button
+                onClick={() => {
+                  setDemo(false);
+                  sim.cancel();
+                }}
+              >
+                Cancel run
+              </button>
+            )}
+            {!sim.busy &&
+              sim.resumeTarget !== null &&
+              state &&
+              sim.resumeTarget > state.timeS && (
+                <button onClick={() => sim.resume()}>
+                  Resume to {sim.resumeTarget}s
+                </button>
+              )}
+            <span>
+              {sim.busy ? 'Solving…' : sim.running ? 'Running' : 'Paused'} ·
+              fixed {state?.integrationStepS ?? 1}s steps
+            </span>
+          </div>
+          {sim.progress && sim.busy && (
+            <output>
+              Replay progress: {sim.progress.completedTimeS}s /{' '}
+              {sim.progress.targetTimeS}s. Completed checkpoints can be exported
+              while running.
+            </output>
+          )}
+          {savedRead.error && <output>{savedRead.error}</output>}
+          {sim.storageStatus && (
+            <output data-testid="checkpoint-storage">
+              {sim.storageStatus}
+              {sim.durableTimeS !== null &&
+                ` Last successful local checkpoint: ${sim.durableTimeS}s.`}
+            </output>
+          )}
+          {sim.recoveryBlocked && (
+            <div className="twin-notice">
+              Automatic saving is paused because the previous recovery data
+              could not be read. The stored value has been retained.
+              <button onClick={() => sim.dismissRecovery()}>
+                Clear unavailable recovery and enable saving
+              </button>
             </div>
           )}
-          {state && detail === 'evidence' && (
-            <div><p>Engineering constraints for the active current checkpoint at {state.timeS} s; separate from the historical scene.</p><EvidencePanel design={design} state={state} /></div>
+          {sim.recovery && (
+            <div className="twin-notice" data-testid="checkpoint-recovery">
+              Local checkpoint available at {sim.recovery.timeS}s. Progress
+              after that saved checkpoint may have been lost. Recovery is
+              paused.
+              <button
+                disabled={sim.busy}
+                onClick={() => {
+                  try {
+                    inspectOrRestore(sim.recovery!);
+                  } catch (problem) {
+                    setNotice(String(problem));
+                  }
+                }}
+              >
+                Recover saved checkpoint
+              </button>
+              <button
+                onClick={() =>
+                  download(
+                    'neptune-recovery-project.json',
+                    serializeProject(sim.recovery!),
+                  )
+                }
+              >
+                Export recovery project
+              </button>
+              <button onClick={() => sim.dismissRecovery()}>
+                Discard recovery and keep current session
+              </button>
+            </div>
           )}
+          {inspectionProject && (
+            <div className="twin-notice" data-testid="project-compatibility">
+              <p>{compatibilityFor(inspectionProject).explanation}</p>
+              <p>
+                Saved scenario: {inspectionProject.timeS}s,{' '}
+                {inspectionProject.events.length} events, solver{' '}
+                {inspectionProject.solverVersion}. Exact continuation is{' '}
+                {compatibilityFor(inspectionProject).canResume
+                  ? 'available'
+                  : 'unavailable'}
+                .
+              </p>
+              <button
+                onClick={() =>
+                  download(
+                    'neptune-original-project.json',
+                    serializeProject(inspectionProject),
+                  )
+                }
+              >
+                Export original project
+              </button>
+              <button
+                disabled={!compatibilityFor(inspectionProject).canRecalculate}
+                onClick={recalculateInspected}
+              >
+                Recalculate with current model
+              </button>
+              <button onClick={() => setInspectionProject(null)}>
+                Close project inspection
+              </button>
+            </div>
+          )}
+          {(notice || sim.error) && (
+            <div className={`twin-notice ${sim.error ? 'error' : ''}`}>
+              {sim.error || notice}
+              <button aria-label="Dismiss notice" onClick={() => setNotice('')}>
+                <X size={14} />
+              </button>
+            </div>
+          )}
+          {summary?.warnings.length !== 0 && (
+            <div className="twin-warnings">
+              {summary?.warnings.map((w, i) => (
+                <p key={i}>{w}</p>
+              ))}
+            </div>
+          )}
+          <section className="twin-operations" data-workspace-panel="Operate" hidden={workspace !== 'Operate' || presentationFocus}>
+          {state && <OperatorTimeline design={design} source={state} display={displayState} assetId={selectedId} selectedEventId={inspectedEventId} resolution={inspection.resolution} onInspect={(timeS,boundary) => {setDemo(false);inspection.inspect(timeS,boundary);}} onEvent={inspectEvent} />}
+          <TransferPanel design={design} state={displayState} busy={sim.busy||compareBusy||inspection.mode==='history'} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
+          {state && !showComparison && <p className="operator-evidence-label">Active experiment controls and full-run evidence · current checkpoint {state.timeS} s. History inspection does not change this evidence.</p>}
+          {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}
+          {state && !showComparison && inspection.mode==='current' && <Trend history={sim.history} />}
+
+          </section>
         </section>
-        <aside className="twin-inspector">
+
+        <aside className="twin-dock" aria-label={panelTitle} hidden={!panelOpen || presentationFocus}>
+          <div className="twin-dock-header" data-layout-control>
+            <strong>{panelTitle}<small className="twin-dock-selection">{asset?.name ?? selectedId}</small></strong>
+            <button className="twin-panel-expand" type="button" aria-expanded={panelExpanded} aria-controls="twin-dock-body" onClick={() => setPanelExpanded(value => !value)}>{panelExpanded ? 'Collapse inspector' : 'Expand inspector'}</button>
+            <button className="twin-panel-close" type="button" aria-label="Close panel" onClick={() => setPanelOpen(false)}><X size={18} /></button>
+          </div>
+          <div className="twin-dock-body" id="twin-dock-body">
+          <section className="twin-design" data-panel="design" id="panel-design" hidden={detail !== 'design'}>
+          <p className="twin-edit-context">Physical design edits save the previous project, reset operation and pause the new run.</p>
+          <div className="twin-eyebrow">
+            REFERENCE DESIGN / {String(config.generation).padStart(2, '0')}
+          </div>
+          <h1>NEPTUNE {romans[config.generation - 1]}</h1>
+          <p>{titles[config.generation - 1]}</p>
+          <div className="twin-generations">
+            {[1, 2, 3].map((g) => (
+              <button
+                key={g}
+                className={config.generation === g ? 'active' : ''}
+                disabled={sim.busy || !state}
+                onClick={() => setDesign({ generation: g as 1 | 2 | 3 })}
+                aria-label={`Design family ${romans[g - 1]}`}
+              >
+                {romans[g - 1]}
+              </button>
+            ))}
+          </div>
+          <label className="twin-preset">
+            Starting scenario
+            <select
+              aria-label="Starting scenario"
+              disabled={sim.busy || !state}
+              value=""
+              onChange={(e) => {
+                const count = Number(e.target.value);
+                setDesign({
+                  requestedAccelerators: count,
+                  supplyW:
+                    count <= 10000
+                      ? 30e6
+                      : count === 100000
+                        ? 300e6
+                        : count === 500000
+                          ? 1.2e9
+                          : 10e9,
+                }, true);
+              }}
+            >
+              <option value="" disabled>
+                Choose capacity…
+              </option>
+              <option value="8">8 accelerator fast reference</option>
+              <option value="1280">1,280 accelerator module</option>
+              <option value="10000">10,000 accelerator pilot</option>
+              <option value="100000">100,000 campus</option>
+              <option value="500000">500,000 archipelago</option>
+              <option value="1000000">1,000,000 bounded scale test</option>
+            </select>
+          </label>
+          <NumberField
+            label="Requested accelerators"
+            value={config.requestedAccelerators}
+            unit="units"
+            min={8}
+            max={1000000}
+            onChange={(v) => setDesign({ requestedAccelerators: v })}
+          />
+          <NumberField
+            label="Supply ceiling"
+            value={config.supplyW / 1e6}
+            unit="MW"
+            min={0}
+            max={10000}
+            onChange={(v) => setDesign({ supplyW: v * 1e6 })}
+          />
+          <label className="twin-number">
+            <span>Standby cooling</span>
+            <select
+              aria-label="Standby cooling"
+              value={config.standbyPumps}
+              onChange={(e) =>
+                setDesign({ standbyPumps: Number(e.target.value) as 0 | 1 })
+              }
+            >
+              <option value={0}>No standby</option>
+              <option value={1}>One standby / module</option>
+            </select>
+          </label>
+          <details className="twin-assumptions">
+            <summary>Design assumptions</summary>
+            <NumberField
+              label="Initial seawater"
+              value={Number((config.seawaterK - 273.15).toFixed(2))}
+              unit="°C"
+              min={2}
+              max={38}
+              onChange={(v) => setDesign({ seawaterK: v + 273.15 })}
+            />
+            <NumberField
+              label="Initial workload"
+              value={config.workload}
+              unit="fraction"
+              min={0}
+              max={1}
+              step={0.05}
+              onChange={(v) => setDesign({ workload: v })}
+            />
+            <NumberField
+              label="Idle draw"
+              value={config.idleFraction}
+              unit="fraction"
+              min={0.1}
+              max={0.8}
+              step={0.05}
+              onChange={(v) => setDesign({ idleFraction: v })}
+            />
+            <NumberField
+              label="Exchanger UA"
+              value={config.exchangerUAWPerK / 1000}
+              unit="kW/K"
+              min={10}
+              max={2000}
+              onChange={(v) => setDesign({ exchangerUAWPerK: v * 1000 })}
+            />
+            <NumberField
+              label="Storage per module"
+              value={config.batteryWhPerModule / 1000}
+              unit="kWh"
+              min={0}
+              max={2000}
+              onChange={(v) => setDesign({ batteryWhPerModule: v * 1000 })}
+            />
+            <label className="twin-checkbox">
+              <input
+                type="checkbox"
+                checked={config.requireExternalNetwork}
+                onChange={(e) =>
+                  setDesign({ requireExternalNetwork: e.target.checked })
+                }
+              />{' '}
+              Workload requires external access
+            </label>
+            <label className="twin-checkbox">
+              <input
+                type="checkbox"
+                checked={config.requireClusterNetwork}
+                onChange={(e) =>
+                  setDesign({ requireClusterNetwork: e.target.checked })
+                }
+              />{' '}
+              Workload requires cluster connectivity
+            </label>
+            <p>
+              Changing physical design reinitializes operation. Installed whole-server reference: {num(computeSpec.ratings.capacityW/1000)} kW / {computeSpec.ratings.accelerators} accelerators, {computeSpec.name} v{computeSpec.version}; hardware envelopes are assumed.
+            </p>
+          </details>
+          </section>
+          <section className="twin-tree" data-panel="assets" id="panel-assets" hidden={detail !== 'assets'}>
+            <h2>Asset hierarchy</h2>
+            <label>
+              Platform
+              <select
+                aria-label="Select platform"
+                value={platform}
+                onChange={(e) =>
+                  select(
+                    design.modules.find((m) => m.platformId === e.target.value)!
+                      .id,
+                    'platform',
+                  )
+                }
+              >
+                {design.assets
+                  .filter((a) => a.type === 'platform')
+                  .map((a) => (
+                    <option key={a.id}>{a.id}</option>
+                  ))}
+              </select>
+            </label>
+            <div role="tree" aria-label="Asset hierarchy">
+              {design.modules
+                .filter((m) => m.platformId === platform)
+                .map((m) => (
+                  <button
+                    role="treeitem"
+                    aria-selected={m.id === selectedModule.id}
+                    key={m.id}
+                    onClick={() => select(m.id, 'module')}
+                  >
+                    <Box size={14} /> {m.id.split('/').at(-1)}{' '}
+                    <small>{m.rackCount} racks</small>
+                  </button>
+                ))}
+            </div>
+            <label>
+              Exact equipment
+              <select
+                aria-label="Select equipment"
+                value={
+                  selectedId.startsWith(selectedModule.id + '/')
+                    ? selectedId
+                    : ''
+                }
+                onChange={(e) => select(e.target.value)}
+              >
+                <option value="">Module assembly</option>
+                {details
+                  .filter((a) => a.type !== 'compute')
+                  .map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} · {a.type}
+                    </option>
+                  ))}
+                {details
+                  .filter(
+                    (a) =>
+                      a.type === 'compute' &&
+                      (selectedId === a.id || selectedId === a.parentId),
+                  )
+                  .map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.id.split('/').slice(-2).join('/')} · compute
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (resolveAsset(design, search)) select(search);
+                else
+                  setNotice(
+                    'Unknown asset ID. Exact IDs are available in the inventory export.',
+                  );
+              }}
+            >
+              <input
+                aria-label="Find asset ID"
+                placeholder="Resolve exact asset ID"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <button type="submit">Find</button>
+            </form>
+          </section>
+        <section className="twin-inspector" data-panel="inspection" id="panel-inspection" hidden={detail !== 'inspection'}>
           <div className="twin-inspector-identity">
           <div className="twin-eyebrow">
             {workspace === 'Operate'
@@ -1606,14 +1752,12 @@ export default function TwinApp() {
           </div>
           <h2>{asset?.name ?? 'Select an asset'}</h2>
           <code className="twin-id">{selectedId}</code>
-          <span className={`twin-tag ${assetOperatingStatus(displayState, selectedId)}`}>
-            {assetOperatingStatus(displayState, selectedId)} · simulated
-          </span>
+
+          <p className="twin-installed-summary" data-testid="installed-spec">{installedSpec ? `${installedSpec.name} · ${installedSpec.id} · v${installedSpec.version}` : `${asset?.catalogId ?? 'Unknown'} · v${asset?.revision ?? 'unknown'}`} · assumed</p>
           </div>
           <AssetContext design={design} state={displayState} assetId={selectedId} onSelect={select} origin={sourceOrigin} />
           {selectedState && (
-            <>
-              <h3>Module operating point · {selectedModule.id}</h3>
+            <details open={asset?.type !== 'pump'}><summary>Module operating point · {selectedModule.id}</summary>
               <dl className="twin-properties twin-readings">
                 <dt>Technical / seawater flow</dt>
                 <dd data-testid="selected-flow">
@@ -1640,10 +1784,10 @@ export default function TwinApp() {
                     : num(summary?.energyPUE ?? NaN, 3)}
                 </dd>
               </dl>
-            </>
+            </details>
           )}
           {asset && (
-            <dl className="twin-properties">
+            <details><summary>Specifications</summary><dl className="twin-properties">
               <dt>Envelope (W × H × D)</dt>
               <dd>{asset.dimensionsM.map((v) => num(v, 3)).join(' × ')} m</dd>
               <dt>Operational mass</dt>
@@ -1653,7 +1797,7 @@ export default function TwinApp() {
                   : `${num(asset.operationalMassKg)} kg`}
               </dd>
               <dt>Catalog / evidence</dt>
-              <dd data-testid="installed-spec">{installedSpec?`${installedSpec.name} · ${installedSpec.id} · v${installedSpec.version}`:`${asset.catalogId} · v${asset.revision}`} · assumed</dd>
+              <dd>{installedSpec?`${installedSpec.name} · ${installedSpec.id} · v${installedSpec.version}`:`${asset.catalogId} · v${asset.revision}`} · assumed</dd>
               <dt>Failure domain</dt>
               <dd>
                 <button
@@ -1672,12 +1816,11 @@ export default function TwinApp() {
                   </dd>
                 </>
               )}
-            </dl>
+            </dl></details>
           )}
-          <TwinNetworkPanel design={design} state={displayState} busy={sim.busy||inspection.mode==='history'} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} />
+          <details><summary>Network design & connections</summary><TwinNetworkPanel design={design} state={displayState} busy={sim.busy||inspection.mode==='history'} selectedId={selectedId} onSelect={select} onApply={applyNetwork} onConnection={changeNetworkConnection} /></details>
           {asset?.type==='pump'&&installedSpec&&(
-            <section aria-label="Replace installed pump">
-              <h3>Replace installed pump</h3>
+            <details aria-label="Replace installed pump"><summary>Replace installed pump</summary>
               <label className="twin-preset">Replacement specification
                 <select aria-label="Replacement specification" value={replacementSpec} onChange={event=>setReplacementSpec(event.target.value)}>
                   {REFERENCE_CATALOG.filter(spec=>spec.type==='pump'&&spec.compatibility===installedSpec.compatibility).map(spec=><option key={spec.id} value={spec.id}>{spec.name} · v{spec.version}</option>)}
@@ -1692,7 +1835,7 @@ export default function TwinApp() {
                 <button disabled={sim.busy||!state||installedSpec.id===replacementSpec} onClick={applyReplacement}>Apply and reset</button>
               </div>
               <details><summary>Installed equipment identity</summary><code className="twin-id">{installedEquipmentIdentity(design,asset.id)}</code><p>The asset ID remains the logical slot. The specification and design revision identify this installation.</p></details>
-            </section>
+            </details>
           )}
           {asset && (
             <details>
@@ -1737,13 +1880,13 @@ export default function TwinApp() {
           <div className="twin-inspector-actions">
             <button
               className="danger"
-              disabled={sim.busy || !state}
+              disabled={sim.busy || !state || inspection.mode === 'history'}
               onClick={() => command('trip')}
             >
               Trip selected asset
             </button>
             <button
-              disabled={sim.busy || !state}
+              disabled={sim.busy || !state || inspection.mode === 'history'}
               onClick={() => command('restore')}
             >
               Restore selected asset
@@ -1761,31 +1904,31 @@ export default function TwinApp() {
               <h3>Recorded boundary commands</h3>
               <div className="twin-actions">
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('workload', 'shore/grid', 1)}
                 >
                   Full load
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('seawater', 'shore/grid', 305.15)}
                 >
                   Seawater 32°C
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('fouling', 'shore/grid', 0.00001)}
                 >
                   Foul exchanger
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('trip', selectedModule.powerDomainId)}
                 >
                   Lose feeder
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() =>
                     command('restore', selectedModule.powerDomainId)
                   }
@@ -1793,19 +1936,19 @@ export default function TwinApp() {
                   Restore feeder
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('maintenance', selectedModule.id)}
                 >
                   Isolate module
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('restore', selectedModule.id)}
                 >
                   Return module
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() =>
                     command('trip', selectedModule.networkDomainId)
                   }
@@ -1813,7 +1956,7 @@ export default function TwinApp() {
                   Lose cluster link
                 </button>
                 <button
-                  disabled={sim.busy}
+                  disabled={sim.busy || inspection.mode === 'history'}
                   onClick={() => command('trip', 'shore/fiber')}
                 >
                   Lose external link
@@ -1855,7 +1998,7 @@ export default function TwinApp() {
               </ol>
             </>
           )}
-          <details open={workspace === 'Explore'}>
+          <details>
             <summary>Supporting paths & connections</summary>
             <div className="twin-path">
               {powerPaths.map((edge) => (
@@ -1897,25 +2040,8 @@ export default function TwinApp() {
               do not mix. Colored paths are connectivity, not CFD.
             </p>
           </details>
-          <h3>Inspect the evidence</h3>
-          <div className="twin-actions">
-            <button
-              onClick={() =>
-                setDetail(detail === 'data' ? 'inspection' : 'data')
-              }
-            >
-              <Activity size={14} /> Data & replay
-            </button>
-            <button
-              onClick={() =>
-                setDetail(detail === 'evidence' ? 'inspection' : 'evidence')
-              }
-            >
-              Constraints & sources
-            </button>
-          </div>
           {summary && (
-            <p className="twin-residuals">
+            <details><summary>Solver diagnostics</summary><p className="twin-residuals">
               Residuals · electrical {num(summary.electricalResidualW, 5)} W ·
               thermal {num(summary.thermalResidualW, 5)} W · solver{' '}
               {num(displayState?.solverMs ?? NaN, 2)} ms
@@ -1923,112 +2049,24 @@ export default function TwinApp() {
               Normalized · electrical{' '}
               {residuals?.electricalNormalized.toExponential(2)} · thermal{' '}
               {residuals?.thermalNormalized.toExponential(2)}
-            </p>
+            </p></details>
           )}
-          {summary?.warnings.length !== 0 && (
-            <div className="twin-warnings">
-              {summary?.warnings.slice(0, 5).map((w, i) => (
-                <p key={i}>{w}</p>
-              ))}
-            </div>
+
+        </section>
+          {state && (
+            <section data-panel="data" id="panel-data" hidden={detail !== 'data'}>
+              <p>Observation data panel · active current checkpoint {state.timeS} s; separate from historical scene inspection.</p><DataPanel key={design.revision} design={design} state={state} onStreamSummary={setStreamSummary} />
+            </section>
           )}
+          {state && (
+            <section data-panel="evidence" id="panel-evidence" hidden={detail !== 'evidence'}><p>Engineering constraints for the active current checkpoint at {state.timeS} s; separate from the historical scene.</p><EvidencePanel design={design} state={state} /></section>
+          )}
+          </div>
         </aside>
       </div>
       <footer className="twin-footer">
         <span>Arhaan Aggarwal · Calibration / physical validation pending</span>
-        <div>
-          <label className="twin-file">
-            Import project
-            <input
-              type="file"
-              accept=".json"
-              onChange={async (e) => {
-                try {
-                  if (e.target.files?.[0]) {
-                    if (e.target.files[0].size > CONTRACT.maxProjectBytes)
-                      throw Error(
-                        `Project exceeds ${CONTRACT.maxProjectBytes} UTF-8 bytes.`,
-                      );
-                    const p = parseProject(await e.target.files[0].text());
-                    inspectOrRestore(p);
-                  }
-                } catch (err) {
-                  setNotice(String(err));
-                }
-                e.target.value = '';
-              }}
-            />
-          </label>
-          <select
-            aria-label="Export artifact"
-            defaultValue=""
-            disabled={!state}
-            onChange={async (e) => {
-              if (!state) return;
-              const kind = e.target.value;
-              e.target.value = '';
-              try {
-                if (kind === 'project')
-                  download(
-                    'neptune-v3-project.json',
-                    serializeProject(sim.captureProject()),
-                  );
-                if (kind === 'events')
-                  download(
-                    'neptune-v2-events.json',
-                    JSON.stringify(
-                      {
-                        schemaVersion: 2,
-                        designRevision: design.revision,
-                        solverVersion: state.solverVersion,
-                        events: state.events,
-                      },
-                      null,
-                      2,
-                    ),
-                  );
-                if (kind === 'results')
-                  download(
-                    'neptune-v2-results.csv',
-                    resultsCSV(design, state),
-                    'text/csv',
-                  );
-                if (kind === 'inventory')
-                  download(
-                    'neptune-v2-inventory.csv',
-                    inventoryCSV(design),
-                    'text/csv',
-                  );
-                if (kind === 'report')
-                  download(
-                    'neptune-v2-engineering.md',
-                    engineeringReport(design, state, costScale),
-                    'text/markdown',
-                  );
-                if (kind === 'gltf') {
-                  const { geometryGLTF } = await import('../scene/TwinScene');
-                  download(
-                    'neptune-v2-dimensioned.gltf',
-                    JSON.stringify(await geometryGLTF(design)),
-                  );
-                }
-              } catch (err) {
-                setNotice(String(err));
-              }
-            }}
-          >
-            <option value="" disabled>
-              Export…
-            </option>
-            <option value="project">Versioned project JSON</option>
-            <option value="events">Experiment events JSON</option>
-            <option value="results">Results CSV</option>
-            <option value="inventory">Equipment inventory CSV</option>
-            <option value="report">Engineering report</option>
-            <option value="gltf">Dimensioned glTF</option>
-          </select>
-          <Download size={14} />
-        </div>
+
       </footer>
     </main>
   );
