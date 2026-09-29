@@ -180,20 +180,36 @@ test('VIS1 repeated selection reveal and interior visits release transient scene
     await expect(button(page, 'X-ray')).toHaveAttribute('aria-pressed', 'false');
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ focus: 'campus', inside: false, exploded: false, selectedId: duty });
   };
-  const resources = () => page.evaluate(() => {
-    const scene = window.__NEPTUNE_TWIN_SCENE__!;
-    return { geometries: scene.geometries, textures: scene.textures };
-  });
+  const completedRenderResources = () => page.evaluate(() => new Promise<{ geometries: number; textures: number }>(resolve => {
+    // CameraRig emits in useFrame, before R3F renders. A newly changed pose can
+    // therefore carry the preceding pose's counters. Observe two subsequent
+    // emissions to sample uploaded resources after the final campus was rendered.
+    let previous = window.__NEPTUNE_TWIN_SCENE__, emissions = 0;
+    const observeFrame = () => {
+      const scene = window.__NEPTUNE_TWIN_SCENE__;
+      if (scene && scene !== previous) {
+        previous = scene;
+        emissions += 1;
+        if (emissions === 2) {
+          resolve({ geometries: scene.geometries, textures: scene.textures });
+          return;
+        }
+      }
+      requestAnimationFrame(observeFrame);
+    };
+    requestAnimationFrame(observeFrame);
+  }));
   // Compile/upload each visited presentation before comparing a repeated identical end state.
   await cycle();
-  const warmed = await resources();
+  const warmed = await completedRenderResources();
   expect(warmed.geometries).toBeGreaterThan(0);
   expect(warmed.textures).toBeGreaterThan(0);
   const observations = [warmed];
   for (let index = 0; index < 5; index++) {
     await cycle();
-    await expect.poll(resources).toEqual(warmed);
-    observations.push(await resources());
+    const measured = await completedRenderResources();
+    expect(measured).toEqual(warmed);
+    observations.push(measured);
   }
   await info.attach('visual-v1-resource-stability', {
     body: JSON.stringify({ browser: info.project.name, warmupCycles: 1, measuredCycles: 5, observations }),
