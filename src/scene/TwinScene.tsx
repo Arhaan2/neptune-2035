@@ -162,6 +162,7 @@ function Instances({
       }}
     >
       <meshStandardMaterial
+        key={opacity < 1 ? 'transparent' : 'opaque'}
         color="white"
         roughness={material.roughness}
         metalness={material.metalness}
@@ -291,6 +292,7 @@ function ModuleStructure({
     <mesh key={key} position={position} receiveShadow castShadow>
       <boxGeometry args={dimensions} />
       <meshStandardMaterial
+        key={opacity < 1 ? 'transparent' : 'opaque'}
         {...assetSurface(key === 'floor' || key === 'aisle' ? 'platform' : 'module')}
         color={stateColor(state, assetSurface(key === 'floor' || key === 'aisle' ? 'platform' : 'module').color)}
         transparent={opacity < 1}

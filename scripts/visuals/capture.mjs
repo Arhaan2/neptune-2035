@@ -65,6 +65,10 @@ await capture('power-inspection');
 await button('Compare').click();
 await capture('compare');
 await page.setViewportSize({ width: 390, height: 844 });
+// A fresh opening view in this isolated capture context, not the prior fault view.
+await page.evaluate(() => localStorage.clear());
+await page.goto(base);
+await page.waitForFunction(() => window.__NEPTUNE_TWIN_SCENE__?.visualSystem === 'blue-hour-v1');
 await button('Explore').click();
 await button('Campus context').click();
 await page.evaluate(() => window.scrollTo(0, 0));
