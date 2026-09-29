@@ -1,3 +1,4 @@
+import { openPanel, withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type Locator } from '@playwright/test';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { buildDesign, DEFAULT_CONFIG, moduleAssets } from '../../src/twin/assets/design';
@@ -6,7 +7,7 @@ import { expectNoHorizontalOverflow } from './layout';
 
 const moduleId = 'platform-001/module-01';
 const cdu = `${moduleId}/cdu`;
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
 const scene = (page: Page) => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__);
 const design = buildDesign(DEFAULT_CONFIG);
 
@@ -43,6 +44,7 @@ for (const width of [1440, 390]) {
     await page.goto('./');
     await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
     await expect(button(page, 'Step 10s')).toBeEnabled();
+    await openPanel(page, 'Inspector');
     await button(page, 'Cooling close-up').click();
     await expect.poll(async () => (await scene(page))?.visualKit.status).toBe('ready');
     await fit(page);
@@ -56,37 +58,37 @@ for (const width of [1440, 390]) {
     await expect(identity).toContainText('simulated');
     await expect(page.locator('.twin-asset-label')).toHaveCount(0);
     for (const open of [false, true]) {
-      if (open) { await summary.focus(); await page.keyboard.press('Enter'); }
+      if (open) { await withVisibleControl(page, summary, control => control.focus()); await page.keyboard.press('Enter'); }
       await expect(legend).toHaveJSProperty('open', open);
       await fit(page);
       await disjoint(canvas, caption); await disjoint(canvas, legend); await disjoint(canvas, controls);
       await disjoint(legend, controls); await disjoint(legend, page.locator('.twin-inspector'));
       expect((await canvas.boundingBox())!.height).toBeGreaterThan(220);
       await expectNoHorizontalOverflow(page, width);
-      await shell.scrollIntoViewIfNeeded();
+      await withVisibleControl(page, shell, control => control.scrollIntoViewIfNeeded());
       await info.attach(`visual-v3-${width}-legend-${open ? 'open' : 'closed'}`, { body: await shell.screenshot(), contentType: 'image/png' });
     }
     await expect(legend).toContainText('Technical coolant');
     await expect(legend).toContainText('Seawater');
-    await summary.focus(); await page.keyboard.press('Enter');
+    await withVisibleControl(page, summary, control => control.focus()); await page.keyboard.press('Enter');
     await expect(summary).toBeFocused();
     // macOS WebKit uses Option-Tab to include native buttons in traversal.
     await page.keyboard.press(info.project.name === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab');
     await expect(button(page, 'X-ray')).toBeFocused();
     // Existing ID lookup remains a native keyboard selection alternative.
     const finder = page.getByLabel('Find asset ID', { exact: true });
-    await finder.fill(cdu); await finder.focus(); await page.keyboard.press('Enter');
+    await withVisibleControl(page, finder, control => control.fill(cdu)); await withVisibleControl(page, finder, control => control.focus()); await page.keyboard.press('Enter');
     await expect(page.locator('main.twin-app')).toHaveAttribute('data-selected', cdu);
     await expect(identity).toContainText(cdu);
     await expect(page.getByLabel('Select equipment', { exact: true })).toHaveValue(cdu);
     await fit(page, [cdu]);
     await expect.poll(async () => (await scene(page))?.visualKit.assets.find(asset => asset.assetId === cdu)?.renderedMeshes ?? 0).toBeGreaterThan(0);
     const beforeManual = await scene(page);
-    await canvas.focus(); await page.keyboard.press('ArrowRight');
+    await withVisibleControl(page, canvas, control => control.focus()); await page.keyboard.press('ArrowRight');
     await expect.poll(async () => (await scene(page))?.camera).not.toEqual(beforeManual!.camera);
     await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '0');
     await expect(page.getByText('Simulated, design-stage prototype; physical validation pending.', { exact: true }).first()).toBeVisible();
-    await shell.scrollIntoViewIfNeeded();
+    await withVisibleControl(page, shell, control => control.scrollIntoViewIfNeeded());
     await info.attach(`visual-v3-${width}-cdu-selection`, { body: await shell.screenshot(), contentType: 'image/png' });
     await button(page, 'Campus view').click();
     await expect.poll(async () => (await scene(page))?.focus).toBe('campus');

@@ -1,3 +1,4 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { Box3, PerspectiveCamera, Ray, Vector3 } from 'three';
@@ -9,7 +10,7 @@ import type { KitDiagnostic } from '../../src/scene/visuals/AuthoredEquipment';
 const manifest = JSON.parse(await fs.readFile(new URL('../../public/visuals/v3/manifest.json', import.meta.url), 'utf8')) as { templates: { bytes: number }[] };
 const cdu = 'platform-001/module-01/cdu', secondCdu = 'platform-001/module-02/cdu';
 const glbs = /\/visuals\/(?:v2\/(?:pump|exchanger)|v3\/cdu)\.glb(?:\?.*)?$/;
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
 const main = (page: Page) => page.locator('main.twin-app');
 type Observation = NonNullable<Window['__NEPTUNE_TWIN_SCENE__']> & { renderEpoch: number; visualKit: KitDiagnostic };
 const scene = (page: Page) => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__ as Observation);
@@ -36,7 +37,7 @@ async function completed(page: Page) {
 }
 async function select(page: Page, id: string) {
   const finder = page.getByLabel('Find asset ID', { exact: true });
-  await finder.fill(id); await finder.focus(); await page.keyboard.press('Enter');
+  await withVisibleControl(page, finder, control => control.fill(id)); await withVisibleControl(page, finder, control => control.focus()); await page.keyboard.press('Enter');
   await expect(main(page)).toHaveAttribute('data-selected', id);
 }
 async function reveal(page: Page, id = cdu) {
@@ -47,7 +48,7 @@ async function reveal(page: Page, id = cdu) {
 }
 async function project(page: Page): Promise<CurrentProject> {
   const pending = page.waitForEvent('download');
-  await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
+  await withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project'));
   const artifact = await pending; expect(await artifact.failure()).toBeNull();
   const file = await artifact.path(); if (!file) throw Error('No project export.');
   const value = parseProject(await fs.readFile(file, 'utf8'));
@@ -134,7 +135,7 @@ test('VIS3 delayed CDU remains interactive beside healthy older templates and ca
     await expect(button(page, 'Step 10s')).toBeEnabled();
     await clickProceduralCdu(page);
     await select(page, secondCdu); await button(page, 'Cooling close-up').click();
-    await button(page, 'Design family II').click(); await ready(page);
+    await withVisibleControl(page, button(page, 'Design family II'), control => control.click()); await ready(page);
     await select(page, secondCdu); await button(page, 'Cooling close-up').click();
     const before = await project(page); await capture(page, info, 'visual-v3-delayed-cdu');
     release(); const loaded = await reveal(page, secondCdu);
@@ -158,8 +159,8 @@ for (const fault of ['missing', 'corrupt', 'size'] as const) {
     expect(observed.visualKit.assets.find(asset => asset.assetId === cdu)).toMatchObject({ status: 'fallback', selected: true, meshCount: 0 });
     await expect(page.getByTestId('visual-kit-status')).toContainText(/procedural/i);
     await clickProceduralCdu(page);
-    await button(page, 'Trip selected asset').click(); await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
-    await button(page, 'Restore selected asset').click(); await expect(page.getByTestId('asset-operating-status')).not.toHaveText('failed');
+    await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click()); await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
+    await withVisibleControl(page, button(page, 'Restore selected asset'), control => control.click()); await expect(page.getByTestId('asset-operating-status')).not.toHaveText('failed');
     await capture(page, info, `visual-v3-${fault}-cdu-fallback`); expect(failures).toEqual([]);
   });
 }
@@ -177,18 +178,18 @@ test('VIS3 CDU submeshes select their parent and projected failure/history tint 
   const failures = errors(page);
   await page.setViewportSize({ width: 1440, height: 900 }); await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./'); await ready(page);
-  await button(page, 'Operate').click(); await page.getByLabel('Experiment', { exact: true }).selectOption('healthy');
-  await page.getByLabel('Experiment initial conditions', { exact: true }).selectOption('cold');
-  await button(page, 'Prepare experiment for stepping').click(); await ready(page);
+  await button(page, 'Operate').click(); await withVisibleControl(page, page.getByLabel('Experiment', { exact: true }), control => control.selectOption('healthy'));
+  await withVisibleControl(page, page.getByLabel('Experiment initial conditions', { exact: true }), control => control.selectOption('cold'));
+  await withVisibleControl(page, button(page, 'Prepare experiment for stepping'), control => control.click()); await ready(page);
   await button(page, 'Step 10s').click(); await ready(page); await reveal(page);
-  await button(page, 'Trip selected asset').click(); await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
+  await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click()); await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   await expect.poll(async () => (await kit(page))?.assets.find(asset => asset.assetId === cdu)?.operatingState).toBe('failed');
   const failed = await completed(page), failedCdu = failed.visualKit.assets.find(asset => asset.assetId === cdu)!;
   expect(failedCdu.materialColor).toBe('#f27b79');
   expect(failed.visualKit.assets.filter(asset => asset.kind !== 'cdu').every(asset => asset.materialColor !== failedCdu.materialColor)).toBe(true);
   // Keep the canonical bay framing while selecting a peer, then target an actual
   // rendered CDU triangle using the same diagnostic projection as retained VIS2.
-  await page.getByLabel('Select equipment', { exact: true }).selectOption('platform-001/module-01/pump-duty');
+  await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption('platform-001/module-01/pump-duty'));
   await button(page, 'Cooling close-up').click(); const peer = await completed(page);
   const surface = peer.visualKit.assets.find(asset => asset.assetId === cdu)!.childWorldPoint;
   expect(surface).toBeDefined(); const bounds = await page.locator('canvas').boundingBox(); if (!bounds) throw Error('No canvas.');
@@ -200,7 +201,7 @@ test('VIS3 CDU submeshes select their parent and projected failure/history tint 
   await expect(main(page)).toHaveAttribute('data-selected', cdu);
   await expect(page.getByTestId('asset-context')).toHaveAttribute('data-asset-id', cdu);
   const checkpoint = await project(page);
-  await page.getByLabel('Inspect history time in seconds', { exact: true }).fill('0'); await button(page, 'Inspect history time').click();
+  await withVisibleControl(page, page.getByLabel('Inspect history time in seconds', { exact: true }), control => control.fill('0')); await withVisibleControl(page, button(page, 'Inspect history time'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-inspection-status', 'resolved');
   await expect.poll(async () => (await kit(page))?.assets.find(asset => asset.assetId === cdu)?.operatingState).not.toBe('failed');
   expect((await completed(page)).visualKit.assets.find(asset => asset.assetId === cdu)!.operatingState).toBe(await page.getByTestId('asset-operating-status').innerText());
@@ -208,7 +209,7 @@ test('VIS3 CDU submeshes select their parent and projected failure/history tint 
   expect(normalizeProject(await project(page))).toEqual(normalizeProject(checkpoint));
   await select(page, secondCdu); const healthy = await completed(page);
   expect(healthy.visualKit.assets.find(asset => asset.assetId === secondCdu)!.materialColor).not.toBe(failedCdu.materialColor);
-  await select(page, cdu); await button(page, 'Restore selected asset').click();
+  await select(page, cdu); await withVisibleControl(page, button(page, 'Restore selected asset'), control => control.click());
   await expect(page.getByTestId('asset-operating-status')).not.toHaveText('failed');
   await expect.poll(async () => (await kit(page))?.assets.find(asset => asset.assetId === cdu)?.materialColor).not.toBe(failedCdu.materialColor);
   await capture(page, info, 'visual-v3-restored-cdu'); expect(failures).toEqual([]);

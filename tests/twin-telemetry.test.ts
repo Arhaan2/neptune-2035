@@ -288,9 +288,22 @@ describe('running DataPanel acceptance', () => {
     try {
       const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
       const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+      await page.addInitScript(() => {
+        const NativeEventSource = window.EventSource;
+        const lifecycle = { created: 0, closed: 0, samples: [] as { sequence: number; sourceId: string; evidence: string; value: number }[] };
+        (window as unknown as { __V4_STREAM_LIFECYCLE__: typeof lifecycle }).__V4_STREAM_LIFECYCLE__ = lifecycle;
+        window.EventSource = class extends NativeEventSource {
+          constructor(url: string | URL, configuration?: EventSourceInit) {
+            super(url, configuration); lifecycle.created++;
+            this.addEventListener('message', event => lifecycle.samples.push(JSON.parse(event.data)));
+          }
+          close() { lifecycle.closed++; super.close(); }
+        };
+      });
       await page.goto('http://127.0.0.1:5173');
       await page.getByRole('button', { name: 'Data & replay', exact: true }).click();
       await page.getByRole('heading', { name: 'Observations & synchronization' }).waitFor();
+      await page.locator('summary').filter({ hasText: /^Project actions$/ }).click();
       const downloadPending = page.waitForEvent('download');
       await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
       const exported = await downloadPending;
@@ -298,6 +311,7 @@ describe('running DataPanel acceptance', () => {
       const revision = JSON.parse(readFileSync((await exported.path())!, 'utf8')).designSnapshot.revision;
       expect(typeof revision).toBe('string');
       expect(await page.locator('.twin-mode').innerText()).toContain(revision);
+      await page.locator('summary').filter({ hasText: /^Project actions$/ }).click();
       await page.getByLabel('Drop generated observations', { exact: true }).check();
       await page.getByRole('button', { name: 'Step 10s', exact: true }).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="sim-time"]')?.textContent === '10s');
@@ -312,6 +326,9 @@ describe('running DataPanel acceptance', () => {
       await page.getByText('Raw imports and reset boundaries', { exact: true }).click();
       await page.getByText('mapped-fixture.csv: 1 raw rows / 0 mapping errors', { exact: true }).waitFor();
       expect(await page.locator('.twin-data pre').innerText()).toContain('"reading": "37"');
+      await page.getByRole('button', { name: 'Reset selected source sequence', exact: true }).click();
+      await page.getByText('generated:ui-import: Explicit operator sequence restart', { exact: false }).waitFor();
+      const boundariesBefore = await page.locator('.twin-data details').filter({ has: page.locator('summary').filter({ hasText: /^Raw imports and reset boundaries$/ }) }).innerText();
       await page.getByText('Bounded exchanger UA calibration', { exact: true }).click();
       await page.getByRole('button', { name: 'Run generated calibration fixture', exact: true }).click();
       await page.getByText('Proposed UA:', { exact: false }).waitFor();
@@ -325,7 +342,39 @@ describe('running DataPanel acceptance', () => {
       expect(publisher.diagnostics.connections).toBeGreaterThanOrEqual(2);
       expect(publisher.diagnostics.lastEventIds.some(id => id !== null)).toBe(true);
       expect(await page.getByLabel('Observation source', { exact: true }).inputValue()).toBe('generated:local-publisher');
+      const lifecycle = () => page.evaluate(() => (window as unknown as { __V4_STREAM_LIFECYCLE__: { created: number; closed: number; samples: { sequence: number; sourceId: string; evidence: string; value: number }[] } }).__V4_STREAM_LIFECYCLE__);
+      const beforeReflow = await lifecycle();
+      const retainedCount = async () => Number((await page.getByText(/retained replay window:/).innerText()).match(/retained replay window: (\d+)/)?.[1]);
+      const retainedBeforeReflow = await retainedCount();
+      const dataOwner = await page.locator('.twin-data').elementHandle();
+      for (const workspace of ['Compare', 'Operate', 'Explore']) {
+        await page.getByRole('button', { name: workspace, exact: true }).click();
+        await page.getByRole('button', { name: 'Presentation focus', exact: true }).click();
+        await page.getByTestId('stream-summary').waitFor({ state: 'visible' });
+        expect(await page.getByTestId('stream-summary').innerText()).toMatch(/stream|reconnect|connected/i);
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.getByRole('button', { name: 'Exit presentation focus', exact: true }).click();
+        await page.setViewportSize({ width: 1440, height: 1100 });
+      }
+      await page.getByRole('button', { name: 'Data & replay', exact: true }).click();
+      await page.waitForFunction(count => (window as unknown as { __V4_STREAM_LIFECYCLE__: { samples: unknown[] } }).__V4_STREAM_LIFECYCLE__.samples.length > count, beforeReflow.samples.length);
+      expect(await dataOwner!.evaluate(element => element === document.querySelector('.twin-data'))).toBe(true);
+      const afterReflow = await lifecycle();
+      expect(await retainedCount()).toBeGreaterThan(retainedBeforeReflow);
+      expect(afterReflow.created).toBe(beforeReflow.created);
+      expect(afterReflow.closed).toBe(beforeReflow.closed);
+      expect(afterReflow.samples.slice(0, beforeReflow.samples.length)).toEqual(beforeReflow.samples);
+      expect(afterReflow.samples.every((sample, index, samples) => sample.sourceId === 'generated:local-publisher' && sample.evidence === 'generated' && (index === 0 || sample.sequence > samples[index - 1].sequence))).toBe(true);
+      expect(await page.getByLabel('Observation source', { exact: true }).inputValue()).toBe('generated:local-publisher');
+      expect(await page.locator('.twin-data pre').innerText()).toContain('"reading": "37"');
+      expect(await page.locator('.twin-data details').filter({ has: page.locator('summary').filter({ hasText: /^Raw imports and reset boundaries$/ }) }).innerText()).toBe(boundariesBefore);
+      expect(await page.locator('main.twin-app').getAttribute('data-time')).toBe('10');
       await page.getByRole('button', { name: 'Disconnect', exact: true }).click();
+      const stopped = await lifecycle();
+      expect(stopped.closed).toBe(beforeReflow.closed + 1);
+      const lastSample = stopped.samples.at(-1)!;
+      const normalizedReading = (lastSample.value - 273.15).toLocaleString('en-US', { maximumFractionDigits: 2 });
+      await page.locator('.twin-data table').first().getByText(`${normalizedReading} °C`, { exact: true }).waitFor();
       mkdirSync('artifacts/v2', { recursive: true });
       await page.locator('.twin-data').screenshot({ path: 'artifacts/v2/telemetry-panel.png' });
       expect(errors).toEqual([]);

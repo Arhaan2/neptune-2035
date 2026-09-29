@@ -1,9 +1,10 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
 
 const main = (page: Page) => page.locator('main.twin-app');
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
-const panel = (page: Page) => page.getByRole('region', { name: 'Network capacity', exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
+const panel = (page: Page) => page.getByRole('region', { includeHidden: true, name: 'Network capacity', exact: true });
 async function ready(page: Page) {
   await expect(main(page)).toHaveAttribute('data-ready', 'true');
   await expect(button(page, 'Step 10s')).toBeEnabled();
@@ -15,12 +16,12 @@ async function step(page: Page) {
   await ready(page);
 }
 async function changeNumber(page: Page, name: string, value: string) {
-  const input = page.getByRole('spinbutton', { name, exact: true });
-  await input.fill(value); await input.press('Enter'); await ready(page);
+  const input = page.getByRole('spinbutton', { includeHidden: true, name, exact: true });
+  await withVisibleControl(page, input, control => control.fill(value)); await withVisibleControl(page, input, control => control.press('Enter')); await ready(page);
 }
 async function exported(page: Page, kind = 'project') {
   const waiting = page.waitForEvent('download');
-  await page.getByLabel('Export artifact', { exact: true }).selectOption(kind);
+  await withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption(kind));
   const download = await waiting;
   expect(await download.failure()).toBeNull();
   const path = await download.path(); if (!path) throw Error('Expected actual downloaded artifact.');
@@ -28,8 +29,8 @@ async function exported(page: Page, kind = 'project') {
 }
 async function project(page: Page) { return JSON.parse(await exported(page)); }
 async function preset(page: Page, value: string) {
-  await page.getByLabel('Network configuration', { exact: true }).selectOption(value);
-  await button(page, 'Apply network and reset').click();
+  await withVisibleControl(page, page.getByLabel('Network configuration', { exact: true }), control => control.selectOption(value));
+  await withVisibleControl(page, button(page, 'Apply network and reset'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-time', '0'); await ready(page);
 }
 function observe(page: Page) {
@@ -57,15 +58,15 @@ test('PH3 nominal and undersized inspection, real worker, revision history, fail
   await expect(page.getByTestId('network-provisioning')).toContainText('4,001 provisioned nodes');
   await expect(page.getByTestId('network-provisioning')).toContainText('400.1 Gbit/s');
   await expect(page.getByTestId('network-current')).toContainText('Current energized demand: satisfied');
-  await panel(page).getByText('Saved workload assumptions', { exact: true }).click();
+  await withVisibleControl(page, panel(page).getByText('Saved workload assumptions', { exact: true }), control => control.click());
   await expect(panel(page)).toContainText('illustrative-job-traffic-v2');
   await expect(panel(page)).toContainText('100,000,000 bit/s per energized node');
   await expect(panel(page)).toContainText('1,000,000 bit/s per energized node');
   await expect(panel(page)).toContainText('not measured training traffic');
   await expect(panel(page)).toContainText('Legacy URL links carry only Legacy v0.1 settings');
-  await button(page, 'Inspect shared core').click();
+  await withVisibleControl(page, button(page, 'Inspect shared core'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-selected', 'shore/cluster-core');
-  await expect(panel(page).getByRole('cell', { name: /switch:shore\/cluster-core/ })).toContainText('7 domains');
+  await expect(panel(page).getByRole('cell', { includeHidden: true, name: /switch:shore\/cluster-core/ })).toContainText('7 domains');
   const initial = await project(page);
   expect(initial.designSnapshot.equipment.networkDesign.preset).toBe('scalable-reference');
   expect(initial.designSnapshot.equipment.workloadProfile.clusterBitSPerNode).toBe(100e6);
@@ -73,9 +74,9 @@ test('PH3 nominal and undersized inspection, real worker, revision history, fail
   await step(page);
   const nominalRun = await project(page);
 
-  await page.getByLabel('Network configuration', { exact: true }).selectOption('undersized-shared-core');
+  await withVisibleControl(page, page.getByLabel('Network configuration', { exact: true }), control => control.selectOption('undersized-shared-core'));
   expect((await project(page)).checkpoint).toEqual(nominalRun.checkpoint);
-  await button(page, 'Apply network and reset').click(); await ready(page);
+  await withVisibleControl(page, button(page, 'Apply network and reset'), control => control.click()); await ready(page);
   await expect(main(page)).toHaveAttribute('data-time', '0');
   await expect(page.getByTestId('network-provisioning')).toContainText('Installed design demand: violated');
   await expect(page.getByTestId('network-current')).toContainText('Current energized demand: violated');
@@ -87,39 +88,39 @@ test('PH3 nominal and undersized inspection, real worker, revision history, fail
   expect(histories.some((entry: { project: { checkpoint: unknown } }) => JSON.stringify(entry.project.checkpoint) === JSON.stringify(nominalRun.checkpoint))).toBe(true);
 
   await preset(page, 'scalable-reference');
-  await page.getByLabel('Inspect network asset', { exact: true }).selectOption('platform-001/cluster');
-  await panel(page).getByText('Network links · enable / disable', { exact: true }).click();
+  await withVisibleControl(page, page.getByLabel('Inspect network asset', { exact: true }), control => control.selectOption('platform-001/cluster'));
+  await withVisibleControl(page, panel(page).getByText('Network links · enable / disable', { exact: true }), control => control.click());
   const link = panel(page).locator('.twin-network-link').filter({ hasText: 'shore/cluster-core>platform-001/cluster:cluster' });
-  await link.getByRole('button', { name: 'Disable network link and reset', exact: true }).click(); await ready(page);
+  await withVisibleControl(page, link.getByRole('button', { includeHidden: true, name: 'Disable network link and reset', exact: true }), control => control.click()); await ready(page);
   await expect(page.getByTestId('network-current')).toContainText('1 affected domains');
   const disabled = await project(page);
   expect(disabled.checkpoint.state.modules.filter((module: { id: string }) => module.id.startsWith('platform-001/')).every((module: { availableAccelerators: number }) => module.availableAccelerators === 0)).toBe(true);
   expect(disabled.checkpoint.state.modules.filter((module: { id: string }) => module.id.startsWith('platform-002/')).every((module: { availableAccelerators: number }) => module.availableAccelerators > 0)).toBe(true);
-  await link.getByRole('button', { name: 'Enable network link and reset', exact: true }).click(); await ready(page);
+  await withVisibleControl(page, link.getByRole('button', { includeHidden: true, name: 'Enable network link and reset', exact: true }), control => control.click()); await ready(page);
   await expect(page.getByTestId('network-current')).toContainText('Current energized demand: satisfied');
-  await button(page, 'Inspect shared core').click();
-  await button(page, 'Trip selected asset').click(); await step(page);
+  await withVisibleControl(page, button(page, 'Inspect shared core'), control => control.click());
+  await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click()); await step(page);
   const failed = await project(page);
   expect(failed.checkpoint.state.failedAssetIds).toContain('shore/cluster-core');
   expect(failed.checkpoint.state.modules.every((module: { availableAccelerators: number }) => module.availableAccelerators === 0)).toBe(true);
-  await button(page, 'Restore selected asset').click(); await step(page);
+  await withVisibleControl(page, button(page, 'Restore selected asset'), control => control.click()); await step(page);
   await expect(page.getByTestId('network-current')).toContainText('Current energized demand: satisfied');
   const saved = await exported(page), checkpoint = JSON.parse(saved).checkpoint;
-  await button(page, 'Reset state').click(); await ready(page);
-  await page.getByLabel('Import project', { exact: true }).setInputFiles({ name: 'phase3-network.json', mimeType: 'application/json', buffer: Buffer.from(saved) });
+  await withVisibleControl(page, button(page, 'Reset state'), control => control.click()); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Import project', { exact: true }), control => control.setInputFiles({ name: 'phase3-network.json', mimeType: 'application/json', buffer: Buffer.from(saved) }));
   await expect(main(page)).toHaveAttribute('data-time', String(checkpoint.state.timeS)); await ready(page);
   expect((await project(page)).checkpoint).toEqual(checkpoint);
   await page.reload();
   await expect(page.getByTestId('checkpoint-recovery')).toContainText(`available at ${checkpoint.state.timeS}s`);
   await ready(page);
   await page.setViewportSize({ width: 390, height: 844 });
-  await button(page, 'Recover saved checkpoint').click(); await ready(page);
+  await withVisibleControl(page, button(page, 'Recover saved checkpoint'), control => control.click()); await ready(page);
   expect((await project(page)).checkpoint).toEqual(checkpoint);
   await expect.poll(() => page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
   await page.screenshot({ path: info.outputPath('phase3-mobile-network.png'), fullPage: true });
   if (info.project.name === 'firefox') {
     await page.setViewportSize({ width: 1600, height: 1050 });
-    await page.getByLabel('Starting scenario', { exact: true }).selectOption('100000'); await ready(page);
+    await withVisibleControl(page, page.getByLabel('Starting scenario', { exact: true }), control => control.selectOption('100000')); await ready(page);
     await expect(page.getByTestId('network-design-name')).toHaveText('Scalable reference network');
     await expect(page.getByTestId('network-provisioning')).toContainText('12,500 provisioned nodes');
     await expect(page.getByTestId('network-provisioning')).toContainText('1,250 Gbit/s');
@@ -144,8 +145,8 @@ test('PH3 fallback and keyboard network controls retain the supported design', a
   const observed = observe(page);
   await page.goto('./?fallback=1'); await ready(page);
   await changeNumber(page, 'Requested accelerators', '8');
-  await page.getByLabel('Network configuration', { exact: true }).selectOption('scalable-reference');
-  await button(page, 'Apply network and reset').focus();
+  await withVisibleControl(page, page.getByLabel('Network configuration', { exact: true }), control => control.selectOption('scalable-reference'));
+  await withVisibleControl(page, button(page, 'Apply network and reset'), control => control.focus());
   await page.keyboard.press('Enter'); await ready(page);
   await expect(page.locator('canvas')).toHaveCount(0);
   await expect(page.getByTestId('network-design-name')).toHaveText('Scalable reference network');

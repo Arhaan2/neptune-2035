@@ -1,3 +1,4 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
@@ -15,7 +16,7 @@ const glbs = /\/visuals\/(?:v2\/(?:pump|exchanger)|v3\/cdu)\.glb(?:\?.*)?$/;
 const resourceTest = test.extend({
   trace: { mode: 'on', screenshots: false, snapshots: false, sources: true, attachments: true },
 });
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
 const main = (page: Page) => page.locator('main.twin-app');
 type KitAsset = { assetId: string; kind: string; status: string; selected: boolean; operatingState: string; materialColor: string; meshCount: number; renderedMeshes: number; worldCenter: number[]; childWorldPoint: number[] };
 type Observation = NonNullable<Window['__NEPTUNE_TWIN_SCENE__']> & { renderEpoch: number; visualKit: { version: string; moduleId: string; status: string; assets: KitAsset[]; cache: { geometries: number; materials: number; textures: number; instances: number } } };
@@ -51,11 +52,11 @@ async function completed(page: Page) {
 async function select(page: Page, id: string) {
   const equipment = page.getByLabel('Select equipment', { exact: true });
   const optionExists = await equipment.locator('option').evaluateAll((options, target) => options.some(option => (option as HTMLOptionElement).value === target), id);
-  if (optionExists) await equipment.selectOption(id);
-  else { await page.getByLabel('Find asset ID', { exact: true }).fill(id); await button(page, 'Find').click(); }
+  if (optionExists) await withVisibleControl(page, equipment, control => control.selectOption(id));
+  else { await withVisibleControl(page, page.getByLabel('Find asset ID', { exact: true }), control => control.fill(id)); await withVisibleControl(page, button(page, 'Find'), control => control.click()); }
   await expect(main(page)).toHaveAttribute('data-selected', id);
 }
-async function reveal(page: Page, id = duty, activate = (name: string) => button(page, name).click()) {
+async function reveal(page: Page, id = duty, activate = (name: string) => withVisibleControl(page, button(page, name), control => control.click())) {
   await select(page, id);
   await activate('Cooling close-up');
   await expect.poll(() => kit(page)).toMatchObject({ version: 'systems-reveal-v3', moduleId: id.slice(0, id.lastIndexOf('/')), status: 'ready' });
@@ -64,12 +65,12 @@ async function reveal(page: Page, id = duty, activate = (name: string) => button
   expect(observation.visualKit.assets.every(asset => asset.status === 'ready' && asset.meshCount > 0 && asset.renderedMeshes > 0)).toBe(true);
   return observation;
 }
-async function toggle(page: Page, name: string, value: boolean, activate = (label: string) => button(page, label).click()) {
+async function toggle(page: Page, name: string, value: boolean, activate = (label: string) => withVisibleControl(page, button(page, label), control => control.click())) {
   if ((await button(page, name).getAttribute('aria-pressed')) !== String(value)) await activate(name);
 }
 async function download(page: Page, kind: string) {
   const pending = page.waitForEvent('download');
-  await page.getByLabel('Export artifact', { exact: true }).selectOption(kind);
+  await withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption(kind));
   const artifact = await pending;
   expect(await artifact.failure()).toBeNull();
   const file = await artifact.path();
@@ -144,7 +145,7 @@ test('VIS2 delayed GLBs stay procedural and late completion binds only the selec
     await expect(button(page, 'Step 10s')).toBeEnabled();
     await select(page, secondDuty);
     await button(page, 'Cooling close-up').click();
-    await button(page, 'Design family II').click(); await ready(page);
+    await withVisibleControl(page, button(page, 'Design family II'), control => control.click()); await ready(page);
     await select(page, secondDuty); await button(page, 'Cooling close-up').click();
     const current = await project(page);
     await capture(page, info, 'visual-v2-delayed-procedural');
@@ -176,7 +177,7 @@ for (const fault of ['missing', 'corrupt'] as const) {
     await expect.poll(async () => (await kit(page))?.assets.find(asset => asset.kind === 'exchanger')).toMatchObject({ status: 'ready' });
     await select(page, standby); await button(page, 'Cooling close-up').click(); await completed(page);
     expect(normalizeProject(await project(page))).toEqual(normalizeProject(before));
-    await button(page, 'Operate').click(); await button(page, 'Trip selected asset').click();
+    await button(page, 'Operate').click(); await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click());
     await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
     await capture(page, info, `visual-v2-${fault}-interactive-fallback`);
     expect(failures).toEqual([]);
@@ -189,13 +190,13 @@ test('VIS2 authored submesh and keyboard selection isolate live failure and exac
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./'); await ready(page);
   await button(page, 'Operate').click();
-  await page.getByLabel('Experiment', { exact: true }).selectOption('healthy');
-  await page.getByLabel('Experiment initial conditions', { exact: true }).selectOption('cold');
-  await button(page, 'Prepare experiment for stepping').click(); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Experiment', { exact: true }), control => control.selectOption('healthy'));
+  await withVisibleControl(page, page.getByLabel('Experiment initial conditions', { exact: true }), control => control.selectOption('cold'));
+  await withVisibleControl(page, button(page, 'Prepare experiment for stepping'), control => control.click()); await ready(page);
   await button(page, 'Step 10s').click(); await ready(page);
   await expect(main(page)).toHaveAttribute('data-time', '10');
   await reveal(page); await button(page, 'Operate').click();
-  await button(page, 'Trip selected asset').click();
+  await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click());
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   await select(page, standby); await button(page, 'Cooling close-up').click();
   const failed = await completed(page);
@@ -219,13 +220,13 @@ test('VIS2 authored submesh and keyboard selection isolate live failure and exac
   await expect(page.getByTestId('asset-context')).toHaveAttribute('data-asset-id', duty);
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   const finder = page.getByLabel('Find asset ID', { exact: true });
-  await finder.fill(standby); await finder.focus(); await page.keyboard.press('Enter');
+  await withVisibleControl(page, finder, control => control.fill(standby)); await withVisibleControl(page, finder, control => control.focus()); await page.keyboard.press('Enter');
   await expect(main(page)).toHaveAttribute('data-selected', standby);
   await expect(page.getByLabel('Select equipment', { exact: true })).toHaveValue(standby);
   await select(page, duty); await button(page, 'Cooling close-up').click();
   const checkpoint = await project(page);
-  await page.getByLabel('Inspect history time in seconds', { exact: true }).fill('0');
-  await button(page, 'Inspect history time').click();
+  await withVisibleControl(page, page.getByLabel('Inspect history time in seconds', { exact: true }), control => control.fill('0'));
+  await withVisibleControl(page, button(page, 'Inspect history time'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-inspection-status', 'resolved');
   await expect(main(page)).toHaveAttribute('data-display-time', '0');
   await expect.poll(async () => (await kit(page))?.assets.find(asset => asset.assetId === duty)?.operatingState).not.toBe('failed');
@@ -310,7 +311,7 @@ test('VIS2 390px reduced-motion authored reveal and real context loss preserve p
   await expectNoHorizontalOverflow(page, 390);
   await expect(button(page, 'Step 10s')).toBeEnabled();
   await capture(page, info, 'visual-v2-390-context-fallback');
-  await button(page, 'Restore 3D view').click();
+  await withVisibleControl(page, button(page, 'Restore 3D view'), control => control.click());
   await expect(page.locator('canvas')).toBeVisible();
   await reveal(page, standby);
   expect(normalizeProject(await project(page))).toEqual(normalizeProject(before));
@@ -324,12 +325,12 @@ test('VIS2 compatible efficiency replacement reuses authored kit and different p
   const failures = errors(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./'); await ready(page); await reveal(page);
-  await page.getByLabel('Replacement specification', { exact: true }).selectOption('pump-efficient');
-  await button(page, 'Apply and reset').click(); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Replacement specification', { exact: true }), control => control.selectOption('pump-efficient'));
+  await withVisibleControl(page, button(page, 'Apply and reset'), control => control.click()); await ready(page);
   await expect(page.getByTestId('installed-spec')).toContainText('pump-efficient');
   await reveal(page);
-  await page.getByLabel('Replacement specification', { exact: true }).selectOption('pump-physical');
-  await button(page, 'Apply and reset').click(); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Replacement specification', { exact: true }), control => control.selectOption('pump-physical'));
+  await withVisibleControl(page, button(page, 'Apply and reset'), control => control.click()); await ready(page);
   await expect(page.getByTestId('installed-spec')).toContainText('pump-physical');
   await button(page, 'Cooling close-up').click();
   await expect.poll(() => kit(page)).toMatchObject({ status: 'fallback' });

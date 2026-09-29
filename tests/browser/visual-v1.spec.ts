@@ -1,3 +1,4 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
@@ -9,7 +10,7 @@ import { activateLifecycleButton } from './lifecycle-keyboard';
 const duty = 'platform-001/module-01/pump-duty';
 const standby = 'platform-001/module-01/pump-standby';
 const main = (page: Page) => page.locator('main.twin-app');
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
 
 function observe(page: Page) {
   const errors: string[] = [];
@@ -27,7 +28,7 @@ async function ready(page: Page) {
 
 async function project(page: Page): Promise<CurrentProject> {
   const pending = page.waitForEvent('download');
-  await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
+  await withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project'));
   const download = await pending;
   expect(await download.failure()).toBeNull();
   const file = await download.path();
@@ -138,19 +139,19 @@ test('VIS1 default campus and systems views preserve the complete normalized pro
   await capture(page, info, 'visual-v1-cooling-reveal');
 
   const feeder = before.designSnapshot.modules[0].powerDomainId;
-  await page.getByLabel('Find asset ID', { exact: true }).fill(feeder);
-  await button(page, 'Find').click();
+  await withVisibleControl(page, page.getByLabel('Find asset ID', { exact: true }), control => control.fill(feeder));
+  await withVisibleControl(page, button(page, 'Find'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-selected', feeder);
   await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.selectedId)).toBe(feeder);
   await capture(page, info, 'visual-v1-power-inspector');
-  await page.getByLabel('Select equipment', { exact: true }).selectOption(duty);
+  await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(duty));
   await button(page, 'Inside module').click();
   await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.inside)).toBe(true);
   await capture(page, info, 'visual-v1-interior');
   await button(page, 'Exit interior').click();
   await button(page, 'Campus view').click();
   for (const name of ['Operate', 'Compare', 'Explore']) {
-    await button(page, name).click();
+    await withVisibleControl(page, button(page, name), control => control.click());
     await expect(button(page, name)).toHaveAttribute('aria-pressed', 'true');
   }
   // Use the existing comparator: only the established solverMs timing field is normalized.
@@ -169,9 +170,9 @@ test('VIS1 repeated selection reveal and interior visits release transient scene
   // keyboard input; the preceding VIS1 case retains pointer coverage of these controls.
   const activate = (name: string) => activateLifecycleButton(page, name);
   const cycle = async () => {
-    await page.getByLabel('Select equipment', { exact: true }).selectOption(standby);
+    await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(standby));
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.selectedId)).toBe(standby);
-    await page.getByLabel('Select equipment', { exact: true }).selectOption(duty);
+    await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(duty));
     await activate('Cooling close-up');
     await activate('Explode');
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ focus: 'cooling', exploded: true, selectedId: duty });
@@ -243,7 +244,7 @@ test('VIS1 reduced-motion 390px inspection and real WebGL loss retain faults and
   await page.keyboard.press('Enter');
   await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.inside)).toBe(false);
   await button(page, 'Operate').click();
-  await button(page, 'Trip selected asset').click();
+  await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click());
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   const failed = await project(page);
   await capture(page, info, 'visual-v1-mobile-failed-inspector');
@@ -258,17 +259,17 @@ test('VIS1 reduced-motion 390px inspection and real WebGL loss retain faults and
   expect(lost, 'The test must exercise actual WebGL context loss.').toBe(true);
   await expect(page.locator('canvas')).toHaveCount(0);
   await expect(page.getByTestId('twin-fallback')).toBeVisible();
-  await page.getByLabel('Select equipment', { exact: true }).selectOption(duty);
-  const failedAsset = page.getByRole('button', { name: `pump duty, ${duty}, failed, selected`, exact: true });
+  await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(duty));
+  const failedAsset = page.getByRole('button', { includeHidden: true, name: `pump duty, ${duty}, failed, selected`, exact: true });
   const failedFill = await failedAsset.locator('rect').getAttribute('fill');
-  const peer = page.getByRole('button', { name: new RegExp(`pump standby, ${standby},`) });
+  const peer = page.getByRole('button', { includeHidden: true, name: new RegExp(`pump standby, ${standby},`) });
   const peerFill = await peer.locator('rect').getAttribute('fill');
   expect(failedFill).not.toBe(peerFill);
-  await peer.focus();
+  await withVisibleControl(page, peer, control => control.focus());
   await expect(peer).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(main(page)).toHaveAttribute('data-selected', standby);
-  await expect(page.getByRole('button', { name: `pump duty, ${duty}, failed`, exact: true }).locator('rect')).toHaveAttribute('fill', failedFill!);
+  await expect(page.getByRole('button', { includeHidden: true, name: `pump duty, ${duty}, failed`, exact: true }).locator('rect')).toHaveAttribute('fill', failedFill!);
   await expect(peer.locator('rect')).toHaveAttribute('fill', peerFill!);
   expect(normalizeProject(await project(page))).toEqual(normalizeProject(failed));
   await expectNoHorizontalOverflow(page, 390);
@@ -288,26 +289,26 @@ test('VIS1 explicit fallback preserves observations, checkpoint import and opera
   await expect(main(page)).toHaveAttribute('data-time', '10');
   await ready(page);
   const before = await project(page);
-  await button(page, 'Data & replay').click();
+  await withVisibleControl(page, button(page, 'Data & replay'), control => control.click());
   const observations = page.getByText(/retained replay window:/);
   await expect(observations).toBeVisible();
   const retained = await observations.innerText();
   expect(Number(retained.match(/retained replay window: (\d+)/)?.[1])).toBeGreaterThan(0);
-  await page.getByLabel('Drop generated observations', { exact: true }).check();
+  await withVisibleControl(page, page.getByLabel('Drop generated observations', { exact: true }), control => control.check());
   for (const name of ['Compare', 'Operate', 'Explore']) {
-    await button(page, name).click();
+    await withVisibleControl(page, button(page, name), control => control.click());
     await expectNoHorizontalOverflow(page, 390);
   }
   await expect(observations).toHaveText(retained);
   await expect(page.getByLabel('Drop generated observations', { exact: true })).toBeChecked();
-  await button(page, 'Data & replay').click();
+  await withVisibleControl(page, button(page, 'Data & replay'), control => control.click());
   await button(page, 'Cooling close-up').click();
   await button(page, 'Explode').click();
   expect(normalizeProject(await project(page))).toEqual(normalizeProject(before));
 
-  await page.getByLabel('Import project', { exact: true }).setInputFiles({
+  await withVisibleControl(page, page.getByLabel('Import project', { exact: true }), control => control.setInputFiles({
     name: 'visual-v1-checkpoint.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(before)),
-  });
+  }));
   await ready(page);
   expect(normalizeProject(await project(page))).toEqual(normalizeProject(before));
   await button(page, 'Step 10s').click();
