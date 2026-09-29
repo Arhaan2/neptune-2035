@@ -5,6 +5,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { createServer } from 'vite';
 import { root, argument, sha256, sourceIdentity } from './results.mjs';
+import { assessHistoricalDependencies } from './dependency-admission.mjs';
 
 const LEGACY_COMMIT = 'c22964d48ddca0e7f7db18ede972125f79dad2df';
 const LEGACY_TREE = 'ce6cd0c2009a7eb78e7b41230a8ab6a94cfe0226';
@@ -159,11 +160,15 @@ export async function recalculateHistorical({ campaigns, legacyCheckout, out }) 
   const legacyIdentity = { commit: legacyGit('rev-parse', 'HEAD'), tree: legacyGit('rev-parse', 'HEAD^{tree}'),
     lockSha256: sha256(await fs.readFile(path.join(legacyCheckout, 'package-lock.json'))) };
   if (legacyIdentity.commit !== LEGACY_COMMIT || legacyIdentity.tree !== LEGACY_TREE || legacyGit('status', '--porcelain', '--untracked-files=no')) throw Error('Historical replay requires clean exact accepted Phase7 source.');
-  if (legacyIdentity.lockSha256 !== currentIdentity.lockSha256) throw Error('Historical/current dependency lock differs; this bridge has not admitted a dependency migration.');
+  const [legacyPackageJSON, currentPackageJSON, legacyLockJSON, currentLockJSON] = await Promise.all([
+    fs.readFile(path.join(legacyCheckout, 'package.json')), fs.readFile(path.join(root, 'package.json')),
+    fs.readFile(path.join(legacyCheckout, 'package-lock.json')), fs.readFile(path.join(root, 'package-lock.json')),
+  ]);
+  const dependencyAdmission = assessHistoricalDependencies({ legacyPackageJSON, currentPackageJSON, legacyLockJSON, currentLockJSON });
   await fs.mkdir(out, { recursive: true });
   const commands = [], originals = [], records = [];
   const receipt = { kind: 'neptune-phase8-historical-recalculation', version: 1, startedAt: new Date().toISOString(), sourceIdentity: currentIdentity,
-    legacyIdentity, originalArchive: { url: 'https://github.com/Arhaan2/neptune-2035/releases/download/phase-7-2026-09-11/phase-7-evidence.zip', sha256: ORIGINAL_ARCHIVE_SHA256, entryPrefix: 'phase-7-evidence/local-final-2/', canonicalFileHashes: ORIGINAL_HASHES },
+    legacyIdentity, dependencyAdmission, originalArchive: { url: 'https://github.com/Arhaan2/neptune-2035/releases/download/phase-7-2026-09-11/phase-7-evidence.zip', sha256: ORIGINAL_ARCHIVE_SHA256, entryPrefix: 'phase-7-evidence/local-final-2/', canonicalFileHashes: ORIGINAL_HASHES },
     commands, campaigns: records, status: 'FAIL', qualification: 'Simulated, design-stage prototype; physical validation pending.' };
   let server;
   async function run(name, command, args, cwd) {
@@ -175,6 +180,8 @@ export async function recalculateHistorical({ campaigns, legacyCheckout, out }) 
     if (exitCode !== 0) throw Error(`${name} failed with exit ${exitCode}; native output retained.`);
   }
   try {
+    if (dependencyAdmission.status !== 'PASS') throw Error(`Historical dependency admission failed: ${dependencyAdmission.error}`);
+    if (dependencyAdmission.legacy.lockSha256 !== legacyIdentity.lockSha256 || dependencyAdmission.current.lockSha256 !== currentIdentity.lockSha256) throw Error('Dependency inputs changed during historical admission.');
     for (const [family, expectedHash] of Object.entries(ORIGINAL_HASHES)) {
       const input = path.join(campaigns, `reproduce-${family}`, 'campaign.json'), bytes = await fs.readFile(input);
       if (sha256(bytes) !== expectedHash) throw Error(`Historical ${family} bytes differ from the immutable Phase7 release export.`);
