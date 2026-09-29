@@ -1,8 +1,8 @@
 import { Box3, Group, Mesh, MeshStandardMaterial, Vector3, type BufferGeometry } from 'three';
-import { KIT_TOLERANCE_M } from './kitContract';
+import { KIT_TOLERANCE_M, isVisualKitKind, type VisualKitKind } from './kitContract';
 
 export interface KitFile {
-  kind: 'pump' | 'exchanger';
+  kind: VisualKitKind;
   url: string;
   sha256: string;
   bytes: number;
@@ -81,11 +81,11 @@ export async function loadKit(file: KitFile, signal: AbortSignal): Promise<KitTe
   }
 }
 
-/** One bounded two-file cache per scene owner. Geometry is immutable and shared;
+/** One bounded three-template cache per scene owner. Geometry is immutable and shared;
  * instance materials are private. Retirement waits for all consumers, including
  * StrictMode's immediate effect replay, and handles in-flight completion. */
 export class VisualKitCache {
-  private entries = new Map<string, { promise: Promise<KitTemplate>; template?: KitTemplate }>();
+  private entries = new Map<VisualKitKind, { sha256: string; promise: Promise<KitTemplate>; template?: KitTemplate }>();
   private instances = new Set<KitInstance>();
   private owners = 0;
   private retired = false;
@@ -112,18 +112,18 @@ export class VisualKitCache {
   }
   load(file: KitFile) {
     if (this.retired) return Promise.reject(Error('Retired visual cache.'));
-    const key = `${file.kind}:${file.sha256}`;
-    const existing = this.entries.get(key);
-    if (existing) return existing.promise;
-    if (this.entries.size >= 2) return Promise.reject(Error('Visual kit cache capacity exceeded.'));
-    const entry: { promise: Promise<KitTemplate>; template?: KitTemplate } = {
+    if (!isVisualKitKind(file.kind)) return Promise.reject(Error('Unsupported visual kit kind.'));
+    const existing = this.entries.get(file.kind);
+    if (existing) return existing.sha256 === file.sha256 ? existing.promise : Promise.reject(Error('Visual kit kind already owns different content.'));
+    const entry: { sha256: string; promise: Promise<KitTemplate>; template?: KitTemplate } = {
+      sha256: file.sha256,
       promise: this.loader(file, this.controller.signal).then(template => {
         if (this.retired) { disposeTemplate(template); throw Error('Retired visual load.'); }
         entry.template = template;
         return template;
       }),
     };
-    this.entries.set(key, entry);
+    this.entries.set(file.kind, entry);
     return entry.promise;
   }
   instantiate(template: KitTemplate): KitInstance {

@@ -7,6 +7,10 @@ const pump: KitFile = {
   kind: 'pump', url: 'visuals/v2/pump.glb', sha256: 'pump-content', bytes: 100,
   dimensionsM: [1.2, 1.2, 0.8],
 };
+const cdu: KitFile = {
+  kind: 'cdu', url: 'visuals/v3/cdu.glb', sha256: 'cdu-content', bytes: 300,
+  dimensionsM: [1.2, 2, 1.1],
+};
 const exchanger: KitFile = {
   kind: 'exchanger', url: 'visuals/v2/exchanger.glb', sha256: 'exchanger-content', bytes: 200,
   dimensionsM: [2, 2.2, 1.4],
@@ -36,7 +40,7 @@ function deferred<T>() {
 // Retirement is intentionally a microtask, matching immediate StrictMode replay.
 const collect = () => new Promise<void>(resolve => queueMicrotask(resolve));
 
-describe('Visual V2 cache ownership', () => {
+describe('Visual V2/V3 cache ownership', () => {
   it('deduplicates in-flight loads and shares immutable geometry with private per-instance state materials', async () => {
     const source = template(), pending = deferred<KitTemplate>();
     const loader = vi.fn((_file: KitFile, _signal: AbortSignal) => pending.promise);
@@ -174,20 +178,34 @@ describe('Visual V2 cache ownership', () => {
     expect(source.geometryDisposal).toHaveBeenCalledTimes(1);
   });
 
-  it('bounds the cache to two content identities and does not load an unsupported third template', async () => {
-    const pumpSource = template(), exchangerSource = template(exchanger);
-    const loader = vi.fn(async (file: KitFile, _signal: AbortSignal) => file.kind === 'pump' ? pumpSource.value : exchangerSource.value);
+  it('bounds the cache to one identity for each of the three declared templates', async () => {
+    const pumpSource = template(), exchangerSource = template(exchanger), cduSource = template(cdu);
+    const sources = { pump: pumpSource, exchanger: exchangerSource, cdu: cduSource };
+    const loader = vi.fn(async (file: KitFile, _signal: AbortSignal) => sources[file.kind].value);
     const cache = new VisualKitCache(loader), release = cache.retain();
-    await Promise.all([cache.load(pump), cache.load(exchanger)]);
-    await expect(cache.load({ ...pump, sha256: 'unauthored-third-content' })).rejects.toThrow('Visual kit cache capacity exceeded');
-    expect(loader).toHaveBeenCalledTimes(2);
+    await Promise.all([cache.load(pump), cache.load(exchanger), cache.load(cdu)]);
+    await expect(cache.load({ ...pump, sha256: 'unauthored-fourth-content' })).rejects.toThrow('Visual kit kind already owns different content');
+    expect(loader).toHaveBeenCalledTimes(3);
     expect(await cache.load(pump)).toBe(pumpSource.value);
     expect(await cache.load(exchanger)).toBe(exchangerSource.value);
-    expect(cache.inventory()).toEqual({ geometries: 2, materials: 4, textures: 0, instances: 0 });
+    expect(await cache.load(cdu)).toBe(cduSource.value);
+    expect(cache.inventory()).toEqual({ geometries: 3, materials: 6, textures: 0, instances: 0 });
     release();
     await collect();
-    expect(pumpSource.geometryDisposal).toHaveBeenCalledTimes(1);
-    expect(exchangerSource.geometryDisposal).toHaveBeenCalledTimes(1);
+    Object.values(sources).forEach(source => expect(source.geometryDisposal).toHaveBeenCalledTimes(1));
+  });
+
+  it('reserves a kind on its first load so changed content cannot displace a mounted template', async () => {
+    const source = template(cdu);
+    const loader = vi.fn(async (_file: KitFile, _signal: AbortSignal) => source.value);
+    const cache = new VisualKitCache(loader), release = cache.retain();
+    const instance = cache.instantiate(await cache.load(cdu));
+    await expect(cache.load({ ...cdu, sha256: 'different-cdu' })).rejects.toThrow('already owns different content');
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(instance.disposed).toBe(false);
+    expect(source.geometryDisposal).not.toHaveBeenCalled();
+    instance.dispose(); release(); await collect();
+    expect(source.geometryDisposal).toHaveBeenCalledTimes(1);
   });
 
   it('isolates a failed load from the other template and does not repeatedly allocate failed retries', async () => {
@@ -210,28 +228,63 @@ describe('Visual V2 cache ownership', () => {
     expect(source.geometryDisposal).toHaveBeenCalledTimes(1);
   });
 
-  it('returns to the exact warmed allocation inventory over twenty equipment cycles', async () => {
-    const source = template();
-    const loader = vi.fn(async (_file: KitFile, _signal: AbortSignal) => source.value);
+  it('keeps healthy pump and exchanger owners while CDU loads and disposes its late completion after unmount', async () => {
+    const sources = { pump: template(pump), exchanger: template(exchanger), cdu: template(cdu) };
+    const pending = deferred<KitTemplate>();
+    const loader = vi.fn((file: KitFile, _signal: AbortSignal) => file.kind === 'cdu' ? pending.promise : Promise.resolve(sources[file.kind].value));
     const cache = new VisualKitCache(loader), release = cache.retain();
-    const loaded = await cache.load(pump);
-    const warm = { geometries: 1, materials: 2, textures: 0, instances: 0 };
+    const instances = await Promise.all([pump, exchanger].map(async file => cache.instantiate(await cache.load(file))));
+    const late = cache.load(cdu), rejection = expect(late).rejects.toThrow('Retired visual load');
+    expect(cache.inventory()).toEqual({ geometries: 2, materials: 8, textures: 0, instances: 2 });
+    release(); await collect();
+    expect(loader.mock.calls.every(call => !call[1].aborted)).toBe(true);
+    instances.forEach(instance => instance.dispose()); await collect();
+    expect(loader.mock.calls.every(call => call[1].aborted)).toBe(true);
+    pending.resolve(sources.cdu.value); await rejection;
+    Object.values(sources).forEach(source => expect(source.geometryDisposal).toHaveBeenCalledTimes(1));
+    expect(cache.inventory()).toEqual({ geometries: 0, materials: 0, textures: 0, instances: 0 });
+  });
+
+  it.each([pump, exchanger, cdu])('isolates failed $kind content from both healthy template families', async failedFile => {
+    const sources = { pump: template(pump), exchanger: template(exchanger), cdu: template(cdu) };
+    const loader = vi.fn(async (file: KitFile) => {
+      if (file.kind === failedFile.kind) throw Error('Equipment detail integrity mismatch.');
+      return sources[file.kind].value;
+    });
+    const cache = new VisualKitCache(loader), release = cache.retain();
+    await expect(cache.load(failedFile)).rejects.toThrow('integrity mismatch');
+    const instances = await Promise.all([pump, exchanger, cdu].filter(file => file.kind !== failedFile.kind).map(async file => cache.instantiate(await cache.load(file))));
+    expect(cache.inventory()).toEqual({ geometries: 2, materials: 8, textures: 0, instances: 2 });
+    instances.forEach(instance => instance.dispose()); release(); await collect();
+    Object.entries(sources).filter(([kind]) => kind !== failedFile.kind).forEach(([,source]) => expect(source.geometryDisposal).toHaveBeenCalledTimes(1));
+    // This fixture was never returned by the failed loader; its owner cleans it up.
+    sources[failedFile.kind].value.geometries.forEach(geometry => geometry.dispose());
+    sources[failedFile.kind].value.materials.forEach(material => material.dispose());
+  });
+
+  it('returns to the exact warmed allocation inventory over twenty equipment cycles', async () => {
+    const sources = { pump: template(pump), exchanger: template(exchanger), cdu: template(cdu) };
+    const loader = vi.fn(async (file: KitFile, _signal: AbortSignal) => sources[file.kind].value);
+    const cache = new VisualKitCache(loader), release = cache.retain();
+    const loaded = await Promise.all([cache.load(pump), cache.load(exchanger), cache.load(cdu)]);
+    const warm = { geometries: 3, materials: 6, textures: 0, instances: 0 };
     expect(cache.inventory()).toEqual(warm);
     for (let cycle = 0; cycle < 20; cycle++) {
-      const instance = cache.instantiate(loaded);
+      const instances = loaded.map(value => cache.instantiate(value));
+      const instance = instances[cycle % instances.length];
       expect(instance.disposed).toBe(false);
       const privateDisposals = [...instance.materials.keys()].map(material => vi.spyOn(material, 'dispose'));
-      expect(cache.inventory()).toEqual({ geometries: 1, materials: 4, textures: 0, instances: 1 });
-      instance.dispose();
+      expect(cache.inventory()).toEqual({ geometries: 3, materials: 12, textures: 0, instances: 3 });
+      instances.forEach(value => value.dispose());
       expect(instance.disposed).toBe(true);
       await collect();
       privateDisposals.forEach(disposal => expect(disposal).toHaveBeenCalledTimes(1));
       expect(cache.inventory()).toEqual(warm);
-      expect(source.geometryDisposal).not.toHaveBeenCalled();
+      Object.values(sources).forEach(source => expect(source.geometryDisposal).not.toHaveBeenCalled());
     }
-    expect(loader).toHaveBeenCalledTimes(1);
+    expect(loader).toHaveBeenCalledTimes(3);
     release();
     await collect();
-    expect(source.geometryDisposal).toHaveBeenCalledTimes(1);
+    Object.values(sources).forEach(source => expect(source.geometryDisposal).toHaveBeenCalledTimes(1));
   });
 });

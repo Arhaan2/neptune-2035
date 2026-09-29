@@ -667,7 +667,7 @@ function TwinFacility({
   const equipment = useMemo(
     () =>
       details.filter(
-        (a) => !['rack', 'compute', 'module', 'pipe', 'pump', 'exchanger'].includes(a.type),
+        (a) => !['rack', 'compute', 'module', 'pipe', 'pump', 'exchanger', 'cdu'].includes(a.type),
       ),
     [details],
   );
@@ -721,7 +721,7 @@ function TwinFacility({
   const pumpInactive = (id: string) =>
     assetMap.get(id)?.type === 'pump' && states?.[id] !== 'running';
   const detailEnabled = props.focus === 'cooling' || props.inside ||
-    (props.focus === 'selection' && ['pump', 'exchanger'].includes(active?.type ?? '')) || (props.xray && props.exploded);
+    (props.focus === 'selection' && ['pump', 'exchanger', 'cdu'].includes(active?.type ?? '')) || (props.xray && props.exploded);
   return (
     <group>
       <Instances assets={hulls} {...common} />
@@ -758,7 +758,7 @@ function TwinFacility({
         interactive={!(props.xray && detailEnabled && !props.inside)}
       />
       {details
-        .filter((a) => a.type === 'pump' || a.type === 'exchanger')
+        .filter((a) => a.type === 'pump' || a.type === 'exchanger' || a.type === 'cdu')
         .map((asset) => (
           <AuthoredEquipment
             key={asset.id}
@@ -1201,7 +1201,7 @@ function CameraRig({
         pixelRatio: gl.getPixelRatio(),
         visualSystem: 'blue-hour-v1',
         renderEpoch: renderEpoch.current,
-        visualKit: { version: 'systems-reveal-v2', moduleId: moduleSpec?.id ?? '', status: 'idle', assets: [], cache: kitCache.inventory() },
+        visualKit: { version: 'systems-reveal-v3', moduleId: moduleSpec?.id ?? '', status: 'idle', assets: [], cache: kitCache.inventory() },
         reducedMotion: props.reducedMotion,
         oceanTimeS: ((scene.getObjectByName('blue-hour-ocean') as Mesh | undefined)?.material as ShaderMaterial | undefined)?.uniforms.time.value ?? 0,
         geometries: gl.info.memory.geometries,
