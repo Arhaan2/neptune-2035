@@ -37,6 +37,7 @@ import {
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { BlueHourEnvironment } from './visuals/DuskEnvironment';
+import { equipmentFrame } from './visuals/equipmentFraming';
 import { BLUE_HOUR, assetSurface, stateColor } from './visuals/materials';
 import { VisualKitCache } from './visuals/kitCache';
 import { AuthoredEquipment, visualKitDiagnostic, type KitDiagnostic, type KitStatus } from './visuals/AuthoredEquipment';
@@ -816,20 +817,7 @@ function TwinFacility({
           exploded={props.exploded}
         />
       )}
-      {active && props.focus !== 'campus' && (
-        <Html
-          position={
-            presentedPosition(active, props.exploded).map(
-              (v, i) => v + (i === 1 ? active.dimensionsM[1] / 2 + 0.4 : 0),
-            ) as Vec3
-          }
-          center
-          className="twin-asset-label"
-        >
-          <span>{active.name}</span>
-          <small>{active.id} · {states?.[active.id] ?? 'status unknown'}</small>
-        </Html>
-      )}
+
     </group>
   );
 }
@@ -960,25 +948,11 @@ function CameraRig({
       distance *= aspectFactor;
       goal.current.target.fromArray(center);
       if (props.focus === 'cooling' && moduleSpec) {
-        const equipment = moduleAssets(props.design, moduleSpec.id).filter(asset => ['pump', 'exchanger'].includes(asset.type));
-        const min = new Vector3(Infinity, Infinity, Infinity), max = new Vector3(-Infinity, -Infinity, -Infinity);
-        for (const asset of equipment) {
-          const center = new Vector3(...presentedPosition(asset, props.exploded)), half = new Vector3(...asset.dimensionsM).multiplyScalar(0.5);
-          min.min(center.clone().sub(half)); max.max(center.clone().add(half));
-        }
-        goal.current.target.copy(min).add(max).multiplyScalar(0.5);
-        const span = max.clone().sub(min);
-        const verticalHalfFov = 46 * Math.PI / 360;
-        const horizontalHalfFov = Math.atan(Math.tan(verticalHalfFov) * size.width / size.height);
-        // Fit the complete canonical equipment sphere inside the smaller field
-        // of view, reserving margin for the existing canvas controls/labels.
-        const fit = span.length() * 0.5 / Math.sin(Math.min(verticalHalfFov, horizontalHalfFov)) * 1.25;
-        goal.current.position
-          .copy(goal.current.target)
-          .add(new Vector3(-0.28, 0.40, -0.86).normalize().multiplyScalar(fit));
-      } else if (props.focus === 'selection' && subject?.type === 'exchanger') {
-        const fit = Math.max(5.2, distance) * aspectFactor;
-        goal.current.position.copy(goal.current.target).add(new Vector3(0.65, 0.32, -0.69).normalize().multiplyScalar(fit));
+        const equipment = moduleAssets(props.design, moduleSpec.id)
+          .filter(asset => ['pump', 'exchanger', 'cdu'].includes(asset.type));
+        goal.current = equipmentFrame(equipment, props.exploded, size.width / size.height, [-0.76, 0.46, -0.64]);
+      } else if (props.focus === 'selection' && subject && ['pump', 'exchanger', 'cdu'].includes(subject.type)) {
+        goal.current = equipmentFrame([subject], props.exploded, size.width / size.height, [0.65, 0.32, -0.69]);
       } else if (props.focus === 'top')
         goal.current.position.set(center[0], distance, center[2] + 0.02);
       else
@@ -1438,7 +1412,9 @@ export default function TwinScene(input: TwinSceneProps) {
       className="twin-scene"
       data-testid="twin-scene"
       data-inside={props.inside}
+      data-detail-view={!props.inside && (props.focus === 'cooling' || (props.focus === 'selection' && ['pump', 'exchanger', 'cdu'].includes(active?.type ?? '')))}
     >
+      <div className="twin-canvas-viewport">
       <TwinBoundary fallback={fallback}>
         <Canvas
           dpr={[1, 1.5]}
@@ -1491,6 +1467,8 @@ export default function TwinScene(input: TwinSceneProps) {
           />
         </Canvas>
       </TwinBoundary>
+      </div>
+      <div className="twin-scene-information">
       {kitStatus !== 'idle' && kitStatus !== 'ready' && <output className="twin-kit-status" data-testid="visual-kit-status" data-status={kitStatus}>
         {kitStatus === 'loading' ? 'Loading equipment detail · envelopes remain interactive' : 'Equipment detail unavailable for some assets · procedural view active'}
       </output>}
@@ -1523,6 +1501,7 @@ export default function TwinScene(input: TwinSceneProps) {
           dimensions unchanged
         </div>
       )}
+      </div>
       {props.inside && (
         <div className="twin-interior-controls">
           <div>

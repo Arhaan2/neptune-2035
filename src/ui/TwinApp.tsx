@@ -1028,7 +1028,8 @@ export default function TwinApp() {
         <section className="twin-center">
           <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
           {walkthrough && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} displayTimeS={displayState?.timeS??null} status={walkthroughPaused?'paused':walkthroughApplied===walkthroughNavigation&&selectedId===walkthrough.steps[walkthroughIndex].assetId&&inspection.status==='resolved'&&inspection.resolution?.boundary===walkthrough.steps[walkthroughIndex].boundary&&inspection.requestedTimeS===walkthrough.steps[walkthroughIndex].timeS?(walkthroughIndex===walkthrough.steps.length-1?'completed':'ready'):'loading'} onStep={index=>{setWalkthroughIndex(index);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onPause={()=>setWalkthroughPaused(true)} onResume={()=>{setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onExit={()=>{setWalkthrough(null);inspection.returnToCurrent();setFocus('campus');setResetId(value=>value+1);}} onPreviousBoundary={()=>{setWalkthroughPaused(true);inspection.inspect(walkthrough.steps[walkthroughIndex].timeS,'previous');}} />}
-          <div className="twin-scene-shell" ref={sceneRegion}>
+          <div className="twin-scene-shell" ref={sceneRegion}
+            data-detail-view={!inside && (effectiveFocus === 'cooling' || (effectiveFocus === 'selection' && ['pump', 'exchanger', 'cdu'].includes(asset?.type ?? '')))}>
             <div className="twin-scene-caption">
               <span>
                 {focus === 'campus'
@@ -1038,8 +1039,14 @@ export default function TwinApp() {
               <strong>
                 {focus === 'campus'
                   ? `${design.modules.length} modules · ${num(design.rackCount, 0)} exact racks`
-                  : selectedId}
+                  : asset?.type === 'cdu' ? 'Coolant distribution unit' : asset?.name ?? selectedId}
               </strong>
+              {focus !== 'campus' && <div className="twin-scene-selected" data-testid="scene-selected-identity">
+                <code>{selectedId}</code>
+                <span className={`twin-scene-state ${assetOperatingStatus(displayState, selectedId)}`}>
+                  {assetOperatingStatus(displayState, selectedId)} · simulated
+                </span>
+              </div>}
             </div>
             {sceneProps ? (
               <Suspense
