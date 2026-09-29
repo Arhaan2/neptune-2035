@@ -1,9 +1,19 @@
 import manifest from '../../../public/visuals/v2/manifest.json';
+import cduManifest from '../../../public/visuals/v3/manifest.json';
 import type { Asset, Connection, Medium, Vec3 } from '../../twin/types';
 
 /** Presentation-only compatibility. Installed specifications and center routes own truth. */
 export const KIT_TOLERANCE_M = 0.00001;
+// Keep the historical descriptor separate: its provenance and regeneration remain
+// exact. Runtime composition adds one declared CDU without copying the V2 files.
 export const VISUAL_KIT_MANIFEST = manifest;
+export const VISUAL_CDU_MANIFEST = cduManifest;
+export const VISUAL_KIT_KINDS = ['pump', 'exchanger', 'cdu'] as const;
+export type VisualKitKind = typeof VISUAL_KIT_KINDS[number];
+export function isVisualKitKind(value: string): value is VisualKitKind {
+  return value === 'pump' || value === 'exchanger' || value === 'cdu';
+}
+const templates = [...manifest.templates, ...cduManifest.templates];
 export interface VisualKitAnchor {
   id: string;
   medium: Medium;
@@ -11,7 +21,7 @@ export interface VisualKitAnchor {
   positionM: Vec3;
 }
 export interface VisualKitBinding {
-  kind: 'pump' | 'exchanger';
+  kind: VisualKitKind;
   url: string;
   sha256: string;
   bytes: number;
@@ -30,14 +40,17 @@ const vecMatches = (actual: readonly number[], expected: readonly number[]) =>
  */
 export function getVisualKitBinding(asset: Asset, connections?: readonly Connection[]): VisualKitBinding | null {
   const role = asset.id.split('/').at(-1)!;
-  const template = manifest.templates.find(t =>
+  const template = templates.find(t =>
     t.type === asset.type && t.supportedRoles.includes(role) &&
     t.supportedSpecifications.some(s => s.id === asset.catalogId && s.version === asset.revision));
-  if (!template || !vecMatches(asset.dimensionsM, template.dimensionsM) || !vecMatches(asset.positionM, asset.positionM)) return null;
-  const anchors: VisualKitAnchor[] = template.logicalAnchors.map(anchor => {
+  if (!template || !isVisualKitKind(template.id) || !vecMatches(asset.dimensionsM, template.dimensionsM) || !vecMatches(asset.positionM, asset.positionM)) return null;
+  const anchors: VisualKitAnchor[] = [];
+  for (const anchor of template.logicalAnchors) {
     const medium = anchor.medium === 'role-fluid' ? role === 'pump-sea' ? 'seawater' : 'technical' : anchor.medium;
-    return { id: anchor.id.replace('fluid', medium), medium: medium as Medium, direction: anchor.direction as 'in' | 'out', positionM: [...anchor.positionM] as Vec3 };
-  });
+    if ((medium !== 'technical' && medium !== 'seawater' && medium !== 'power') ||
+      (anchor.direction !== 'in' && anchor.direction !== 'out')) return null;
+    anchors.push({ id: anchor.id.replace('fluid', medium), medium, direction: anchor.direction, positionM: [...anchor.positionM] as Vec3 });
+  }
   if (asset.ports.length !== anchors.length || anchors.some(anchor => !asset.ports.some(port => port.id === anchor.id && port.medium === anchor.medium && port.direction === anchor.direction))) return null;
   if (connections?.some(connection => {
     const isFrom = connection.from === asset.id, isTo = connection.to === asset.id;
@@ -48,9 +61,9 @@ export function getVisualKitBinding(asset: Asset, connections?: readonly Connect
     return !anchor || !endpoint || !vecMatches(endpoint, asset.positionM.map((v, i) => v + anchor.positionM[i]));
   })) return null;
   return {
-    kind: template.id as VisualKitBinding['kind'], url: template.url,
+    kind: template.id, url: template.url,
     sha256: template.sha256, bytes: template.bytes, dimensionsM: [...template.dimensionsM] as Vec3,
     bounds: {min: [...template.boundsM.min] as Vec3, max: [...template.boundsM.max] as Vec3},
-    anchors, materialRoles: manifest.materialRoles.map(role => role.name), rootName: template.rootName,
+    anchors, materialRoles: (template.id === 'cdu' ? cduManifest : manifest).materialRoles.map(role => role.name), rootName: template.rootName,
   };
 }

@@ -20,7 +20,7 @@ export interface KitAssetDiagnostic {
   childWorldPoint?: number[];
 }
 export interface KitDiagnostic {
-  version: 'systems-reveal-v2';
+  version: 'systems-reveal-v3';
   moduleId: string;
   status: KitStatus;
   assets: KitAssetDiagnostic[];
@@ -117,5 +117,5 @@ export function visualKitDiagnostic(scene: Scene, camera: Camera, cache: VisualK
     assets.push({ ...source, meshCount, renderedMeshes, materialColor, worldCenter: center.toArray(), ...(point ? { childWorldPoint: point } : {}) });
   });
   const status = !assets.length ? 'idle' : assets.some(asset => asset.status === 'loading') ? 'loading' : assets.some(asset => asset.status === 'fallback') ? 'fallback' : 'ready';
-  return { version: 'systems-reveal-v2', moduleId, status, assets, cache: cache.inventory() };
+  return { version: 'systems-reveal-v3', moduleId, status, assets, cache: cache.inventory() };
 }

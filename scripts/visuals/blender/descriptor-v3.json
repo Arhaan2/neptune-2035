@@ -1,0 +1,47 @@
+{
+  "kitId": "neptune-cooling-kit",
+  "version": "3.0.0",
+  "schemaVersion": 1,
+  "units": "meter",
+  "coordinateSystem": "right-handed Y-up; +X right, +Y up, +Z rear",
+  "rootPivot": "canonical-asset-center",
+  "rootScale": [1, 1, 1],
+  "toleranceM": 0.00001,
+  "normalTolerance": 0.001,
+  "runtimeDirectory": "visuals/v3",
+  "sources": ["src/twin/catalog/equipment.ts", "src/twin/assets/design.ts", "src/scene/twinGeometry.ts"],
+  "anchorSemantics": "The authoritative graph uses abstract asset-center route endpoints. All logical anchors are at local [0,0,0]. Exterior connection faces are illustrative surfaces inside the owning envelope, not physical port coordinates or engineering route changes. The CDU distributes technical coolant; pumps and the two-fluid exchanger remain separate existing equipment. No seawater, internal pump, exchanger, sensor, thermal stage or new electrical load is added.",
+  "provenance": {
+    "author": "Original NEPTUNE Visual V3 geometry authored with the repository Blender Python script",
+    "rights": "Original project-generated geometry; no third-party models, textures, fonts, brands or scans",
+    "claim": "Generic closed design-stage cabinet exterior; no manufacturer CAD, certified internals or measured interface precision"
+  },
+  "materialRoles": [
+    {"name": "paint", "color": "#E8EEF0", "metalness": 0, "roughness": 0.43, "stateTint": true},
+    {"name": "silver", "color": "#AEBBC4", "metalness": 1, "roughness": 0.32, "stateTint": false},
+    {"name": "graphite", "color": "#273541", "metalness": 0.55, "roughness": 0.47, "stateTint": false},
+    {"name": "insert", "color": "#111D27", "metalness": 0.05, "roughness": 0.74, "stateTint": false}
+  ],
+  "templates": [
+    {
+      "id": "cdu",
+      "file": "cdu.glb",
+      "type": "cdu",
+      "dimensionsM": [1.2, 2, 1.1],
+      "boundsM": {"min": [-0.6, -1, -0.55], "max": [0.6, 1, 0.55]},
+      "supportedSpecifications": [{"id": "cdu-reference", "version": "1.0.0"}],
+      "supportedRoles": ["cdu"],
+      "logicalAnchors": [
+        {"id": "technical-in", "medium": "technical", "direction": "in", "positionM": [0, 0, 0]},
+        {"id": "technical-out", "medium": "technical", "direction": "out", "positionM": [0, 0, 0]},
+        {"id": "power-in", "medium": "power", "direction": "in", "positionM": [0, 0, 0]},
+        {"id": "power-out", "medium": "power", "direction": "out", "positionM": [0, 0, 0]}
+      ],
+      "triangleBudget": 12000,
+      "payloadBudgetBytes": 1048576,
+      "cosmeticParts": ["closed-panel-shell", "door-seams", "recessed-unlit-inset", "service-handles", "hinges", "mounting-plinth", "technical-connection-faces", "fasteners"],
+      "movableSubgroups": [],
+      "selectionOwner": "canonical parent asset ID"
+    }
+  ]
+}

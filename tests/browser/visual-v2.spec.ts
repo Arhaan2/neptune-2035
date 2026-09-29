@@ -9,7 +9,7 @@ const manifest = JSON.parse(await fs.readFile(new URL('../../public/visuals/v2/m
 const duty = 'platform-001/module-01/pump-duty';
 const standby = 'platform-001/module-01/pump-standby';
 const secondDuty = 'platform-001/module-02/pump-duty';
-const glbs = /\/visuals\/v2\/(?:pump|exchanger)\.glb(?:\?.*)?$/;
+const glbs = /\/visuals\/(?:v2\/(?:pump|exchanger)|v3\/cdu)\.glb(?:\?.*)?$/;
 // Only the resource-cycle case avoids per-action DOM/filmstrip tracing. Its API
 // trace, source and diagnostic attachments are retained even on a passing run.
 const resourceTest = test.extend({
@@ -58,7 +58,7 @@ async function select(page: Page, id: string) {
 async function reveal(page: Page, id = duty, activate = (name: string) => button(page, name).click()) {
   await select(page, id);
   await activate('Cooling close-up');
-  await expect.poll(() => kit(page)).toMatchObject({ version: 'systems-reveal-v2', moduleId: id.slice(0, id.lastIndexOf('/')), status: 'ready' });
+  await expect.poll(() => kit(page)).toMatchObject({ version: 'systems-reveal-v3', moduleId: id.slice(0, id.lastIndexOf('/')), status: 'ready' });
   const observation = await completed(page);
   expect(observation.visualKit.assets.length).toBeGreaterThanOrEqual(3);
   expect(observation.visualKit.assets.every(asset => asset.status === 'ready' && asset.meshCount > 0 && asset.renderedMeshes > 0)).toBe(true);
@@ -106,6 +106,7 @@ test('VIS2 lazy production-path authored kit renders while paused exports remain
   expect(new Set(requests.map(url => new URL(url).pathname))).toEqual(new Set([
     new URL('visuals/v2/pump.glb', page.url()).pathname,
     new URL('visuals/v2/exchanger.glb', page.url()).pathname,
+    new URL('visuals/v3/cdu.glb', page.url()).pathname,
   ]));
   expect(authored.drawCalls).toBeLessThanOrEqual(250);
   expect(authored.triangles).toBeLessThanOrEqual(500000);
@@ -122,7 +123,7 @@ test('VIS2 lazy production-path authored kit renders while paused exports remain
   expect(await download(page, 'inventory')).toBe(inventoryBefore);
   expect(await download(page, 'results')).toBe(resultsBefore);
   expect(JSON.parse(await download(page, 'gltf'))).toEqual(geometryBefore);
-  expect(requests).toHaveLength(2);
+  expect(requests).toHaveLength(3);
   await info.attach('visual-v2-authored-and-canonical', { body: JSON.stringify({ campus, authored, requests }), contentType: 'application/json' });
   expect(failures).toEqual([]);
 });
@@ -137,7 +138,7 @@ test('VIS2 delayed GLBs stay procedural and late completion binds only the selec
   await page.goto('./'); await ready(page);
   try {
     await button(page, 'Cooling close-up').click();
-    await expect.poll(() => pending.length).toBe(2);
+    await expect.poll(() => pending.length).toBe(3);
     await expect.poll(() => kit(page)).toMatchObject({ status: 'loading' });
     expect((await completed(page)).visualKit.assets.every(asset => asset.meshCount === 0)).toBe(true);
     await expect(button(page, 'Step 10s')).toBeEnabled();

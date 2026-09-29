@@ -127,3 +127,73 @@ These checks establish authored-kit structure and compatibility, not app visual
 quality or release acceptance. Browser loader, state/selection isolation, matched
 images, resource/performance measurements and hosted evidence belong to the V2
 integration/release report. No offline Blender image substitutes for that evidence.
+
+## Additive Visual V3 CDU
+
+`descriptor-v3.json` adds only `cdu-reference@1.0.0`, role `cdu`, with the current
+catalog envelope **1.2 × 2 × 1.1 m**. The closed cabinet has pearl doors/side panels,
+manufactured edges, dark seams/plinth, silver handles/hinges/mounting hardware and
+a blank unlit inset. Its two rear technical connection faces are cosmetic. They
+do not replace the authoritative center anchors, move route endpoints or add a
+seawater interface. Existing pumps and the two-fluid exchanger stay separate;
+the cabinet introduces no simulated pump, exchanger, sensor, airflow, thermal
+stage or power load. All geometry is original, unbranded and texture-free.
+
+The V2 descriptor, both V2 GLBs and V2 manifest retain their shipped bytes. The
+default author/validator commands above retain the V2 regeneration path; V3 uses
+an explicit descriptor and separate output directory. `author.py` dispatches only
+the declared pump/exchanger/CDU functions and rejects unknown names.
+
+The following commands were executed from the repository root on 2026-09-29:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python scripts/visuals/blender/author.py -- --descriptor scripts/visuals/blender/descriptor-v3.json --output /private/tmp/neptune-v3-cdu-run-1/output --source-dir /private/tmp/neptune-v3-cdu-run-1/source
+node scripts/visuals/blender/validate.mjs /private/tmp/neptune-v3-cdu-run-1/source /private/tmp/neptune-v3-cdu-run-1/output scripts/visuals/blender/descriptor-v3.json
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python scripts/visuals/blender/author.py -- --descriptor scripts/visuals/blender/descriptor-v3.json --output /private/tmp/neptune-v3-cdu-run-2/output --source-dir /private/tmp/neptune-v3-cdu-run-2/source
+node scripts/visuals/blender/validate.mjs /private/tmp/neptune-v3-cdu-run-2/source /private/tmp/neptune-v3-cdu-run-2/output scripts/visuals/blender/descriptor-v3.json
+cmp /private/tmp/neptune-v3-cdu-run-1/output/cdu.glb /private/tmp/neptune-v3-cdu-run-2/output/cdu.glb
+cmp /private/tmp/neptune-v3-cdu-run-1/output/manifest.json /private/tmp/neptune-v3-cdu-run-2/output/manifest.json
+npx vitest run tests/visuals/cdu-contract.test.ts
+```
+
+Both independent exports used Blender **4.3.2**, build `32f5fdce0a0a`, and **Khronos
+glTF Blender I/O v4.3.47**. Both comparison commands exited zero: the GLBs and
+generated manifests are byte-identical. The editable `cdu.blend` files (892,948
+bytes each), `orientation-proof.glb`, and `authoring-run.json` remain in their
+nonshipping source directories. Their timestamps/metadata are not claimed stable;
+the checked-in script and descriptor regenerate them without an outside source.
+The first sandboxed Blender attempt exited 139 before Python during native device
+discovery; the authorized outside-sandbox executions succeeded. This failed
+environment attempt is not included as an export or validation pass.
+
+| New runtime file | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `public/visuals/v3/cdu.glb` | 296,508 | `f5274b9846026b674773bc2f8170b7175aeee202fbbcb9dd34bf38ebff9ee110` |
+| `public/visuals/v3/manifest.json` | 5,623 | `232aa49417cebdaf6e213e908caa4a8309b465f89ca5135353cd2654b03c782b` |
+
+V3 descriptor SHA-256:
+`2d8e3dfad5ea454bd03b3033c2c48ea4e47e1e29e8ee904d57887100923ec958`.
+The inherited V2 manifest SHA-256 remains
+`b9bc013bc9a4cb80171853e423b7958eb79676aebe1dd489150525d26e97454e`;
+the unchanged pump/exchanger hashes are recorded above and asserted in V3 tests.
+
+The cabinet has **5,956 triangles**, **10,664 vertices**, four merged meshes/four
+material roles and zero textures. Its GLB is below the predeclared 12,000-triangle
+and 1 MiB budgets. All three GLBs total **1,180,924 bytes** before HTTP overhead;
+manifests are additional. No decoder or dependency admission was added.
+
+Both exports passed the existing pinned `gltf-validator@2.0.0-dev.3.10` with
+**zero errors, warnings or information messages**, then the real Three
+`GLTFLoader` root/finite-geometry/unit-normal/material/anchor/bounds checks. The
+coordinate tolerance remains **0.00001 m**, normal-length tolerance **0.001**.
+The one-meter/asymmetric axis proof returned the same values recorded for V2.
+`cdu-contract.test.ts` passed **17 tests**, including exact exported bounds,
+front/rear asymmetry, specification/version/role/dimension/interface/route
+rejections, current first/second-module ports and unchanged V2 artifacts.
+
+Only `cdu.glb` and the new manifest are copied into `public/visuals/v3/`; they
+reference no images, external buffers or extensions. The runtime composes this
+CDU-only manifest with the retained V2 templates. App appearance, state/lifecycle,
+resource/performance and hosted acceptance are separate V3 release evidence;
+this authoring validation establishes no physical fidelity or full equipment
+library completion.

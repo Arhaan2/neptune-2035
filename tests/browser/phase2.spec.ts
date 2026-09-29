@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 const duty = 'platform-001/module-01/pump-duty';
 const main = (page: Page) => page.locator('main.twin-app');
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const lastExportCompleted = new WeakMap<Page, number>();
 async function ready(page: Page) {
   await expect(main(page)).toHaveAttribute('data-ready', 'true');
   await expect(button(page, 'Step 10s')).toBeEnabled();
@@ -25,9 +26,15 @@ async function step(page: Page) {
   await ready(page);
 }
 async function artifact(page: Page, value: string) {
+  // Chromium silently suppresses the eleventh download in a one-second burst.
+  // Pace automation to at most eight exports/second; retain every real download
+  // and assertion without changing browser settings, retries or test deadlines.
+  const remaining = 125 - (performance.now() - (lastExportCompleted.get(page) ?? -Infinity));
+  if (remaining > 0) await page.waitForTimeout(remaining);
   const waiting = page.waitForEvent('download');
   await page.getByLabel('Export artifact', { exact: true }).selectOption(value);
   const download = await waiting;
+  lastExportCompleted.set(page, performance.now());
   expect(await download.failure()).toBeNull();
   const path = await download.path(); if (!path) throw Error('Expected actual downloaded artifact.');
   return fs.readFile(path, 'utf8');
