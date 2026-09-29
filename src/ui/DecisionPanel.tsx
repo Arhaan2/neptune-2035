@@ -42,6 +42,12 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun,
     catch (error) { return {plan: null, error: String(error)}; }
   }, [campaign]);
   const stale = Boolean(result && result.campaignIdentity !== current.plan?.campaignIdentity);
+  // Workers retain failures as evidence instead of throwing. Keep those outcomes
+  // visible outside Compare without treating completed infeasibility as an error.
+  const executionIssues = [...new Set(result?.runs
+    .filter(run => run.status !== 'completed' && run.status !== 'cancelled')
+    .map(run => run.status) ?? [])];
+  const executionNeedsAttention = executionIssues.length > 0 || (!running && result?.status === 'incomplete');
   const evidenceCampaign = resultCampaign ?? campaign;
   // Result rows belong to their evaluated campaign, including when the editable
   // inputs change. Never attach a historical row to a newly planned experiment.
@@ -117,11 +123,12 @@ export function DecisionPanel({hidden, activeDesign, state, busy, onLoad, onRun,
     } catch (error) { setProblem(`Import rejected; current campaign retained. ${String(error)}`); }
   }
   const req = (key: keyof DecisionCampaign['requirements'], value: number) => edit({...campaign, requirements: {...campaign.requirements, [key]: value}});
-  return <section className="twin-card decision-panel" aria-label="Phase 6 decision support" hidden={hidden && !running && !problem} data-background={hidden}>
+  return <section className="twin-card decision-panel" aria-label="Phase 6 decision support" hidden={hidden && !running && !problem && !executionNeedsAttention} data-background={hidden}>
     <header className="decision-heading"><div><span className="twin-eyebrow">COMPARE / DECLARED CAMPAIGN</span><h2>Phase 6 · Decision support</h2></div><p>Simulated, design-stage prototype; physical validation pending.</p></header>
     <section className="decision-run-controls" aria-label="Decision campaign controls and progress">
     <div className="twin-actions"><button disabled={running || !current.plan || !recovered} onClick={() => void start()}>Start decision campaign</button><button disabled={!running} onClick={() => abort.current?.abort()}>Cancel decision campaign</button></div>
     {(current.error || problem) && <p role="alert">{current.error || problem}</p>}
+    {executionNeedsAttention && <output className="decision-execution-warning" data-testid="decision-execution-warning">Campaign execution requires attention: {executionIssues.length ? executionIssues.map(status => status.replaceAll('-', ' ')).join(', ') : 'incomplete coverage'}. {running ? 'Evaluation continues; coverage is unresolved.' : 'No final whole-campaign recommendation is available.'} {stale && 'This concerns retained results; campaign inputs have changed. '}Open Compare for scenario evidence and execution reasons.</output>}
     {/unavailable|not saved|retained but not loaded/i.test(storage) && <output className="decision-storage-warning">{storage}</output>}
     <output data-testid="decision-coverage" data-status={running ? 'running' : result?.status ?? 'ready'} data-completed={result?.coverage.completed ?? 0} data-planned={result?.coverage.planned ?? current.plan?.totalRuns ?? 0} aria-live="polite">{result ? `${result.coverage.completed}/${result.coverage.planned} runs completed; ${result.coverage.fullyEvaluatedCandidates}/${result.plan.candidates} candidates fully evaluated. ${running ? 'Running' : result.status}.` : `Ready: ${current.plan?.totalRuns ?? 0} planned runs.`}</output>
     {stale && <output data-testid="decision-stale">Results are stale: campaign inputs changed. Export retains the original evaluated definitions. Rerun the current inputs before using a recommendation.</output>}

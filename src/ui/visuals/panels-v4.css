@@ -213,6 +213,7 @@
   font-variant-numeric: tabular-nums;
 }
 .twin-app .decision-run-controls > [data-testid='decision-stale'],
+.twin-app .decision-execution-warning,
 .twin-app .decision-storage-warning,
 .twin-app .decision-run-controls > [role='alert'] {
   flex-basis: 100%;
