@@ -54,3 +54,16 @@ Focused V4 coverage exercises owner identity, normalized paused checkpoints, dra
 `scripts/visuals/v4-measure.mjs` retains three normal-motion 30-second paths, separate inspector/presentation transition intervals, twenty panel/workspace/view cycles and a ten-minute interactive soak. Receipts record the actual machine, browser, viewport, DPR, motion state, raw frame intervals, warmed geometry/texture/cache inventory and available JS heap. These counters do not measure total GPU/native memory. Measurements must identify the tested compiled manifest and are not inferred from V3. Startup readiness and bundle-size comparisons use the unchanged default workload and clearly distinguish compiled/static bytes from release metadata.
 
 Before/after captures use the unchanged default design/time/viewport but disclose intentional layout and camera differences. They are full actual-app captures, not material-only comparisons or offline renders. Native Safari remains a separate limitation unless a visible authorized session is actually established; Playwright WebKit is separately identified. No accessibility certification or physical validation is claimed.
+
+## Actual interface review captures
+
+The images below are unretouched browser captures from the committed production preview at `3318290`, compiled/static manifest `5800803bded210b70fde34f23fe0d92cbdb7327e4b5dfdeea7bc4d9e7eef957f`. They document visual review before final release acceptance; the external release receipt binds the final accepted source, CI artifact, measurements and hosted media. Desktop viewport is 1440×900, mobile 390×844, DPR 1.5, reduced motion. Full-page captures include document scrolling; the mobile viewport captures are scrolled to the scene to show the compact/expanded sheet. The source screenshots do not substitute for the later hosted journey.
+
+| View | Actual capture and context |
+| --- | --- |
+| V3 before / V4 after | [V3 full Explore](v4/v3-explore-before.png), [V4 full Explore](v4/v4-explore.png): same default physical design and paused 0 s, same desktop viewport; shell width, scene height and camera fitting intentionally differ |
+| Cooling equipment | [Selected CDU, exploded cooling](v4/v4-cdu.png): same authored kit, lower supported exploded camera; no geometry removal |
+| Operate history | [History at 0 s, current clock 10 s](v4/v4-history.png): explicitly prepared healthy cold experiment; controls retain history guards |
+| Compare | [Completed nominal campaign](v4/v4-compare.png): declared three-candidate campaign and included-cost evidence, with no active-project replacement |
+| Presentation | [Presentation focus](v4/v4-presentation.png): same selected CDU and paused 0 s, inspector hidden by UI state |
+| Mobile inspector | [Compact](v4/v4-mobile-compact.png), [expanded](v4/v4-mobile-expanded.png): same selected duty pump and paused 0 s; header provides the explicit route back |
