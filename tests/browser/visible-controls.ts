@@ -30,8 +30,8 @@ export async function visibleControl(page: Page, target: Locator): Promise<Locat
   for (const details of closed) {
     if (await details.getAttribute('open') === null) await details.locator(':scope > summary').click();
   }
-  // Native file inputs intentionally use a visible label as the chooser. Keep
-  // that real entry point visible before Playwright's native file selection.
+  // Expose the native chooser's actual label before file selection. V4 also
+  // keeps the input itself visible and keyboard-focusable inside its menu.
   if (await target.evaluate(element => element instanceof HTMLInputElement && element.type === 'file')) {
     const label = target.locator('xpath=ancestor::label[1]');
     await label.scrollIntoViewIfNeeded();

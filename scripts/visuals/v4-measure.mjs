@@ -116,6 +116,14 @@ async function ready(page) {
   });
 }
 async function completed(page) {
+  // Exact history resolution can intentionally replace an unavailable scene.
+  // Wait for the new displayed boundary's completed publication before reading
+  // its epoch; resolved history state alone does not mean a canvas has rendered.
+  await page.waitForFunction(() => {
+    const value = window.__NEPTUNE_TWIN_SCENE__;
+    const displayed = document.querySelector('main.twin-app')?.getAttribute('data-display-time');
+    return value?.renderEpoch > 0 && displayed !== null && value.simulationTimeS === Number(displayed);
+  });
   const epoch = (await scene(page)).renderEpoch;
   await page.waitForFunction(e => (window.__NEPTUNE_TWIN_SCENE__?.renderEpoch ?? 0) >= e + 2, epoch);
   return scene(page);
