@@ -28,6 +28,7 @@ const receipt = {
   budgets: { revealTransferBytes: 6 * 1024 * 1024, drawCalls: 250, triangles: 500000, durationPerRunMs: 30000, runs: 3, medianFPS: 55, p95FrameMs: 25, cycles: 20, soakDurationMs: 600000 },
   transferTimingScope: 'First-reveal GLBs plus the lazy GLTFLoader JavaScript chunk. encodedBodySize is compressed response-body bytes; transferSize includes response overhead and can be zero on cache hits. Metadata is compiled into initial scene code, not separately fetched at reveal.',
   loadTimingScope: 'Cold/warm milliseconds run from the ordinary view action through actual authored readiness and two new post-render publications; separate PerformanceResourceTiming entries describe fetch timing.',
+  motionScope: 'Capture and resource soak use reduced motion. Performance contexts use normal motion from before navigation, then wait for three stable completed camera/target publications before each measured path. Raw samples retain the observed preference and camera movement.',
   measurementLimits: 'rAF intervals describe browser presentation cadence. Geometry/texture object counters are allocation inventories, not total memory. GPU/native driver allocation unavailable. JS heap uses the nonstandard performance.memory API, may be quantized, and may be unavailable. No native Safari or thermal certification is inferred.',
   errors, failures, requests, snapshots,
 };
@@ -41,8 +42,8 @@ let activeContext;
 const duty = 'platform-001/module-01/pump-duty';
 const standby = 'platform-001/module-01/pump-standby';
 const second = 'platform-001/module-02/pump-duty';
-async function createPage(recordVideo = false) {
-  activeContext = await browser.newContext({ viewport: receipt.viewport, deviceScaleFactor: 1.5, reducedMotion: 'reduce', ...(recordVideo ? { recordVideo: { dir: path.join(out, 'recordings'), size: receipt.viewport } } : {}) });
+async function createPage(recordVideo = false, reducedMotion = 'reduce') {
+  activeContext = await browser.newContext({ viewport: receipt.viewport, deviceScaleFactor: 1.5, reducedMotion, ...(recordVideo ? { recordVideo: { dir: path.join(out, 'recordings'), size: receipt.viewport } } : {}) });
   const page = await activeContext.newPage();
   page.on('pageerror', e => errors.push({ at: new Date().toISOString(), message: e.message }));
   page.on('response', response => {
@@ -149,17 +150,33 @@ async function runCapture() {
   receipt.captureDurationMs = Date.now() - start;
 }
 async function runMeasure() {
-  const page = await createPage();
+  // TwinApp reads the preference at mount. Changing only emulated media after
+  // navigation cannot turn an already mounted reduced-motion app into this path.
+  const page = await createPage(false, 'no-preference');
   await page.goto(base); await ready(page); await reveal(page);
   await setToggle(page, 'Explode', true); await completed(page);
   receipt.performanceRuns = [];
+  const stableCamera = async () => {
+    const samples = [], toleranceM = 0.00001, requiredStablePublications = 3;
+    let previous, stable = 0;
+    const deadline = Date.now() + 12000;
+    while (Date.now() < deadline) {
+      const value = await completed(page);
+      if (value.reducedMotion !== false) throw Error('Performance requires observed normal motion from initial navigation.');
+      const pose = [...value.camera, ...value.target];
+      stable = previous && pose.every((coordinate, index) => Math.abs(coordinate - previous[index]) <= toleranceM) ? stable + 1 : 0;
+      samples.push({ renderEpoch: value.renderEpoch, camera: value.camera, target: value.target, reducedMotion: value.reducedMotion });
+      previous = pose;
+      if (stable >= requiredStablePublications) return { scene: value, readiness: { toleranceM, requiredStablePublications, samples } };
+    }
+    throw Error('Camera/target did not reach three stable completed publications within 12 seconds.');
+  };
   for (let run = 0; run < 3; run++) {
-    // Reset each measured run to the same immediate reduced-motion pose; then
-    // restore normal animation before sampling. This separates camera readiness
-    // from kit readiness and avoids counting an arbitrary settling delay.
-    await page.emulateMedia({ reducedMotion: 'reduce' }); await reveal(page);
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    const startScene = await completed(page); await page.locator('canvas').focus();
+    // Reset through the ordinary control and observe actual camera convergence;
+    // authored readiness alone does not mean normal-motion framing has settled.
+    await reveal(page);
+    const settled = await stableCamera(), startScene = settled.scene;
+    await page.locator('canvas').focus();
     const measured = page.evaluate(() => new Promise(resolve => {
       const intervals = [], samples = []; let first = null, last = null, epoch = -1;
       function frame(t) {
@@ -167,7 +184,7 @@ async function runMeasure() {
         if (last !== null) intervals.push(t - last);
         last = t;
         const scene = window.__NEPTUNE_TWIN_SCENE__;
-        if (scene && scene.renderEpoch !== epoch) { epoch = scene.renderEpoch; samples.push({ atMs: t - first, renderEpoch: epoch, drawCalls: scene.drawCalls, triangles: scene.triangles, geometries: scene.geometries, textures: scene.textures, kitStatus: scene.visualKit?.status, moduleId: scene.visualKit?.moduleId }); }
+        if (scene && scene.renderEpoch !== epoch) { epoch = scene.renderEpoch; samples.push({ atMs: t - first, renderEpoch: epoch, camera: scene.camera, target: scene.target, reducedMotion: scene.reducedMotion, oceanTimeS: scene.oceanTimeS, drawCalls: scene.drawCalls, triangles: scene.triangles, geometries: scene.geometries, textures: scene.textures, kitStatus: scene.visualKit?.status, moduleId: scene.visualKit?.moduleId }); }
         if (t - first < 30000) requestAnimationFrame(frame); else resolve({ intervals, samples, startMs: first, endMs: t, durationMs: t - first });
       }
       requestAnimationFrame(frame);
@@ -181,9 +198,10 @@ async function runMeasure() {
       await page.keyboard.press(step < 30 ? 'ArrowRight' : 'ArrowLeft');
     }
     const raw = await measured, sorted = [...raw.intervals].sort((a, b) => a - b);
-    const result = { run: run + 1, startScene, durationMs: raw.durationMs, sampleCount: sorted.length, medianFrameMs: sorted[Math.floor(sorted.length * 0.5)], p95FrameMs: sorted[Math.floor(sorted.length * 0.95)], maxFrameMs: sorted.at(-1), minFrameMs: sorted[0], maxDrawCalls: Math.max(...raw.samples.map(s => s.drawCalls)), maxTriangles: Math.max(...raw.samples.map(s => s.triangles)) };
+    const maxCameraDisplacementM = Math.max(...raw.samples.map(s => Math.hypot(...s.camera.map((coordinate, index) => coordinate - startScene.camera[index]))));
+    const result = { run: run + 1, startScene, cameraReadiness: settled.readiness, normalMotion: raw.samples.length > 0 && raw.samples.every(s => s.reducedMotion === false), maxCameraDisplacementM, cameraMoved: maxCameraDisplacementM > settled.readiness.toleranceM, durationMs: raw.durationMs, sampleCount: sorted.length, medianFrameMs: sorted[Math.floor(sorted.length * 0.5)], p95FrameMs: sorted[Math.floor(sorted.length * 0.95)], maxFrameMs: sorted.at(-1), minFrameMs: sorted[0], maxDrawCalls: Math.max(...raw.samples.map(s => s.drawCalls)), maxTriangles: Math.max(...raw.samples.map(s => s.triangles)) };
     result.medianFPS = 1000 / result.medianFrameMs;
-    result.passed = result.durationMs >= 30000 && result.medianFPS >= 55 && result.p95FrameMs <= 25 && result.maxDrawCalls <= 250 && result.maxTriangles <= 500000;
+    result.passed = result.normalMotion && result.cameraMoved && result.durationMs >= 30000 && result.medianFPS >= 55 && result.p95FrameMs <= 25 && result.maxDrawCalls <= 250 && result.maxTriangles <= 500000;
     receipt.performanceRuns.push(result);
     await fs.writeFile(path.join(out, `orbit-run-${run + 1}-raw.json`), JSON.stringify(raw) + '\n');
     check(result.passed, `Performance run ${run + 1} failed declared budget`, result); await persist();

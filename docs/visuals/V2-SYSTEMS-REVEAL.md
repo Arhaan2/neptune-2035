@@ -8,10 +8,10 @@ The normal **Cooling close-up** control reveals the selected module's installed 
 
 | Template | Supported specification | Canonical envelope, m | GLB bytes | Triangles |
 | --- | --- | --- | ---: | ---: |
-| Pump | `pump-reference@1.0.0`, `pump-efficient@1.0.0` | 1.2 × 1.2 × 0.8 | 325,256 | 8,648 |
-| Plate exchanger | `exchanger-reference@1.0.0` | 2 × 2.2 × 1.4 | 559,312 | 15,464 |
+| Pump | `pump-reference@1.0.0`, `pump-efficient@1.0.0` | 1.2 × 1.2 × 0.8 | 325,180 | 8,648 |
+| Plate exchanger | `exchanger-reference@1.0.0` | 2 × 2.2 × 1.4 | 559,236 | 15,464 |
 
-Each template has four merged mesh/material groups: pearl paint, brushed silver, graphite and dark inserts. Paint conveys the existing projected equipment state; selection uses the separate canonical cyan outline. The pump includes a shaped volute, motor cooling fins, flange rims, coupling guard, feet and shared fastener geometry. The exchanger includes a pressure frame, bounded plate pack, tie bars, feet and illustrative connection fittings. There are no animated rotors, invented sensors or new readings.
+Closed solids use front-face culling; two final exports retain byte-identical geometry/normal/index data to the initial exports, with only material sidedness changed. Each template has four merged mesh/material groups: pearl paint, brushed silver, graphite and dark inserts. Paint conveys the existing projected equipment state; selection uses the separate canonical cyan outline. The pump includes a shaped volute, motor cooling fins, flange rims, coupling guard, feet and shared fastener geometry. The exchanger includes a pressure frame, bounded plate pack, tie bars, feet and illustrative connection fittings. There are no animated rotors, invented sensors or new readings.
 
 The larger `pump-physical` and unknown/legacy/custom specification IDs or versions use the established procedural geometry. Compatibility requires an explicit specification/role, matching meter dimensions, logical port sets and route endpoints. It never stretches the model. Technical pumps and the seawater pump use their respective canonical media; the exchanger retains the existing two-fluid boundary. All current graph endpoints are abstract asset centers. Cosmetic fittings do not claim physical port coordinates, extend outside the owning envelope or alter route lengths.
 
@@ -29,8 +29,8 @@ npx vitest run tests/visuals/kit-contract.test.ts tests/visuals/kit-cache.test.t
 
 The tested command recreates editable `.blend` files and the one-meter/asymmetric orientation proof outside `public/`. See [authoring README](../../scripts/visuals/blender/README.md) for executed commands, exporter settings and retained failures. Only the two GLBs and runtime manifest ship. Two executions produced byte-identical GLBs; no randomness or automatic bounding-box normalization is used. Runtime `(x,y,z)` maps to Blender `(x,-z,y)` and export applies the Y-up conversion exactly once.
 
-- Pump SHA-256: `1e38190d53be939b7285d976e6ef2d2ac7643d5008ef1f6870fa4a64b800f9a9`.
-- Exchanger SHA-256: `df09475ea7be7ac73721a61afd791b05e1a29797ed6b1906c642ca04dbde79e5`.
+- Pump SHA-256: `349db03c6513239aac075c85942ae8a79f90827f40c96b52fdcd593b992eaf75`.
+- Exchanger SHA-256: `b18e9ad1d69d2b588e34e9eb06d728a891449d61959d8150b41a47631424c559`.
 - Predeclared coordinate tolerance: `0.00001 m`; normal-length tolerance: `0.001`.
 - Pinned build-time Khronos `gltf-validator@2.0.0-dev.3.10`: zero errors, warnings and informational messages for both shipping files.
 - The validation script and tests load through Three's actual `GLTFLoader` and assert finite attributes/unit normals, identity canonical root, bounded geometry and transformed logical anchors. Tests also compare the descriptor to authoritative installed equipment and reject mismatched versions, dimensions, role/interface and graph endpoints.
@@ -47,11 +47,13 @@ Each scene owns a bounded two-template cache. Templates own immutable shared geo
 
 Placement uses the exact canonical center and `presentedPosition`, with one existing exploded offset. No dimensions, mass, assets, routes or solver inputs change. The dimensioned glTF/project/inventory/results exports still use canonical generators, independently of cosmetic children. Under existing X-ray inspection, the selected bay's other procedural equipment envelopes fade and stop intercepting clicks so their opaque boxes cannot hide the kit; their identities and operating values remain available in the inspector. Distant module shells stay opaque in Cooling close-up. The circuit legend is available on demand. Blue Hour's opaque-to-transparent shader recreation is retained. Diagnostics publish through R3F's post-render callback so readiness and allocation observations describe completed frames.
 
+The diagnostic surface hit is cached for each immutable instance/camera origin/assembly transform. Camera motion, explosion and instance replacement invalidate it; state, selection, rendered-mesh counts and allocation counters remain fresh on every publication. Weak keys retain no retired scene or GPU resources.
+
 ## Acceptance and budgets
 
 Declared before judging the candidate: ≤10,000 triangles/pump, ≤20,000/exchanger, ≤6 MiB first-reveal assets; complete reveal ≤250 draws and ≤500,000 submitted triangles. Target 60 fps at 1440×900 CSS and DPR ≤1.5, with median ≥55 fps and p95 interval ≤25 ms in each of three fixed 30-second orbit/reveal runs. Twenty repeated cycles and a ten-minute interactive soak must retain bounded allocations, correct state and recoverable rendering.
 
-The new assets total **884,568 bytes** before HTTP overhead and manifest. The persistent cache contains eight geometries/eight source materials/zero textures. At the standard campus end pose, the implementation-stage observed warmed renderer inventory is **73 geometries/two environment textures**, versus the cold 65/two. The expected change is the eight cached geometries; no-growth assertions compare identical completed poses. Active detail adds four private materials per equipment instance, released on leaving detail. Renderer counters are allocation inventories, not total memory.
+The new assets total **884,416 bytes** before HTTP overhead and manifest. The persistent cache contains eight geometries/eight source materials/zero textures. At the standard campus end pose, the implementation-stage observed warmed renderer inventory is **73 geometries/two environment textures**, versus the cold 65/two. The expected change is the eight cached geometries; no-growth assertions compare identical completed poses. Active detail adds four private materials per equipment instance, released on leaving detail. Renderer counters are allocation inventories, not total memory.
 
 `tests/browser/visual-v2.spec.ts` runs alongside the complete retained prototype, Phase 2–8 and VIS1 suites against the same compiled artifact. It covers real production paths, deferred/corrupt/missing loads, supersession, authored surface selection, keyboard selection, failure/history isolation, compatible and physical replacements, paused canonical exports, warmed reveal cycles, resource plateau, 390 px and actual context loss/restoration. Unit tests exercise cache ownership, twenty clone/dispose cycles and geometry/compatibility contracts. The two historical Chromium/WebKit large-campus Step 10s exclusions remain the only exclusions; Firefox's case remains active. No new retries, deadline relaxation or skipped numerical/historical jobs are introduced.
 
@@ -63,7 +65,9 @@ NEPTUNE_VISUAL_MODE=measure NEPTUNE_VISUAL_OUT=/absolute/evidence/measure node s
 NEPTUNE_VISUAL_MODE=soak NEPTUNE_VISUAL_OUT=/absolute/evidence/soak node scripts/visuals/v2-measure.mjs
 ```
 
-The helper retains raw intervals, cold/warm observations, resource counts, separate JS heap observations, screenshots and an actual-app WebM outside Git. GPU/native allocation is unavailable. Bundled Chromium, CI browsers, hosted observations and native Safari are identified separately in the release receipt; none substitutes for another. Local hardware identification is recorded afresh, without assuming the V1 host.
+The helper retains raw intervals, cold/warm observations, resource counts, separate JS heap observations, screenshots and an actual-app WebM outside Git. Performance contexts select normal motion before application mount and verify stable completed camera poses, normal-motion state and actual orbit displacement; capture/soak contexts use explicitly recorded reduced motion. GPU/native allocation is unavailable. Bundled Chromium, CI browsers, hosted observations and native Safari are identified separately in the release receipt; none substitutes for another. Local hardware identification is recorded afresh, without assuming the V1 host.
+
+The VIS1/VIS2 resource-cycle cases use native keyboard activation of the same visible, enabled, focused buttons. Pointer control and authored-surface coverage remain in the other cases. Every cycle, intermediate state/render wait, resource equality assertion and the original 60-second deadline remains intact. This avoids cumulative pointer-action pipeline overhead observed on CI software rendering; the failed original attempts are retained.
 
 ## Release and next boundary
 

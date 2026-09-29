@@ -49,17 +49,17 @@ async function select(page: Page, id: string) {
   else { await page.getByLabel('Find asset ID', { exact: true }).fill(id); await button(page, 'Find').click(); }
   await expect(main(page)).toHaveAttribute('data-selected', id);
 }
-async function reveal(page: Page, id = duty) {
+async function reveal(page: Page, id = duty, activate = (name: string) => button(page, name).click()) {
   await select(page, id);
-  await button(page, 'Cooling close-up').click();
+  await activate('Cooling close-up');
   await expect.poll(() => kit(page)).toMatchObject({ version: 'systems-reveal-v2', moduleId: id.slice(0, id.lastIndexOf('/')), status: 'ready' });
   const observation = await completed(page);
   expect(observation.visualKit.assets.length).toBeGreaterThanOrEqual(3);
   expect(observation.visualKit.assets.every(asset => asset.status === 'ready' && asset.meshCount > 0 && asset.renderedMeshes > 0)).toBe(true);
   return observation;
 }
-async function toggle(page: Page, name: string, value: boolean) {
-  if ((await button(page, name).getAttribute('aria-pressed')) !== String(value)) await button(page, name).click();
+async function toggle(page: Page, name: string, value: boolean, activate = (label: string) => button(page, label).click()) {
+  if ((await button(page, name).getAttribute('aria-pressed')) !== String(value)) await activate(name);
 }
 async function download(page: Page, kind: string) {
   const pending = page.waitForEvent('download');
@@ -238,13 +238,20 @@ test('VIS2 warmed reveal cycles reach the same post-render resource inventory', 
   const failures = errors(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./'); await ready(page);
+  // Exercise the identical lifecycle through native keyboard activation. Pointer
+  // discoverability and authored-surface clicks remain in the other VIS1/VIS2 cases.
+  const activate = async (name: string) => {
+    const control = button(page, name);
+    await expect(control).toBeVisible(); await expect(control).toBeEnabled();
+    await control.focus(); await expect(control).toBeFocused(); await control.press('Enter');
+  };
   const cycle = async (id: string) => {
-    await reveal(page, id);
-    await toggle(page, 'Explode', true); await completed(page);
-    await toggle(page, 'Explode', false); await toggle(page, 'X-ray', false); await completed(page);
-    await toggle(page, 'X-ray', true); await completed(page);
-    await select(page, duty); await button(page, 'Campus view').click();
-    await toggle(page, 'X-ray', false); return completed(page);
+    await reveal(page, id, activate);
+    await toggle(page, 'Explode', true, activate); await completed(page);
+    await toggle(page, 'Explode', false, activate); await toggle(page, 'X-ray', false, activate); await completed(page);
+    await toggle(page, 'X-ray', true, activate); await completed(page);
+    await select(page, duty); await activate('Campus view');
+    await toggle(page, 'X-ray', false, activate); return completed(page);
   };
   await cycle(duty); await cycle(secondDuty);
   const baseline = await cycle(duty);
