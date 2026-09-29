@@ -10,9 +10,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../../..');
 const sourceDir = process.argv[2];
-if (!sourceDir) throw Error('Usage: node scripts/visuals/blender/validate.mjs /path/to/nonshipping-source-dir [output-dir]');
+if (!sourceDir) throw Error('Usage: node scripts/visuals/blender/validate.mjs /path/to/nonshipping-source-dir [output-dir] [descriptor-file]');
 const outputDir = process.argv[3] ? resolve(process.argv[3]) : resolve(root, 'public/visuals/v2');
-const descriptorBytes = await readFile(resolve(here, 'descriptor.json'));
+const descriptorBytes = await readFile(process.argv[4] ? resolve(process.argv[4]) : resolve(here, 'descriptor.json'));
 const descriptor = JSON.parse(descriptorBytes);
 const authoring = JSON.parse(await readFile(resolve(sourceDir, 'authoring-run.json'), 'utf8'));
 const tolerance = descriptor.toleranceM;
@@ -88,8 +88,9 @@ for (const template of descriptor.templates) {
     assert(object.userData.medium === anchor.medium && object.userData.direction === anchor.direction, `${template.file}: anchor semantic drift`);
   }
   assert(triangles <= template.triangleBudget, `${template.file}: ${triangles} triangles exceeds budget`);
+  if (template.payloadBudgetBytes) assert(bytes.length <= template.payloadBudgetBytes, `${template.file}: payload exceeds budget`);
   assert(meshes === 4 && materials.size === 4 && textures.size === 0, `${template.file}: expected four merged material groups without textures`);
-  templates.push({...template, url: `visuals/v2/${template.file}`, rootName: `${template.id}_canonical_root`, sha256: hash(bytes), bytes: bytes.length, semanticSha256: hash(JSON.stringify(semantic)), actualBoundsM: {min: bounds.min.toArray(), max: bounds.max.toArray()}, metrics: {meshes, materials: materials.size, textures: textures.size, triangles, vertices}, validation: {validator: 'Khronos glTF Validator', version: version(), errors: validation.issues.numErrors, warnings: validation.issues.numWarnings, infos: validation.issues.numInfos, messages: validation.issues.messages}});
+  templates.push({...template, url: `${descriptor.runtimeDirectory ?? 'visuals/v2'}/${template.file}`, rootName: `${template.id}_canonical_root`, sha256: hash(bytes), bytes: bytes.length, semanticSha256: hash(JSON.stringify(semantic)), actualBoundsM: {min: bounds.min.toArray(), max: bounds.max.toArray()}, metrics: {meshes, materials: materials.size, textures: textures.size, triangles, vertices}, validation: {validator: 'Khronos glTF Validator', version: version(), errors: validation.issues.numErrors, warnings: validation.issues.numWarnings, infos: validation.issues.numInfos, messages: validation.issues.messages}});
 }
 const manifest = {...descriptor, descriptorSha256: hash(descriptorBytes), authoring, orientationProof: {meterStartM: start, meterEndM: end, asymmetricM: asymmetric, asymmetricSizeM: proofSize, sourceFile: 'regenerated outside shipping payload', testedWith: 'Three GLTFLoader'}, templates};
 await writeFile(resolve(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');

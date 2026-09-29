@@ -208,6 +208,57 @@ def exchanger():
     box('service_panel_insert', (0, 0.04, -0.532), (0.34, 0.125, 0.005), 'insert', 0.006)
 
 
+def cdu():
+    # A closed technical-coolant distribution cabinet, not an additional packaged
+    # pump or heat exchanger. Detail is cosmetic; the existing center graph owns
+    # every route. Front is -Z, rear service connections are +Z, inside the envelope.
+    box('closed_graphite_carcass', (0, 0.015, 0), (1.148, 1.89, 1.006), 'graphite', 0.02)
+    box('recessed_mounting_plinth', (0, -0.933, 0), (1.10, 0.134, 1.02), 'graphite', 0.016)
+    for x in (-0.45, 0.45):
+        box('bounded_mounting_rail', (x, -0.975, 0), (0.18, 0.05, 1.1), 'graphite', 0.008)
+        for z in (-0.48, 0.48):
+            cylinder('plinth_hold_down', (x, -0.94, z), 0.022, 0.018, (0, 1, 0), 'silver', 6, 0)
+    for x in (-0.587, 0.587):
+        box('pearl_side_panel', (x, 0.03, 0.005), (0.026, 1.90, 1.036), 'paint', 0.010)
+        # Shallow unlit service insets imply no fan, airflow or measured condition.
+        box('side_service_recess', (x * 1.009, -0.40, 0.025), (0.009, 0.47, 0.57), 'insert', 0.004)
+        for y in (-0.57, -0.49, -0.41, -0.33, -0.25):
+            box('side_service_louvre', (x * 1.013, y, 0.025), (0.010, 0.028, 0.49), 'graphite', 0.004)
+    box('pearl_top_cap', (0, 0.98, 0), (1.2, 0.04, 1.06), 'paint', 0.012)
+    box('top_cap_reveal', (0, 0.95, 0), (1.17, 0.015, 1.044), 'insert', 0.005)
+    # The dark gasket plane and gaps remain visible between the closed doors.
+    box('front_door_gasket', (0, 0.055, -0.514), (1.137, 1.75, 0.024), 'insert', 0.012)
+    for x in (-0.280, 0.280):
+        box('closed_pearl_service_door', (x, 0.16, -0.521), (0.542, 1.51, 0.042), 'paint', 0.012)
+    box('lower_service_panel', (0, -0.708, -0.521), (1.10, 0.19, 0.042), 'paint', 0.010)
+    box('lower_service_seam', (0, -0.597, -0.538), (1.096, 0.012, 0.008), 'graphite', 0.003)
+    # Pull handles sit over compact dark recesses; no floating chrome or labels.
+    for x in (-0.105, 0.105):
+        box('handle_recess', (x, 0.17, -0.543), (0.067, 0.38, 0.007), 'graphite', 0.010)
+        for y in (0.025, 0.315):
+            box('handle_bracket', (x, y, -0.546), (0.025, 0.030, 0.008), 'silver', 0.003)
+        box('brushed_pull_handle', (x, 0.17, -0.545), (0.018, 0.300, 0.010), 'silver', 0.004)
+    for x in (-0.530, 0.530):
+        for y in (-0.40, 0.62):
+            box('service_door_hinge', (x, y, -0.539), (0.034, 0.12, 0.018), 'silver', 0.006)
+            box('hinge_center_seam', (x, y, -0.549), (0.038, 0.007, 0.002), 'graphite', 0)
+    box('unlit_inset_bezel', (0.30, 0.66, -0.544), (0.30, 0.20, 0.009), 'graphite', 0.010)
+    box('blank_unlit_service_inset', (0.30, 0.66, -0.549), (0.254, 0.151, 0.002), 'insert', 0.006)
+    for x in (-0.47, 0.47):
+        for y in (-0.711, 0.877):
+            cylinder('front_captive_fastener', (x, y, -0.546), 0.012, 0.007, (0, 0, 1), 'silver', 6, 0)
+    box('closed_rear_service_panel', (0, 0.08, 0.515), (1.10, 1.73, 0.038), 'paint', 0.010)
+    box('rear_technical_service_plate', (0, 0.46, 0.537), (0.89, 0.40, 0.012), 'graphite', 0.010)
+    # Two generic technical-coolant faces. They are NOT new graph anchors and have
+    # no seawater identity. Keeping them flush avoids extending any physical route.
+    for x in (-0.265, 0.265):
+        cylinder('technical_connection_rim', (x, 0.46, 0.543), 0.094, 0.014, (0, 0, 1), 'silver', 32, 0.003)
+        cylinder('technical_connection_recess', (x, 0.46, 0.548), 0.059, 0.003, (0, 0, 1), 'insert', 24, 0)
+        bolts('technical_connection_fastener', (x, 0.46, 0.539), 0.076, (0, 0, 1), 4, 0.008)
+    box('rear_electrical_service_cover', (0.29, -0.48, 0.538), (0.30, 0.27, 0.016), 'graphite', 0.012)
+    box('rear_electrical_cover_inset', (0.29, -0.48, 0.547), (0.24, 0.21, 0.004), 'insert', 0.008)
+
+
 def empty(name, p=(0, 0, 0), parent=None):
     obj = bpy.data.objects.new(name, None)
     bpy.context.collection.objects.link(obj)
@@ -227,7 +278,8 @@ def export(path):
 
 for template in descriptor['templates']:
     MATERIALS = reset()
-    (pump if template['id'] == 'pump' else exchanger)()
+    # Explicit bounded template set: a typo must never silently export another asset.
+    {'pump': pump, 'exchanger': exchanger, 'cdu': cdu}[template['id']]()
     root = empty(f"{template['id']}_canonical_root")
     root['visualKit'] = descriptor['kitId']
     root['visualVersion'] = descriptor['version']
