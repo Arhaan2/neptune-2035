@@ -10,6 +10,11 @@ const duty = 'platform-001/module-01/pump-duty';
 const standby = 'platform-001/module-01/pump-standby';
 const secondDuty = 'platform-001/module-02/pump-duty';
 const glbs = /\/visuals\/v2\/(?:pump|exchanger)\.glb(?:\?.*)?$/;
+// Only the resource-cycle case avoids per-action DOM/filmstrip tracing. Its API
+// trace, source and diagnostic attachments are retained even on a passing run.
+const resourceTest = test.extend({
+  trace: { mode: 'on', screenshots: false, snapshots: false, sources: true, attachments: true },
+});
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 const main = (page: Page) => page.locator('main.twin-app');
 type KitAsset = { assetId: string; kind: string; status: string; selected: boolean; operatingState: string; materialColor: string; meshCount: number; renderedMeshes: number; worldCenter: number[]; childWorldPoint: number[] };
@@ -235,33 +240,45 @@ test('VIS2 authored submesh and keyboard selection isolate live failure and exac
   expect(failures).toEqual([]);
 });
 
-test('VIS2 warmed reveal cycles reach the same post-render resource inventory', async ({ page }, info) => {
+resourceTest('VIS2 warmed reveal cycles reach the same post-render resource inventory', async ({ page }, info) => {
   const failures = errors(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./'); await ready(page);
   // Exercise the identical lifecycle through native keyboard activation. Pointer
   // discoverability and authored-surface clicks remain in the other VIS1/VIS2 cases.
   const activate = (name: string) => activateLifecycleButton(page, name);
+  const completedCycles: { cycle: number; revealedAssetId: string; observation: Observation }[] = [];
   const cycle = async (id: string) => {
     await reveal(page, id, activate);
     await toggle(page, 'Explode', true, activate); await completed(page);
     await toggle(page, 'Explode', false, activate); await toggle(page, 'X-ray', false, activate); await completed(page);
     await toggle(page, 'X-ray', true, activate); await completed(page);
     await select(page, duty); await activate('Campus view');
-    await toggle(page, 'X-ray', false, activate); return completed(page);
+    await toggle(page, 'X-ray', false, activate);
+    const observation = await completed(page);
+    completedCycles.push({ cycle: completedCycles.length + 1, revealedAssetId: id, observation });
+    return observation;
   };
-  await cycle(duty); await cycle(secondDuty);
-  const baseline = await cycle(duty);
-  const inventory = (value: Observation) => ({ geometries: value.geometries, textures: value.textures, cache: value.visualKit.cache });
-  const observations = [baseline];
-  for (let index = 0; index < 5; index++) {
-    const value = await cycle(index % 2 ? duty : secondDuty);
-    expect(value.renderEpoch).toBeGreaterThan(observations.at(-1)!.renderEpoch);
-    expect(inventory(value)).toEqual(inventory(baseline));
-    expect(value.simulationTimeS).toBe(0); observations.push(value);
+  try {
+    await cycle(duty); await cycle(secondDuty);
+    const baseline = await cycle(duty);
+    const inventory = (value: Observation) => ({ geometries: value.geometries, textures: value.textures, cache: value.visualKit.cache });
+    const observations = [baseline];
+    for (let index = 0; index < 5; index++) {
+      const value = await cycle(index % 2 ? duty : secondDuty);
+      expect(value.renderEpoch).toBeGreaterThan(observations.at(-1)!.renderEpoch);
+      expect(inventory(value)).toEqual(inventory(baseline));
+      expect(value.simulationTimeS).toBe(0); observations.push(value);
+    }
+    await info.attach('visual-v2-post-render-resource-plateau', { body: JSON.stringify({ browser: info.project.name, warmupCycles: 3, measuredCycles: 5, observations }), contentType: 'application/json' });
+    expect(failures).toEqual([]);
+  } finally {
+    // Retain already observed post-render boundaries even if a later cycle times out.
+    await info.attach('visual-v2-completed-cycle-boundaries', {
+      body: JSON.stringify({ browser: info.project.name, warmupCycles: 3, measuredCycles: 5, expectedCycles: 8, completedCycles }),
+      contentType: 'application/json',
+    });
   }
-  await info.attach('visual-v2-post-render-resource-plateau', { body: JSON.stringify({ browser: info.project.name, warmupCycles: 3, measuredCycles: 5, observations }), contentType: 'application/json' });
-  expect(failures).toEqual([]);
 });
 
 test('VIS2 390px reduced-motion authored reveal and real context loss preserve paused state', async ({ page }, info) => {
