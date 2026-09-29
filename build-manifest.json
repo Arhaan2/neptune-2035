@@ -7,34 +7,39 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "assets/index-DHqwpfnK.css",
-      "bytes": 221914,
-      "sha256": "bdd4e727e2989c6efc9112c760f8a3d657d045610241080f7166fa384e91d07f"
+      "path": "assets/GLTFLoader-BRgYUoOV.js",
+      "bytes": 45225,
+      "sha256": "4b6b7c834071c07d13abc577fee91bb170c3208c364423841f4af1d8da33fa51"
     },
     {
-      "path": "assets/index-RSwVGGhC.js",
-      "bytes": 780871,
-      "sha256": "0fa0096ae48f5523c77a83b324cffb4e60720e3c3858e72bb7ac96d82ef21c76"
+      "path": "assets/index-CnsHmns1.js",
+      "bytes": 780969,
+      "sha256": "f29f84287fdda63f662b5b1857ac5b1b458fa2eeb3db466093765a8ace919ba2"
     },
     {
-      "path": "assets/OrbitControls-t871xd-R.js",
-      "bytes": 934213,
-      "sha256": "6bcff0932dca7fbb7d899742cae1e47d840c4e5ec0626d2b17cd2f444380e364"
+      "path": "assets/index-In-HoDZF.css",
+      "bytes": 222173,
+      "sha256": "0ef88fa4b156cfed0abfab88f5859913150711493d4da735da5e11cc55a415ec"
     },
     {
-      "path": "assets/Scene-Cg9zV3kp.js",
-      "bytes": 16448,
-      "sha256": "b4d9b8f688059ebe611b754648e11620d65b24bf9075192a11f1bc3f52cf3814"
+      "path": "assets/OrbitControls-Bu3ZA5ZG.js",
+      "bytes": 934646,
+      "sha256": "c45248ae9f32aa752f46c497e4fef2d10f1a882840a950bd37592066a81ac994"
     },
     {
-      "path": "assets/TwinScene-B5ORFgbw.js",
-      "bytes": 71411,
-      "sha256": "3bd974095ec5e82298da9a26ab36656f8d8a8c1e470cb85ecbfc5385c55f163e"
+      "path": "assets/Scene-Ug8ThxHp.js",
+      "bytes": 16456,
+      "sha256": "934d5dcc52f2aa70c40115d5a7e04b2cff46562ce456e05cf15626f8f37d5273"
     },
     {
-      "path": "assets/TwinScene-cZU5kvlY.css",
-      "bytes": 5263,
-      "sha256": "e348c2d51c3e6a6e159ece7d98cae00851dbb0950cdf388a317f0d672cc58d17"
+      "path": "assets/TwinScene-D9uZBsSw.js",
+      "bytes": 85645,
+      "sha256": "0fe43a5eb0c927b3dd65fff9c62bea8e6c04d192229418374edd5d63a4ec4bd3"
+    },
+    {
+      "path": "assets/TwinScene-DxHFhTWU.css",
+      "bytes": 5885,
+      "sha256": "0d2f3bcead214cb68e53989d7dc8d83cfeb984eb0a96acd8d2e2151aecc6a995"
     },
     {
       "path": "assets/worker-DEzDetim.js",
@@ -199,7 +204,7 @@
     {
       "path": "index.html",
       "bytes": 1234,
-      "sha256": "4822ef64763d50bbfef6d4ead51f82165214b0e3d878a44200f294ffee085545"
+      "sha256": "c07fe4b401b71c49acdf29b1390077fe60970f357cca974844f8416a8779ed8e"
     },
     {
       "path": "samples/calibration-generated.json",
@@ -225,6 +230,21 @@
       "path": "THIRD-PARTY-NOTICES.txt",
       "bytes": 689018,
       "sha256": "78bab8dcfab7c8f84a3a41829b16dfb5b88692d914424b0895774273c8a80176"
+    },
+    {
+      "path": "visuals/v2/exchanger.glb",
+      "bytes": 559236,
+      "sha256": "b18e9ad1d69d2b588e34e9eb06d728a891449d61959d8150b41a47631424c559"
+    },
+    {
+      "path": "visuals/v2/manifest.json",
+      "bytes": 7918,
+      "sha256": "b9bc013bc9a4cb80171853e423b7958eb79676aebe1dd489150525d26e97454e"
+    },
+    {
+      "path": "visuals/v2/pump.glb",
+      "bytes": 325180,
+      "sha256": "349db03c6513239aac075c85942ae8a79f90827f40c96b52fdcd593b992eaf75"
     }
   ]
 }

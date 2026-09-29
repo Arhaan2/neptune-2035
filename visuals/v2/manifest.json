@@ -1,0 +1,342 @@
+{
+  "kitId": "neptune-cooling-kit",
+  "version": "2.0.0",
+  "schemaVersion": 1,
+  "units": "meter",
+  "coordinateSystem": "right-handed Y-up; +X right, +Y up, +Z rear",
+  "rootPivot": "canonical-asset-center",
+  "rootScale": [
+    1,
+    1,
+    1
+  ],
+  "toleranceM": 0.00001,
+  "normalTolerance": 0.001,
+  "sources": [
+    "src/twin/catalog/equipment.ts",
+    "src/twin/assets/design.ts",
+    "src/scene/twinGeometry.ts"
+  ],
+  "anchorSemantics": "The authoritative graph uses abstract asset-center route endpoints. All logical anchors are at local [0,0,0]. Exterior flanges are illustrative surfaces inside the owning envelope, not physical port coordinates or engineering route changes.",
+  "provenance": {
+    "author": "Original NEPTUNE Visual V2 geometry authored with the repository Blender Python script",
+    "rights": "Original project-generated geometry; no third-party models, textures, fonts, brands or scans",
+    "claim": "Generic design-stage exterior visualization; no manufacturer CAD, certified internals or measured interface precision"
+  },
+  "materialRoles": [
+    {
+      "name": "paint",
+      "color": "#E8EEF0",
+      "metalness": 0,
+      "roughness": 0.43,
+      "stateTint": true
+    },
+    {
+      "name": "silver",
+      "color": "#AEBBC4",
+      "metalness": 1,
+      "roughness": 0.32,
+      "stateTint": false
+    },
+    {
+      "name": "graphite",
+      "color": "#273541",
+      "metalness": 0.55,
+      "roughness": 0.47,
+      "stateTint": false
+    },
+    {
+      "name": "insert",
+      "color": "#111D27",
+      "metalness": 0.05,
+      "roughness": 0.74,
+      "stateTint": false
+    }
+  ],
+  "templates": [
+    {
+      "id": "pump",
+      "file": "pump.glb",
+      "type": "pump",
+      "dimensionsM": [
+        1.2,
+        1.2,
+        0.8
+      ],
+      "boundsM": {
+        "min": [
+          -0.6,
+          -0.6,
+          -0.4
+        ],
+        "max": [
+          0.6,
+          0.6,
+          0.4
+        ]
+      },
+      "supportedSpecifications": [
+        {
+          "id": "pump-reference",
+          "version": "1.0.0"
+        },
+        {
+          "id": "pump-efficient",
+          "version": "1.0.0"
+        }
+      ],
+      "supportedRoles": [
+        "pump-duty",
+        "pump-standby",
+        "pump-sea"
+      ],
+      "logicalAnchors": [
+        {
+          "id": "fluid-in",
+          "medium": "role-fluid",
+          "direction": "in",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "fluid-out",
+          "medium": "role-fluid",
+          "direction": "out",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "power-in",
+          "medium": "power",
+          "direction": "in",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "power-out",
+          "medium": "power",
+          "direction": "out",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "triangleBudget": 10000,
+      "cosmeticParts": [
+        "volute",
+        "motor-fins",
+        "flange-rims",
+        "coupling-guard",
+        "mounting-feet",
+        "fasteners"
+      ],
+      "movableSubgroups": [],
+      "selectionOwner": "canonical parent asset ID",
+      "url": "visuals/v2/pump.glb",
+      "rootName": "pump_canonical_root",
+      "sha256": "349db03c6513239aac075c85942ae8a79f90827f40c96b52fdcd593b992eaf75",
+      "bytes": 325180,
+      "semanticSha256": "7405868967285086fcb6885cd8a0463dd517077f03a0b254152cae5dd366fd9d",
+      "actualBoundsM": {
+        "min": [
+          -0.6000000238418579,
+          -0.6000000238418579,
+          -0.4000000059604645
+        ],
+        "max": [
+          0.6000000238418579,
+          0.5999999642372131,
+          0.4000000059604645
+        ]
+      },
+      "metrics": {
+        "meshes": 4,
+        "materials": 4,
+        "textures": 0,
+        "triangles": 8648,
+        "vertices": 11184
+      },
+      "validation": {
+        "validator": "Khronos glTF Validator",
+        "version": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "messages": []
+      }
+    },
+    {
+      "id": "exchanger",
+      "file": "exchanger.glb",
+      "type": "exchanger",
+      "dimensionsM": [
+        2,
+        2.2,
+        1.4
+      ],
+      "boundsM": {
+        "min": [
+          -1,
+          -1.1,
+          -0.7
+        ],
+        "max": [
+          1,
+          1.1,
+          0.7
+        ]
+      },
+      "supportedSpecifications": [
+        {
+          "id": "exchanger-reference",
+          "version": "1.0.0"
+        }
+      ],
+      "supportedRoles": [
+        "hx"
+      ],
+      "logicalAnchors": [
+        {
+          "id": "technical-in",
+          "medium": "technical",
+          "direction": "in",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "technical-out",
+          "medium": "technical",
+          "direction": "out",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "seawater-in",
+          "medium": "seawater",
+          "direction": "in",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "seawater-out",
+          "medium": "seawater",
+          "direction": "out",
+          "positionM": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "triangleBudget": 20000,
+      "cosmeticParts": [
+        "plate-pack",
+        "pressure-frame",
+        "tie-bars",
+        "flange-rims",
+        "mounting-feet",
+        "fasteners"
+      ],
+      "movableSubgroups": [],
+      "selectionOwner": "canonical parent asset ID",
+      "url": "visuals/v2/exchanger.glb",
+      "rootName": "exchanger_canonical_root",
+      "sha256": "b18e9ad1d69d2b588e34e9eb06d728a891449d61959d8150b41a47631424c559",
+      "bytes": 559236,
+      "semanticSha256": "383f2b929bc3d5afbd639d4a2461876098538d8c49aded53f3f4f81dc01f149c",
+      "actualBoundsM": {
+        "min": [
+          -1,
+          -1.0999999046325684,
+          -0.699999988079071
+        ],
+        "max": [
+          1,
+          1.1000001430511475,
+          0.699999988079071
+        ]
+      },
+      "metrics": {
+        "meshes": 4,
+        "materials": 4,
+        "textures": 0,
+        "triangles": 15464,
+        "vertices": 19232
+      },
+      "validation": {
+        "validator": "Khronos glTF Validator",
+        "version": "2.0.0-dev.3.10",
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "messages": []
+      }
+    }
+  ],
+  "descriptorSha256": "c6ea4d13e88b4e9068d9226f336715d6da0588922d1e749a3b2b6c1815bd19d6",
+  "authoring": {
+    "blenderVersion": "4.3.2",
+    "blenderBuildHash": "32f5fdce0a0a",
+    "authoringCoordinates": "runtime (x,y,z) -> Blender (x,-z,y)",
+    "exportSettings": {
+      "format": "GLB",
+      "export_yup": true,
+      "export_apply": true,
+      "export_extras": true,
+      "export_normals": true,
+      "export_texcoords": false,
+      "export_cameras": false,
+      "export_lights": false,
+      "export_animations": false
+    },
+    "guideShipping": false,
+    "materialSide": "front",
+    "originalGeometry": true,
+    "externalAssets": [],
+    "gltfExporter": "Khronos glTF Blender I/O v4.3.47"
+  },
+  "orientationProof": {
+    "meterStartM": [
+      0,
+      0,
+      0
+    ],
+    "meterEndM": [
+      1,
+      0,
+      0
+    ],
+    "asymmetricM": [
+      0.23000000417232513,
+      0.4099999964237213,
+      -0.17000000178813934
+    ],
+    "asymmetricSizeM": [
+      0.12999999523162842,
+      0.07000000029802322,
+      0.029999999329447746
+    ],
+    "sourceFile": "regenerated outside shipping payload",
+    "testedWith": "Three GLTFLoader"
+  }
+}
