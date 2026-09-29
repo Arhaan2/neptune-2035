@@ -1074,7 +1074,10 @@ export default function TwinApp() {
                 Dimensions
               </button>
               <button
+                title="Inspect the selected module’s cooling system"
+                aria-pressed={focus === 'cooling' && !inside}
                 onClick={() => {
+                  setInside(false);
                   setFocus('cooling');
                   setXray(true);
                   setResetId((v) => v + 1);

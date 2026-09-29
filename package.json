@@ -52,6 +52,7 @@
     "@types/react-dom": "19.2.3",
     "@types/three": "0.183.1",
     "@vitejs/plugin-react": "6.0.2",
+    "gltf-validator": "2.0.0-dev.3.10",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
     "oxlint-tsgolint": "7.0.2001",

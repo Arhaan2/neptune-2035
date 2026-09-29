@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { normalizeProject, parseProject, type CurrentProject } from '../../src/twin/persistence/project';
 import { expectNoHorizontalOverflow } from './layout';
+import { activateLifecycleButton } from './lifecycle-keyboard';
 
 const duty = 'platform-001/module-01/pump-duty';
 const standby = 'platform-001/module-01/pump-standby';
@@ -164,26 +165,28 @@ test('VIS1 repeated selection reveal and interior visits release transient scene
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await ready(page);
+  // Keep every lifecycle transition and resource assertion while using native
+  // keyboard input; the preceding VIS1 case retains pointer coverage of these controls.
+  const activate = (name: string) => activateLifecycleButton(page, name);
   const cycle = async () => {
     await page.getByLabel('Select equipment', { exact: true }).selectOption(standby);
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.selectedId)).toBe(standby);
     await page.getByLabel('Select equipment', { exact: true }).selectOption(duty);
-    await button(page, 'Cooling close-up').click();
-    await button(page, 'Explode').click();
+    await activate('Cooling close-up');
+    await activate('Explode');
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ focus: 'cooling', exploded: true, selectedId: duty });
-    await button(page, 'Inside module').click();
+    await activate('Inside module');
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.inside)).toBe(true);
-    await button(page, 'Exit interior').click();
-    await button(page, 'Explode').click();
-    await button(page, 'X-ray').click();
-    await button(page, 'Campus view').click();
+    await activate('Exit interior');
+    await activate('Explode');
+    await activate('X-ray');
+    await activate('Campus view');
     await expect(button(page, 'X-ray')).toHaveAttribute('aria-pressed', 'false');
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ focus: 'campus', inside: false, exploded: false, selectedId: duty });
   };
   const completedRenderResources = () => page.evaluate(() => new Promise<{ geometries: number; textures: number }>(resolve => {
-    // CameraRig emits in useFrame, before R3F renders. A newly changed pose can
-    // therefore carry the preceding pose's counters. Observe two subsequent
-    // emissions to sample uploaded resources after the final campus was rendered.
+    // Diagnostics publish after rendering. Retain two subsequent publications
+    // so resource comparisons follow the final campus transition and cleanup.
     let previous = window.__NEPTUNE_TWIN_SCENE__, emissions = 0;
     const observeFrame = () => {
       const scene = window.__NEPTUNE_TWIN_SCENE__;
