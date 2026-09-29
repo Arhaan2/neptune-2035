@@ -21,6 +21,7 @@
 .twin-project-content { display: grid; gap: 12px; }
 .twin-project-content .twin-file { display: block; }
 .twin-project-content input[type='file'] { width: 100%; font-size: 0.875rem; margin-top: 8px; }
+.twin-app .twin-file input[type='file'] { display: block; width: 100%; min-width: 0; max-width: 100%; margin-top: 8px; font-size: 0.875rem; }
 .twin-project-content select { width: 100%; min-height: 44px; }
 .twin-workspace-help .operator-guide { display: block; margin: 0; }
 .twin-workspace-help .operator-guide .twin-actions { display: flex; flex-wrap: wrap; }
