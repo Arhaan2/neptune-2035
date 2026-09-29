@@ -27,21 +27,34 @@ test('PH7 C1 real canvas keeps failed selected pump and feeder visible through r
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await expect(main(page)).toHaveAttribute('data-ready', 'true');
-  await withVisibleControl(page, button(page, 'Design family III'), control => control.click());
+  // The surfaces are known in this desktop journey. Navigate them explicitly
+  // instead of repeatedly discovering their ancestors across browser round trips.
+  await button(page, 'Design').click();
+  await button(page, 'Design family III').click();
   await expect(button(page, 'Step 10s')).toBeEnabled();
   await expect(page.locator('canvas')).toBeVisible();
   const pump = 'platform-001/module-01/pump-duty';
-  await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(pump));
+  await button(page, 'Assets').click();
+  await page.getByLabel('Select equipment', { exact: true }).selectOption(pump);
   await button(page, 'Operate').click();
-  await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click());
+  await button(page, 'Inspector').click();
+  await button(page, 'Trip selected asset').click();
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
-  const failed = await downloadJSON(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
+  const exportProject = () => downloadJSON(page, async () => {
+    const summary = page.locator('summary').filter({ hasText: /^Project actions$/ });
+    await summary.click();
+    await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
+    await summary.click();
+  });
+  const failed = await exportProject();
   const design = failed.designSnapshot as Design;
-  for (const exploded of [false, true, false, true, false]) {
+  for (const [index, exploded] of [false, true, false, true, false].entries()) {
     if ((await button(page, 'Explode').getAttribute('aria-pressed')) !== String(exploded)) await button(page, 'Explode').click();
     await button(page, 'X-ray').click();
-    await withVisibleControl(page, button(page, 'Campus context'), control => control.click());
-    await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(pump));
+    if (index === 0) await page.locator('summary').filter({ hasText: /^Workspace help$/ }).click();
+    await button(page, 'Campus context').click();
+    if (index === 0) await button(page, 'Assets').click();
+    await page.getByLabel('Select equipment', { exact: true }).selectOption(pump);
     const target = presentedPosition(resolveAsset(design, pump)!, exploded);
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ selectedId: pump, focus: 'selection', exploded, target: target.map(value => expect.closeTo(value, 5)) });
     await expect(page.getByTestId('asset-context')).toHaveAttribute('data-asset-id', pump);
@@ -49,17 +62,18 @@ test('PH7 C1 real canvas keeps failed selected pump and feeder visible through r
   }
   await page.locator('canvas').screenshot({ path: info.outputPath('failed-selected-pump-canvas.png') });
   await page.screenshot({ path: info.outputPath('failed-selected-pump-page.png'), fullPage: true });
-  const afterViews = await downloadJSON(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
+  const afterViews = await exportProject();
   expect(afterViews.checkpoint).toEqual(failed.checkpoint);
   const feeder = design.modules[0].powerDomainId;
-  await withVisibleControl(page, page.getByLabel('Find asset ID', { exact: true }), control => control.fill(feeder));
-  await withVisibleControl(page, button(page, 'Find'), control => control.click());
-  await withVisibleControl(page, button(page, 'Trip selected asset'), control => control.click());
+  await page.getByLabel('Find asset ID', { exact: true }).fill(feeder);
+  await button(page, 'Find').click();
+  await button(page, 'Inspector').click();
+  await button(page, 'Trip selected asset').click();
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ selectedId: feeder, focus: 'selection', target: resolveAsset(design, feeder)!.positionM.map(value => expect.closeTo(value, 5)) });
   await page.locator('canvas').screenshot({ path: info.outputPath('failed-selected-feeder-canvas.png') });
   await page.screenshot({ path: info.outputPath('failed-selected-feeder-page.png'), fullPage: true });
-  const exported = await downloadJSON(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
+  const exported = await exportProject();
   expect(exported.checkpoint.state.failedAssetIds).toContain(feeder);
   await info.attach('C1-canvas-state-and-camera', { body: JSON.stringify({ exported, scene: await page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__) }), contentType: 'application/json' });
   expect(errors).toEqual([]);
