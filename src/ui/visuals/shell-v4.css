@@ -4,9 +4,9 @@
 .twin-header { min-height: 64px; height: auto; padding: 8px 20px; gap: 12px 20px; flex-wrap: wrap; }
 .twin-brand { font-size: 1.1875rem; gap: 10px; }
 .twin-brand small { font-size: 0.75rem; }
-.twin-header nav { height: auto; min-height: 44px; }
+.twin-header nav { height: auto; min-height: 44px; min-width: 0; max-width: 100%; flex-wrap: wrap; }
 .twin-header nav button { min-height: 36px; font-size: 0.875rem; padding: 4px 18px; }
-.twin-header-end { display: flex; gap: 8px; margin-left: auto; }
+.twin-header-end { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .twin-header-end button { border: 1px solid var(--blue-hour-border-strong); background: var(--blue-hour-panel); min-height: 44px; }
 .twin-header-status { color: var(--muted); font-size: 0.875rem; }
 .twin-mode { padding: 6px 20px; gap: 8px 24px; flex-wrap: wrap; font-size: 0.75rem; }
