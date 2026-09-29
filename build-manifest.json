@@ -7,34 +7,34 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "assets/index-B46QGY7-.css",
-      "bytes": 215311,
-      "sha256": "6944f82ce21aabfd3e977da121fe9eba6eca78a5b998312db691b33c62b62739"
+      "path": "assets/index-DHqwpfnK.css",
+      "bytes": 221914,
+      "sha256": "bdd4e727e2989c6efc9112c760f8a3d657d045610241080f7166fa384e91d07f"
     },
     {
-      "path": "assets/index-BKVtMIQb.js",
-      "bytes": 780663,
-      "sha256": "fe7b01cdbaf774d5eedb7fe0d0b687fd9de9f6d70e43618dedd4ffda9fd9a7c9"
+      "path": "assets/index-RSwVGGhC.js",
+      "bytes": 780871,
+      "sha256": "0fa0096ae48f5523c77a83b324cffb4e60720e3c3858e72bb7ac96d82ef21c76"
     },
     {
-      "path": "assets/OrbitControls-C112jz_I.js",
-      "bytes": 934189,
-      "sha256": "1bd5e994297f4628c6a5cfad2eb1cc4b380e5c84d03d2ee36c6ec8685b78ce05"
+      "path": "assets/OrbitControls-t871xd-R.js",
+      "bytes": 934213,
+      "sha256": "6bcff0932dca7fbb7d899742cae1e47d840c4e5ec0626d2b17cd2f444380e364"
     },
     {
-      "path": "assets/Scene-LZ19-L9J.js",
-      "bytes": 16453,
-      "sha256": "2ae893d01de8dcd7efc8fb71977c9755818e07fa11af758996dfe8f18d84a9c1"
+      "path": "assets/Scene-Cg9zV3kp.js",
+      "bytes": 16448,
+      "sha256": "b4d9b8f688059ebe611b754648e11620d65b24bf9075192a11f1bc3f52cf3814"
     },
     {
-      "path": "assets/TwinScene-DCY1wMb8.js",
-      "bytes": 64729,
-      "sha256": "b563ed86dd74e1c110fe5e4ac341133baaac7fefcb9bb467b9c18be76265192f"
+      "path": "assets/TwinScene-B5ORFgbw.js",
+      "bytes": 71411,
+      "sha256": "3bd974095ec5e82298da9a26ab36656f8d8a8c1e470cb85ecbfc5385c55f163e"
     },
     {
-      "path": "assets/TwinScene-DkCf7rj3.css",
-      "bytes": 4505,
-      "sha256": "180c5e2ef9f5324679a23caded3b2515234ccca40c72aa1ac1ec8ff82da823d4"
+      "path": "assets/TwinScene-cZU5kvlY.css",
+      "bytes": 5263,
+      "sha256": "e348c2d51c3e6a6e159ece7d98cae00851dbb0950cdf388a317f0d672cc58d17"
     },
     {
       "path": "assets/worker-DEzDetim.js",
@@ -199,7 +199,7 @@
     {
       "path": "index.html",
       "bytes": 1234,
-      "sha256": "ef25cc949d5d4b813aa7802f3ebb5901f111ee64dbccab6ab95c3dbcdc9b857e"
+      "sha256": "4822ef64763d50bbfef6d4ead51f82165214b0e3d878a44200f294ffee085545"
     },
     {
       "path": "samples/calibration-generated.json",
