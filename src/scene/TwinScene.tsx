@@ -31,13 +31,14 @@ import {
   Mesh,
   MeshStandardMaterial,
   Object3D,
+  PerspectiveCamera,
   Quaternion,
   Vector3,
 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { BlueHourEnvironment } from './visuals/DuskEnvironment';
-import { equipmentFrame } from './visuals/equipmentFraming';
+import { coolingViewDirection, equipmentFrame } from './visuals/equipmentFraming';
 import { BLUE_HOUR, assetSurface, stateColor } from './visuals/materials';
 import { VisualKitCache } from './visuals/kitCache';
 import { AuthoredEquipment, visualKitDiagnostic, type KitDiagnostic, type KitStatus } from './visuals/AuthoredEquipment';
@@ -848,10 +849,19 @@ function CameraRig({
   });
   const transitioning = useRef(true),
     wasInside = useRef(false);
-  const exterior = useRef<CameraPose | null>(null);
+  const exterior = useRef<(CameraPose & { manual: boolean }) | null>(null);
+  const manual = useRef(false);
+  const ready = useRef(false);
+  const lastRequest = useRef('');
   const keys = useRef(new Set<string>()),
     yaw = useRef(Math.PI / 2),
     pitch = useRef(0);
+  const inside = props.inside && !!moduleSpec;
+  // Use a stable current-props ref for DOM event handlers, avoiding resubscription on solver ticks.
+  const current = useRef({ props, moduleSpec, inside });
+  useLayoutEffect(() => {
+    current.current = { props, moduleSpec, inside };
+  });
   const diagnosticAt = useRef(0);
   const renderEpoch = useRef(0);
   const pendingDiagnostic = useRef<Window['__NEPTUNE_TWIN_SCENE__']>(undefined);
@@ -859,9 +869,18 @@ function CameraRig({
     // The callback follows all automatic root renders. Never read the previous
     // frame's GPU allocation counters from a pre-render useFrame callback.
     if (!pendingDiagnostic.current) return;
-    const visualKit = visualKitDiagnostic(scene, camera, kitCache, pendingDiagnostic.current.detailModuleId, gl.info.render.frame);
+    const observed = pendingDiagnostic.current;
+    pendingDiagnostic.current = undefined;
+    // R3F's ResizeObserver owns measurement/projection. Do not announce a frame
+    // that still uses its previous drawing size while the surrounding UI reflows.
+    const viewport = gl.domElement.parentElement;
+    if (!viewport || Math.abs(viewport.clientWidth - observed.canvasSize.width) > 1 ||
+        Math.abs(viewport.clientHeight - observed.canvasSize.height) > 1 ||
+        Math.abs(gl.domElement.clientWidth - observed.canvasSize.width) > 1 ||
+        Math.abs(gl.domElement.clientHeight - observed.canvasSize.height) > 1) return;
+    const visualKit = visualKitDiagnostic(scene, camera, kitCache, observed.detailModuleId, gl.info.render.frame);
     window.__NEPTUNE_TWIN_SCENE__ = {
-      ...pendingDiagnostic.current,
+      ...observed,
       renderEpoch: ++renderEpoch.current,
       drawCalls: gl.info.render.calls,
       triangles: gl.info.render.triangles,
@@ -869,10 +888,13 @@ function CameraRig({
       textures: gl.info.memory.textures,
       visualKit,
     };
-    pendingDiagnostic.current = undefined;
     onKitStatus(visualKit.status);
+    if (!ready.current && !observed.cameraTransitioning) {
+      ready.current = true;
+      current.current.props.onReady?.();
+    }
   }), [camera, gl, scene, kitCache, onKitStatus]);
-  const snapshots = useRef(new Map<string, CameraPose>()),
+  const snapshots = useRef(new Map<string, CameraPose & { manual: boolean }>()),
     lastContext = useRef('');
   const moduleId = moduleSpec?.id;
   const bounds = useMemo(
@@ -880,33 +902,43 @@ function CameraRig({
       footprintBounds(props.design.assets.filter((a) => a.type === 'platform')),
     [props.design],
   );
-  const inside = props.inside && !!moduleSpec;
-  // Use a stable current-props ref for DOM event handlers, avoiding resubscription on solver ticks.
-  const current = useRef({ props, moduleSpec, inside });
   useLayoutEffect(() => {
-    current.current = { props, moduleSpec, inside };
-  });
-  useEffect(() => {
     const c = controls.current;
-    if (!c) return;
-    const context = `${size.width}x${size.height}:${props.design.revision}:${props.exploded ? 'exploded' : 'assembled'}:${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
+    // A hidden workspace may transiently measure zero. Preserve both its pose
+    // and saved contexts until R3F reports a usable visible canvas again.
+    if (!c || !Number.isFinite(size.width) || !Number.isFinite(size.height) || size.width <= 0 || size.height <= 0) return;
+    const view = `${props.design.revision}:${props.exploded ? 'exploded' : 'assembled'}:${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
+    const request = `${view}:${props.resetId}:${inside}`;
+    const context = `${size.width}x${size.height}:${view}`;
+    // Layout changes refit named views. Pointer/keyboard takeover persists across
+    // reflow and hidden-panel restoration until an explicit view/reset request.
+    if (lastRequest.current === request && (manual.current || inside)) {
+      lastContext.current = context;
+      return;
+    }
+    const priorManual = manual.current;
+    manual.current = false;
+    lastRequest.current = request;
     if (lastContext.current && !wasInside.current && !inside)
       snapshots.current.set(lastContext.current, {
         position: camera.position.clone(),
         target: c.target.clone(),
+        manual: priorManual,
       });
     if (inside && moduleSpec) {
       if (!wasInside.current)
         exterior.current = {
           position: camera.position.clone(),
           target: c.target.clone(),
+          manual: priorManual,
         };
       const p = interiorWaypoint(moduleSpec, 0);
       goal.current.position.fromArray(p);
       goal.current.target.set(p[0] + 4, p[1], p[2]);
       yaw.current = Math.PI / 2;
       pitch.current = 0;
-    } else if (wasInside.current && exterior.current) {
+    } else if (wasInside.current && exterior.current?.manual) {
+      manual.current = true;
       goal.current = {
         position: exterior.current.position.clone(),
         target: exterior.current.target.clone(),
@@ -931,39 +963,25 @@ function CameraRig({
         subject = resolveAsset(props.design, `${moduleId}/hx`);
       const campus =
         props.focus === 'campus' || props.focus === 'top' || !subject;
-      const center = campus
-        ? bounds.center
-        : presentedPosition(subject!, props.exploded);
-      let distance = campus
-        ? bounds.radius * 2.5
-        : Math.max(
-            3.5,
-            Math.hypot(subject!.dimensionsM[0], subject!.dimensionsM[2]) * 1.55,
-          );
-      if (props.focus === 'cooling') distance = 12;
-      const aspectFactor = Math.max(
-        1,
-        1.3 / Math.max(0.4, size.width / size.height),
-      );
-      distance *= aspectFactor;
-      goal.current.target.fromArray(center);
+      const aspect = size.width / size.height;
       if (props.focus === 'cooling' && moduleSpec) {
         const equipment = moduleAssets(props.design, moduleSpec.id)
           .filter(asset => ['pump', 'exchanger', 'cdu'].includes(asset.type));
-        goal.current = equipmentFrame(equipment, props.exploded, size.width / size.height, [-0.76, 0.46, -0.64]);
+        goal.current = equipmentFrame(equipment, props.exploded, aspect, coolingViewDirection(props.exploded));
       } else if (props.focus === 'selection' && subject && ['pump', 'exchanger', 'cdu'].includes(subject.type)) {
-        goal.current = equipmentFrame([subject], props.exploded, size.width / size.height, [0.65, 0.32, -0.69]);
-      } else if (props.focus === 'top')
-        goal.current.position.set(center[0], distance, center[2] + 0.02);
-      else
-        goal.current.position.set(
-          center[0] + distance * 0.55,
-          center[1] + distance * (campus ? 0.28 : 0.55),
-          center[2] + distance * 0.8,
-        );
+        goal.current = equipmentFrame([subject], props.exploded, aspect, [0.65, 0.32, -0.69]);
+      } else {
+        const subjects = campus
+          ? props.design.assets.filter(asset => ['platform', 'hull', 'module'].includes(asset.type))
+          : [subject!];
+        goal.current = equipmentFrame(subjects, props.exploded, aspect,
+          props.focus === 'top' ? [0, 1, 0.0001] : [0.55, campus ? 0.28 : 0.55, 0.8]);
+      }
+      // Only a user-owned pose is a meaningful saved view. A named view may
+      // have been saved mid-transition; recompute its fit for this actual size.
       const saved = snapshots.current.get(context);
       if (
-        saved &&
+        saved?.manual &&
         lastContext.current !== context &&
         props.focus !== 'cooling' &&
         props.focus !== 'selection'
@@ -972,22 +990,24 @@ function CameraRig({
           position: saved.position.clone(),
           target: saved.target.clone(),
         };
+        manual.current = saved.manual;
       }
     }
     while (snapshots.current.size > 24) snapshots.current.delete(snapshots.current.keys().next().value!);
     const initial = !lastContext.current;
     wasInside.current = inside;
     lastContext.current = context;
-    if (initial) {
+    if (initial || props.reducedMotion) {
       camera.position.copy(goal.current.position);
       c.target.copy(goal.current.target);
       c.update();
     }
-    transitioning.current = !initial;
+    transitioning.current = !initial && !props.reducedMotion;
   }, [
     props.focus,
     props.selectedId,
     props.resetId,
+    props.reducedMotion,
     props.exploded,
     props.design,
     inside,
@@ -1017,6 +1037,7 @@ function CameraRig({
     );
     let drag: { x: number; y: number; pointerId: number } | null = null;
     const down = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       const { props: p, inside: interior } = current.current;
       if (event.key === 'Escape' && interior) {
         event.preventDefault();
@@ -1042,6 +1063,7 @@ function CameraRig({
         return;
       event.preventDefault();
       p.onManual();
+      manual.current = true;
       transitioning.current = false;
       if (interior) {
         keys.current.add(k);
@@ -1093,6 +1115,7 @@ function CameraRig({
       drag.x = e.clientX;
       drag.y = e.clientY;
       transitioning.current = false;
+      manual.current = true;
       current.current.props.onManual();
     };
     const pointerUp = () => {
@@ -1124,14 +1147,17 @@ function CameraRig({
   }, [gl, camera]);
   useFrame((_, delta) => {
     const c = controls.current;
-    if (!c) return;
+    if (!c || size.width <= 0 || size.height <= 0) return;
     const dt = Math.min(delta, 0.05);
     if (transitioning.current) {
       const t = props.reducedMotion ? 1 : 1 - Math.exp(-delta * 5);
       camera.position.lerp(goal.current.position, t);
       c.target.lerp(goal.current.target, t);
-      if (camera.position.distanceTo(goal.current.position) < 0.015)
+      if (camera.position.distanceTo(goal.current.position) < 0.015 && c.target.distanceTo(goal.current.target) < 0.015) {
+        camera.position.copy(goal.current.position);
+        c.target.copy(goal.current.target);
         transitioning.current = false;
+      }
       c.update();
     } else if (inside && moduleSpec) {
       const pressed = keys.current;
@@ -1165,11 +1191,15 @@ function CameraRig({
       camera.lookAt(c.target);
     }
     diagnosticAt.current += delta;
-    if (diagnosticAt.current > 0.25) {
+    if (diagnosticAt.current > 0.25 || !ready.current) {
       diagnosticAt.current = 0;
       pendingDiagnostic.current = {
         camera: camera.position.toArray(),
         target: c.target.toArray(),
+        canvasSize: { width: size.width, height: size.height },
+        cameraAspect: camera instanceof PerspectiveCamera ? camera.aspect : size.width / size.height,
+        cameraControl: manual.current ? 'manual' : 'named',
+        cameraTransitioning: transitioning.current,
         drawCalls: gl.info.render.calls,
         triangles: gl.info.render.triangles,
         pixelRatio: gl.getPixelRatio(),
@@ -1210,6 +1240,7 @@ function CameraRig({
       maxPolarAngle={Math.PI * 0.495}
       enableDamping={!props.reducedMotion}
       onStart={() => {
+        manual.current = true;
         transitioning.current = false;
         props.onManual();
       }}
@@ -1221,6 +1252,10 @@ declare global {
     __NEPTUNE_TWIN_SCENE__?: {
       camera: number[];
       target: number[];
+      canvasSize: { width: number; height: number };
+      cameraAspect: number;
+      cameraControl: 'named' | 'manual';
+      cameraTransitioning: boolean;
       drawCalls: number;
       triangles: number;
       pixelRatio: number;
@@ -1446,7 +1481,6 @@ export default function TwinScene(input: TwinSceneProps) {
               },
               { once: true },
             );
-            props.onReady?.();
           }}
         >
           <BlueHourEnvironment radius={radius} quiet={props.reducedMotion} />
