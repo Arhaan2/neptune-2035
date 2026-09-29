@@ -12,6 +12,7 @@ import {
 } from 'react';
 import {
   Canvas,
+  addAfterEffect,
   useFrame,
   useThree,
   type ThreeEvent,
@@ -37,6 +38,8 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { BlueHourEnvironment } from './visuals/DuskEnvironment';
 import { BLUE_HOUR, assetSurface, stateColor } from './visuals/materials';
+import { VisualKitCache } from './visuals/kitCache';
+import { AuthoredEquipment, visualKitDiagnostic, type KitDiagnostic, type KitStatus } from './visuals/AuthoredEquipment';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import type {
   Asset,
@@ -109,6 +112,7 @@ function Instances({
   states,
   scale = UNIT_SCALE,
   surface = false,
+  interactive = true,
 }: {
   assets: Asset[];
   selectedId: string;
@@ -119,6 +123,7 @@ function Instances({
   states?: Record<string, EquipmentState>;
   scale?: Vec3;
   surface?: boolean;
+  interactive?: boolean;
 }) {
   const ref = useRef<InstancedMesh>(null);
   const material = assetSurface(surface ? 'valve' : assets[0]?.type ?? 'module');
@@ -155,7 +160,7 @@ function Instances({
       args={[geometry, undefined, assets.length]}
       castShadow
       receiveShadow
-      onClick={(event: ThreeEvent<MouseEvent>) => {
+      onClick={!interactive || (surface && opacity < 0.5) ? undefined : (event: ThreeEvent<MouseEvent>) => {
         if (event.instanceId === undefined) return;
         event.stopPropagation();
         onSelect(assets[event.instanceId].id);
@@ -614,11 +619,13 @@ function TwinFacility({
   moduleSpec,
   details,
   active,
+  kitCache,
 }: {
   props: TwinSceneProps;
   moduleSpec?: ModuleSpec;
   details: Asset[];
   active?: Asset;
+  kitCache: VisualKitCache;
 }) {
   const envelopes = useMemo(
     () => props.design.assets.filter((a) => a.type === 'module'),
@@ -660,7 +667,7 @@ function TwinFacility({
   const equipment = useMemo(
     () =>
       details.filter(
-        (a) => !['rack', 'compute', 'module', 'pipe', 'pump'].includes(a.type),
+        (a) => !['rack', 'compute', 'module', 'pipe', 'pump', 'exchanger'].includes(a.type),
       ),
     [details],
   );
@@ -713,11 +720,13 @@ function TwinFacility({
   }));
   const pumpInactive = (id: string) =>
     assetMap.get(id)?.type === 'pump' && states?.[id] !== 'running';
+  const detailEnabled = props.focus === 'cooling' || props.inside ||
+    (props.focus === 'selection' && ['pump', 'exchanger'].includes(active?.type ?? '')) || (props.xray && props.exploded);
   return (
     <group>
       <Instances assets={hulls} {...common} />
       <Instances assets={platforms} {...common} />
-      <Instances assets={shells} {...common} states={states} opacity={props.xray ? (props.focus === 'cooling' ? 0.12 : 0.35) : 1} />
+      <Instances assets={shells} {...common} states={states} opacity={props.xray && props.focus !== 'cooling' ? 0.35 : 1} />
       <ModuleEnvelopeDetails
         assets={envelopes}
         selectedModuleId={moduleSpec?.id}
@@ -741,17 +750,31 @@ function TwinFacility({
         opacity={props.xray || props.inside ? 0.17 : 0.75}
       />
       <Instances assets={nodes} {...common} states={states} />
-      <EquipmentInstances assets={equipment} {...common} states={states} />
+      <EquipmentInstances
+        assets={equipment}
+        {...common}
+        states={states}
+        opacity={props.xray && detailEnabled && !props.inside ? 0.12 : 1}
+        interactive={!(props.xray && detailEnabled && !props.inside)}
+      />
       {details
-        .filter((a) => a.type === 'pump')
+        .filter((a) => a.type === 'pump' || a.type === 'exchanger')
         .map((asset) => (
-          <PumpEnvelope
+          <AuthoredEquipment
             key={asset.id}
             asset={asset}
+            connections={connections}
+            identity={props.design.revision}
+            cache={kitCache}
+            enabled={detailEnabled}
+            selected={props.selectedId === asset.id}
             state={states?.[asset.id]}
             exploded={props.exploded}
             onSelect={props.onSelect}
-          />
+          >
+            {asset.type === 'pump' ? <PumpEnvelope asset={asset} state={states?.[asset.id]} exploded={props.exploded} onSelect={props.onSelect} /> :
+              <Instances assets={[asset]} {...common} states={states} />}
+          </AuthoredEquipment>
         ))}
       {moduleSpec && (
         <CanonicalPipes
@@ -819,11 +842,15 @@ function CameraRig({
   moduleSpec,
   active,
   waypoint,
+  kitCache,
+  onKitStatus,
 }: {
   props: TwinSceneProps;
   moduleSpec?: ModuleSpec;
   active?: Asset;
   waypoint: number;
+  kitCache: VisualKitCache;
+  onKitStatus: (status: KitStatus) => void;
 }) {
   const { camera, gl, size, scene } = useThree();
   const controls = useRef<OrbitControlsImpl>(null);
@@ -838,6 +865,25 @@ function CameraRig({
     yaw = useRef(Math.PI / 2),
     pitch = useRef(0);
   const diagnosticAt = useRef(0);
+  const renderEpoch = useRef(0);
+  const pendingDiagnostic = useRef<Window['__NEPTUNE_TWIN_SCENE__']>(undefined);
+  useEffect(() => addAfterEffect(() => {
+    // The callback follows all automatic root renders. Never read the previous
+    // frame's GPU allocation counters from a pre-render useFrame callback.
+    if (!pendingDiagnostic.current) return;
+    const visualKit = visualKitDiagnostic(scene, camera, kitCache, pendingDiagnostic.current.detailModuleId, gl.info.render.frame);
+    window.__NEPTUNE_TWIN_SCENE__ = {
+      ...pendingDiagnostic.current,
+      renderEpoch: ++renderEpoch.current,
+      drawCalls: gl.info.render.calls,
+      triangles: gl.info.render.triangles,
+      geometries: gl.info.memory.geometries,
+      textures: gl.info.memory.textures,
+      visualKit,
+    };
+    pendingDiagnostic.current = undefined;
+    onKitStatus(visualKit.status);
+  }), [camera, gl, scene, kitCache, onKitStatus]);
   const snapshots = useRef(new Map<string, CameraPose>()),
     lastContext = useRef('');
   const moduleId = moduleSpec?.id;
@@ -914,17 +960,25 @@ function CameraRig({
       distance *= aspectFactor;
       goal.current.target.fromArray(center);
       if (props.focus === 'cooling' && moduleSpec) {
-        goal.current.target.set(
-          moduleSpec.positionM[0] + 9.5,
-          moduleSpec.positionM[1] - 0.9,
-          moduleSpec.positionM[2],
-        );
-        goal.current.target.add(
-          new Vector3(...presentationOffset('exchanger', props.exploded)),
-        );
+        const equipment = moduleAssets(props.design, moduleSpec.id).filter(asset => ['pump', 'exchanger'].includes(asset.type));
+        const min = new Vector3(Infinity, Infinity, Infinity), max = new Vector3(-Infinity, -Infinity, -Infinity);
+        for (const asset of equipment) {
+          const center = new Vector3(...presentedPosition(asset, props.exploded)), half = new Vector3(...asset.dimensionsM).multiplyScalar(0.5);
+          min.min(center.clone().sub(half)); max.max(center.clone().add(half));
+        }
+        goal.current.target.copy(min).add(max).multiplyScalar(0.5);
+        const span = max.clone().sub(min);
+        const verticalHalfFov = 46 * Math.PI / 360;
+        const horizontalHalfFov = Math.atan(Math.tan(verticalHalfFov) * size.width / size.height);
+        // Fit the complete canonical equipment sphere inside the smaller field
+        // of view, reserving margin for the existing canvas controls/labels.
+        const fit = span.length() * 0.5 / Math.sin(Math.min(verticalHalfFov, horizontalHalfFov)) * 1.25;
         goal.current.position
           .copy(goal.current.target)
-          .add(new Vector3(-2, 6, -13).multiplyScalar(aspectFactor));
+          .add(new Vector3(-0.28, 0.40, -0.86).normalize().multiplyScalar(fit));
+      } else if (props.focus === 'selection' && subject?.type === 'exchanger') {
+        const fit = Math.max(5.2, distance) * aspectFactor;
+        goal.current.position.copy(goal.current.target).add(new Vector3(0.65, 0.32, -0.69).normalize().multiplyScalar(fit));
       } else if (props.focus === 'top')
         goal.current.position.set(center[0], distance, center[2] + 0.02);
       else
@@ -1139,13 +1193,15 @@ function CameraRig({
     diagnosticAt.current += delta;
     if (diagnosticAt.current > 0.25) {
       diagnosticAt.current = 0;
-      window.__NEPTUNE_TWIN_SCENE__ = {
+      pendingDiagnostic.current = {
         camera: camera.position.toArray(),
         target: c.target.toArray(),
         drawCalls: gl.info.render.calls,
         triangles: gl.info.render.triangles,
         pixelRatio: gl.getPixelRatio(),
         visualSystem: 'blue-hour-v1',
+        renderEpoch: renderEpoch.current,
+        visualKit: { version: 'systems-reveal-v2', moduleId: moduleSpec?.id ?? '', status: 'idle', assets: [], cache: kitCache.inventory() },
         reducedMotion: props.reducedMotion,
         oceanTimeS: ((scene.getObjectByName('blue-hour-ocean') as Mesh | undefined)?.material as ShaderMaterial | undefined)?.uniforms.time.value ?? 0,
         geometries: gl.info.memory.geometries,
@@ -1195,6 +1251,8 @@ declare global {
       triangles: number;
       pixelRatio: number;
       visualSystem: string;
+      renderEpoch: number;
+      visualKit: KitDiagnostic;
       reducedMotion: boolean;
       oceanTimeS: number;
       geometries: number;
@@ -1362,6 +1420,9 @@ export default function TwinScene(input: TwinSceneProps) {
   const [lost, setLost] = useState(false),
     [visible, setVisible] = useState(!document.hidden),
     [waypoint, setWaypoint] = useState(0);
+  const [kitCache, setKitCache] = useState(() => new VisualKitCache());
+  const [kitStatus, setKitStatus] = useState<KitStatus>('idle');
+  useEffect(() => supported && !lost ? kitCache.retain() : undefined, [kitCache, supported, lost]);
   useEffect(() => {
     const listener = () => setVisible(!document.hidden);
     document.addEventListener('visibilitychange', listener);
@@ -1371,7 +1432,7 @@ export default function TwinScene(input: TwinSceneProps) {
     };
   }, []);
   const fallback = <TwinFallback {...props} />;
-  if (!supported || lost) return fallback;
+  if (!supported || lost) return <>{fallback}{lost && <button className="twin-restore" onClick={() => { setKitCache(new VisualKitCache()); setKitStatus('idle'); setLost(false); }}>Restore 3D view</button>}</>;
   return (
     <div
       className="twin-scene"
@@ -1404,6 +1465,7 @@ export default function TwinScene(input: TwinSceneProps) {
               'webglcontextlost',
               (event) => {
                 event.preventDefault();
+                delete window.__NEPTUNE_TWIN_SCENE__;
                 setLost(true);
               },
               { once: true },
@@ -1417,15 +1479,21 @@ export default function TwinScene(input: TwinSceneProps) {
             moduleSpec={moduleSpec}
             details={details}
             active={active}
+            kitCache={kitCache}
           />
           <CameraRig
             props={sceneProps}
             moduleSpec={moduleSpec}
             active={active}
             waypoint={waypoint}
+            kitCache={kitCache}
+            onKitStatus={setKitStatus}
           />
         </Canvas>
       </TwinBoundary>
+      {kitStatus !== 'idle' && kitStatus !== 'ready' && <output className="twin-kit-status" data-testid="visual-kit-status" data-status={kitStatus}>
+        {kitStatus === 'loading' ? 'Loading equipment detail · envelopes remain interactive' : 'Equipment detail unavailable for some assets · procedural view active'}
+      </output>}
       <div className="twin-scale-caption">
         <span>1 UNIT = 1 m</span>
         <span>
@@ -1436,15 +1504,19 @@ export default function TwinScene(input: TwinSceneProps) {
           LOD: {moduleSpec?.rackCount ?? 0} racks · {moduleSpec?.nodeCount ?? 0}{' '}
           nodes · 1 selected module
         </span>
+        {kitStatus === 'ready' && <output data-testid="visual-kit-status" data-status="ready">Authored equipment · illustrative exterior</output>}
       </div>
-      <div className="twin-route-legend" aria-label="Connection colors">
+      <details className="twin-route-legend" aria-label="Connection colors">
+        <summary>Circuit legend</summary>
+        <div>
         <span style={{ color: MEDIUM_COLORS.technical }}>
           — Technical coolant
         </span>
         <span style={{ color: MEDIUM_COLORS.seawater }}>— Seawater</span>
         <span style={{ color: MEDIUM_COLORS.power }}>— Power</span>
         <span style={{ color: MEDIUM_COLORS.cluster }}>— Network</span>
-      </div>
+        </div>
+      </details>
       {props.exploded && !props.inside && (
         <div className="twin-presentation-note">
           Exploded offsets are presentation only · physical routes and solver

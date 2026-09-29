@@ -11,6 +11,29 @@
   outline-offset: -4px;
   touch-action: none;
 }
+.twin-kit-status {
+  position: absolute;
+  left: 20px;
+  bottom: 124px;
+  max-width: calc(100% - 40px);
+  padding: 5px 9px;
+  color: #b2c1cc;
+  background: #142330ed;
+  border: 1px solid #83d5e826;
+  border-radius: 6px;
+  pointer-events: none;
+  font: 10px/1.4 ui-monospace, monospace;
+}
+.twin-restore {
+  position: absolute;
+  right: 20px;
+  bottom: 112px;
+  padding: 9px 12px;
+  border: 1px solid #83d5e8;
+  border-radius: 5px;
+  color: #edf3f6;
+  background: #142330;
+}
 .twin-scale-caption {
   position: absolute;
   right: 18px;
@@ -39,10 +62,7 @@
   position: absolute;
   left: 20px;
   bottom: 82px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  pointer-events: none;
+  pointer-events: auto;
   font:
     10px/1.5 ui-monospace,
     SFMono-Regular,
@@ -52,6 +72,9 @@
   border: 1px solid #83d5e826;
   border-radius: 4px;
 }
+.twin-route-legend summary { cursor: pointer; color: #b2c1cc; }
+.twin-route-legend summary:focus-visible { outline: 2px solid #83d5e8; outline-offset: 3px; }
+.twin-route-legend > div { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
 .twin-presentation-note {
   position: absolute;
   left: 20px;
@@ -195,6 +218,7 @@
   margin-top: auto;
 }
 @media (max-width: 700px) {
+  .twin-kit-status { left: 10px; bottom: 164px; font-size: 9px; }
   .twin-scene,
   .twin-fallback {
     min-height: 370px;
