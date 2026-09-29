@@ -13,7 +13,7 @@ const PURPOSE: Record<Workspace, [string, string]> = {
 };
 export function WorkspaceGuide({ workspace, onAssets, onEquipment, onCampus }: { workspace: Workspace; onAssets: () => void; onEquipment: () => void; onCampus: () => void }) {
   return <section className="operator-guide" aria-label={`${workspace} workspace guide`}>
-    <div><span className="twin-eyebrow">{workspace.toUpperCase()}</span><h2>{PURPOSE[workspace][0]}</h2><p>{PURPOSE[workspace][1]}</p></div>
+    <div><span className="twin-eyebrow">{workspace.toUpperCase()}</span><h2>{PURPOSE[workspace][0]}</h2><details className="operator-guide-help"><summary>Workspace guidance</summary><p>{PURPOSE[workspace][1]}</p></details></div>
     <div className="twin-actions"><button onClick={onCampus}>Campus context</button><button onClick={onAssets}>Browse installed assets</button><button onClick={onEquipment}>Inspect selected equipment</button></div>
   </section>;
 }

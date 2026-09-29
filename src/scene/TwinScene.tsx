@@ -18,20 +18,25 @@ import {
 } from '@react-three/fiber';
 import { Html, Line, OrbitControls } from '@react-three/drei';
 import {
-  BackSide,
+  ACESFilmicToneMapping,
+  SRGBColorSpace,
+  type ShaderMaterial,
   BoxGeometry,
   Color,
   CylinderGeometry,
+  EdgesGeometry,
   Group,
   InstancedMesh,
   Mesh,
   MeshStandardMaterial,
   Object3D,
   Quaternion,
-  ShaderMaterial,
   Vector3,
 } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { BlueHourEnvironment } from './visuals/DuskEnvironment';
+import { BLUE_HOUR, assetSurface, stateColor } from './visuals/materials';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import type {
   Asset,
@@ -83,23 +88,9 @@ export interface TwinSceneProps {
   onManual: () => void;
   onReady?: () => void;
 }
-const COLORS: Record<Asset['type'], string> = {
-  platform: '#819899',
-  hull: '#18353e',
-  module: '#bfcdca',
-  rack: '#203840',
-  compute: '#41616b',
-  cdu: '#3b9d91',
-  exchanger: '#49b6a0',
-  pump: '#3ba690',
-  valve: '#b7cfd0',
-  pipe: '#53c6b5',
-  transformer: '#b4a484',
-  switchboard: '#bdab8b',
-  battery: '#c28d52',
-  network: '#837aac',
-  external: '#758f9f',
-};
+const COLORS = Object.fromEntries(
+  (['platform', 'hull', 'module', 'rack', 'compute', 'cdu', 'exchanger', 'pump', 'valve', 'pipe', 'transformer', 'switchboard', 'battery', 'network', 'external'] as Asset['type'][]).map(type => [type, assetSurface(type).color]),
+) as Record<Asset['type'], string>;
 const MEDIUM_COLORS: Record<Connection['medium'], string> = {
   power: '#edb878',
   technical: '#64ebc5',
@@ -108,13 +99,6 @@ const MEDIUM_COLORS: Record<Connection['medium'], string> = {
   'external-network': '#a298fb',
 };
 const UNIT_SCALE: Vec3 = [1, 1, 1];
-function stateColor(state: EquipmentState | undefined, fallback: string) {
-  if (state === 'failed') return '#ff5d52';
-  if (state === 'maintenance' || state === 'isolated') return '#667882';
-  if (state === 'starting') return '#ffd17c';
-  if (state === 'standby') return '#7e9ba0';
-  return fallback;
-}
 function Instances({
   assets,
   selectedId,
@@ -137,6 +121,10 @@ function Instances({
   surface?: boolean;
 }) {
   const ref = useRef<InstancedMesh>(null);
+  const material = assetSurface(surface ? 'valve' : assets[0]?.type ?? 'module');
+  const bevel = !surface && ['module', 'cdu', 'exchanger', 'transformer', 'switchboard', 'battery'].includes(assets[0]?.type);
+  const geometry = useMemo(() => bevel ? new RoundedBoxGeometry(1, 1, 1, 1, 0.018) : new BoxGeometry(1, 1, 1), [bevel]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
   useLayoutEffect(() => {
     if (!ref.current) return;
     const dummy = new Object3D(),
@@ -153,9 +141,7 @@ function Instances({
       const base = stateColor(states?.[asset.id], color ?? COLORS[asset.type]);
       ref.current!.setColorAt(
         i,
-        tint.set(
-          asset.id === selectedId && !states?.[asset.id] ? '#edf5da' : base,
-        ),
+        tint.set(base),
       );
     });
     ref.current.instanceMatrix.needsUpdate = true;
@@ -166,7 +152,7 @@ function Instances({
   return (
     <instancedMesh
       ref={ref}
-      args={[undefined, undefined, assets.length]}
+      args={[geometry, undefined, assets.length]}
       castShadow
       receiveShadow
       onClick={(event: ThreeEvent<MouseEvent>) => {
@@ -175,11 +161,11 @@ function Instances({
         onSelect(assets[event.instanceId].id);
       }}
     >
-      <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial
+        key={opacity < 1 ? 'transparent' : 'opaque'}
         color="white"
-        roughness={0.73}
-        metalness={0.25}
+        roughness={material.roughness}
+        metalness={material.metalness}
         transparent={opacity < 1}
         opacity={opacity}
         depthWrite={opacity > 0.7}
@@ -189,6 +175,18 @@ function Instances({
       />
     </instancedMesh>
   );
+}
+function EquipmentInstances(props: Parameters<typeof Instances>[0]) {
+  const groups = useMemo(() => {
+    const byType = new Map<Asset['type'], Asset[]>();
+    for (const asset of props.assets) {
+      const group = byType.get(asset.type) ?? [];
+      group.push(asset);
+      byType.set(asset.type, group);
+    }
+    return [...byType.entries()];
+  }, [props.assets]);
+  return <>{groups.map(([type, assets]) => <Instances key={type} {...props} assets={assets} />)}</>;
 }
 function ModuleEnvelopeDetails({
   assets,
@@ -256,89 +254,33 @@ function ModuleEnvelopeDetails({
       <Instances
         assets={pieces.roof}
         {...common}
-        color="#688991"
+        color={BLUE_HOUR.silver}
         opacity={xray ? 0.2 : 0.8}
       />
       <Instances
         assets={pieces.louvers}
         {...common}
-        color="#426879"
+        color={BLUE_HOUR.structure}
         opacity={xray ? 0.16 : 0.8}
       />
       <Instances
         assets={pieces.corners}
         {...common}
-        color="#72969b"
+        color={BLUE_HOUR.silver}
         opacity={xray ? 0.18 : 0.8}
       />
     </group>
   );
 }
-const waveVertex = `varying vec3 vWorld; uniform float time; void main(){ vec3 p=position; p.z += sin(p.x*.14+time*.4)*.13 + sin(p.y*.2+time*.3)*.08; vec4 world=modelMatrix*vec4(p,1.); vWorld=world.xyz; gl_Position=projectionMatrix*viewMatrix*world; }`;
-const waveFragment = `varying vec3 vWorld; uniform float time; void main(){float wave=sin(vWorld.x*.6+vWorld.z*1.3+time*.8)*sin(vWorld.z*2.1-time*.5); float fine=pow(max(0.,sin(vWorld.x*1.4+vWorld.z*2.8+sin(vWorld.x*.2+time*.4)*2.+sin(vWorld.z*.23)*3.)),16.); float distanceFade=exp(-length(vWorld.xz)*.0025); float trail=exp(-pow((vWorld.x+55.)/24.,2.))*(1.-smoothstep(-250.,40.,vWorld.z)); vec3 c=mix(vec3(.055,.13,.17),vec3(.11,.23,.28),wave*.08+.2); c+=vec3(.22,.13,.075)*trail*(.23+fine*.45); c+=vec3(.14,.26,.3)*fine*.045*distanceFade; float horizon=smoothstep(10.,600.,length(vWorld.xz)); c=mix(c,vec3(.49,.29,.23),horizon*.82); gl_FragColor=vec4(c,1.); }`;
-function SunsetSky({ radius }: { radius: number }) {
-  const material = useMemo(
-    () =>
-      new ShaderMaterial({
-        side: BackSide,
-        depthWrite: false,
-        toneMapped: false,
-        vertexShader:
-          'varying vec3 vDirection; void main(){vDirection=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-        fragmentShader:
-          'varying vec3 vDirection; void main(){vec3 d=normalize(vDirection); float h=max(d.y,0.); vec3 c=mix(vec3(.77,.40,.26),vec3(.14,.23,.31),smoothstep(0.,.45,h)); c=mix(vec3(.45,.28,.24),c,smoothstep(-.1,.015,d.y)); vec3 sun=normalize(vec3(-150.,3.,-100.)); float sd=dot(d,sun); float glow=pow(max(0.,sd),100.); c+=vec3(.27,.13,.035)*glow; float disk=smoothstep(.99993,.99996,sd); c=mix(c,vec3(1.,.82,.52),disk); gl_FragColor=vec4(c,1.);}',
-      }),
-    [],
-  );
-  useEffect(() => () => material.dispose(), [material]);
-  return (
-    <mesh material={material} renderOrder={-100}>
-      <sphereGeometry args={[Math.max(1800, radius * 15), 32, 16]} />
-    </mesh>
-  );
-}
-function Water({ quiet, radius }: { quiet: boolean; radius: number }) {
-  const ref = useRef<Mesh>(null);
-  const material = useMemo(
-    () =>
-      new ShaderMaterial({
-        uniforms: { time: { value: 0 } },
-        vertexShader: waveVertex,
-        fragmentShader: waveFragment,
-      }),
-    [],
-  );
-  useEffect(() => () => material.dispose(), [material]);
-  useFrame((_, dt) => {
-    const current = ref.current?.material as ShaderMaterial | undefined;
-    if (current && !quiet && !document.hidden)
-      current.uniforms.time.value += Math.min(0.05, dt);
-  });
-  return (
-    <mesh
-      ref={ref}
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, 0, 0]}
-      material={material}
-    >
-      <planeGeometry
-        args={[
-          Math.max(3000, radius * 12),
-          Math.max(3000, radius * 12),
-          96,
-          96,
-        ]}
-      />
-    </mesh>
-  );
-}
 function ModuleStructure({
   asset,
+  state,
   exploded,
   xray,
   inside,
 }: {
   asset: Asset;
+  state?: EquipmentState;
   exploded: boolean;
   xray: boolean;
   inside: boolean;
@@ -350,9 +292,9 @@ function ModuleStructure({
     <mesh key={key} position={position} receiveShadow castShadow>
       <boxGeometry args={dimensions} />
       <meshStandardMaterial
-        color="#bacdca"
-        roughness={0.72}
-        metalness={0.25}
+        key={opacity < 1 ? 'transparent' : 'opaque'}
+        {...assetSurface(key === 'floor' || key === 'aisle' ? 'platform' : 'module')}
+        color={stateColor(state, assetSurface(key === 'floor' || key === 'aisle' ? 'platform' : 'module').color)}
         transparent={opacity < 1}
         opacity={opacity}
         depthWrite={opacity > 0.7}
@@ -361,12 +303,12 @@ function ModuleStructure({
   );
   return (
     <group position={p}>
-      {wall([0, -h / 2 + 0.04, 0], [w, 0.08, d], 'floor')}
+      {wall([0, -h / 2 + 0.04, 0], [w, 0.08, d], 'floor', inside ? 1 : xray || exploded ? 0.1 : 1)}
       {wall(
         [0, h / 2 - 0.04 + (exploded ? 3 : 0), 0],
         [w, 0.08, d],
         'roof',
-        inside ? 0.05 : xray ? 0.09 : 0.75,
+        inside ? 0.05 : xray ? 0.09 : 1,
       )}
       {[-1, 1].map((side) =>
         wall(
@@ -385,13 +327,13 @@ function ModuleStructure({
           ),
         ),
       )}
-      {wall([0, -h / 2 + 0.052, 0], [18.8, 0.015, 2.6], 'aisle')}
+      {wall([0, -h / 2 + 0.052, 0], [18.8, 0.015, 2.6], 'aisle', inside ? 1 : xray || exploded ? 0.1 : 1)}
       <mesh
         position={[-1.5, -h / 2 + 0.065, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
       >
         <planeGeometry args={[19, 0.06]} />
-        <meshBasicMaterial color="#4dc3a6" />
+        <meshBasicMaterial color={BLUE_HOUR.pearl} />
       </mesh>
     </group>
   );
@@ -419,19 +361,19 @@ function PumpEnvelope({
     >
       <mesh position={[0, -h / 2 + 0.07, 0]}>
         <boxGeometry args={[w, 0.14, d]} />
-        <meshStandardMaterial color="#29464d" roughness={0.7} metalness={0.6} />
+        <meshStandardMaterial {...assetSurface('hull')} />
       </mesh>
       <mesh rotation={[0, 0, Math.PI / 2]} position={[w * 0.08, -h * 0.07, 0]}>
         <cylinderGeometry args={[d * 0.44, d * 0.44, w * 0.7, 16]} />
-        <meshStandardMaterial color={color} roughness={0.45} metalness={0.55} />
+        <meshStandardMaterial {...assetSurface('pump')} color={color} />
       </mesh>
       <mesh position={[-w * 0.36, -h * 0.07, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[d * 0.46, d * 0.46, w * 0.18, 16]} />
-        <meshStandardMaterial color={color} roughness={0.45} metalness={0.55} />
+        <meshStandardMaterial {...assetSurface('pump')} color={color} />
       </mesh>
       <mesh position={[-w * 0.35, h * 0.3, 0]}>
         <cylinderGeometry args={[d * 0.17, d * 0.17, h * 0.35, 12]} />
-        <meshStandardMaterial color="#a5b9b7" metalness={0.8} roughness={0.3} />
+        <meshStandardMaterial {...assetSurface('valve')} />
       </mesh>
       <mesh position={[w * 0.19, h * 0.18, 0]}>
         <boxGeometry args={[w * 0.22, h * 0.14, d * 0.42]} />
@@ -444,27 +386,22 @@ function PumpEnvelope({
     </group>
   );
 }
-function SelectionOutline({
-  asset,
-  exploded,
-}: {
-  asset: Asset;
-  exploded: boolean;
-}) {
+function SelectionOutline({ asset, exploded }: { asset: Asset; exploded: boolean }) {
+  const geometry = useMemo(() => {
+    const box = new BoxGeometry(1, 1, 1);
+    const edges = new EdgesGeometry(box);
+    box.dispose();
+    return edges;
+  }, []);
+  useEffect(() => () => geometry.dispose(), [geometry]);
   return (
-    <mesh
+    <lineSegments
+      geometry={geometry}
       position={presentedPosition(asset, exploded)}
       scale={asset.dimensionsM.map((d) => d + 0.045) as Vec3}
     >
-      <boxGeometry args={[1, 1, 1]} />
-      <meshBasicMaterial
-        color="#eaffd5"
-        wireframe
-        transparent
-        opacity={0.8}
-        depthTest={false}
-      />
-    </mesh>
+      <lineBasicMaterial color={BLUE_HOUR.selection} transparent opacity={0.9} depthTest={false} />
+    </lineSegments>
   );
 }
 function PipeRoutes({
@@ -780,7 +717,7 @@ function TwinFacility({
     <group>
       <Instances assets={hulls} {...common} />
       <Instances assets={platforms} {...common} />
-      <Instances assets={shells} {...common} states={states} opacity={props.xray ? 0.35 : 1} />
+      <Instances assets={shells} {...common} states={states} opacity={props.xray ? (props.focus === 'cooling' ? 0.12 : 0.35) : 1} />
       <ModuleEnvelopeDetails
         assets={envelopes}
         selectedModuleId={moduleSpec?.id}
@@ -788,10 +725,11 @@ function TwinFacility({
         xray={props.xray}
         onSelect={props.onSelect}
       />
-      <Instances assets={globals} {...common} states={states} />
+      <EquipmentInstances assets={globals} {...common} states={states} />
       {moduleAsset && (
         <ModuleStructure
           asset={moduleAsset}
+          state={states?.[moduleAsset.id]}
           exploded={props.exploded}
           xray={props.xray}
           inside={props.inside}
@@ -803,7 +741,7 @@ function TwinFacility({
         opacity={props.xray || props.inside ? 0.17 : 0.75}
       />
       <Instances assets={nodes} {...common} states={states} />
-      <Instances assets={equipment} {...common} states={states} />
+      <EquipmentInstances assets={equipment} {...common} states={states} />
       {details
         .filter((a) => a.type === 'pump')
         .map((asset) => (
@@ -887,7 +825,7 @@ function CameraRig({
   active?: Asset;
   waypoint: number;
 }) {
-  const { camera, gl, size } = useThree();
+  const { camera, gl, size, scene } = useThree();
   const controls = useRef<OrbitControlsImpl>(null);
   const goal = useRef<CameraPose>({
     position: new Vector3(),
@@ -917,7 +855,7 @@ function CameraRig({
   useEffect(() => {
     const c = controls.current;
     if (!c) return;
-    const context = `${props.design.revision}:${props.exploded ? 'exploded' : 'assembled'}:${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
+    const context = `${size.width}x${size.height}:${props.design.revision}:${props.exploded ? 'exploded' : 'assembled'}:${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
     if (lastContext.current && !wasInside.current && !inside)
       snapshots.current.set(lastContext.current, {
         position: camera.position.clone(),
@@ -986,7 +924,7 @@ function CameraRig({
         );
         goal.current.position
           .copy(goal.current.target)
-          .add(new Vector3(-7.5, 4.8, 1.2).multiplyScalar(aspectFactor));
+          .add(new Vector3(-2, 6, -13).multiplyScalar(aspectFactor));
       } else if (props.focus === 'top')
         goal.current.position.set(center[0], distance, center[2] + 0.02);
       else
@@ -1009,9 +947,15 @@ function CameraRig({
       }
     }
     while (snapshots.current.size > 24) snapshots.current.delete(snapshots.current.keys().next().value!);
+    const initial = !lastContext.current;
     wasInside.current = inside;
     lastContext.current = context;
-    transitioning.current = true;
+    if (initial) {
+      camera.position.copy(goal.current.position);
+      c.target.copy(goal.current.target);
+      c.update();
+    }
+    transitioning.current = !initial;
   }, [
     props.focus,
     props.selectedId,
@@ -1199,6 +1143,11 @@ function CameraRig({
         camera: camera.position.toArray(),
         target: c.target.toArray(),
         drawCalls: gl.info.render.calls,
+        triangles: gl.info.render.triangles,
+        pixelRatio: gl.getPixelRatio(),
+        visualSystem: 'blue-hour-v1',
+        reducedMotion: props.reducedMotion,
+        oceanTimeS: ((scene.getObjectByName('blue-hour-ocean') as Mesh | undefined)?.material as ShaderMaterial | undefined)?.uniforms.time.value ?? 0,
         geometries: gl.info.memory.geometries,
         textures: gl.info.memory.textures,
         selectedId: props.selectedId,
@@ -1243,6 +1192,11 @@ declare global {
       camera: number[];
       target: number[];
       drawCalls: number;
+      triangles: number;
+      pixelRatio: number;
+      visualSystem: string;
+      reducedMotion: boolean;
+      oceanTimeS: number;
       geometries: number;
       textures: number;
       selectedId: string;
@@ -1345,7 +1299,7 @@ export function TwinFallback(props: TwinSceneProps) {
               rx={0.04}
               fill={stateColor(states?.[a.id], COLORS[a.type])}
               fillOpacity={a.type === 'platform' ? 0.22 : 0.85}
-              stroke={a.id === props.selectedId ? '#efffd4' : '#8ca9ac'}
+              stroke={a.id === props.selectedId ? BLUE_HOUR.selection : BLUE_HOUR.silver}
               strokeWidth={a.id === props.selectedId ? 0.1 : 0.025}
             />
             <title>
@@ -1441,7 +1395,10 @@ export default function TwinScene(input: TwinSceneProps) {
             preserveDrawingBuffer: true,
           }}
           onCreated={({ gl }) => {
-            gl.setClearColor('#0a1920');
+            gl.setClearColor(BLUE_HOUR.ocean);
+            gl.toneMapping = ACESFilmicToneMapping;
+            gl.toneMappingExposure = 1;
+            gl.outputColorSpace = SRGBColorSpace;
             gl.domElement.setAttribute('role', 'img');
             gl.domElement.addEventListener(
               'webglcontextlost',
@@ -1454,24 +1411,7 @@ export default function TwinScene(input: TwinSceneProps) {
             props.onReady?.();
           }}
         >
-          <SunsetSky radius={radius} />
-          <fog
-            attach="fog"
-            args={['#0a1920', radius * 3.5, radius * 9 + 1000]}
-          />
-          <ambientLight intensity={1.1} color="#b7d3d4" />
-          <hemisphereLight args={['#d4eef0', '#203941', 2.3]} />
-          <directionalLight
-            position={[-80, 110, -40]}
-            intensity={3.5}
-            color="#ffc899"
-          />
-          <directionalLight
-            position={[70, 50, 80]}
-            intensity={1.4}
-            color="#c0ebf2"
-          />
-          <Water quiet={props.reducedMotion} radius={radius} />
+          <BlueHourEnvironment radius={radius} quiet={props.reducedMotion} />
           <TwinFacility
             props={sceneProps}
             moduleSpec={moduleSpec}
@@ -1574,7 +1514,7 @@ export async function geometryGLTF(design: Design): Promise<object> {
     pipeGeometry = new CylinderGeometry(1, 1, 1, 10),
     materials = new Map<Asset['type'], MeshStandardMaterial>();
   for (const type of Object.keys(COLORS) as Asset['type'][])
-    materials.set(type, new MeshStandardMaterial({ color: COLORS[type] }));
+    materials.set(type, new MeshStandardMaterial(assetSurface(type)));
   const add = (asset: Asset) => {
     if (asset.id.endsWith('/pipe-tech')) {
       const spec = design.modules.find((m) => m.id === asset.parentId);

@@ -1,0 +1,36 @@
+/* Blue Hour UI palette. Information surfaces stay opaque; only small scene
+   overlays use translucency. Status colors never encode asset selection. */
+.twin-app {
+  --blue-hour-background: #0b141d;
+  --blue-hour-panel: #142330;
+  --blue-hour-panel-raised: #192c3b;
+  --blue-hour-panel-hover: #213c4d;
+  --blue-hour-inset: #0e1b26;
+  --blue-hour-border: #304655;
+  --blue-hour-border-strong: #526a7a;
+  --blue-hour-text: #edf3f6;
+  --blue-hour-secondary: #b2c1cc;
+  --blue-hour-focus: #83d5e8;
+  --blue-hour-focus-ink: #0b2833;
+  --blue-hour-selected: #1b3d4d;
+  --blue-hour-warning: #f0be72;
+  --blue-hour-warning-background: #392d20;
+  --blue-hour-warning-border: #8a6940;
+  --blue-hour-failure: #f27b79;
+  --blue-hour-failure-background: #3b252b;
+  --blue-hour-failure-border: #925358;
+  --blue-hour-unknown: #c1bddc;
+  --blue-hour-unknown-background: #2b2b3d;
+  --blue-hour-unknown-border: #5d5a77;
+  --blue-hour-technical: #93dfcf;
+  --blue-hour-seawater: #88bfff;
+  --blue-hour-overlay: rgb(11 20 29 / 90%);
+  --blue-hour-shadow: 0 12px 32px rgb(3 10 17 / 28%);
+  --blue-hour-radius: 8px;
+  --blue-hour-radius-large: 12px;
+  /* Existing components share the same presentation vocabulary. */
+  --ink: var(--blue-hour-text);
+  --muted: var(--blue-hour-secondary);
+  --line: var(--blue-hour-border);
+  --mint: var(--blue-hour-focus);
+}
