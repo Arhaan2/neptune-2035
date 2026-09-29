@@ -145,8 +145,8 @@
       "selectionOwner": "canonical parent asset ID",
       "url": "visuals/v2/pump.glb",
       "rootName": "pump_canonical_root",
-      "sha256": "1e38190d53be939b7285d976e6ef2d2ac7643d5008ef1f6870fa4a64b800f9a9",
-      "bytes": 325256,
+      "sha256": "349db03c6513239aac075c85942ae8a79f90827f40c96b52fdcd593b992eaf75",
+      "bytes": 325180,
       "semanticSha256": "7405868967285086fcb6885cd8a0463dd517077f03a0b254152cae5dd366fd9d",
       "actualBoundsM": {
         "min": [
@@ -261,8 +261,8 @@
       "selectionOwner": "canonical parent asset ID",
       "url": "visuals/v2/exchanger.glb",
       "rootName": "exchanger_canonical_root",
-      "sha256": "df09475ea7be7ac73721a61afd791b05e1a29797ed6b1906c642ca04dbde79e5",
-      "bytes": 559312,
+      "sha256": "b18e9ad1d69d2b588e34e9eb06d728a891449d61959d8150b41a47631424c559",
+      "bytes": 559236,
       "semanticSha256": "383f2b929bc3d5afbd639d4a2461876098538d8c49aded53f3f4f81dc01f149c",
       "actualBoundsM": {
         "min": [
@@ -310,6 +310,7 @@
       "export_animations": false
     },
     "guideShipping": false,
+    "materialSide": "front",
     "originalGeometry": true,
     "externalAssets": [],
     "gltfExporter": "Khronos glTF Blender I/O v4.3.47"

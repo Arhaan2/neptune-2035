@@ -4,13 +4,14 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { validateBytes, version } from 'gltf-validator';
-import { Box3, Vector3, Matrix4 } from 'three';
+import { Box3, Vector3, Matrix4, FrontSide } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../../..');
 const sourceDir = process.argv[2];
-if (!sourceDir) throw Error('Usage: node scripts/visuals/blender/validate.mjs /path/to/nonshipping-source-dir');
+if (!sourceDir) throw Error('Usage: node scripts/visuals/blender/validate.mjs /path/to/nonshipping-source-dir [output-dir]');
+const outputDir = process.argv[3] ? resolve(process.argv[3]) : resolve(root, 'public/visuals/v2');
 const descriptorBytes = await readFile(resolve(here, 'descriptor.json'));
 const descriptor = JSON.parse(descriptorBytes);
 const authoring = JSON.parse(await readFile(resolve(sourceDir, 'authoring-run.json'), 'utf8'));
@@ -37,7 +38,7 @@ assert(proofSize.every((v, i) => close(v, [0.13, 0.07, 0.03][i])), 'Asymmetric g
 
 const templates = [];
 for (const template of descriptor.templates) {
-  const path = resolve(root, 'public/visuals/v2', template.file);
+  const path = resolve(outputDir, template.file);
   const bytes = await readFile(path);
   const document = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString());
   assert((document.images ?? []).length === 0 && (document.textures ?? []).length === 0, `${template.file}: unexpected texture dependency`);
@@ -70,6 +71,7 @@ for (const template of descriptor.templates) {
     assert(!Array.isArray(material), `${object.name}: one material per merged mesh required`);
     assert(descriptor.materialRoles.some(role => role.name === material.name), `${object.name}: unexpected role`);
     assert(!material.transparent && material.opacity === 1 && material.isMeshStandardMaterial, `${object.name}: unsupported material`);
+    assert(material.side === FrontSide, `${object.name}: closed-solid material must cull backfaces`);
     materials.add(material.name);
     Object.values(material).filter(v => v?.isTexture).forEach(texture => textures.add(texture));
     semantic.push({ name: object.name, matrix: object.matrixWorld.toArray(), positions: [...position.array], normals: [...normal.array], indices: [...geometry.index.array], material: {name: material.name, color: material.color.toArray(), metalness: material.metalness, roughness: material.roughness} });
@@ -90,5 +92,5 @@ for (const template of descriptor.templates) {
   templates.push({...template, url: `visuals/v2/${template.file}`, rootName: `${template.id}_canonical_root`, sha256: hash(bytes), bytes: bytes.length, semanticSha256: hash(JSON.stringify(semantic)), actualBoundsM: {min: bounds.min.toArray(), max: bounds.max.toArray()}, metrics: {meshes, materials: materials.size, textures: textures.size, triangles, vertices}, validation: {validator: 'Khronos glTF Validator', version: version(), errors: validation.issues.numErrors, warnings: validation.issues.numWarnings, infos: validation.issues.numInfos, messages: validation.issues.messages}});
 }
 const manifest = {...descriptor, descriptorSha256: hash(descriptorBytes), authoring, orientationProof: {meterStartM: start, meterEndM: end, asymmetricM: asymmetric, asymmetricSizeM: proofSize, sourceFile: 'regenerated outside shipping payload', testedWith: 'Three GLTFLoader'}, templates};
-await writeFile(resolve(root, 'public/visuals/v2/manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+await writeFile(resolve(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 console.log(JSON.stringify({kitId: descriptor.kitId, version: descriptor.version, blender: authoring.blenderVersion, validator: version(), orientationProof: manifest.orientationProof, assets: templates.map(t => ({file: t.file, sha256: t.sha256, bytes: t.bytes, ...t.metrics, validation: t.validation}))}, null, 2));

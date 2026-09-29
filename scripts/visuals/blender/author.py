@@ -47,6 +47,8 @@ def reset():
     for role in descriptor['materialRoles']:
         material = bpy.data.materials.new(role['name'])
         material.use_nodes = True
+        # Every authored part is a closed solid with outward-facing polygons.
+        material.use_backface_culling = True
         rgb = tuple(linear(int(role['color'][i:i + 2], 16) / 255) for i in (1, 3, 5))
         bsdf = material.node_tree.nodes.get('Principled BSDF')
         bsdf.inputs['Base Color'].default_value = (*rgb, 1)
@@ -269,6 +271,7 @@ export(source / 'orientation-proof.glb')
     'authoringCoordinates': 'runtime (x,y,z) -> Blender (x,-z,y)',
     'exportSettings': {'format': 'GLB', 'export_yup': True, 'export_apply': True, 'export_extras': True, 'export_normals': True, 'export_texcoords': False, 'export_cameras': False, 'export_lights': False, 'export_animations': False},
     'guideShipping': False,
+    'materialSide': 'front',
     'originalGeometry': True,
     'externalAssets': [],
 }, indent=2) + '\n')

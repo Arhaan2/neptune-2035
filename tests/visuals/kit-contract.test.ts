@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { describe, expect, test } from 'vitest';
-import { Box3, Matrix4, Mesh, MeshStandardMaterial, Vector3, type BufferAttribute } from 'three';
+import { Box3, FrontSide, Matrix4, Mesh, MeshStandardMaterial, Vector3, type BufferAttribute } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { buildDesign, connectionsForModule, DEFAULT_CONFIG, moduleAssets } from '../../src/twin/assets/design';
 import { catalogSpecification, engineeringIdentity } from '../../src/twin/catalog/equipment';
@@ -136,6 +136,7 @@ describe('Visual V2 authoring contract', () => {
         roleNames.push(material.name);
         expect(material.transparent).toBe(false);
         expect(material.opacity).toBe(1);
+        expect(material.side).toBe(FrontSide);
         const role = descriptor.materialRoles.find((r: {name: string}) => r.name === material.name);
         expect(material.metalness).toBeCloseTo(role.metalness, 6);
         expect(material.roughness).toBeCloseTo(role.roughness, 6);

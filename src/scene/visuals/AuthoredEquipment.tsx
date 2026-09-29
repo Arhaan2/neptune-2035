@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
-import { Mesh, Raycaster, Vector3, type Camera, type Scene } from 'three';
+import { Mesh, Raycaster, Vector3, type Camera, type Object3D, type Scene } from 'three';
 import type { Asset, Connection, EquipmentState } from '../../twin/types';
 import { presentedPosition } from '../twinGeometry';
 import { getVisualKitBinding, type VisualKitBinding } from './kitContract';
@@ -26,6 +26,12 @@ export interface KitDiagnostic {
   assets: KitAssetDiagnostic[];
   cache: ReturnType<VisualKitCache['inventory']>;
 }
+
+// The kit has immutable geometry and no moving subgroups. A diagnostic surface
+// point changes only with the instance, its assembly transform or camera origin.
+// Avoid raycasting every triangle on otherwise identical diagnostic publications.
+// Weak keys and numeric values retain neither retired scenes nor GPU resources.
+const diagnosticHits = new WeakMap<Object3D, { key: string; point?: number[] }>();
 
 export function AuthoredEquipment({ asset, connections, identity, state, selected, exploded, enabled, cache, onSelect, children }: {
   asset: Asset;
@@ -82,6 +88,7 @@ export function AuthoredEquipment({ asset, connections, identity, state, selecte
  * the current completed frame, including changes in selection or loaded assets. */
 export function visualKitDiagnostic(scene: Scene, camera: Camera, cache: VisualKitCache, moduleId: string, frame: number): KitDiagnostic {
   const assets: KitAssetDiagnostic[] = [];
+  const cameraPosition = camera.getWorldPosition(new Vector3());
   scene.traverse(object => {
     const source = object.userData.visualKitAsset as Omit<KitAssetDiagnostic, 'materialColor' | 'meshCount' | 'renderedMeshes' | 'worldCenter'> | undefined;
     if (!source || source.status === 'idle') return;
@@ -95,9 +102,19 @@ export function visualKitDiagnostic(scene: Scene, camera: Camera, cache: VisualK
       for (const material of Array.isArray(child.material) ? child.material : [child.material])
         if (material.name.includes('paint')) materialColor = `#${material.color.getHexString()}`;
     });
-    const ray = new Raycaster(camera.getWorldPosition(new Vector3()), center.clone().sub(camera.getWorldPosition(new Vector3())).normalize());
-    const hit = source.status === 'ready' ? ray.intersectObject(object, true)[0] : undefined;
-    assets.push({ ...source, meshCount, renderedMeshes, materialColor, worldCenter: center.toArray(), ...(hit ? { childWorldPoint: hit.point.toArray() } : {}) });
+    let point: number[] | undefined;
+    const assembly = object.children[0], instance = assembly?.children[0];
+    if (source.status === 'ready' && instance) {
+      const key = `${instance.uuid}:${assembly.matrixWorld.elements.join(',')}:${cameraPosition.toArray().join(',')}`;
+      let cached = diagnosticHits.get(object);
+      if (cached?.key !== key) {
+        const ray = new Raycaster(cameraPosition, center.clone().sub(cameraPosition).normalize());
+        cached = { key, point: ray.intersectObject(object, true)[0]?.point.toArray() };
+        diagnosticHits.set(object, cached);
+      }
+      point = cached.point?.slice();
+    } else diagnosticHits.delete(object);
+    assets.push({ ...source, meshCount, renderedMeshes, materialColor, worldCenter: center.toArray(), ...(point ? { childWorldPoint: point } : {}) });
   });
   const status = !assets.length ? 'idle' : assets.some(asset => asset.status === 'loading') ? 'loading' : assets.some(asset => asset.status === 'fallback') ? 'fallback' : 'ready';
   return { version: 'systems-reveal-v2', moduleId, status, assets, cache: cache.inventory() };

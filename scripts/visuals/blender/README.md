@@ -28,6 +28,8 @@ The first command was actually executed with Blender **4.3.2**, build
 v4.3.47**. Blender's installed operator API is used directly:
 `bpy.ops.export_scene.gltf`, with GLB output, `export_yup=True`, applied modifiers,
 normals and custom extras enabled, and UVs, lights, cameras and animation disabled.
+All authored parts are closed solids; materials enable `use_backface_culling` so
+the GLB loads as Three `FrontSide`, matching the procedural equipment's culling.
 Reference: [Blender glTF exporter manual](https://docs.blender.org/manual/en/4.3/addons/import_export/scene_gltf2.html).
 
 `--source-dir` is required and must be outside the shipping output directory. The
@@ -41,6 +43,11 @@ shipping GLB SHA-256 values. There is no randomness. Mesh and material names and
 export settings are fixed. The manifest additionally records semantic geometry,
 normal, index and material hashes; `.blend` file metadata is not claimed byte-stable.
 Do not regenerate assets after candidate acceptance without rerunning acceptance.
+
+To validate a separate output without overwriting shipping files, pass
+`--output /path/to/output` to `author.py`, then pass that directory as the optional
+second argument to `validate.mjs`. The culling correction was exported and
+validated twice in independent output and editable-source directories.
 
 ## Geometry and coordinate checks
 
@@ -74,21 +81,21 @@ pretend to be physical port coordinates or add routed flow paths.
 
 | Template | Supported specification | Bytes | Triangles | Meshes / materials / textures |
 | --- | --- | ---: | ---: | --- |
-| Pump | `pump-reference@1.0.0`, `pump-efficient@1.0.0` | 325,256 | 8,648 | 4 / 4 / 0 |
-| Exchanger | `exchanger-reference@1.0.0` | 559,312 | 15,464 | 4 / 4 / 0 |
+| Pump | `pump-reference@1.0.0`, `pump-efficient@1.0.0` | 325,180 | 8,648 | 4 / 4 / 0 |
+| Exchanger | `exchanger-reference@1.0.0` | 559,236 | 15,464 | 4 / 4 / 0 |
 
-Pump SHA-256: `1e38190d53be939b7285d976e6ef2d2ac7643d5008ef1f6870fa4a64b800f9a9`.
+Pump SHA-256: `349db03c6513239aac075c85942ae8a79f90827f40c96b52fdcd593b992eaf75`.
 
-Exchanger SHA-256: `df09475ea7be7ac73721a61afd791b05e1a29797ed6b1906c642ca04dbde79e5`.
+Exchanger SHA-256: `b18e9ad1d69d2b588e34e9eb06d728a891449d61959d8150b41a47631424c559`.
 
-Combined GLB transfer is **884,568 bytes**; the small manifest is additional. A
+Combined GLB transfer is **884,416 bytes**; the small manifest is additional. A
 module's three compatible pumps share one immutable geometry template. The
 physically different `pump-physical` and configured nonreference exchanger records
 remain procedural, as do unknown versions, changed bounds and changed interfaces.
 
 Khronos `gltf-validator@2.0.0-dev.3.10` reports **zero errors, zero warnings and zero
 information messages** for both files. Three's loader checks finite attributes,
-unit normals, opaque standard materials, exact bounds, identity canonical root,
+unit normals, opaque front-sided standard materials, exact bounds, identity canonical root,
 anchor parents/transforms and no external texture/buffer dependency. The normal
 unit suite runs both real exported files through Khronos and Three again.
 
@@ -105,6 +112,16 @@ predeclared tolerance was retained. Initial exact material scalar equality also
 detected ordinary float32 `0.55 -> 0.5500000119`; the test uses explicit six-decimal
 comparison, without weakening geometry limits. Both corrected exports then passed
 the full 14-test contract suite and repeat export.
+
+The original exporter defaults produced double-sided materials for these closed
+solids. Enabling backface culling removed only the four `doubleSided: true` fields
+from each GLB's material definitions. Against frozen candidate
+`80d45ad7140ab320960e6d6e4fd8d3efcadf3d71`, the binary chunks and every other GLB JSON
+value are identical: positions, normals, indices, accessors, bounds, transforms and
+anchors are unchanged. The existing semantic hashes remain identical. Both new
+exports and manifests match each other byte for byte; each GLB is 76 bytes smaller.
+This corrects culling without reducing geometric detail. Actual browser appearance
+and performance remain separate acceptance checks.
 
 These checks establish authored-kit structure and compatibility, not app visual
 quality or release acceptance. Browser loader, state/selection isolation, matched
