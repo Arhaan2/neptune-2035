@@ -1,0 +1,64 @@
+{
+  "kitId": "neptune-cooling-kit",
+  "version": "2.0.0",
+  "schemaVersion": 1,
+  "units": "meter",
+  "coordinateSystem": "right-handed Y-up; +X right, +Y up, +Z rear",
+  "rootPivot": "canonical-asset-center",
+  "rootScale": [1, 1, 1],
+  "toleranceM": 0.00001,
+  "normalTolerance": 0.001,
+  "sources": ["src/twin/catalog/equipment.ts", "src/twin/assets/design.ts", "src/scene/twinGeometry.ts"],
+  "anchorSemantics": "The authoritative graph uses abstract asset-center route endpoints. All logical anchors are at local [0,0,0]. Exterior flanges are illustrative surfaces inside the owning envelope, not physical port coordinates or engineering route changes.",
+  "provenance": {
+    "author": "Original NEPTUNE Visual V2 geometry authored with the repository Blender Python script",
+    "rights": "Original project-generated geometry; no third-party models, textures, fonts, brands or scans",
+    "claim": "Generic design-stage exterior visualization; no manufacturer CAD, certified internals or measured interface precision"
+  },
+  "materialRoles": [
+    {"name": "paint", "color": "#E8EEF0", "metalness": 0, "roughness": 0.43, "stateTint": true},
+    {"name": "silver", "color": "#AEBBC4", "metalness": 1, "roughness": 0.32, "stateTint": false},
+    {"name": "graphite", "color": "#273541", "metalness": 0.55, "roughness": 0.47, "stateTint": false},
+    {"name": "insert", "color": "#111D27", "metalness": 0.05, "roughness": 0.74, "stateTint": false}
+  ],
+  "templates": [
+    {
+      "id": "pump",
+      "file": "pump.glb",
+      "type": "pump",
+      "dimensionsM": [1.2, 1.2, 0.8],
+      "boundsM": {"min": [-0.6, -0.6, -0.4], "max": [0.6, 0.6, 0.4]},
+      "supportedSpecifications": [{"id": "pump-reference", "version": "1.0.0"}, {"id": "pump-efficient", "version": "1.0.0"}],
+      "supportedRoles": ["pump-duty", "pump-standby", "pump-sea"],
+      "logicalAnchors": [
+        {"id": "fluid-in", "medium": "role-fluid", "direction": "in", "positionM": [0, 0, 0]},
+        {"id": "fluid-out", "medium": "role-fluid", "direction": "out", "positionM": [0, 0, 0]},
+        {"id": "power-in", "medium": "power", "direction": "in", "positionM": [0, 0, 0]},
+        {"id": "power-out", "medium": "power", "direction": "out", "positionM": [0, 0, 0]}
+      ],
+      "triangleBudget": 10000,
+      "cosmeticParts": ["volute", "motor-fins", "flange-rims", "coupling-guard", "mounting-feet", "fasteners"],
+      "movableSubgroups": [],
+      "selectionOwner": "canonical parent asset ID"
+    },
+    {
+      "id": "exchanger",
+      "file": "exchanger.glb",
+      "type": "exchanger",
+      "dimensionsM": [2, 2.2, 1.4],
+      "boundsM": {"min": [-1, -1.1, -0.7], "max": [1, 1.1, 0.7]},
+      "supportedSpecifications": [{"id": "exchanger-reference", "version": "1.0.0"}],
+      "supportedRoles": ["hx"],
+      "logicalAnchors": [
+        {"id": "technical-in", "medium": "technical", "direction": "in", "positionM": [0, 0, 0]},
+        {"id": "technical-out", "medium": "technical", "direction": "out", "positionM": [0, 0, 0]},
+        {"id": "seawater-in", "medium": "seawater", "direction": "in", "positionM": [0, 0, 0]},
+        {"id": "seawater-out", "medium": "seawater", "direction": "out", "positionM": [0, 0, 0]}
+      ],
+      "triangleBudget": 20000,
+      "cosmeticParts": ["plate-pack", "pressure-frame", "tie-bars", "flange-rims", "mounting-feet", "fasteners"],
+      "movableSubgroups": [],
+      "selectionOwner": "canonical parent asset ID"
+    }
+  ]
+}
