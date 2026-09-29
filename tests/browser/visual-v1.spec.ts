@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { normalizeProject, parseProject, type CurrentProject } from '../../src/twin/persistence/project';
 import { expectNoHorizontalOverflow } from './layout';
+import { activateLifecycleButton } from './lifecycle-keyboard';
 
 const duty = 'platform-001/module-01/pump-duty';
 const standby = 'platform-001/module-01/pump-standby';
@@ -166,11 +167,7 @@ test('VIS1 repeated selection reveal and interior visits release transient scene
   await ready(page);
   // Keep every lifecycle transition and resource assertion while using native
   // keyboard input; the preceding VIS1 case retains pointer coverage of these controls.
-  const activate = async (name: string) => {
-    const control = button(page, name);
-    await expect(control).toBeVisible(); await expect(control).toBeEnabled();
-    await control.focus(); await expect(control).toBeFocused(); await control.press('Enter');
-  };
+  const activate = (name: string) => activateLifecycleButton(page, name);
   const cycle = async () => {
     await page.getByLabel('Select equipment', { exact: true }).selectOption(standby);
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__?.selectedId)).toBe(standby);

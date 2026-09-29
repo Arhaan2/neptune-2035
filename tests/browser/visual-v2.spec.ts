@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { normalizeProject, parseProject, type CurrentProject } from '../../src/twin/persistence/project';
 import { expectNoHorizontalOverflow } from './layout';
+import { activateLifecycleButton } from './lifecycle-keyboard';
 const manifest = JSON.parse(await fs.readFile(new URL('../../public/visuals/v2/manifest.json', import.meta.url), 'utf8')) as { templates: { id: string; bytes: number }[] };
 
 const duty = 'platform-001/module-01/pump-duty';
@@ -240,11 +241,7 @@ test('VIS2 warmed reveal cycles reach the same post-render resource inventory', 
   await page.goto('./'); await ready(page);
   // Exercise the identical lifecycle through native keyboard activation. Pointer
   // discoverability and authored-surface clicks remain in the other VIS1/VIS2 cases.
-  const activate = async (name: string) => {
-    const control = button(page, name);
-    await expect(control).toBeVisible(); await expect(control).toBeEnabled();
-    await control.focus(); await expect(control).toBeFocused(); await control.press('Enter');
-  };
+  const activate = (name: string) => activateLifecycleButton(page, name);
   const cycle = async (id: string) => {
     await reveal(page, id, activate);
     await toggle(page, 'Explode', true, activate); await completed(page);
