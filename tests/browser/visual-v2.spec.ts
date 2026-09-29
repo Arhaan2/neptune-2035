@@ -1,4 +1,4 @@
-import { withVisibleControl } from './visible-controls';
+import { openPanel, withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
@@ -49,15 +49,19 @@ async function completed(page: Page) {
     requestAnimationFrame(observe);
   }));
 }
-async function select(page: Page, id: string) {
+async function select(page: Page, id: string, activate?: (name: string) => Promise<void>) {
   const equipment = page.getByLabel('Select equipment', { exact: true });
   const optionExists = await equipment.locator('option').evaluateAll((options, target) => options.some(option => (option as HTMLOptionElement).value === target), id);
-  if (optionExists) await withVisibleControl(page, equipment, control => control.selectOption(id));
+  if (activate) {
+    await openPanel(page, 'Assets', activate);
+    if (optionExists) await equipment.selectOption(id);
+    else { await page.getByLabel('Find asset ID', { exact: true }).fill(id); await activate('Find'); }
+  } else if (optionExists) await withVisibleControl(page, equipment, control => control.selectOption(id));
   else { await withVisibleControl(page, page.getByLabel('Find asset ID', { exact: true }), control => control.fill(id)); await withVisibleControl(page, button(page, 'Find'), control => control.click()); }
   await expect(main(page)).toHaveAttribute('data-selected', id);
 }
-async function reveal(page: Page, id = duty, activate = (name: string) => withVisibleControl(page, button(page, name), control => control.click())) {
-  await select(page, id);
+async function reveal(page: Page, id = duty, activate = (name: string) => withVisibleControl(page, button(page, name), control => control.click()), selectAsset = (target: string) => select(page, target)) {
+  await selectAsset(id);
   await activate('Cooling close-up');
   await expect.poll(() => kit(page)).toMatchObject({ version: 'systems-reveal-v3', moduleId: id.slice(0, id.lastIndexOf('/')), status: 'ready' });
   const observation = await completed(page);
@@ -249,13 +253,14 @@ resourceTest('VIS2 warmed reveal cycles reach the same post-render resource inve
   // Exercise the identical lifecycle through native keyboard activation. Pointer
   // discoverability and authored-surface clicks remain in the other VIS1/VIS2 cases.
   const activate = (name: string) => activateLifecycleButton(page, name);
+  const selectAsset = (id: string) => select(page, id, activate);
   const completedCycles: { cycle: number; revealedAssetId: string; observation: Observation }[] = [];
   const cycle = async (id: string) => {
-    await reveal(page, id, activate);
+    await reveal(page, id, activate, selectAsset);
     await toggle(page, 'Explode', true, activate); await completed(page);
     await toggle(page, 'Explode', false, activate); await toggle(page, 'X-ray', false, activate); await completed(page);
     await toggle(page, 'X-ray', true, activate); await completed(page);
-    await select(page, duty); await activate('Campus view');
+    await selectAsset(duty); await activate('Campus view');
     await toggle(page, 'X-ray', false, activate);
     const observation = await completed(page);
     completedCycles.push({ cycle: completedCycles.length + 1, revealedAssetId: id, observation });

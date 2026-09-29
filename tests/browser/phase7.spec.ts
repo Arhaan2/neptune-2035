@@ -1,3 +1,4 @@
+import { activateLifecycleButton } from './lifecycle-keyboard';
 import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
@@ -22,6 +23,7 @@ async function downloadJSON(page: Page, trigger: () => Promise<unknown>) {
 }
 
 test('PH7 C1 real canvas keeps failed selected pump and feeder visible through repeated camera arrangements', async ({ page }, info) => {
+  const activate = (name: string) => activateLifecycleButton(page, name);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -29,16 +31,18 @@ test('PH7 C1 real canvas keeps failed selected pump and feeder visible through r
   await expect(main(page)).toHaveAttribute('data-ready', 'true');
   // The surfaces are known in this desktop journey. Navigate them explicitly
   // instead of repeatedly discovering their ancestors across browser round trips.
-  await button(page, 'Design').click();
-  await button(page, 'Design family III').click();
+  // Native keyboard activation retains visibility/enabled/focus checks through
+  // the same rendered journey without repeated pointer stability frame waits.
+  await activate('Design');
+  await activate('Design family III');
   await expect(button(page, 'Step 10s')).toBeEnabled();
   await expect(page.locator('canvas')).toBeVisible();
   const pump = 'platform-001/module-01/pump-duty';
-  await button(page, 'Assets').click();
+  await activate('Assets');
   await page.getByLabel('Select equipment', { exact: true }).selectOption(pump);
-  await button(page, 'Operate').click();
-  await button(page, 'Inspector').click();
-  await button(page, 'Trip selected asset').click();
+  await activate('Operate');
+  await activate('Inspector');
+  await activate('Trip selected asset');
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   const exportProject = () => downloadJSON(page, async () => {
     const summary = page.locator('summary').filter({ hasText: /^Project actions$/ });
@@ -49,11 +53,11 @@ test('PH7 C1 real canvas keeps failed selected pump and feeder visible through r
   const failed = await exportProject();
   const design = failed.designSnapshot as Design;
   for (const [index, exploded] of [false, true, false, true, false].entries()) {
-    if ((await button(page, 'Explode').getAttribute('aria-pressed')) !== String(exploded)) await button(page, 'Explode').click();
-    await button(page, 'X-ray').click();
+    if ((await button(page, 'Explode').getAttribute('aria-pressed')) !== String(exploded)) await activate('Explode');
+    await activate('X-ray');
     if (index === 0) await page.locator('summary').filter({ hasText: /^Workspace help$/ }).click();
-    await button(page, 'Campus context').click();
-    if (index === 0) await button(page, 'Assets').click();
+    await activate('Campus context');
+    if (index === 0) await activate('Assets');
     await page.getByLabel('Select equipment', { exact: true }).selectOption(pump);
     const target = presentedPosition(resolveAsset(design, pump)!, exploded);
     await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ selectedId: pump, focus: 'selection', exploded, target: target.map(value => expect.closeTo(value, 5)) });
@@ -66,9 +70,9 @@ test('PH7 C1 real canvas keeps failed selected pump and feeder visible through r
   expect(afterViews.checkpoint).toEqual(failed.checkpoint);
   const feeder = design.modules[0].powerDomainId;
   await page.getByLabel('Find asset ID', { exact: true }).fill(feeder);
-  await button(page, 'Find').click();
-  await button(page, 'Inspector').click();
-  await button(page, 'Trip selected asset').click();
+  await activate('Find');
+  await activate('Inspector');
+  await activate('Trip selected asset');
   await expect(page.getByTestId('asset-operating-status')).toHaveText('failed');
   await expect.poll(() => page.evaluate(() => window.__NEPTUNE_TWIN_SCENE__)).toMatchObject({ selectedId: feeder, focus: 'selection', target: resolveAsset(design, feeder)!.positionM.map(value => expect.closeTo(value, 5)) });
   await page.locator('canvas').screenshot({ path: info.outputPath('failed-selected-feeder-canvas.png') });

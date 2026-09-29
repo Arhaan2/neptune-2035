@@ -1,3 +1,4 @@
+import { activateLifecycleButton } from './lifecycle-keyboard';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
@@ -28,15 +29,16 @@ async function project(page: Page): Promise<CurrentProject> {
   await page.locator('summary').filter({ hasText: /^Project actions$/ }).click();
   return value;
 }
-async function select(page: Page, id = cdu) {
-  await openPanel(page, 'Assets');
+async function select(page: Page, id = cdu, activate?: (name: string) => Promise<void>) {
+  await openPanel(page, 'Assets', activate);
   const finder = page.getByLabel('Find asset ID', { exact: true });
   await finder.fill(id); await finder.press('Enter');
   await expect(main(page)).toHaveAttribute('data-selected', id);
-  await openPanel(page, 'Inspector');
+  await openPanel(page, 'Inspector', activate);
 }
-async function focus(page: Page, enabled: boolean) {
-  await button(page, enabled ? 'Presentation focus' : 'Exit presentation focus').click();
+async function focus(page: Page, enabled: boolean, activate?: (name: string) => Promise<void>) {
+  const name = enabled ? 'Presentation focus' : 'Exit presentation focus';
+  await (activate ? activate(name) : button(page, name).click());
   await expect(button(page, enabled ? 'Exit presentation focus' : 'Presentation focus')).toBeVisible();
 }
 async function settledCamera(page: Page) {
@@ -285,23 +287,26 @@ for (const outcome of ['delayed', 'failed'] as const) {
 }
 
 test('VIS4 exploded cooling leaves the actual CDU surface selectable across inspector and presentation compositions', async ({ page }, info) => {
+  const activate = (name: string) => activateLifecycleButton(page, name);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./'); await ready(page);
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
     for (const moduleId of ['platform-001/module-01', 'platform-001/module-02']) {
       const target = `${moduleId}/cdu`;
-      await select(page, `${moduleId}/pump-duty`);
-      await button(page, 'Cooling close-up').click();
-      if (await button(page, 'Explode').getAttribute('aria-pressed') !== 'true') await button(page, 'Explode').click();
+      await select(page, `${moduleId}/pump-duty`, activate);
+      await activate('Cooling close-up');
+      if (await button(page, 'Explode').getAttribute('aria-pressed') !== 'true') await activate('Explode');
       for (const presentation of [false, true]) {
-        if (presentation) await focus(page, true);
+        if (presentation) await focus(page, true, activate);
         const canvas = page.locator('canvas');
         await canvas.scrollIntoViewIfNeeded();
         await expect.poll(async () => {
-          const value = await scene(page), rect = await canvas.boundingBox();
-          const parent = await canvas.evaluate(element => ({ width: element.parentElement!.getBoundingClientRect().width, height: element.parentElement!.getBoundingClientRect().height }));
-          return Boolean(value && rect && value.focus === 'cooling' && value.exploded && value.selectedId === `${moduleId}/pump-duty` &&
+          const { value, rect, parent } = await canvas.evaluate(element => {
+            const rect = element.getBoundingClientRect(), parent = element.parentElement!.getBoundingClientRect();
+            return { value: window.__NEPTUNE_TWIN_SCENE__, rect: { width: rect.width, height: rect.height }, parent: { width: parent.width, height: parent.height } };
+          });
+          return Boolean(value && rect.width > 0 && rect.height > 0 && value.focus === 'cooling' && value.exploded && value.selectedId === `${moduleId}/pump-duty` &&
             value.visualKit.moduleId === moduleId && value.visualKit.status === 'ready' && !value.cameraTransitioning &&
             Math.abs(parent.width - rect.width) < 1 && Math.abs(parent.height - rect.height) < 1 &&
             Math.abs(value.canvasSize.width - rect.width) < 1 && Math.abs(value.canvasSize.height - rect.height) < 1 &&
@@ -328,8 +333,8 @@ test('VIS4 exploded cooling leaves the actual CDU surface selectable across insp
         await expect(main(page)).toHaveAttribute('data-selected', target);
         await expect(page.getByTestId('scene-selected-identity')).toContainText(target);
         await info.attach(`V4-CDU-${width}-${moduleId.split('/').at(-1)}-${presentation ? 'presentation' : 'inspector'}`, { body: await page.screenshot(), contentType: 'image/png' });
-        if (presentation) await focus(page, false);
-        await select(page, `${moduleId}/pump-duty`); await button(page, 'Cooling close-up').click();
+        if (presentation) await focus(page, false, activate);
+        await select(page, `${moduleId}/pump-duty`, activate); await activate('Cooling close-up');
       }
     }
   }
@@ -348,7 +353,20 @@ test('VIS4 normal-motion panel reflow settles named framing and preserves subseq
   }).toBe(true);
   const named = (await scene(page))!;
   const canvas = page.locator('canvas');
-  await canvas.focus(); await page.keyboard.press('ArrowRight');
+  // A settled native zoom tests manual-pose preservation without making the
+  // inherited frame-count-based angular damping a wall-clock settling contract.
+  // Retained VIS3 coverage still exercises the ArrowRight route.
+  await canvas.focus(); await canvas.scrollIntoViewIfNeeded();
+  await expect(canvas).toBeInViewport();
+  await canvas.hover();
+  const wheelPoint = await canvas.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
+    return { x, y, usable: rect.width > 0 && rect.height > 0 && x >= 0 && x < innerWidth && y >= 0 && y < innerHeight && document.elementFromPoint(x, y) === element };
+  });
+  expect(wheelPoint.usable, 'The native wheel point must belong to the visible canvas.').toBe(true);
+  await page.mouse.move(wheelPoint.x, wheelPoint.y);
+  await page.mouse.wheel(0, 120);
   await expect.poll(async () => (await scene(page))?.cameraControl).toBe('manual');
   const manual = await settledCamera(page);
   expect(manual.camera).not.toEqual(named.camera);
@@ -369,5 +387,5 @@ test('VIS4 normal-motion panel reflow settles named framing and preserves subseq
   expect(reframed.camera).toEqual(manual.camera.map(value => expect.closeTo(value, 5)));
   expect(reframed.target).toEqual(manual.target.map(value => expect.closeTo(value, 5)));
   await expect(main(page)).toHaveAttribute('data-time', '0');
-  await info.attach('V4-named-reflow-and-manual-pose', { body: JSON.stringify({ named, manual, reframed }), contentType: 'application/json' });
+  await info.attach('V4-named-reflow-and-manual-pose', { body: JSON.stringify({ named, manual, reframed, wheelPoint }), contentType: 'application/json' });
 });

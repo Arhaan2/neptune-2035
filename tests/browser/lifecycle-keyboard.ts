@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
-/** For the two resource-cycle cases only. Other acceptance keeps pointer input.
+/** For the two resource-cycle cases, PH7 real-canvas arrangements and V4 CDU compositions only.
+ * Other acceptance keeps pointer input.
  * One retried browser observation retains native-button visibility, effective
  * enabled state and actual focus, then Enter travels through browser keyboard
  * input. No DOM click, event dispatch, forced action or deadline change.

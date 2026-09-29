@@ -54,11 +54,11 @@ export async function withVisibleControl<T>(page: Page, target: Locator, action:
   return value;
 }
 
-export async function openPanel(page: Page, name: string) {
+export async function openPanel(page: Page, name: string, activate?: (label: string) => Promise<void>) {
   const control = page.getByRole('button', { name, exact: true });
-  if (await control.getAttribute('aria-pressed') !== 'true' && await control.getAttribute('aria-expanded') !== 'true') await control.click();
+  if (await control.getAttribute('aria-pressed') !== 'true' && await control.getAttribute('aria-expanded') !== 'true') await (activate ? activate(name) : control.click());
   const expand = page.getByRole('button', { name: 'Expand inspector', exact: true });
-  if (await expand.isVisible()) await expand.click();
+  if (await expand.isVisible()) await (activate ? activate('Expand inspector') : expand.click());
 }
 
 export async function projectActions(page: Page) {
