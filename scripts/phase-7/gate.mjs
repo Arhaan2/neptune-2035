@@ -45,7 +45,7 @@ try{
  await fs.copyFile('dist/release.json',path.join(out,'tested-release.json'));
  await run('archive','tar',['-cf',path.join(out,'tested-build.tar'),'-C','dist','.'],{COPYFILE_DISABLE:'1'});
  await server('production-server',['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4173','--strictPort','--base',basePath],productionURL);
- await run('browser','npx',['playwright','test','tests/browser/prototype.spec.ts','tests/browser/phase2.spec.ts','tests/browser/phase3.spec.ts','tests/browser/phase4.spec.ts','tests/browser/phase5.spec.ts','tests/browser/phase6.spec.ts','tests/browser/phase7.spec.ts',...(extraBrowser?[extraBrowser]:[]),'tests/browser/visual-v1.spec.ts','tests/browser/visual-v2.spec.ts','tests/browser/visual-v3.spec.ts','tests/browser/visual-v3-clarity.spec.ts','tests/browser/visual-v4.spec.ts','--workers=1','--retries=0'],{NEPTUNE_BASE_URL:productionURL,NEPTUNE_BROWSER_REPORT:path.join(out,'browser.json')});
+ await run('browser','npx',['playwright','test','tests/browser/prototype.spec.ts','tests/browser/phase2.spec.ts','tests/browser/phase3.spec.ts','tests/browser/phase4.spec.ts','tests/browser/phase5.spec.ts','tests/browser/phase6.spec.ts','tests/browser/phase7.spec.ts',...(extraBrowser?[extraBrowser]:[]),'tests/browser/visual-v1.spec.ts','tests/browser/visual-v2.spec.ts','tests/browser/visual-v3.spec.ts','tests/browser/visual-v3-clarity.spec.ts','tests/browser/visual-v4.spec.ts','tests/browser/visual-v5.spec.ts','--workers=1','--retries=0'],{NEPTUNE_BASE_URL:productionURL,NEPTUNE_BROWSER_REPORT:path.join(out,'browser.json')});
 }catch(problem){error=String(problem);console.error(error);process.exitCode=1;}
 finally{
  for(const {child,log} of servers){child.kill('SIGTERM');await log.close();}

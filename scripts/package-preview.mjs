@@ -68,8 +68,8 @@ const artifactSha256 = createHash('sha256').update(manifestText).digest('hex');
 await fs.writeFile('dist/build-manifest.json', manifestText);
 const release = {
   product: 'NEPTUNE',
-  description: 'NEPTUNE Visual V4 — scene-first interface and presentation focus on the Blue Hour design-stage twin.',
-  visualRelease: 'scene-first-v4',
+  description: 'NEPTUNE Visual V5 — evidence-driven cinematic walkthrough on the Blue Hour design-stage twin.',
+  visualRelease: 'cinematic-v5',
   version: pkg.version,
   channel: production ? 'production' : 'separate-preview',
   sourceSha,
@@ -85,7 +85,7 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Visual V4 / scene-first interface: stable responsive application shell, equipment inspector, compact operation and canonical history controls, results-first comparison, session-local presentation focus and supported-view cooling composition. Authored pump/exchanger/CDU assets, solver, schemas and engineering contracts unchanged. Retains Phase 8 numerical and whole-experiment acceptance and V1–V3 visual coverage. Simulated, design-stage prototype; physical validation pending. Broader authored library and native Safari visible-session evidence remain unfinished',
+    releaseScope: 'Visual V5 / cinematic walkthrough: explicit completed-result loading, evidence-bound chapters and authored equipment views, foreground automatic pacing with manual inspection, directed camera readiness, and scoped honest outcomes. Authored pump/exchanger/CDU assets, solver, schemas and engineering contracts unchanged. Retains Phase 8 numerical and whole-experiment acceptance and V1–V4 visual coverage. Simulated, design-stage prototype; physical validation pending. Broader authored library and native Safari visible-session evidence remain unfinished',
     modelId: 'neptune-reference-3',
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',

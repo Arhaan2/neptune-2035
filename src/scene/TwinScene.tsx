@@ -68,6 +68,7 @@ import {
   selectedModule,
   upstreamConnections,
 } from './twinGeometry';
+import { createCameraFlight, presentationFrame, presentationRequestKey, PresentationSettling, sampleCameraFlight, type CameraFlight, type CameraPose, type PresentationCameraRequest, type PresentationSceneReadiness } from './presentationCamera';
 import './twinScene.css';
 
 export interface TwinSceneProps {
@@ -92,6 +93,10 @@ export interface TwinSceneProps {
   reducedMotion: boolean;
   onManual: () => void;
   onReady?: () => void;
+  presentation?: PresentationCameraRequest;
+  presentationPending?: boolean;
+  onPresentationReadiness?: (report: PresentationSceneReadiness) => void;
+  onPresentationTakeover?: (reason: 'pointer' | 'keyboard' | 'context-loss') => void;
 }
 const COLORS = Object.fromEntries(
   (['platform', 'hull', 'module', 'rack', 'compute', 'cdu', 'exchanger', 'pump', 'valve', 'pipe', 'transformer', 'switchboard', 'battery', 'network', 'external'] as Asset['type'][]).map(type => [type, assetSurface(type).color]),
@@ -686,6 +691,10 @@ function TwinFacility({
         moduleSpec.networkDomainId,
       ]),
       ...local,
+      // Isolation stops upstream traversal, but the selected failed feeder's
+      // real incident edges still belong in its inspection. Their projected
+      // enabled state remains authoritative; inactive highlights stay dashed.
+      ...props.design.connections.filter(connection => connection.from === props.selectedId || connection.to === props.selectedId),
     ]
       .filter((c, i, a) => a.findIndex((other) => other.id === c.id) === i)
       .filter((c) => !c.from.includes('/node-') && !c.to.includes('/node-'))
@@ -822,10 +831,6 @@ function TwinFacility({
     </group>
   );
 }
-interface CameraPose {
-  position: Vector3;
-  target: Vector3;
-}
 function CameraRig({
   props,
   moduleSpec,
@@ -853,6 +858,13 @@ function CameraRig({
   const manual = useRef(false);
   const ready = useRef(false);
   const lastRequest = useRef('');
+  const flight = useRef<CameraFlight | null>(null);
+  const guidanceOwner = useRef('');
+  const pendingGuidance = useRef(false);
+  const cancelledGuidance = useRef('');
+  const guidanceLayout = useRef('');
+  const settled = useRef(new PresentationSettling());
+  const lastGuidanceReport = useRef('');
   const keys = useRef(new Set<string>()),
     yaw = useRef(Math.PI / 2),
     pitch = useRef(0);
@@ -889,6 +901,29 @@ function CameraRig({
       visualKit,
     };
     onKitStatus(visualKit.status);
+    const request = current.current.props.presentation;
+    if (request && guidanceOwner.current === presentationRequestKey(request) && cancelledGuidance.current !== guidanceOwner.current) {
+      const matching = observed.presentationKey === guidanceOwner.current && observed.selectedId === request.selectedId && observed.simulationTimeS === request.timeS;
+      const detail = request.authoredKind ? visualKit.assets.find(asset => asset.assetId === request.selectedId && asset.kind === request.authoredKind) : undefined;
+      const terminal = request.authoredKind ? !!detail && detail.status !== 'loading' && detail.status !== 'idle' : visualKit.status !== 'loading';
+      const rendered = !detail || detail.status !== 'ready' || (detail.renderedMeshes > 0 && !!detail.childWorldPoint);
+      const isSettled = settled.current.observe([...observed.camera, ...observed.target, observed.canvasSize.width, observed.canvasSize.height], matching && terminal && rendered && !observed.cameraTransitioning);
+      const fallback = detail?.status === 'fallback' || visualKit.status === 'fallback';
+      const representation = detail?.status === 'ready' || (!request.authoredKind && visualKit.status === 'ready') ? 'authored' : 'procedural';
+      const report: PresentationSceneReadiness = {
+        token: request.token, sourceKey: request.sourceKey, stepId: request.stepId, shot: request.shot,
+        selectedId: observed.selectedId, timeS: observed.simulationTimeS,
+        status: isSettled ? fallback ? 'fallback' : 'ready' : 'settling', representation,
+        settledFrames: settled.current.frames, camera: observed.camera, target: observed.target,
+        canvasSize: observed.canvasSize, renderEpoch: renderEpoch.current,
+      };
+      window.__NEPTUNE_TWIN_SCENE__!.presentation = report;
+      const reportKey = `${guidanceOwner.current}:${guidanceLayout.current}:${report.status}:${report.representation}`;
+      if (lastGuidanceReport.current !== reportKey) {
+        lastGuidanceReport.current = reportKey;
+        current.current.props.onPresentationReadiness?.(report);
+      }
+    }
     if (!ready.current && !observed.cameraTransitioning) {
       ready.current = true;
       current.current.props.onReady?.();
@@ -910,6 +945,97 @@ function CameraRig({
     const view = `${props.design.revision}:${props.exploded ? 'exploded' : 'assembled'}:${props.focus}:${props.focus === 'campus' || props.focus === 'top' ? props.design.revision : props.focus === 'module' || props.focus === 'cooling' ? moduleId : props.selectedId}`;
     const request = `${view}:${props.resetId}:${inside}`;
     const context = `${size.width}x${size.height}:${view}`;
+    const guidance = props.presentation;
+    if (props.presentationPending) {
+      // Selection/history may change in separate React commits. Retain the last
+      // displayed pose until the matching canonical boundary supplies its shot.
+      // Neither an ordinary focus effect nor a stale flight owns this interval.
+      flight.current = null;
+      transitioning.current = false;
+      settled.current.reset();
+      pendingGuidance.current = true;
+      guidanceOwner.current = '';
+      guidanceLayout.current = '';
+      cancelledGuidance.current = '';
+      c.enabled = false;
+      c.enableDamping = false;
+      lastRequest.current = request;
+      lastContext.current = context;
+      return;
+    }
+    if (pendingGuidance.current) {
+      pendingGuidance.current = false;
+      c.enabled = !inside;
+      c.enableDamping = !props.reducedMotion;
+      if (!guidance) {
+        guidanceOwner.current = '';
+        guidanceLayout.current = '';
+        cancelledGuidance.current = '';
+        manual.current = true;
+        lastRequest.current = request;
+        lastContext.current = context;
+        return;
+      }
+    }
+    if (guidance && !inside) {
+      const key = presentationRequestKey(guidance);
+      if (cancelledGuidance.current === key) return;
+      if (guidanceOwner.current === key && guidanceLayout.current === context) return;
+      // Flush old OrbitControls inertia once before taking ownership. Its frame
+      // writer stays disabled throughout the directed flight; real DOM input
+      // releases ownership before OrbitControls handles that input.
+      c.enableDamping = false;
+      c.update();
+      c.enabled = false;
+      guidanceOwner.current = key;
+      guidanceLayout.current = context;
+      cancelledGuidance.current = '';
+      settled.current.reset();
+      lastGuidanceReport.current = '';
+      manual.current = false;
+      goal.current = presentationFrame(props.design, guidance, props.exploded, size.width / size.height);
+      flight.current = createCameraFlight({ position: camera.position, target: c.target }, goal.current, guidance.transitionMs);
+      const immediate = props.reducedMotion || flight.current.durationS === 0;
+      transitioning.current = !immediate;
+      if (immediate) {
+        camera.position.copy(goal.current.position);
+        c.target.copy(goal.current.target);
+        camera.up.set(0, 1, 0);
+        camera.lookAt(c.target);
+        flight.current = null;
+        c.enabled = true;
+      }
+      lastRequest.current = request;
+      lastContext.current = context;
+      current.current.props.onPresentationReadiness?.({
+        token: guidance.token, sourceKey: guidance.sourceKey, stepId: guidance.stepId, shot: guidance.shot,
+        selectedId: props.selectedId, timeS: current.current.props.state.timeS, status: 'settling', representation: 'procedural', settledFrames: 0,
+        camera: camera.position.toArray(), target: c.target.toArray(), canvasSize: { width: size.width, height: size.height }, renderEpoch: renderEpoch.current,
+      });
+      return;
+    }
+    if (guidanceOwner.current) {
+      // Pause/exit releases guidance immediately and keeps the actual visible
+      // pose. A later explicit request can safely start there.
+      flight.current = null;
+      transitioning.current = false;
+      guidanceOwner.current = '';
+      guidanceLayout.current = '';
+      cancelledGuidance.current = '';
+      settled.current.reset();
+      c.enabled = !inside;
+      c.enableDamping = !props.reducedMotion;
+      if (lastRequest.current === request) {
+        manual.current = true;
+        lastContext.current = context;
+        return;
+      }
+      // A simultaneous explicit ordinary view/selection request still runs.
+      // Only pause alone preserves the guided pose.
+      manual.current = false;
+    }
+    c.enabled = !inside;
+    c.enableDamping = !props.reducedMotion;
     // Layout changes refit named views. Pointer/keyboard takeover persists across
     // reflow and hidden-panel restoration until an explicit view/reset request.
     if (lastRequest.current === request && (manual.current || inside)) {
@@ -1004,6 +1130,8 @@ function CameraRig({
     }
     transitioning.current = !initial && !props.reducedMotion;
   }, [
+    props.presentation,
+    props.presentationPending,
     props.focus,
     props.selectedId,
     props.resetId,
@@ -1028,6 +1156,25 @@ function CameraRig({
     pitch.current = 0;
     transitioning.current = true;
   }, [waypoint, inside, moduleSpec]);
+  const takeOver = (reason: 'pointer' | 'keyboard') => {
+    const request = current.current.props.presentation;
+    if (current.current.props.presentationPending && !manual.current) current.current.props.onPresentationTakeover?.(reason);
+    if (request && guidanceOwner.current && cancelledGuidance.current !== guidanceOwner.current) {
+      cancelledGuidance.current = guidanceOwner.current;
+      flight.current = null;
+      settled.current.reset();
+      current.current.props.onPresentationTakeover?.(reason);
+    }
+    transitioning.current = false;
+    manual.current = true;
+    if (controls.current) {
+      controls.current.enabled = !current.current.inside;
+      controls.current.enableDamping = !current.current.props.reducedMotion;
+    }
+    current.current.props.onManual();
+  };
+  const takeOverRef = useRef(takeOver);
+  useLayoutEffect(() => { takeOverRef.current = takeOver; });
   useEffect(() => {
     const canvas = gl.domElement;
     canvas.setAttribute('tabindex', '0');
@@ -1062,9 +1209,7 @@ function CameraRig({
       )
         return;
       event.preventDefault();
-      p.onManual();
-      manual.current = true;
-      transitioning.current = false;
+      takeOverRef.current('keyboard');
       if (interior) {
         keys.current.add(k);
         return;
@@ -1114,9 +1259,7 @@ function CameraRig({
       );
       drag.x = e.clientX;
       drag.y = e.clientY;
-      transitioning.current = false;
-      manual.current = true;
-      current.current.props.onManual();
+      takeOverRef.current('pointer');
     };
     const pointerUp = () => {
       if (drag) {
@@ -1128,6 +1271,11 @@ function CameraRig({
       }
       drag = null;
     };
+    const presentationPointer = () => {
+      if (current.current.props.presentationPending || (current.current.props.presentation && cancelledGuidance.current !== guidanceOwner.current)) takeOverRef.current('pointer');
+    };
+    canvas.addEventListener('pointerdown', presentationPointer, true);
+    canvas.addEventListener('wheel', presentationPointer, { capture: true, passive: true });
     canvas.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
     canvas.addEventListener('blur', clear);
@@ -1136,6 +1284,8 @@ function CameraRig({
     canvas.addEventListener('pointerup', pointerUp);
     canvas.addEventListener('pointercancel', pointerUp);
     return () => {
+      canvas.removeEventListener('pointerdown', presentationPointer, true);
+      canvas.removeEventListener('wheel', presentationPointer, true);
       canvas.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
       canvas.removeEventListener('blur', clear);
@@ -1149,7 +1299,21 @@ function CameraRig({
     const c = controls.current;
     if (!c || size.width <= 0 || size.height <= 0) return;
     const dt = Math.min(delta, 0.05);
-    if (transitioning.current) {
+    if (flight.current && transitioning.current) {
+      // Hidden scenes do not render. The foreground presentation owner also
+      // removes its request on hide, so no hidden wall time is caught up here.
+      flight.current.elapsedS += Math.max(0, delta);
+      const pose = sampleCameraFlight(flight.current, props.reducedMotion ? flight.current.durationS : flight.current.elapsedS);
+      camera.position.copy(pose.position);
+      c.target.copy(pose.target);
+      camera.up.set(0, 1, 0);
+      camera.lookAt(c.target);
+      if (props.reducedMotion || flight.current.elapsedS >= flight.current.durationS) {
+        flight.current = null;
+        transitioning.current = false;
+        c.enabled = true;
+      }
+    } else if (transitioning.current) {
       const t = props.reducedMotion ? 1 : 1 - Math.exp(-delta * 5);
       camera.position.lerp(goal.current.position, t);
       c.target.lerp(goal.current.target, t);
@@ -1191,7 +1355,7 @@ function CameraRig({
       camera.lookAt(c.target);
     }
     diagnosticAt.current += delta;
-    if (diagnosticAt.current > 0.25 || !ready.current) {
+    if (diagnosticAt.current > 0.25 || !ready.current || (props.presentation && !transitioning.current && settled.current.frames < 3)) {
       diagnosticAt.current = 0;
       pendingDiagnostic.current = {
         camera: camera.position.toArray(),
@@ -1200,6 +1364,7 @@ function CameraRig({
         cameraAspect: camera instanceof PerspectiveCamera ? camera.aspect : size.width / size.height,
         cameraControl: manual.current ? 'manual' : 'named',
         cameraTransitioning: transitioning.current,
+        presentationKey: guidanceOwner.current,
         drawCalls: gl.info.render.calls,
         triangles: gl.info.render.triangles,
         pixelRatio: gl.getPixelRatio(),
@@ -1238,11 +1403,9 @@ function CameraRig({
       maxDistance={Math.max(100, bounds.radius * 8)}
       minPolarAngle={0.001}
       maxPolarAngle={Math.PI * 0.495}
-      enableDamping={!props.reducedMotion}
+      enableDamping={!props.reducedMotion && !props.presentation}
       onStart={() => {
-        manual.current = true;
-        transitioning.current = false;
-        props.onManual();
+        if (!manual.current) takeOverRef.current('pointer');
       }}
     />
   );
@@ -1256,6 +1419,8 @@ declare global {
       cameraAspect: number;
       cameraControl: 'named' | 'manual';
       cameraTransitioning: boolean;
+      presentationKey?: string;
+      presentation?: PresentationSceneReadiness;
       drawCalls: number;
       triangles: number;
       pixelRatio: number;
@@ -1323,8 +1488,47 @@ export function TwinFallback(props: TwinSceneProps) {
   useEffect(() => {
     onReady?.();
   }, [onReady]);
+  const fallbackRoot = useRef<HTMLDivElement>(null);
+  const fallbackCurrent = useRef(props);
+  useLayoutEffect(() => { fallbackCurrent.current = props; });
+  const fallbackRequestKey = props.presentation ? presentationRequestKey(props.presentation) : '';
+  useEffect(() => {
+    const element = fallbackRoot.current;
+    if (!element || !fallbackRequestKey) return;
+    let frame = 0;
+    const stability = new PresentationSettling();
+    let lastStatus = '';
+    const publish = (status: 'settling' | 'fallback') => {
+      const currentProps = fallbackCurrent.current, request = currentProps.presentation;
+      if (!request || presentationRequestKey(request) !== fallbackRequestKey || lastStatus === status) return;
+      lastStatus = status;
+      currentProps.onPresentationReadiness?.({
+        token: request.token, sourceKey: request.sourceKey, stepId: request.stepId, shot: request.shot,
+        selectedId: currentProps.selectedId, timeS: currentProps.state.timeS,
+        status, representation: 'plan', settledFrames: stability.frames,
+        camera: [], target: [], canvasSize: { width: element.clientWidth, height: element.clientHeight }, renderEpoch: 0,
+      });
+    };
+    const sample = () => {
+      const currentProps = fallbackCurrent.current, request = currentProps.presentation;
+      if (!request || presentationRequestKey(request) !== fallbackRequestKey) return;
+      const valid = !document.hidden && element.clientWidth > 0 && element.clientHeight > 0 && currentProps.selectedId === request.selectedId && currentProps.state.timeS === request.timeS;
+      if (stability.observe([element.clientWidth, element.clientHeight], valid)) publish('fallback');
+      else frame = requestAnimationFrame(sample);
+    };
+    const resize = () => {
+      cancelAnimationFrame(frame);
+      stability.reset();
+      publish('settling');
+      frame = requestAnimationFrame(sample);
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(element);
+    resize();
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
+  }, [fallbackRequestKey]);
   return (
-    <div className="twin-fallback" data-testid="twin-fallback">
+    <div ref={fallbackRoot} className="twin-fallback" data-testid="twin-fallback">
       <div className="twin-fallback-heading">
         <span className="twin-map-eyebrow">
           DIMENSIONED FOOTPRINT · ACCESSIBLE FALLBACK
@@ -1393,6 +1597,8 @@ export function TwinFallback(props: TwinSceneProps) {
 }
 /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 export default function TwinScene(input: TwinSceneProps) {
+  const inputRef = useRef(input);
+  useLayoutEffect(() => { inputRef.current = input; });
   const supplyProjection=useMemo(()=>activePowerDesign(input.design,input.state),[input.design,input.state]);
   const props={...input,design:supplyProjection};
   const sceneProps = props.inside ? { ...props, exploded: false } : props;
@@ -1477,6 +1683,7 @@ export default function TwinScene(input: TwinSceneProps) {
               (event) => {
                 event.preventDefault();
                 delete window.__NEPTUNE_TWIN_SCENE__;
+                inputRef.current.onPresentationTakeover?.('context-loss');
                 setLost(true);
               },
               { once: true },

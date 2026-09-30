@@ -128,6 +128,7 @@ jobs:
             files: >-
               tests/browser/visual-v3-clarity.spec.ts
               tests/browser/visual-v4.spec.ts
+              tests/browser/visual-v5.spec.ts
     env:
       TESTED_SOURCE_SHA: ${{ needs.core.outputs.source-sha }}
       TESTED_SOURCE_TREE: ${{ needs.core.outputs.source-tree }}

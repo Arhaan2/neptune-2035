@@ -1,5 +1,7 @@
 import { WalkthroughPanel } from './WalkthroughPanel';
-import { createResultWalkthrough, walkthroughSourceIdentity, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
+import { createResultWalkthrough, walkthroughSourceIdentity, walkthroughShots, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
+import { initialPlayback, playbackReducer } from '../twin/presentation/playback';
+import type { PresentationSceneReadiness } from '../scene/presentationCamera';
 import type { InspectDecisionEvidence } from './DecisionExplanation';
 import type { DecisionCampaign, DecisionResult } from '../twin/decision/types';
 import { useInspection } from './useInspection';
@@ -15,7 +17,7 @@ import { signatureDemonstration, referenceExperiment } from '../twin/experiment/
 import { counterfactualDefinition } from '../twin/experiment/runner';
 import { createExperimentDefinition } from '../twin/experiment/definition';
 import { REFERENCE_CATALOG, resolveSpecification, roleForAsset, equipmentFor, updateEconomicAssumptions, installedEquipmentIdentity, engineeringIdentity } from '../twin/catalog/equipment';
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   Waves,
   Play,
@@ -77,6 +79,7 @@ import {
 } from '../twin/persistence/structure';
 import './twin.css';
 import './visuals/shell-v4.css';
+import './visuals/walkthrough-v5.css';
 const TwinScene = lazy(() => import('../scene/TwinScene'));
 const romans = ['I', 'II', 'III'],
   titles = ['Shore-connected pilot', 'Modular campus', 'Segmented archipelago'];
@@ -238,23 +241,46 @@ export default function TwinApp() {
     [demo, setDemo] = useState(false),
     [inspectedEventId, setInspectedEventId] = useState<string | null>(null),
     [walkthroughSession, setWalkthrough] = useState<(WalkthroughDefinition & { sourceIdentity: string; runGeneration: number }) | null>(null),
-    [walkthroughIndex, setWalkthroughIndex] = useState(0),
-    [walkthroughPaused, setWalkthroughPaused] = useState(false),
-    [walkthroughNavigation, setWalkthroughNavigation] = useState(0),
-    [walkthroughApplied, setWalkthroughApplied] = useState(-1),
     [pendingEvidenceView, setPendingEvidenceView] = useState<{definitionId:string; assetId:string; timeS:number; boundary:'post'|'at-or-after'} | null>(null);
-  const appliedWalkthroughNavigation = useRef(-1);
+  const [playback, dispatchPlayback] = useReducer(playbackReducer, initialPlayback);
+  const [presentationScene, setPresentationScene] = useState<PresentationSceneReadiness | null>(null);
+  const appliedWalkthroughNavigation = useRef('');
+  const [appliedPresentationToken, setAppliedPresentationToken] = useState(-1);
+  const temporaryPresentation = useRef<{ focus: boolean; xray: boolean; exploded: boolean; focusOwned: boolean; appearanceOwned: boolean } | null>(null);
+  const pauseWalkthrough = useCallback((reason = 'Paused for inspection.') => dispatchPlayback({ type: 'pause', reason }), []);
+  const releasePresentation = useCallback(() => {
+    const owned = temporaryPresentation.current;
+    const restored = {
+      focus: owned?.focusOwned ? owned.focus : presentationFocus,
+      xray: owned?.appearanceOwned ? owned.xray : xray,
+      exploded: owned?.appearanceOwned ? owned.exploded : exploded,
+    };
+    if (owned?.focusOwned) setPresentationFocus(owned.focus);
+    if (owned?.appearanceOwned) { setXray(owned.xray); setExploded(owned.exploded); }
+    temporaryPresentation.current = null;
+    return restored;
+  }, [presentationFocus, xray, exploded]);
   const sourceIdentity = useMemo(() => walkthroughSession ? walkthroughSourceIdentity(design, state) : null, [walkthroughSession, design, state]);
   const walkthrough = walkthroughSession?.runGeneration === sim.runGeneration && walkthroughSession.sourceIdentity === sourceIdentity ? walkthroughSession : null;
   // Retire invalid guidance before rendering or scheduling another historical seek.
   // The user's replacement/modified experiment remains the active source.
   if (walkthroughSession && !walkthrough) {
     setWalkthrough(null);
+    dispatchPlayback({ type: 'invalidate', reason: 'Original completed source changed.' });
     setNotice('Walkthrough ended because its original completed experiment is no longer active. Your current experiment is retained; start a result walkthrough explicitly to reload its original evidence.');
   }
+  useEffect(() => { if (!walkthroughSession) releasePresentation(); }, [walkthroughSession, releasePresentation]);
+  const shots = useMemo(() => walkthrough ? walkthroughShots(walkthrough) : [], [walkthrough]);
+  const shot = shots[playback.shotIndex];
+  const walkthroughIndex = shot?.stepIndex ?? 0;
   const sourceOrigin = sim.sourceOrigin;
   const inspection = useInspection(design, state, selectedId, sim.runGeneration);
   const displayState = inspection.displayState;
+  // Preserve the single renderer/cache while an exact history worker resolves.
+  // The resolving caption never presents this retained frame as the next result.
+  const [retainedScene, setRetainedScene] = useState<{ generation: number; state: SimulationState } | null>(null);
+  if (displayState && (retainedScene?.state !== displayState || retainedScene.generation !== sim.runGeneration)) setRetainedScene({ generation: sim.runGeneration, state: displayState });
+  const sceneState = displayState ?? (retainedScene?.generation === sim.runGeneration ? retainedScene.state : state?.designIdentity === engineeringIdentity(design) ? state : null);
   const inspectionController = useRef(inspection);
   useEffect(()=>{inspectionController.current=inspection;},[inspection]);
   const [comparison, setComparison] = useState<Compared[]>([]),
@@ -274,10 +300,13 @@ export default function TwinApp() {
   useEffect(()=>{if(pendingPhase5&&state?.designRevision===pendingPhase5.designRevision&&!sim.busy){const timer=setTimeout(()=>{sim.prepareExperiment(pendingPhase5);setPendingPhase5(null);},0);return()=>clearTimeout(timer);}},[pendingPhase5,state?.designRevision,sim]);
   const costScale=equipmentFor(design).economics.unitCostScale;
   const setCostScale=(value:number)=>setDesignOverride(updateEconomicAssumptions(design,{unitCostScale:value}));
-  const reducedMotion = useMemo(
-    () => matchMedia('(prefers-reduced-motion: reduce)').matches,
-    [],
-  );
+  const [reducedMotion, setReducedMotion] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useEffect(() => {
+    const media = matchMedia('(prefers-reduced-motion: reduce)');
+    const changed = () => { setReducedMotion(media.matches); pauseWalkthrough('Motion preference changed. Resume explicitly.'); };
+    media.addEventListener('change', changed);
+    return () => media.removeEventListener('change', changed);
+  }, [pauseWalkthrough]);
   const asset = resolveAsset(design, selectedId),
     selectedModule =
       design.modules.find(
@@ -313,7 +342,7 @@ export default function TwinApp() {
   const select = (id: string, view: Focus = 'selection') => {
     if (!resolveAsset(design, id)) { setNotice('Unsupported asset ID. Select an installed asset from the asset list.'); return; }
     setSelectedId(id);
-    if (walkthrough) setWalkthroughPaused(true);
+    if (walkthrough) pauseWalkthrough('Equipment selected for inspection.');
     setFocus(view);
     setResetId((v) => v + 1);
     setDemo(false);
@@ -338,23 +367,69 @@ export default function TwinApp() {
   };
   const startResultWalkthrough = (campaign: DecisionCampaign, result: DecisionResult) => {
     const prepared = createResultWalkthrough(campaign,result);
-    retainBeforeRevision('Before result walkthrough'); inspection.returnToCurrent();
+    retainBeforeRevision('Before result walkthrough'); inspection.returnToCurrent(); setPendingEvidenceView(null);
     const next = sim.restore(projectFile(prepared.run.design,prepared.evidence.state), result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied simulated campaign evidence'); setDesignOverride(next); setConfig(next.config);
-    setWalkthrough({...prepared,sourceIdentity:walkthroughSourceIdentity(prepared.run.design,prepared.evidence.state)!,runGeneration:sim.runGeneration+1});setWalkthroughIndex(0);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);setDemo(false);setInside(false);setXray(true);
-    setNotice('Walkthrough loaded one completed scenario. Your previous project remains in saved scenarios; guidance only inspects history after this explicit load.');
+    const restored = releasePresentation();
+    temporaryPresentation.current = { ...restored, focusOwned: false, appearanceOwned: true };
+    setWalkthrough({...prepared,sourceIdentity:walkthroughSourceIdentity(prepared.run.design,prepared.evidence.state)!,runGeneration:sim.runGeneration+1});
+    dispatchPlayback({ type: 'load', sourceKey: `${sim.runGeneration + 1}:${prepared.evidenceIdentity}` });
+    setPresentationScene(null); setDemo(false); setInside(false);
+    setNotice('Completed scenario loaded. The prior project is saved in Compare without private observations or stream URLs. Design revisions may reset observation mappings. Play presentation starts pacing; manual chapters remain available.');
   };
+  const exitWalkthrough = () => {
+    dispatchPlayback({ type: 'invalidate', reason: 'Walkthrough exited.' });
+    setWalkthrough(null); setPresentationScene(null); setPendingEvidenceView(null); inspection.returnToCurrent(); releasePresentation();
+    setFocus('campus'); setResetId(value => value + 1);
+  };
+  const playPresentation = () => {
+    if (!walkthrough) return;
+    if (temporaryPresentation.current && !temporaryPresentation.current.focusOwned) { temporaryPresentation.current.focus = presentationFocus; temporaryPresentation.current.focusOwned = !presentationFocus; }
+    setPresentationFocus(true); dispatchPlayback({ type: 'play' });
+  };
+  const navigateWalkthrough = (index: number) => {
+    const shotIndex = shots.findIndex(item => item.stepIndex === index);
+    if (shotIndex >= 0) dispatchPlayback({ type: 'navigate', shotIndex });
+  };
+  const displayedShotMatches = Boolean(shot && inspection.status === 'resolved' && inspection.resolution?.boundary === shot.boundary && inspection.requestedTimeS === shot.timeS && selectedId === shot.assetId);
+  const historyMatches = appliedPresentationToken === playback.token && displayedShotMatches;
+  const guided = Boolean(walkthrough && shot && !['paused', 'error', 'invalidated'].includes(playback.phase));
   useEffect(() => {
-    if (!walkthrough || walkthroughPaused || sim.busy || state?.experiment?.definition.id !== walkthrough.run.definition.id || appliedWalkthroughNavigation.current === walkthroughNavigation) return;
-    appliedWalkthroughNavigation.current = walkthroughNavigation;
-    const step = walkthrough.steps[walkthroughIndex];
-    const timer = setTimeout(() => {setWalkthroughApplied(walkthroughNavigation);setSelectedId(step.assetId);setFocus('selection');setResetId(value=>value+1);setInspectedEventId(step.eventId);setWorkspace(step.workspace);inspectionController.current.inspect(step.timeS,step.boundary);},0);
-    return () => {clearTimeout(timer);appliedWalkthroughNavigation.current=-1;};
-  },[walkthrough,walkthroughIndex,walkthroughPaused,walkthroughNavigation,sim.busy,state?.experiment?.definition.id]);
+    if (!walkthrough || !shot || !guided || sim.busy || state?.experiment?.definition.id !== walkthrough.run.definition.id) return;
+    const key = `${playback.sourceKey}:${playback.token}`;
+    if (appliedWalkthroughNavigation.current === key) return;
+    appliedWalkthroughNavigation.current = key;
+    setAppliedPresentationToken(playback.token);
+    setPresentationScene(null);
+    setSelectedId(shot.assetId); setFocus(shot.kind === 'campus' || shot.kind === 'summary' ? 'campus' : shot.kind === 'cooling' ? 'cooling' : 'selection');
+    setXray(!['campus', 'summary'].includes(shot.kind)); setExploded(false); setInside(false);
+    if (temporaryPresentation.current && !temporaryPresentation.current.appearanceOwned) { temporaryPresentation.current.xray = xray; temporaryPresentation.current.exploded = exploded; temporaryPresentation.current.appearanceOwned = true; }
+    setResetId(value => value + 1); setInspectedEventId(shot.eventId); setWorkspace(playback.automatic ? 'Operate' : shot.workspace);
+    inspectionController.current.inspect(shot.timeS, shot.boundary);
+  }, [walkthrough, shot, guided, playback.token, playback.sourceKey, playback.automatic, sim.busy, state?.experiment?.definition.id, xray, exploded]);
+  const onPresentationReadiness = useCallback((report: PresentationSceneReadiness) => {
+    // A late frame can neither authorize a new chapter nor replace its record.
+    if (!guided || report.token !== String(playback.token) || report.sourceKey !== playback.sourceKey || !historyMatches || report.selectedId !== shot?.assetId || report.timeS !== displayState?.timeS) return;
+    setPresentationScene(report);
+    dispatchPlayback({ type: 'scene', token: playback.token, sourceKey: playback.sourceKey, ready: report.status !== 'settling', last: playback.shotIndex === shots.length - 1 });
+  }, [guided, playback.token, playback.sourceKey, playback.shotIndex, historyMatches, shot?.assetId, displayState?.timeS, shots.length]);
+  useEffect(() => {
+    if (guided && appliedPresentationToken === playback.token && inspection.status === 'unavailable-history') dispatchPlayback({ type: 'error', token: playback.token, reason: inspection.resolution?.reason ?? 'The requested history is unavailable.' });
+  }, [guided, appliedPresentationToken, inspection.status, inspection.resolution?.reason, playback.token]);
+  useEffect(() => {
+    if (!walkthrough || !['playing', 'resolving'].includes(playback.phase)) return;
+    let previous = performance.now();
+    const timer = window.setInterval(() => {
+      const now = performance.now(), deltaMs = now - previous; previous = now;
+      if (document.hidden) return;
+      dispatchPlayback({ type: 'tick', deltaMs, dwellMs: shot?.dwellMs ?? 4000, count: shots.length });
+    }, 100);
+    return () => clearInterval(timer);
+  }, [walkthrough, shot?.dwellMs, shots.length, playback.token, playback.phase]);
   useEffect(() => {
     if(!pendingEvidenceView||sim.busy||state?.experiment?.definition.id!==pendingEvidenceView.definitionId)return;
     const timer=setTimeout(()=>{inspectionController.current.inspect(pendingEvidenceView.timeS,pendingEvidenceView.boundary);setPendingEvidenceView(null);},0);return()=>clearTimeout(timer);
   },[pendingEvidenceView,sim.busy,state?.experiment?.definition.id]);
-  useEffect(() => {const hide=()=>{if(document.hidden)setWalkthroughPaused(true);};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[]);
+  useEffect(() => {const hide=()=>{if(document.hidden)pauseWalkthrough('Document hidden. Resume explicitly to continue.');};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[pauseWalkthrough]);
   const setDesign = (patch: Partial<DesignConfig>, nominalPreset = false) => {
     try {
       const next = { ...config, ...patch };
@@ -421,6 +496,12 @@ export default function TwinApp() {
     : focus;
   const effectiveXray = xray || (demo && (state?.timeS ?? 0) >= 10);
   const sceneRegion = useRef<HTMLDivElement>(null);
+  const storyRegion = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!walkthrough || !playback.automatic || !presentationFocus) return;
+    const frame = requestAnimationFrame(() => storyRegion.current?.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    return () => cancelAnimationFrame(frame);
+  }, [walkthrough, playback.automatic, presentationFocus]);
   const comparisonRegion = useRef<HTMLElement>(null);
   const cinematicStage =
     demo && (state?.timeS ?? 0) >= 180 && (state?.timeS ?? 0) < 220
@@ -722,10 +803,10 @@ export default function TwinApp() {
       setCompareBusy(false);
     }
   };
-  const sceneProps = displayState
+  const sceneProps = sceneState
     ? {
         design,
-        state: displayState,
+        state: sceneState,
         selectedId,
         onSelect: (id: string) => select(id),
         xray: effectiveXray,
@@ -736,7 +817,11 @@ export default function TwinApp() {
         focus: effectiveFocus,
         resetId,
         reducedMotion,
-        onManual: () => {setDemo(false);setWalkthroughPaused(true);},
+        onManual: () => {setDemo(false);pauseWalkthrough('Camera taken over. Resume reapplies guidance.');},
+        presentation: guided && historyMatches && shot ? { token: String(playback.token), sourceKey: playback.sourceKey, stepId: shot.stepId, shot: shot.kind, selectedId: shot.assetId, timeS: displayState!.timeS, transitionMs: playback.automatic ? shot.transitionMs : 0, authoredKind: shot.authoredKind } : undefined,
+        presentationPending: guided && !historyMatches,
+        onPresentationReadiness,
+        onPresentationTakeover: (reason: string) => pauseWalkthrough(`Presentation paused: ${reason}.`),
         onReady: () => setSceneReady(true),
       }
     : null;
@@ -744,6 +829,7 @@ export default function TwinApp() {
     <main
       className="twin-app"
       data-presentation-focus={presentationFocus}
+      data-walkthrough-active={Boolean(walkthrough)}
       data-panel-open={panelOpen && !presentationFocus}
       data-panel-expanded={panelExpanded}
       data-ready={state !== null}
@@ -759,7 +845,7 @@ export default function TwinApp() {
         if (overlay?.matches('details[data-ui-overlay]')) activeOverlay.current = overlay as HTMLDetailsElement;
       }}
       onKeyDownCapture={(event) => {
-        if (event.key !== 'Escape') return;
+        if (event.key !== 'Escape' || (event.target as HTMLElement).closest('input, select, textarea, [contenteditable="true"]')) return;
         const visible = (element: HTMLDetailsElement | null) => element?.open && element.getClientRects().length > 0 ? element : null;
         const overlay = visible((event.target as HTMLElement).closest<HTMLDetailsElement>('details[data-ui-overlay][open]'))
           ?? visible(activeOverlay.current)
@@ -767,9 +853,10 @@ export default function TwinApp() {
         if (overlay) {
           event.preventDefault(); event.stopPropagation(); overlay.open = false;
           overlay.querySelector<HTMLElement>('summary')?.focus();
-        }
+        } else if (walkthrough) { event.preventDefault(); event.stopPropagation(); exitWalkthrough(); }
       }}
-      onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"], [data-layout-control]')) setWalkthroughPaused(true);}}
+      onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"], [data-layout-control]')) pauseWalkthrough('Paused for inspection.');}}
+      onFocusCapture={(event) => { if (walkthrough && playback.phase === 'playing' && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"], [data-layout-control]')) pauseWalkthrough('Paused while reading or using a control.'); }}
       onWheelCapture={() => {
         if (demo) setDemo(false);
       }}
@@ -896,6 +983,7 @@ export default function TwinApp() {
           </details>
           <button type="button" data-layout-control aria-pressed={presentationFocus} onClick={(event) => {
             if (!presentationFocus) event.currentTarget.closest('main')?.querySelectorAll<HTMLDetailsElement>('details[data-ui-overlay][open]').forEach(element => { element.open = false; });
+            if (temporaryPresentation.current) temporaryPresentation.current.focusOwned = false;
             setPresentationFocus(value => !value);
           }}>
             {presentationFocus ? 'Exit presentation focus' : 'Presentation focus'}
@@ -1137,8 +1225,13 @@ export default function TwinApp() {
           )}
 
           </div>
-          <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => inspection.returnToCurrent(true)} />
-          {walkthrough && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} displayTimeS={displayState?.timeS??null} status={walkthroughPaused?'paused':walkthroughApplied===walkthroughNavigation&&selectedId===walkthrough.steps[walkthroughIndex].assetId&&inspection.status==='resolved'&&inspection.resolution?.boundary===walkthrough.steps[walkthroughIndex].boundary&&inspection.requestedTimeS===walkthrough.steps[walkthroughIndex].timeS?(walkthroughIndex===walkthrough.steps.length-1?'completed':'ready'):'loading'} onStep={index=>{setWalkthroughIndex(index);setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onPause={()=>setWalkthroughPaused(true)} onResume={()=>{setWalkthroughPaused(false);setWalkthroughNavigation(value=>value+1);}} onExit={()=>{setWalkthrough(null);inspection.returnToCurrent();setFocus('campus');setResetId(value=>value+1);}} onPreviousBoundary={()=>{setWalkthroughPaused(true);inspection.inspect(walkthrough.steps[walkthroughIndex].timeS,'previous');}} />}
+          <InspectionContext current={state} display={displayState} mode={inspection.mode} status={inspection.status} requestedTimeS={inspection.requestedTimeS} resolution={inspection.resolution} origin={sourceOrigin} onReturn={() => {pauseWalkthrough('Returned to the loaded current checkpoint.');inspection.returnToCurrent();setInspectedEventId(null);}} onCancel={() => {pauseWalkthrough('Historical inspection cancelled.');inspection.returnToCurrent(true);}} />
+          <div className="twin-story-stage" ref={storyRegion}>
+          {walkthrough && shot && <WalkthroughPanel walkthrough={walkthrough} index={walkthroughIndex} shot={shot} shotIndex={playback.shotIndex} shotCount={shots.length} playback={playback} scene={presentationScene} reducedMotion={reducedMotion} historyMatches={displayedShotMatches} displayedModule={selectedState ?? null} displayTimeS={displayState?.timeS ?? null}
+            onStep={navigateWalkthrough} onShot={shotIndex => dispatchPlayback({type:'navigate',shotIndex})} onPlay={playPresentation} onPause={() => pauseWalkthrough()} onResume={() => dispatchPlayback({type:'resume'})} onRestart={() => dispatchPlayback({type:'restart'})} onExit={exitWalkthrough}
+            onReview={() => { pauseWalkthrough('Reviewing original campaign evidence.'); setPresentationFocus(false); if (temporaryPresentation.current) temporaryPresentation.current.focusOwned = false; setWorkspace('Compare'); }}
+            onPreviousBoundary={() => {pauseWalkthrough('Inspecting the boundary before the metric marker.'); inspection.inspect(shot.timeS,'previous');}} />}
+
           <div className="twin-scene-shell" ref={sceneRegion}
             data-detail-view={!inside && (effectiveFocus === 'cooling' || (effectiveFocus === 'selection' && ['pump', 'exchanger', 'cdu'].includes(asset?.type ?? '')))}>
             <div className="twin-scene-caption">
@@ -1176,12 +1269,12 @@ export default function TwinApp() {
               </div>
             )}
             <div className="twin-scene-toolbar" aria-label="Scene controls">
-              <button aria-pressed={xray} onClick={() => setXray(!xray)}>
+              <button aria-pressed={xray} onClick={() => {if (temporaryPresentation.current) temporaryPresentation.current.appearanceOwned = false; setXray(!xray);}}>
                 <Layers size={15} /> X-ray
               </button>
               <button
                 aria-pressed={exploded}
-                onClick={() => setExploded(!exploded)}
+                onClick={() => {if (temporaryPresentation.current) temporaryPresentation.current.appearanceOwned = false; setExploded(!exploded);}}
               >
                 Explode
               </button>
@@ -1234,6 +1327,7 @@ export default function TwinApp() {
                 Plan
               </button>
             </div>
+          </div>
           </div>
           <div className="twin-metric-context">Campus metrics · {inspection.mode === 'history' ? 'displayed historical boundary' : 'current model'} · {displayState ? `${displayState.timeS} s` : 'unavailable'} · {sourceOrigin}</div>
           <div className="twin-metrics">
@@ -1489,7 +1583,7 @@ export default function TwinApp() {
             </div>
           )}
           <section className="twin-operations" data-workspace-panel="Operate" hidden={workspace !== 'Operate' || presentationFocus}>
-          {state && <OperatorTimeline design={design} source={state} display={displayState} assetId={selectedId} selectedEventId={inspectedEventId} resolution={inspection.resolution} onInspect={(timeS,boundary) => {setDemo(false);inspection.inspect(timeS,boundary);}} onEvent={inspectEvent} />}
+          {state && <OperatorTimeline design={design} source={state} display={displayState} assetId={selectedId} selectedEventId={inspectedEventId} resolution={inspection.resolution} onInspect={(timeS,boundary) => {pauseWalkthrough('Manual history navigation.');setDemo(false);inspection.inspect(timeS,boundary);}} onEvent={inspectEvent} />}
           <TransferPanel design={design} state={displayState} busy={sim.busy||compareBusy||inspection.mode==='history'} onSelect={select} onRun={definition=>sim.startExperiment(definition)} onLoad={(next,definition)=>{try{retainBeforeRevision('Before Phase 5 reference');setDesignOverride(next);setConfig(next.config);setPendingPhase5(definition);setDemo(false);setWorkspace('Operate');select(next.transfer!.routes[0].tieId);}catch(e){setNotice(String(e));}}}/>
           {state && !showComparison && <p className="operator-evidence-label">Active experiment controls and full-run evidence · current checkpoint {state.timeS} s. History inspection does not change this evidence.</p>}
           {state && <ExperimentPanel design={design} state={state} busy={sim.busy||inspection.mode==='history'} hidden={showComparison} onStart={(definition) => { setDemo(false); sim.startExperiment(definition); }} onPrepare={(definition) => { setDemo(false); sim.prepareExperiment(definition); }} onPause={() => sim.setRunning(false)} onStep={() => sim.advance(1)} onCancel={() => sim.cancel()} />}

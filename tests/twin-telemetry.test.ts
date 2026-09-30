@@ -11,6 +11,8 @@ import type { Observation } from '../src/twin/types';
 import { calibrateUA, calculateResiduals, connectStream, generateObservations, importObservations, normalizeObservation, parseCSV, replayObservations, SIMULATION_EPOCH_MS, TelemetryStore, validateStreamURL, type EventSourceTransport, type StreamStatus, type UACalibrationSample } from '../src/twin/telemetry';
 // @ts-expect-error The optional publisher is intentionally plain Node JavaScript.
 import { createTelemetryPublisher } from '../scripts/telemetry-publisher.mjs';
+import { visibleControl } from './browser/visible-controls';
+import { parseProject } from '../src/twin/persistence/project';
 
 const design = buildDesign({ ...DEFAULT_CONFIG, requestedAccelerators: 1280 });
 const moduleId = design.modules[0].id;
@@ -403,6 +405,88 @@ describe('running DataPanel acceptance', () => {
       mkdirSync('artifacts/v2', { recursive: true });
       stage('capture completed data panel');
       await page.locator('.twin-data').screenshot({ path: 'artifacts/v2/telemetry-panel.png' });
+
+      stage('load completed V5 result before opening its compatible observation session');
+      // The explicit result load intentionally replaces the physical design and
+      // its observation mapping. Continuity assertions begin only AFTER that
+      // boundary; the preceding V4 mapping/reconnect assertions remain intact.
+      await publisher.close(); publisher = undefined;
+      await page.getByRole('button', { name: 'Compare', exact: true }).click();
+      await (await visibleControl(page, page.getByRole('button', { name: 'Start decision campaign', exact: true }))).click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="decision-coverage"]')?.getAttribute('data-status') === 'completed');
+      await (await visibleControl(page, page.getByRole('button', { name: 'Start result walkthrough', exact: true }))).click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
+      const walkthrough = page.getByTestId('operator-walkthrough');
+      const sourceBefore = JSON.parse((await walkthrough.getAttribute('data-presentation-record'))!) as { runId: string; sourceKey: string; evidenceIdentity: string };
+      await page.locator('summary').filter({ hasText: /^Project actions$/ }).click();
+      const v5DownloadPending = page.waitForEvent('download');
+      await page.getByLabel('Export artifact', { exact: true }).selectOption('project');
+      const v5Export = await v5DownloadPending;
+      expect(await v5Export.failure()).toBeNull();
+      const loaded = parseProject(readFileSync((await v5Export.path())!, 'utf8'));
+      if (loaded.schemaVersion !== 3 || !loaded.checkpoint) throw Error('V5 result load did not export a completed current project.');
+      await page.locator('summary').filter({ hasText: /^Project actions$/ }).click();
+      await page.getByRole('button', { name: 'Data & replay', exact: true }).click();
+      await page.getByRole('heading', { name: 'Observations & synchronization' }).waitFor();
+      const v5Module = loaded.designSnapshot.modules[0].id;
+      const retainedFixture = { ...sample(), assetId: v5Module, mappingVersion: loaded.designSnapshot.revision, sourceId: 'generated:v5-retained-import', evidence: 'generated', observedAt: time(loaded.timeS * 1000), receivedAt: time(loaded.timeS * 1000) };
+      await page.getByLabel('Import telemetry CSV or JSON').setInputFiles({ name: 'v5-retained.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify([retainedFixture])) });
+      await page.getByText('1 accepted; 0 rejected.', { exact: false }).waitFor();
+      await page.getByText('Raw imports and reset boundaries', { exact: true }).click();
+      await page.getByRole('button', { name: 'Reset selected source sequence', exact: true }).click();
+      await page.getByText('generated:v5-retained-import: Explicit operator sequence restart', { exact: false }).waitFor();
+      const v5Raw = await page.locator('.twin-data pre').innerText();
+      const v5Boundaries = await page.locator('.twin-data details').filter({ has: page.locator('summary').filter({ hasText: /^Raw imports and reset boundaries$/ }) }).innerText();
+      expect(v5Raw).toContain('generated:v5-retained-import');
+      publisher = createTelemetryPublisher({ mappingVersion: loaded.designSnapshot.revision, assetId: v5Module, intervalMs: 100, allowedOrigins: ['http://127.0.0.1:5173'] }) as Publisher;
+      const v5Port = await listen(publisher.server);
+      await page.getByLabel('Stream URL', { exact: true }).fill(`http://127.0.0.1:${v5Port}/events`);
+      await page.getByRole('button', { name: 'Connect stream', exact: true }).click();
+      await page.getByText('Accepted stream sample.', { exact: false }).waitFor();
+      const v5Before = await lifecycle(), v5Retained = await retainedCount();
+      const v5DataOwner = await page.locator('.twin-data').elementHandle();
+      expect(publisher.diagnostics.connections).toBe(1);
+      expect(v5Before.created).toBe(stopped.created + 1);
+      const v5SamplesStart = stopped.samples.length;
+      const v5Checkpoint = await page.locator('main.twin-app').getAttribute('data-time');
+      stage('V5 Play Pause Next Restart Exit with native SSE retained');
+      // Reading/importing Data intentionally pauses guidance. Explicit Resume
+      // returns this manually loaded chapter to ready before choosing autoplay.
+      expect(await walkthrough.getAttribute('data-presentation-status')).toBe('paused');
+      await page.getByRole('button', { name: 'Resume walkthrough', exact: true }).click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
+      await page.getByRole('button', { name: 'Play presentation', exact: true }).click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-presentation-status') === 'playing');
+      await page.getByRole('button', { name: 'Pause walkthrough', exact: true }).click();
+      expect(await walkthrough.getAttribute('data-presentation-status')).toBe('paused');
+      await page.getByRole('button', { name: 'Next walkthrough step', exact: true }).click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
+      expect(await walkthrough.getAttribute('data-step-index')).toBe('1');
+      await walkthrough.locator('summary').filter({ hasText: /^Details$/ }).click();
+      await page.getByRole('button', { name: 'Restart presentation', exact: true }).click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
+      expect(await walkthrough.getAttribute('data-shot-index')).toBe('0');
+      const sourceAfter = JSON.parse((await walkthrough.getAttribute('data-presentation-record'))!) as typeof sourceBefore;
+      for (const key of ['runId', 'sourceKey', 'evidenceIdentity'] as const) expect(sourceAfter[key]).toBe(sourceBefore[key]);
+      await page.getByRole('button', { name: 'Exit walkthrough', exact: true }).click();
+      await walkthrough.waitFor({ state: 'detached' });
+      await page.getByRole('button', { name: 'Data & replay', exact: true }).click();
+      await page.waitForFunction(count => (window as unknown as { __V4_STREAM_LIFECYCLE__: { samples: unknown[] } }).__V4_STREAM_LIFECYCLE__.samples.length > count, v5Before.samples.length);
+      const v5After = await lifecycle();
+      expect(await v5DataOwner!.evaluate(element => element === document.querySelector('.twin-data'))).toBe(true);
+      expect(publisher.diagnostics.connections).toBe(1);
+      expect(v5After.created).toBe(v5Before.created);
+      expect(v5After.closed).toBe(v5Before.closed);
+      expect(v5After.samples.slice(0, v5Before.samples.length)).toEqual(v5Before.samples);
+      expect(v5After.samples.slice(v5SamplesStart).every((item, index, samples) => item.sourceId === 'generated:local-publisher' && item.evidence === 'generated' && (index === 0 || item.sequence > samples[index - 1].sequence))).toBe(true);
+      expect(await retainedCount()).toBeGreaterThan(v5Retained);
+      expect(await page.getByLabel('Observation source', { exact: true }).inputValue()).toBe('generated:local-publisher');
+      expect(await page.locator('.twin-data pre').innerText()).toBe(v5Raw);
+      expect(await page.locator('.twin-data details').filter({ has: page.locator('summary').filter({ hasText: /^Raw imports and reset boundaries$/ }) }).innerText()).toBe(v5Boundaries);
+      expect(await page.locator('main.twin-app').getAttribute('data-time')).toBe(v5Checkpoint);
+      await page.getByRole('button', { name: 'Disconnect', exact: true }).click();
+      expect((await lifecycle()).closed).toBe(v5Before.closed + 1);
+      stage('V5 compatible-session continuity verified');
       expect(errors).toEqual([]);
     } finally { await publisher?.close(); await browser.close(); }
   }, 40_000);
