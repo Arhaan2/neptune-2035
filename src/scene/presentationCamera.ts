@@ -79,6 +79,25 @@ export function createCameraFlight(from: CameraPose, to: CameraPose, durationMs:
     elapsedS: 0,
   };
 }
+
+/** Layout updates belong to the current navigation. Retarget an active flight
+ * without restarting its elapsed-time budget; a completed owner needs only an
+ * immediate refit, followed by the usual fresh rendered-frame settling checks.
+ * The caller must reject cancelled owners before applying this result. */
+export function updatePresentationFlight(
+  previous: CameraFlight | null,
+  sameOwner: boolean,
+  from: CameraPose,
+  to: CameraPose,
+  durationMs: number,
+): CameraFlight | null {
+  if (!sameOwner) return createCameraFlight(from, to, durationMs);
+  if (!previous) return null;
+  return {
+    ...previous,
+    to: { position: to.position.clone(), target: to.target.clone() },
+  };
+}
 const ease = (t: number) => t * t * (3 - 2 * t);
 /** Elapsed foreground time controls a complete move. Interpolating the viewing
  * orbit avoids a straight chord through the subject on opposite-side shots.

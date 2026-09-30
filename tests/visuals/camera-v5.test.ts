@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { buildDesign, DEFAULT_CONFIG, resolveAsset } from '../../src/twin/assets/design';
-import { createCameraFlight, presentationFrame, presentationRequestKey, PresentationSettling, sampleCameraFlight, type PresentationCameraRequest } from '../../src/scene/presentationCamera';
+import { createCameraFlight, presentationFrame, presentationRequestKey, PresentationSettling, sampleCameraFlight, updatePresentationFlight, type PresentationCameraRequest } from '../../src/scene/presentationCamera';
 import { presentedPosition } from '../../src/scene/twinGeometry';
 
 const design = buildDesign(DEFAULT_CONFIG);
@@ -59,6 +59,69 @@ describe('Visual V5 directed camera', () => {
     expect(presentationRequestKey(original)).not.toBe(presentationRequestKey({ ...original, sourceKey: 'run-2:evidence-1' }));
     expect(presentationRequestKey(original)).not.toBe(presentationRequestKey({ ...original, token: 'request-2' }));
     expect(presentationRequestKey(original)).not.toBe(presentationRequestKey({ ...original, timeS: 17 }));
+  });
+
+  test('same-owner fractional layout publications cannot restart an active navigation deadline', () => {
+    const shot = request('campus'), from = { position: new Vector3(80, 50, 100), target: new Vector3() };
+    const initial = presentationFrame(design, shot, false, 1240 / 430);
+    let flight = updatePresentationFlight(null, false, from, initial, 1500), pose = from;
+    let firstCompletedFrame: number | undefined;
+    for (let frame = 1; frame <= 720; frame++) {
+      if (frame % 24 === 0) {
+        const width = 1240 + (frame % 48 === 0 ? 0 : 1 / 64), height = width / (1240 / 430);
+        const destination = presentationFrame(design, shot, false, width / height);
+        expect(destination).toEqual(initial);
+        flight = updatePresentationFlight(flight, true, pose, destination, 1500);
+        if (!flight) pose = destination;
+      }
+      if (flight) {
+        flight.elapsedS += 1 / 60;
+        pose = sampleCameraFlight(flight, flight.elapsedS);
+        if (flight.elapsedS >= flight.durationS) {
+          flight = null;
+          firstCompletedFrame ??= frame;
+        }
+      }
+    }
+    expect(firstCompletedFrame).toBe(91);
+    expect(flight).toBeNull();
+    expect(pose).toEqual(initial);
+  });
+
+  test('meaningful resize retargets the actual goal without extending the owner budget', () => {
+    const shot = request('equipment', `${design.modules[0].id}/cdu`);
+    const from = { position: new Vector3(80, 50, 100), target: new Vector3() };
+    const wide = presentationFrame(design, shot, true, 1240 / 430);
+    const tall = presentationFrame(design, shot, true, 390 / 740);
+    expect(tall).not.toEqual(wide);
+    const flight = createCameraFlight(from, wide, 1500);
+    flight.elapsedS = 1.2;
+    const actual = sampleCameraFlight(flight, flight.elapsedS);
+    const retargeted = updatePresentationFlight(flight, true, actual, tall, 2500)!;
+    expect(retargeted.elapsedS).toBe(1.2);
+    expect(retargeted.durationS).toBe(1.5);
+    expect(retargeted.from).toEqual(flight.from);
+    expect(sampleCameraFlight(retargeted, 1.5)).toEqual(tall);
+    expect(flight.to).toEqual(wide);
+    expect(retargeted.to.position).not.toBe(tall.position);
+    expect(retargeted.to.target).not.toBe(tall.target);
+  });
+
+  test('completed same-owner refits still need fresh settling and a new owner starts from the current pose', () => {
+    const actual = { position: new Vector3(8, 6, 10), target: new Vector3(1, 2, 3) };
+    const destination = presentationFrame(design, request('campus'), false, 390 / 740);
+    expect(updatePresentationFlight(null, true, actual, destination, 1500)).toBeNull();
+    const tracker = new PresentationSettling(), pose = [...destination.position.toArray(), ...destination.target.toArray(), 390, 740];
+    tracker.observe(pose, true); tracker.observe(pose, true); expect(tracker.observe(pose, true)).toBe(true);
+    tracker.reset();
+    expect(tracker.observe(pose, false)).toBe(false);
+    expect(tracker.observe(pose, true)).toBe(false);
+    expect(tracker.observe(pose, true)).toBe(false);
+    expect(tracker.observe(pose, true)).toBe(true);
+    const next = updatePresentationFlight(null, false, actual, destination, 1500)!;
+    expect(next.elapsedS).toBe(0);
+    expect(sampleCameraFlight(next, 0)).toEqual(actual);
+    expect(sampleCameraFlight(next, next.durationS)).toEqual(destination);
   });
 
   test('requires three consecutive valid stable completed poses and discards loading/reflow/stale progress', () => {

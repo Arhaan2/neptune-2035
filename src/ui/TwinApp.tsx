@@ -1,3 +1,4 @@
+import { presentationDiagnostic, presentationDiagnosticChange, presentationDiagnosticIdentity, presentationDiagnosticsEnabled } from '../twin/presentation/diagnostics';
 import { WalkthroughPanel } from './WalkthroughPanel';
 import { createResultWalkthrough, walkthroughSourceIdentity, walkthroughShots, type WalkthroughDefinition } from '../twin/presentation/walkthrough';
 import { initialPlayback, playbackReducer } from '../twin/presentation/playback';
@@ -407,12 +408,24 @@ export default function TwinApp() {
     setResetId(value => value + 1); setInspectedEventId(shot.eventId); setWorkspace('Operate');
     inspectionController.current.inspect(shot.timeS, shot.boundary);
   }, [walkthrough, shot, guided, playback.token, playback.sourceKey, playback.automatic, sim.busy, state?.experiment?.definition.id, xray, exploded]);
+  useEffect(() => {
+    if (!presentationDiagnosticsEnabled()) return;
+    const blockers = [!guided && 'unguided', appliedPresentationToken !== playback.token && 'unapplied-token', !displayedShotMatches && 'history-selection'].filter(Boolean).join(',');
+    presentationDiagnosticChange('history', JSON.stringify([playback.token, playback.phase, appliedPresentationToken, inspection.status, inspection.requestedTimeS, inspection.resolution?.boundary, displayState?.timeS, selectedId, blockers]), 'history', {
+      source: presentationDiagnosticIdentity(playback.sourceKey), evidence: presentationDiagnosticIdentity(walkthrough?.evidenceIdentity), token: playback.token, appliedToken: appliedPresentationToken ?? -1,
+      step: shot?.stepId ?? '', shot: shot?.kind ?? '', phase: playback.phase, requestedTimeS: shot?.timeS ?? -1, historyRequestedTimeS: inspection.requestedTimeS ?? -1,
+      displayedTimeS: displayState?.timeS ?? -1, boundary: shot?.boundary ?? '', displayedBoundary: inspection.resolution?.boundary ?? '', historyStatus: inspection.status,
+      selectedId, blockers, visible: !document.hidden,
+    });
+  }, [playback.token, playback.phase, playback.sourceKey, appliedPresentationToken, inspection.status, inspection.requestedTimeS, inspection.resolution?.boundary, displayState?.timeS, selectedId, guided, displayedShotMatches, shot, walkthrough?.evidenceIdentity]);
   const onPresentationReadiness = useCallback((report: PresentationSceneReadiness) => {
     // A late frame can neither authorize a new chapter nor replace its record.
-    if (!guided || report.token !== String(playback.token) || report.sourceKey !== playback.sourceKey || !historyMatches || report.selectedId !== shot?.assetId || report.timeS !== displayState?.timeS) return;
+    const rejection = !guided ? 'unguided' : report.token !== String(playback.token) ? 'token' : report.sourceKey !== playback.sourceKey ? 'source' : !historyMatches ? 'history' : report.selectedId !== shot?.assetId ? 'selection' : report.timeS !== displayState?.timeS ? 'time' : '';
+    if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: rejection ? 'rejected' : 'accepted', reason: rejection, token: report.token, currentToken: playback.token, source: presentationDiagnosticIdentity(report.sourceKey), step: report.stepId, shot: report.shot, phase: playback.phase, status: report.status, renderEpoch: report.renderEpoch, displayedTimeS: displayState?.timeS ?? -1, reportTimeS: report.timeS });
+    if (rejection) return;
     setPresentationScene(report);
     dispatchPlayback({ type: 'scene', token: playback.token, sourceKey: playback.sourceKey, ready: report.status !== 'settling', last: playback.shotIndex === shots.length - 1 });
-  }, [guided, playback.token, playback.sourceKey, playback.shotIndex, historyMatches, shot?.assetId, displayState?.timeS, shots.length]);
+  }, [guided, playback.token, playback.sourceKey, playback.shotIndex, playback.phase, historyMatches, shot?.assetId, displayState?.timeS, shots.length]);
   useEffect(() => {
     if (guided && appliedPresentationToken === playback.token && inspection.status === 'unavailable-history') dispatchPlayback({ type: 'error', token: playback.token, reason: inspection.resolution?.reason ?? 'The requested history is unavailable.' });
   }, [guided, appliedPresentationToken, inspection.status, inspection.resolution?.reason, playback.token]);
@@ -430,7 +443,7 @@ export default function TwinApp() {
     if(!pendingEvidenceView||sim.busy||state?.experiment?.definition.id!==pendingEvidenceView.definitionId)return;
     const timer=setTimeout(()=>{inspectionController.current.inspect(pendingEvidenceView.timeS,pendingEvidenceView.boundary);setPendingEvidenceView(null);},0);return()=>clearTimeout(timer);
   },[pendingEvidenceView,sim.busy,state?.experiment?.definition.id]);
-  useEffect(() => {const hide=()=>{if(document.hidden)pauseWalkthrough('Document hidden. Resume explicitly to continue.');};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[pauseWalkthrough]);
+  useEffect(() => {const hide=()=>{presentationDiagnostic('visibility', { visible: !document.hidden });if(document.hidden)pauseWalkthrough('Document hidden. Resume explicitly to continue.');};document.addEventListener('visibilitychange',hide);return()=>document.removeEventListener('visibilitychange',hide);},[pauseWalkthrough]);
   const setDesign = (patch: Partial<DesignConfig>, nominalPreset = false) => {
     try {
       const next = { ...config, ...patch };

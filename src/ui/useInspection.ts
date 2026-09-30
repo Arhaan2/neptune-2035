@@ -1,3 +1,4 @@
+import { presentationDiagnostic, presentationDiagnosticIdentity, presentationDiagnosticsEnabled } from '../twin/presentation/diagnostics';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Design, SimulationState } from '../twin/types';
 import { engineeringIdentity } from '../twin/catalog/equipment';
@@ -24,12 +25,15 @@ export function useInspection(design: Design, active: SimulationState | null, as
     if (!validRequest) return;
     const instance = new Worker(new URL('../twin/presentation/worker.ts', import.meta.url), { type: 'module' });
     worker.current = instance;
+    if (presentationDiagnosticsEnabled()) presentationDiagnostic('history', { outcome: 'worker-request', epoch: mine, source: presentationDiagnosticIdentity(runIdentity), selectedId: assetId, requestedTimeS: validRequest.timeS, boundary: validRequest.boundary });
     const fail = (reason: string) => { if (epoch.current !== mine) return; instance.terminate(); setReply({ key, resolution: { status: 'unavailable-history', reason, runIdentity, requestedTimeS: validRequest.timeS, resolvedTimeS: null, boundary: validRequest.boundary, state: null, samples: [], samplesSeen: 0, truncated: false, work: 0, summary: null, residuals: null } }); };
     const watchdog = setTimeout(() => fail('History worker exceeded its execution budget. Active experiment retained.'), INSPECTION_LIMITS.wallMs + 1000);
     instance.onerror = event => { clearTimeout(watchdog); fail(`History worker unavailable: ${event.message}. Active experiment retained.`); };
     instance.onmessage = (event: MessageEvent<HistoryWorkerResponse>) => {
       const response = event.data;
-      if (epoch.current !== mine || response.version !== 1 || response.epoch !== mine || response.runIdentity !== runIdentity || response.assetId !== assetId || response.resolution.runIdentity !== runIdentity) return;
+      const rejected = epoch.current !== mine ? 'superseded-worker' : response.version !== 1 ? 'version' : response.epoch !== mine ? 'epoch' : response.runIdentity !== runIdentity ? 'source' : response.assetId !== assetId ? 'selection' : response.resolution.runIdentity !== runIdentity ? 'resolution-source' : '';
+      if (presentationDiagnosticsEnabled()) presentationDiagnostic('history', { outcome: rejected ? 'worker-rejected' : 'worker-accepted', reason: rejected, epoch: mine, source: presentationDiagnosticIdentity(runIdentity), selectedId: assetId, requestedTimeS: validRequest.timeS, boundary: validRequest.boundary, displayedTimeS: response.resolution?.resolvedTimeS ?? -1, historyStatus: response.resolution?.status ?? 'unavailable' });
+      if (rejected) return;
       clearTimeout(watchdog); instance.terminate(); setReply({ key, resolution: response.resolution });
     };
     instance.postMessage({ version: 1, epoch: mine, runIdentity, design, source: validRequest.source, request: { assetId, timeS: validRequest.timeS, boundary: validRequest.boundary } } satisfies HistoryWorkerRequest);

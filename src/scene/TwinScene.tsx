@@ -1,3 +1,4 @@
+import { presentationDiagnostic, presentationDiagnosticChange, presentationDiagnosticIdentity, presentationDiagnosticsEnabled } from '../twin/presentation/diagnostics';
 import { visualAssetStates } from '../twin/presentation/assets';
 import { activePowerDesign } from '../twin/transfer/topology';
 import { engineeringIdentity } from '../twin/catalog/equipment';
@@ -877,9 +878,31 @@ function CameraRig({
   const diagnosticAt = useRef(0);
   const renderEpoch = useRef(0);
   const pendingDiagnostic = useRef<Window['__NEPTUNE_TWIN_SCENE__']>(undefined);
+  const layoutRevision = useRef(0);
+  const meaningfulLayoutRevision = useRef(0);
+  const diagnosticLayout = useRef<number[]>([]);
+  const lastCompletedFrame = useRef(0);
+  const lastRendererFrame = useRef(gl.info.render.frame);
+  const diagnose = (reason: string, kind: 'camera' | 'settling' | 'layout' = 'camera') => {
+    if (!presentationDiagnosticsEnabled()) return;
+    const request = current.current.props.presentation;
+    presentationDiagnosticChange('camera-boundary', JSON.stringify([reason, presentationDiagnosticIdentity(guidanceOwner.current), request?.token, layoutRevision.current, transitioning.current]), kind, {
+      reason, source: presentationDiagnosticIdentity(request?.sourceKey), owner: presentationDiagnosticIdentity(guidanceOwner.current), token: request?.token ?? '', step: request?.stepId ?? '', shot: request?.shot ?? '',
+      elapsedS: flight.current?.elapsedS ?? 0, durationS: flight.current?.durationS ?? 0, camera: camera.position.toArray(), target: controls.current?.target.toArray() ?? [], goalCamera: goal.current.position.toArray(), goalTarget: goal.current.target.toArray(), transitioning: transitioning.current,
+      r3fWidth: get().size.width, r3fHeight: get().size.height, parentWidth: gl.domElement.parentElement?.clientWidth ?? 0, parentHeight: gl.domElement.parentElement?.clientHeight ?? 0, canvasWidth: gl.domElement.clientWidth, canvasHeight: gl.domElement.clientHeight,
+      layoutRevision: layoutRevision.current, meaningfulLayoutRevision: meaningfulLayoutRevision.current, settledFrames: settled.current.frames, renderEpoch: renderEpoch.current, lastCompletedFrameMs: lastCompletedFrame.current, rendererFrame: lastRendererFrame.current, visible: !document.hidden, contextLost: gl.getContext().isContextLost(),
+    });
+  };
+  const diagnoseRef = useRef(diagnose);
+  useLayoutEffect(() => { diagnoseRef.current = diagnose; });
   useEffect(() => addAfterEffect(() => {
     // The callback follows all automatic root renders. Never read the previous
     // frame's GPU allocation counters from a pre-render useFrame callback.
+    if (presentationDiagnosticsEnabled() && gl.info.render.frame !== lastRendererFrame.current) {
+      lastRendererFrame.current = gl.info.render.frame;
+      lastCompletedFrame.current = performance.now();
+      window.__NEPTUNE_V5_LAST_FRAME__ = lastCompletedFrame.current;
+    }
     if (!pendingDiagnostic.current) return;
     const observed = pendingDiagnostic.current;
     pendingDiagnostic.current = undefined;
@@ -890,6 +913,7 @@ function CameraRig({
         Math.abs(viewport.clientHeight - observed.canvasSize.height) > 1 ||
         Math.abs(gl.domElement.clientWidth - observed.canvasSize.width) > 1 ||
         Math.abs(gl.domElement.clientHeight - observed.canvasSize.height) > 1) {
+      if (presentationDiagnosticsEnabled()) presentationDiagnosticChange('size-blocker', JSON.stringify([presentationDiagnosticIdentity(guidanceOwner.current), observed.canvasSize, viewport?.clientWidth, viewport?.clientHeight, gl.domElement.clientWidth, gl.domElement.clientHeight]), 'layout', { reason: 'css-r3f-mismatch', token: current.current.props.presentation?.token ?? '', r3fWidth: observed.canvasSize.width, r3fHeight: observed.canvasSize.height, parentWidth: viewport?.clientWidth ?? 0, parentHeight: viewport?.clientHeight ?? 0, canvasWidth: gl.domElement.clientWidth, canvasHeight: gl.domElement.clientHeight, renderEpoch: renderEpoch.current, lastCompletedFrameMs: lastCompletedFrame.current });
       settled.current.reset();
       // A missed native resize notification must not leave drawing/projection
       // at a transient layout forever. Repair through the existing R3F store,
@@ -904,6 +928,7 @@ function CameraRig({
       }
       return;
     }
+    if (presentationDiagnosticsEnabled()) presentationDiagnosticChange('size-blocker', `${presentationDiagnosticIdentity(guidanceOwner.current)}:matched`, 'layout', { reason: 'css-r3f-matched', owner: presentationDiagnosticIdentity(guidanceOwner.current), token: current.current.props.presentation?.token ?? '', renderEpoch: renderEpoch.current, rendererFrame: lastRendererFrame.current, lastCompletedFrameMs: lastCompletedFrame.current });
     const visualKit = visualKitDiagnostic(scene, camera, kitCache, observed.detailModuleId, gl.info.render.frame);
     window.__NEPTUNE_TWIN_SCENE__ = {
       ...observed,
@@ -921,7 +946,18 @@ function CameraRig({
       const detail = request.authoredKind ? visualKit.assets.find(asset => asset.assetId === request.selectedId && asset.kind === request.authoredKind) : undefined;
       const terminal = request.authoredKind ? !!detail && detail.status !== 'loading' && detail.status !== 'idle' : visualKit.status !== 'loading';
       const rendered = !detail || detail.status !== 'ready' || (detail.renderedMeshes > 0 && !!detail.childWorldPoint);
+      const previousFrames = settled.current.frames;
       const isSettled = settled.current.observe([...observed.camera, ...observed.target, observed.canvasSize.width, observed.canvasSize.height], matching && terminal && rendered && !observed.cameraTransitioning);
+      if (presentationDiagnosticsEnabled()) {
+        const blockers = [!matching && 'identity', !terminal && 'asset-pending', !rendered && 'authored-not-rendered', observed.cameraTransitioning && 'transition', !isSettled && 'three-stable-frames'].filter(Boolean).join(',');
+        presentationDiagnosticChange('render-blocker', JSON.stringify([request.token, guidanceLayout.current, blockers, Math.min(3, settled.current.frames), detail?.status, visualKit.status]), 'render', {
+          token: request.token, source: presentationDiagnosticIdentity(request.sourceKey), owner: presentationDiagnosticIdentity(guidanceOwner.current), step: request.stepId, shot: request.shot, blockers,
+          assetStatus: detail?.status ?? visualKit.status, renderedMeshes: detail?.renderedMeshes ?? 0, authoredSurfaceVisible: !!detail?.childWorldPoint, selectedId: observed.selectedId, displayedTimeS: observed.simulationTimeS,
+          settledFrames: settled.current.frames, resetReason: previousFrames > 0 && settled.current.frames <= 1 ? (matching && terminal && rendered && !observed.cameraTransitioning ? 'pose-or-layout-changed' : blockers) : '',
+          renderEpoch: renderEpoch.current, lastCompletedFrameMs: lastCompletedFrame.current, rendererFrame: lastRendererFrame.current, camera: observed.camera, target: observed.target, elapsedS: flight.current?.elapsedS ?? 0, durationS: flight.current?.durationS ?? 0, transitioning: observed.cameraTransitioning,
+          r3fWidth: observed.canvasSize.width, r3fHeight: observed.canvasSize.height, parentWidth: viewport.clientWidth, parentHeight: viewport.clientHeight, canvasWidth: gl.domElement.clientWidth, canvasHeight: gl.domElement.clientHeight, layoutRevision: layoutRevision.current, meaningfulLayoutRevision: meaningfulLayoutRevision.current, visible: !document.hidden, contextLost: gl.getContext().isContextLost(),
+        });
+      }
       const fallback = detail?.status === 'fallback' || visualKit.status === 'fallback';
       const representation = detail?.status === 'ready' || (!request.authoredKind && visualKit.status === 'ready') ? 'authored' : 'procedural';
       const report: PresentationSceneReadiness = {
@@ -934,6 +970,7 @@ function CameraRig({
       window.__NEPTUNE_TWIN_SCENE__!.presentation = report;
       const reportKey = `${guidanceOwner.current}:${guidanceLayout.current}:${report.status}:${report.representation}`;
       if (lastGuidanceReport.current !== reportKey) {
+        if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: report.token, source: presentationDiagnosticIdentity(report.sourceKey), step: report.stepId, shot: report.shot, status: report.status, representation: report.representation, renderEpoch: report.renderEpoch, layoutRevision: layoutRevision.current });
         lastGuidanceReport.current = reportKey;
         current.current.props.onPresentationReadiness?.(report);
       }
@@ -964,6 +1001,7 @@ function CameraRig({
       // Selection/history may change in separate React commits. Retain the last
       // displayed pose until the matching canonical boundary supplies its shot.
       // Neither an ordinary focus effect nor a stale flight owns this interval.
+      diagnoseRef.current('history-pending', 'settling');
       flight.current = null;
       transitioning.current = false;
       settled.current.reset();
@@ -1001,13 +1039,20 @@ function CameraRig({
       c.enableDamping = false;
       c.update();
       c.enabled = false;
+      const diagnosticPreviousOwner = guidanceOwner.current;
       guidanceOwner.current = key;
       guidanceLayout.current = context;
+      layoutRevision.current++;
       cancelledGuidance.current = '';
       settled.current.reset();
       lastGuidanceReport.current = '';
       manual.current = false;
       goal.current = presentationFrame(props.design, guidance, props.exploded, size.width / size.height);
+      if (presentationDiagnosticsEnabled()) {
+        const nextLayout = [size.width, size.height, ...goal.current.position.toArray(), ...goal.current.target.toArray()];
+        if (!diagnosticLayout.current.length || nextLayout.some((value, index) => Math.abs(value - diagnosticLayout.current[index]) > (index < 2 ? 1 : 1e-5))) meaningfulLayoutRevision.current++;
+        diagnosticLayout.current = nextLayout;
+      }
       flight.current = createCameraFlight({ position: camera.position, target: c.target }, goal.current, guidance.transitionMs);
       const immediate = props.reducedMotion || flight.current.durationS === 0;
       transitioning.current = !immediate;
@@ -1019,8 +1064,10 @@ function CameraRig({
         flight.current = null;
         c.enabled = true;
       }
+      diagnoseRef.current(diagnosticPreviousOwner === key ? 'same-owner-layout-refit' : 'new-owner-flight', 'layout');
       lastRequest.current = request;
       lastContext.current = context;
+      if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: guidance.token, source: presentationDiagnosticIdentity(guidance.sourceKey), status: 'settling', renderEpoch: renderEpoch.current, layoutRevision: layoutRevision.current });
       current.current.props.onPresentationReadiness?.({
         token: guidance.token, sourceKey: guidance.sourceKey, stepId: guidance.stepId, shot: guidance.shot,
         selectedId: props.selectedId, timeS: current.current.props.state.timeS, status: 'settling', representation: 'procedural', settledFrames: 0,
@@ -1029,6 +1076,7 @@ function CameraRig({
       return;
     }
     if (guidanceOwner.current) {
+      diagnoseRef.current('guidance-released', 'settling');
       // Pause/exit releases guidance immediately and keeps the actual visible
       // pose. A later explicit request can safely start there.
       flight.current = null;
@@ -1174,6 +1222,7 @@ function CameraRig({
     const request = current.current.props.presentation;
     if (current.current.props.presentationPending && !manual.current) current.current.props.onPresentationTakeover?.(reason);
     if (request && guidanceOwner.current && cancelledGuidance.current !== guidanceOwner.current) {
+      diagnoseRef.current(`takeover-${reason}`, 'settling');
       cancelledGuidance.current = guidanceOwner.current;
       flight.current = null;
       settled.current.reset();
@@ -1323,6 +1372,7 @@ function CameraRig({
       camera.up.set(0, 1, 0);
       camera.lookAt(c.target);
       if (props.reducedMotion || flight.current.elapsedS >= flight.current.durationS) {
+        diagnoseRef.current('flight-completed');
         flight.current = null;
         transitioning.current = false;
         c.enabled = true;
@@ -1515,6 +1565,7 @@ export function TwinFallback(props: TwinSceneProps) {
     const publish = (status: 'settling' | 'fallback') => {
       const currentProps = fallbackCurrent.current, request = currentProps.presentation;
       if (!request || presentationRequestKey(request) !== fallbackRequestKey || lastStatus === status) return;
+      if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: request.token, source: presentationDiagnosticIdentity(request.sourceKey), step: request.stepId, shot: request.shot, status, representation: 'plan', settledFrames: stability.frames, canvasWidth: element.clientWidth, canvasHeight: element.clientHeight, visible: !document.hidden });
       lastStatus = status;
       currentProps.onPresentationReadiness?.({
         token: request.token, sourceKey: request.sourceKey, stepId: request.stepId, shot: request.shot,
@@ -1532,6 +1583,7 @@ export function TwinFallback(props: TwinSceneProps) {
     };
     const resize = () => {
       cancelAnimationFrame(frame);
+      if (presentationDiagnosticsEnabled()) presentationDiagnostic('settling', { reason: 'fallback-layout', token: fallbackCurrent.current.presentation?.token ?? '', canvasWidth: element.clientWidth, canvasHeight: element.clientHeight, visible: !document.hidden });
       stability.reset();
       publish('settling');
       frame = requestAnimationFrame(sample);
@@ -1696,6 +1748,7 @@ export default function TwinScene(input: TwinSceneProps) {
               'webglcontextlost',
               (event) => {
                 event.preventDefault();
+                presentationDiagnostic('context', { reason: 'webgl-context-lost', visible: !document.hidden });
                 delete window.__NEPTUNE_TWIN_SCENE__;
                 inputRef.current.onPresentationTakeover?.('context-loss');
                 setLost(true);
