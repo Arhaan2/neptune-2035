@@ -846,7 +846,7 @@ function CameraRig({
   kitCache: VisualKitCache;
   onKitStatus: (status: KitStatus) => void;
 }) {
-  const { camera, gl, size, scene } = useThree();
+  const { camera, gl, size, scene, get, setSize } = useThree();
   const controls = useRef<OrbitControlsImpl>(null);
   const goal = useRef<CameraPose>({
     position: new Vector3(),
@@ -889,7 +889,21 @@ function CameraRig({
     if (!viewport || Math.abs(viewport.clientWidth - observed.canvasSize.width) > 1 ||
         Math.abs(viewport.clientHeight - observed.canvasSize.height) > 1 ||
         Math.abs(gl.domElement.clientWidth - observed.canvasSize.width) > 1 ||
-        Math.abs(gl.domElement.clientHeight - observed.canvasSize.height) > 1) return;
+        Math.abs(gl.domElement.clientHeight - observed.canvasSize.height) > 1) {
+      settled.current.reset();
+      // A missed native resize notification must not leave drawing/projection
+      // at a transient layout forever. Repair through the existing R3F store,
+      // then require a later real render to pass this same size guard. Comparing
+      // current store dimensions avoids repeated updates while React catches up.
+      const measured = viewport?.getBoundingClientRect();
+      const currentSize = get().size;
+      if (measured && [measured.width, measured.height, measured.top, measured.left].every(Number.isFinite) &&
+          measured.width > 0 && measured.height > 0 &&
+          (currentSize.width !== measured.width || currentSize.height !== measured.height)) {
+        setSize(measured.width, measured.height, measured.top, measured.left);
+      }
+      return;
+    }
     const visualKit = visualKitDiagnostic(scene, camera, kitCache, observed.detailModuleId, gl.info.render.frame);
     window.__NEPTUNE_TWIN_SCENE__ = {
       ...observed,
@@ -928,7 +942,7 @@ function CameraRig({
       ready.current = true;
       current.current.props.onReady?.();
     }
-  }), [camera, gl, scene, kitCache, onKitStatus]);
+  }), [camera, gl, scene, kitCache, onKitStatus, get, setSize]);
   const snapshots = useRef(new Map<string, CameraPose & { manual: boolean }>()),
     lastContext = useRef('');
   const moduleId = moduleSpec?.id;

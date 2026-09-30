@@ -52,6 +52,8 @@ Nominal coverage omits nonexistent fault/recovery chapters and identifies its no
 
 No scene is cached per chapter, no additional WebGL context is created for a transition, and no equipment geometry is duplicated for scale. The existing three-template cache and private instance material ownership are unchanged. Initial ordinary-campus entry makes no GLB request. Explicit detail preparation/entry admits only compatible local templates. Procedural/plan fallback remains usable and is disclosed; it never counts as authored-detail showcase acceptance.
 
+If a native resize notification is missed, the post-render size guard requests the actual nonzero viewport dimensions through the existing R3F store. It discards that mismatched frame and resets settling; readiness still requires subsequent correctly sized rendered frames. This recovery retains manual camera ownership and does not remount the canvas.
+
 The authored files are unchanged and must be rehashed against the accepted candidate and served release:
 
 | Asset | SHA-256 |

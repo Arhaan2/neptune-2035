@@ -477,3 +477,119 @@ test('VIS5 reused campaign IDs get a new source generation and price edits retai
   await expect(panel(page)).toContainText('Imported supplied evidence');
   await info.attach('V5-reused-id-source-and-economic-capture', { body: JSON.stringify({ original, economic, imported }), contentType: 'application/json' });
 });
+
+test('VIS5 missed native resize delivery recovers rendered bounds without losing manual camera ownership or the checkpoint', async ({ page }, info) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.addInitScript(() => {
+    const NativeResizeObserver = window.ResizeObserver;
+    const gate = { armed: false, dropped: [] as { at: number; width: number; height: number; measuredWidth: number; measuredHeight: number }[] };
+    (window as unknown as { __V5_RESIZE_DELIVERY__: typeof gate }).__V5_RESIZE_DELIVERY__ = gate;
+    window.ResizeObserver = class extends NativeResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        super((entries, observer) => {
+          const target = document.querySelector('.twin-story-stage canvas')?.parentElement;
+          const delivered = entries.filter(entry => {
+            if (!gate.armed || entry.target !== target) return true;
+            const measured = entry.target.getBoundingClientRect();
+            gate.dropped.push({ at: performance.now(), width: entry.contentRect.width, height: entry.contentRect.height, measuredWidth: measured.width, measuredHeight: measured.height });
+            return false;
+          });
+          if (delivered.length) callback(delivered, observer);
+        });
+      }
+    };
+  });
+  const sample = () => page.evaluate(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>('.twin-story-stage canvas');
+    if (!canvas?.parentElement) throw Error('Expected the primary renderer canvas and its measured parent.');
+    const box = (element: Element) => {
+      const rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height, x: rect.x, y: rect.y };
+    };
+    const gate = (window as unknown as { __V5_RESIZE_DELIVERY__: { armed: boolean; dropped: { at: number; width: number; height: number; measuredWidth: number; measuredHeight: number }[] } }).__V5_RESIZE_DELIVERY__;
+    const presentation = document.querySelector<HTMLElement>('[data-testid="operator-walkthrough"]');
+    return { scene: window.__NEPTUNE_TWIN_SCENE__, parent: box(canvas.parentElement), canvas: box(canvas), backing: { width: canvas.width, height: canvas.height },
+      gate: { armed: gate.armed, dropped: [...gate.dropped] }, source: presentation?.dataset.sourceIdentity, shot: presentation?.dataset.shotId,
+      status: presentation?.dataset.presentationStatus, currentTime: document.querySelector<HTMLElement>('main.twin-app')?.dataset.time };
+  });
+  const observations: { label: string; value: Awaited<ReturnType<typeof sample>> }[] = [];
+  try {
+    await setup(page); await enter(page);
+    await panel(page).locator('summary').filter({ hasText: /^Details$/ }).click();
+    await page.getByLabel('Presentation view', { exact: true }).selectOption({ label: '2. Reveal the cooling system' });
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+    await expect(panel(page)).toHaveAttribute('data-readiness', 'authored');
+    await readable(page);
+    const checkpoint = normalizeProject(await project(page)), savedBefore = await saved(page);
+    await button(page, 'Presentation focus').click();
+    await expect(main(page)).toHaveAttribute('data-presentation-focus', 'true');
+    const canvas = page.locator('.twin-story-stage canvas'), owner = await canvas.elementHandle();
+    await canvas.scrollIntoViewIfNeeded();
+    const point = await canvas.evaluate(element => {
+      const rect = element.getBoundingClientRect(), x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
+      return { x, y, owned: document.elementFromPoint(x, y) === element };
+    });
+    expect(point.owned).toBe(true);
+    await page.mouse.move(point.x, point.y); await page.mouse.wheel(0, 120);
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'paused');
+    let prior: number[] | undefined, epoch = -1, stable = 0;
+    await expect.poll(async () => {
+      const scene = (await sample()).scene;
+      if (!scene || scene.cameraControl !== 'manual' || scene.renderEpoch === epoch) return stable;
+      epoch = scene.renderEpoch;
+      const pose = [...scene.camera, ...scene.target];
+      stable = prior && pose.every((value, index) => Math.abs(value - prior![index]) <= 0.00001) ? stable + 1 : 0;
+      prior = pose;
+      return stable;
+    }).toBeGreaterThanOrEqual(3);
+    const baseline = await sample(); observations.push({ label: 'settled manual baseline', value: baseline });
+    expect(baseline.source).toBeTruthy(); expect(baseline.shot).toBeTruthy();
+    const recover = async (label: string, previous: Awaited<ReturnType<typeof sample>>) => {
+      await expect.poll(async () => {
+        const value = await sample(), scene = value.scene;
+        observations.push({ label, value });
+        return Boolean(scene && scene.renderEpoch >= previous.scene!.renderEpoch + 3 && !scene.cameraTransitioning &&
+          value.parent.width > 0 && value.parent.height > 0 &&
+          Math.abs(scene.canvasSize.width - value.parent.width) <= 1 && Math.abs(scene.canvasSize.height - value.parent.height) <= 1 &&
+          Math.abs(value.canvas.width - value.parent.width) <= 1 && Math.abs(value.canvas.height - value.parent.height) <= 1 &&
+          Math.abs(scene.cameraAspect - scene.canvasSize.width / scene.canvasSize.height) <= 0.00000001 &&
+          value.backing.width === Math.floor(scene.canvasSize.width * scene.pixelRatio) && value.backing.height === Math.floor(scene.canvasSize.height * scene.pixelRatio));
+      }).toBe(true);
+      const value = await sample();
+      expect(value.status).toBe('paused');
+      expect(value.scene!.cameraControl).toBe('manual');
+      expect(value.source).toBe(baseline.source); expect(value.shot).toBe(baseline.shot); expect(value.currentTime).toBe(baseline.currentTime);
+      for (const [index, coordinate] of [...value.scene!.camera, ...value.scene!.target].entries()) {
+        expect(Math.abs(coordinate - [...baseline.scene!.camera, ...baseline.scene!.target][index])).toBeLessThanOrEqual(0.00001);
+      }
+      expect(await owner!.evaluate(element => element === document.querySelector('.twin-story-stage canvas'))).toBe(true);
+      return value;
+    };
+    await page.evaluate(() => { (window as unknown as { __V5_RESIZE_DELIVERY__: { armed: boolean } }).__V5_RESIZE_DELIVERY__.armed = true; });
+    const summary = panel(page).locator('summary').filter({ hasText: /^Details$/ });
+    await summary.click();
+    await expect.poll(async () => (await sample()).gate.dropped.length).toBeGreaterThan(0);
+    await expect.poll(async () => Math.abs((await sample()).parent.height - baseline.parent.height)).toBeGreaterThan(1);
+    const opened = await recover('Details open with native resize delivery suppressed', baseline);
+    await summary.click();
+    await expect.poll(async () => (await sample()).gate.dropped.length).toBeGreaterThan(opened.gate.dropped.length);
+    const closed = await recover('Details closed with native resize delivery suppressed', opened);
+    await button(page, 'Exit presentation focus').click();
+    const unfocused = await recover('Presentation focus exited through visible control', closed);
+    await activate(page, 'X-ray');
+    await recover('Later React UI update retains repaired renderer bounds', unfocused);
+    await button(page, 'Resume walkthrough').click();
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+    const resumed = await readable(page);
+    expect(resumed.record.scene.settledFrames).toBeGreaterThanOrEqual(3);
+    await button(page, 'Exit walkthrough').click();
+    expect(normalizeProject(await project(page))).toEqual(checkpoint);
+    expect(await saved(page)).toEqual(savedBefore);
+    expect(errors).toEqual([]);
+  } finally {
+    const final = await sample().catch(() => null);
+    await page.evaluate(() => { const gate = (window as unknown as { __V5_RESIZE_DELIVERY__?: { armed: boolean } }).__V5_RESIZE_DELIVERY__; if (gate) gate.armed = false; }).catch(() => undefined);
+    await info.attach('V5-native-resize-delivery-observations', { body: JSON.stringify({ observations, final, errors }), contentType: 'application/json' });
+  }
+});
