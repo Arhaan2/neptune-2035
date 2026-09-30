@@ -76,10 +76,15 @@ async function completePath(page, index) {
     };
     requestAnimationFrame(frame);
   });
-  if (index === 0) await button(page, 'Play presentation').click(); else await restart(page);
-  await expect(page.getByTestId('operator-walkthrough')).toHaveAttribute('data-presentation-status', 'completed', { timeout: 240_000 });
+  let completionError = null;
+  try {
+    if (index === 0) await button(page, 'Play presentation').click(); else await restart(page);
+    await expect(page.getByTestId('operator-walkthrough')).toHaveAttribute('data-presentation-status', 'completed', { timeout: 240_000 });
+  } catch (error) { completionError = error.stack ?? String(error); }
   const sample = await page.evaluate(() => { const data = window.__NEPTUNE_V5_FRAME_SAMPLE__; data.ended = true; return { ...data, stoppedAt: performance.now(), visibilityState: document.visibilityState, reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches }; });
-  const final = await observe(page); assertReadable(final);
+  const final = await observe(page);
+  if (completionError) { receipt.paths.push({ index, incomplete: true, sample, final, failure: completionError }); await persist(); throw Error(completionError); }
+  assertReadable(final);
   const intervals = sample.frames.map(item => item.intervalMs).sort((a, b) => a - b);
   const percentile = fraction => intervals[Math.floor((intervals.length - 1) * fraction)];
   const summary = { durationMs: sample.stoppedAt - sample.startedAt, frames: intervals.length, medianFrameMs: percentile(.5), medianFPS: 1000 / percentile(.5), p95FrameMs: percentile(.95), maxFrameMs: intervals.at(-1), transitions: {},
