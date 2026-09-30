@@ -74,6 +74,36 @@ test('VIS5 real Play advances an authored shot, pauses immediately and preserves
   expect(fetched).toEqual([]);
   const beforeSaved = await saved(page);
   await enter(page);
+  const details = panel(page).locator('details'), summary = details.locator('summary');
+  // Native details toggle is queued. Deliberate chapter selection must close
+  // that disclosure before navigating, so a late opening toggle cannot pause
+  // the new request. Do not wait for the opening pause between these actions.
+  await summary.click();
+  await page.getByLabel('Presentation view', { exact: true }).selectOption({ label: '2. Reveal the cooling system' });
+  await expect(details).not.toHaveAttribute('open');
+  await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+  await expect(panel(page)).toHaveAttribute('data-readiness', 'authored');
+  const selected = await readable(page);
+  await expect.poll(async () => (await observation(page)).scene?.renderEpoch ?? 0).toBeGreaterThan(selected.scene!.renderEpoch + 3);
+  await expect(panel(page)).toHaveAttribute('data-request-token', selected.attributes.requestToken!);
+  await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+  await summary.click();
+  await page.getByLabel('Presentation view', { exact: true }).selectOption('0');
+  await expect(details).not.toHaveAttribute('open');
+  await expect(panel(page)).toHaveAttribute('data-status', 'ready');
+  const immediateChapters = [];
+  for (const [action, index] of [['Next walkthrough step', '1'], ['Previous walkthrough step', '0']] as const) {
+    await summary.click();
+    await button(page, action).click();
+    await expect(details).not.toHaveAttribute('open');
+    await expect(panel(page)).toHaveAttribute('data-step-index', index);
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+    const chapter = await readable(page);
+    await expect.poll(async () => (await observation(page)).scene?.renderEpoch ?? 0).toBeGreaterThan(chapter.scene!.renderEpoch + 3);
+    await expect(panel(page)).toHaveAttribute('data-request-token', chapter.attributes.requestToken!);
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+    immediateChapters.push(chapter);
+  }
   const loaded = normalizeProject(await project(page));
   const loadedSaved = await saved(page);
   expect(loadedSaved).toHaveLength(beforeSaved.length + 1);
@@ -110,7 +140,7 @@ test('VIS5 real Play advances an authored shot, pauses immediately and preserves
   expect(await owner!.evaluate(element => element === document.querySelector('canvas'))).toBe(true);
   expect(new Set(fetched).size).toBe(fetched.length);
   expect(errors).toEqual([]);
-  await info.attach('V5-native-autoplay-purity', { body: JSON.stringify({ first, paused, loaded, savedCount: loadedSaved.length, fetched }), contentType: 'application/json' });
+  await info.attach('V5-native-autoplay-purity', { body: JSON.stringify({ selected, immediateChapters, first, paused, loaded, savedCount: loadedSaved.length, fetched }), contentType: 'application/json' });
 });
 
 test('VIS5 held required authored detail does not consume reading dwell and late completion after exit cannot restore guidance', async ({ page }, info) => {

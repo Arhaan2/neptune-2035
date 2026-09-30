@@ -8,7 +8,9 @@ export function WalkthroughPanel({ walkthrough, index, shot, shotIndex, shotCoun
   playback: PlaybackState; scene: PresentationSceneReadiness | null; reducedMotion: boolean; historyMatches: boolean; displayedModule: ModuleState | null; displayTimeS: number | null;
   onStep: (index: number) => void; onShot: (index: number) => void; onPlay: () => void; onPause: () => void; onResume: () => void; onRestart: () => void; onExit: () => void; onReview: () => void; onPreviousBoundary: () => void;
 }) {
-  const guide = (button: HTMLButtonElement, action: () => void) => {
+  const guide = (button: HTMLElement, action: () => void) => {
+    // Close before navigation so a queued native opening toggle cannot pause
+    // the newly requested chapter. Summary activation still pauses inspection.
     const disclosure = button.closest('section')?.querySelector('details');
     if (disclosure) disclosure.open = false;
     action();
@@ -36,8 +38,8 @@ export function WalkthroughPanel({ walkthrough, index, shot, shotIndex, shotCoun
       {step.id === 'decision' && <button onClick={onReview}>Review evidence</button>}
         {playback.phase !== 'completed' && (!playback.automatic && !['paused','error'].includes(playback.phase) && <button onClick={event => guide(event.currentTarget, onPlay)}>Play presentation</button>)}
       {playback.phase !== 'completed' && (['paused','error'].includes(playback.phase) ? <button onClick={event => guide(event.currentTarget, onResume)}>Resume walkthrough</button> : <button onClick={onPause}>Pause walkthrough</button>)}
-      <button disabled={index === 0} onClick={() => onStep(index - 1)}>Previous walkthrough step</button>
-      <button disabled={index === walkthrough.steps.length - 1} onClick={() => onStep(index + 1)}>Next walkthrough step</button>
+      <button disabled={index === 0} onClick={event => guide(event.currentTarget, () => onStep(index - 1))}>Previous walkthrough step</button>
+      <button disabled={index === walkthrough.steps.length - 1} onClick={event => guide(event.currentTarget, () => onStep(index + 1))}>Next walkthrough step</button>
       <button onClick={onExit}>Exit walkthrough</button>
     </div>
     {showing && step.id === 'decision' && <div className="walkthrough-result" data-testid="presentation-result" data-ranking-status={walkthrough.summary.decisionStatus}>
@@ -49,7 +51,7 @@ export function WalkthroughPanel({ walkthrough, index, shot, shotIndex, shotCoun
       <h3>{step.title}</h3><p>{step.explanation}</p>
       <p>Source: {walkthrough.result.provenance === 'executed' ? 'executed simulated campaign' : 'imported supplied campaign evidence'}. Run <code>{walkthrough.run.id}</code>. Captured evidence <code>{walkthrough.evidenceIdentity}</code>.</p>
       <p>Evaluated design: {walkthrough.designSummary.candidateLabel}, {walkthrough.designSummary.provisionedAccelerators} installed accelerators, {walkthrough.designSummary.modules} modules. {reducedMotion ? 'Reduced motion: framing is immediate. Play presentation explicitly chooses automatic chapter advancement without camera motion.' : 'Presentation time controls camera movement and reading holds only; no simulation or measured values are interpolated.'}</p>
-      <label>Presentation view<select aria-label="Presentation view" value={shotIndex} onChange={event => onShot(Number(event.target.value))}>{walkthrough.steps.flatMap(item => item.shots).map((item, i) => <option key={item.id} value={i}>{i + 1}. {item.title}</option>)}</select></label>
+      <label>Presentation view<select aria-label="Presentation view" value={shotIndex} onChange={event => { const index = Number(event.currentTarget.value); guide(event.currentTarget, () => onShot(index)); }}>{walkthrough.steps.flatMap(item => item.shots).map((item, i) => <option key={item.id} value={i}>{i + 1}. {item.title}</option>)}</select></label>
       <div className="twin-actions"><button onClick={event => guide(event.currentTarget, onRestart)}>Restart presentation</button>{step.boundary === 'at-or-after' && <button onClick={onPreviousBoundary}>Inspect boundary before metric marker</button>}{step.id !== 'decision' && <button onClick={onReview}>Review evidence</button>}</div>
       <p>Exit returns to the loaded current checkpoint. The prior project remains in saved scenarios in Compare; restoration is explicit. Private observations and stream URLs are excluded from default saves; incompatible design revisions reset observation mapping.</p>
     </details>
