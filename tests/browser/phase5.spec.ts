@@ -1,14 +1,15 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 
 const main = (page: Page) => page.locator('main.twin-app');
-const panel = (page: Page) => page.getByRole('region', { name: 'Phase 5 controlled transfer', exact: true });
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const panel = (page: Page) => page.getByRole('region', { includeHidden: true, name: 'Phase 5 controlled transfer', exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
 async function ready(page: Page) { await expect(main(page)).toHaveAttribute('data-ready', 'true'); await expect(button(page, 'Step 10s')).toBeEnabled(); }
 async function setup(page: Page, fallback = false) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(fallback ? './?fallback=1' : './'); await ready(page);
-  await page.getByLabel('Starting scenario', { exact: true }).selectOption('8'); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Starting scenario', { exact: true }), control => control.selectOption('8')); await ready(page);
   await expect(panel(page)).toContainText('Simulated, design-stage prototype; physical validation pending.');
 }
 async function download(page: Page, trigger: () => Promise<unknown>) {
@@ -17,14 +18,14 @@ async function download(page: Page, trigger: () => Promise<unknown>) {
   if (!path) throw Error('Actual native export missing.');
   return JSON.parse(await fs.readFile(path, 'utf8'));
 }
-async function project(page: Page) { return download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project')); }
+async function project(page: Page) { return download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project'))); }
 async function compare(page: Page, kind: string) {
-  await page.getByLabel('Phase 5 experiment', { exact: true }).selectOption(kind);
-  await button(page, 'Compare Generation II / III').click();
+  await withVisibleControl(page, page.getByLabel('Phase 5 experiment', { exact: true }), control => control.selectOption(kind));
+  await withVisibleControl(page, button(page, 'Compare Generation II / III'), control => control.click());
   // Follow the real four-worker lifecycle within the original test budget.
   await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(control => control.textContent === 'Compare Generation II / III' && !control.disabled));
   await expect(page.getByTestId('phase5-comparison-report')).toBeVisible();
-  return download(page, () => button(page, 'Export Phase 5 comparison').click());
+  return download(page, () => withVisibleControl(page, button(page, 'Export Phase 5 comparison'), control => control.click()));
 }
 function observe(page: Page) {
   const errors: string[] = [], workers: string[] = [], failedRequests: string[] = [];
@@ -96,24 +97,24 @@ test('PH5 shared-donor partial restoration has exact unserved history and native
 
 test('PH5 loaded experiment exports imports replays and invalidates stale comparisons on mobile keyboard fallback', async ({ page }, info) => {
   const observed = observe(page); await setup(page, true); await expect(page.locator('canvas')).toHaveCount(0);
-  await button(page, 'Load Phase 5 reference').focus(); await page.keyboard.press('Enter');
+  await withVisibleControl(page, button(page, 'Load Phase 5 reference'), control => control.focus()); await page.keyboard.press('Enter');
   await expect(button(page, 'Run loaded Phase 5 experiment')).toBeEnabled(); await ready(page);
-  await button(page, 'Run loaded Phase 5 experiment').click();
+  await withVisibleControl(page, button(page, 'Run loaded Phase 5 experiment'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-time', '12'); await ready(page);
   const source = await project(page);
   expect(source.checkpoint.state.experiment.metrics.shortfallAcceleratorS).toBe(19);
   expect(source.checkpoint.state.transfer.attempts[0]).toMatchObject({ status: 'transferred', tieClosed: true });
-  await button(page, 'Replay').click(); await ready(page);
+  await withVisibleControl(page, button(page, 'Replay'), control => control.click()); await ready(page);
   const replayed = await project(page);
   expect(replayed.checkpoint.state.experiment.metrics).toEqual(source.checkpoint.state.experiment.metrics);
   expect(replayed.checkpoint.state.transfer).toEqual(source.checkpoint.state.transfer);
-  await page.getByLabel('Import project', { exact: true }).setInputFiles({ name: 'phase5-replay.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(source)) }); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Import project', { exact: true }), control => control.setInputFiles({ name: 'phase5-replay.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(source)) })); await ready(page);
   const imported = await project(page); expect(imported.checkpoint).toEqual(source.checkpoint);
   await compare(page, 'eligible');
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(() => page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
   await page.screenshot({ path: info.outputPath('phase5-mobile-report.png'), fullPage: true });
-  await page.getByLabel('Starting scenario', { exact: true }).selectOption('8'); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Starting scenario', { exact: true }), control => control.selectOption('8')); await ready(page);
   await expect(page.getByTestId('phase5-comparison-report')).toHaveCount(0);
   await expect(panel(page)).toContainText('previous Phase 5 comparison is historical because engineering inputs changed');
   await evidence(info, 'phase5-replay-native-exports', { source, replayed, imported }, observed);
@@ -121,18 +122,18 @@ test('PH5 loaded experiment exports imports replays and invalidates stale compar
 
 test('PH5 experiment draft survives Compare and Operate with the selected healthy run and exact duration', async ({ page }, info) => {
   const observed = observe(page); await setup(page, true);
-  const whole = page.getByRole('region', { name: 'Whole experiment', exact: true });
-  await page.getByLabel('Experiment', { exact: true }).selectOption('healthy');
-  await page.getByLabel('Experiment duration seconds', { exact: true }).fill('40');
-  await page.getByLabel('Recovery dwell seconds', { exact: true }).fill('7');
+  const whole = page.getByRole('region', { includeHidden: true, name: 'Whole experiment', exact: true });
+  await withVisibleControl(page, page.getByLabel('Experiment', { exact: true }), control => control.selectOption('healthy'));
+  await withVisibleControl(page, page.getByLabel('Experiment duration seconds', { exact: true }), control => control.fill('40'));
+  await withVisibleControl(page, page.getByLabel('Recovery dwell seconds', { exact: true }), control => control.fill('7'));
   await button(page, 'Compare').click();
-  await expect(page.getByRole('heading', { name: 'Compare reproducible scenarios', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { includeHidden: true, name: 'Compare reproducible scenarios', exact: true })).toBeVisible();
   await expect(whole).toBeHidden();
   await button(page, 'Operate').click(); await expect(whole).toBeVisible();
   await expect(page.getByLabel('Experiment', { exact: true })).toHaveValue('healthy');
   await expect(page.getByLabel('Experiment duration seconds', { exact: true })).toHaveValue('40');
   await expect(page.getByLabel('Recovery dwell seconds', { exact: true })).toHaveValue('7');
-  await button(page, 'Start whole experiment').click();
+  await withVisibleControl(page, button(page, 'Start whole experiment'), control => control.click());
   await expect(whole.getByTestId('experiment-outcome')).toContainText('completed · PASS'); await ready(page);
   const exported = await project(page), run = exported.checkpoint.state.experiment;
   expect(exported.timeS).toBe(40);

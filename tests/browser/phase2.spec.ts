@@ -1,9 +1,10 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs/promises';
 
 const duty = 'platform-001/module-01/pump-duty';
 const main = (page: Page) => page.locator('main.twin-app');
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
 const lastExportCompleted = new WeakMap<Page, number>();
 async function ready(page: Page) {
   await expect(main(page)).toHaveAttribute('data-ready', 'true');
@@ -13,10 +14,10 @@ async function loadSmall(page: Page, fallback = false) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(fallback ? './?fallback=1' : './');
   await ready(page);
-  const input = page.getByRole('spinbutton', { name: 'Requested accelerators', exact: true });
-  await input.fill('8'); await input.press('Enter');
+  const input = page.getByRole('spinbutton', { includeHidden: true, name: 'Requested accelerators', exact: true });
+  await withVisibleControl(page, input, control => control.fill('8')); await withVisibleControl(page, input, control => control.press('Enter'));
   await ready(page);
-  await page.getByLabel('Select equipment', { exact: true }).selectOption(duty);
+  await withVisibleControl(page, page.getByLabel('Select equipment', { exact: true }), control => control.selectOption(duty));
   await expect(main(page)).toHaveAttribute('data-selected', duty);
 }
 async function step(page: Page) {
@@ -32,7 +33,7 @@ async function artifact(page: Page, value: string) {
   const remaining = 125 - (performance.now() - (lastExportCompleted.get(page) ?? -Infinity));
   if (remaining > 0) await page.waitForTimeout(remaining);
   const waiting = page.waitForEvent('download');
-  await page.getByLabel('Export artifact', { exact: true }).selectOption(value);
+  await withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption(value));
   const download = await waiting;
   lastExportCompleted.set(page, performance.now());
   expect(await download.failure()).toBeNull();
@@ -41,9 +42,9 @@ async function artifact(page: Page, value: string) {
 }
 async function project(page: Page) { return JSON.parse(await artifact(page, 'project')); }
 async function install(page: Page, specification: string) {
-  await page.getByLabel('Replacement specification', { exact: true }).selectOption(specification);
+  await withVisibleControl(page, page.getByLabel('Replacement specification', { exact: true }), control => control.selectOption(specification));
   await expect(page.getByTestId('proposed-spec-details')).toBeVisible();
-  await button(page, 'Apply and reset').click();
+  await withVisibleControl(page, button(page, 'Apply and reset'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-time', '0');
   await ready(page);
 }
@@ -76,11 +77,11 @@ test('PH2 real-worker replacement preserves history and propagates through scene
 
   await step(page);
   const oldRun = await project(page);
-  await page.getByLabel('Replacement specification', { exact: true }).selectOption('pump-efficient');
+  await withVisibleControl(page, page.getByLabel('Replacement specification', { exact: true }), control => control.selectOption('pump-efficient'));
   await expect(page.getByTestId('proposed-spec-details')).toContainText(/0\.84|84%/);
   // A proposed replacement leaves the active hardware/clock/checkpoint untouched until Apply.
   expect((await project(page)).checkpoint).toEqual(oldRun.checkpoint);
-  await button(page, 'Apply and reset').click();
+  await withVisibleControl(page, button(page, 'Apply and reset'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-time', '0'); await ready(page);
   await expect(page.getByTestId('installed-spec')).toContainText('84%');
   const efficient = await project(page);
@@ -112,22 +113,22 @@ test('PH2 real-worker replacement preserves history and propagates through scene
   const report = await artifact(page, 'report'); expect(report).toContain('pump-physical'); expect(report).toContain('280000');
   await step(page);
   const saved = await artifact(page, 'project');
-  await button(page, 'Reset state').click(); await expect(main(page)).toHaveAttribute('data-time', '0'); await ready(page);
-  await page.getByLabel('Import project', { exact: true }).setInputFiles({ name: 'phase2-replacement.json', mimeType: 'application/json', buffer: Buffer.from(saved) });
+  await withVisibleControl(page, button(page, 'Reset state'), control => control.click()); await expect(main(page)).toHaveAttribute('data-time', '0'); await ready(page);
+  await withVisibleControl(page, page.getByLabel('Import project', { exact: true }), control => control.setInputFiles({ name: 'phase2-replacement.json', mimeType: 'application/json', buffer: Buffer.from(saved) }));
   await expect(main(page)).toHaveAttribute('data-time', '10'); await ready(page);
   expect((await project(page)).checkpoint).toEqual(JSON.parse(saved).checkpoint);
   await page.reload();
   await expect(page.getByTestId('checkpoint-recovery')).toContainText('available at 10s');
   await expect(page.getByText('Saved scenario recovery failed:', { exact: false })).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await button(page, 'Recover saved checkpoint').click();
+  await withVisibleControl(page, button(page, 'Recover saved checkpoint'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-time', '10'); await ready(page);
   await expect(page.getByTestId('installed-spec')).toContainText('Physical replacement');
   await expect.poll(() => page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
   await page.screenshot({ path: info.outputPath('phase2-mobile-replacement.png'), fullPage: true });
   await page.setViewportSize({ width: 1600, height: 1050 });
   await button(page, 'Compare').click();
-  await button(page, preserved.name).click();
+  await withVisibleControl(page, button(page, preserved.name), control => control.click());
   await ready(page);
   await expect(main(page)).toHaveAttribute('data-time', '10');
   expect((await project(page)).checkpoint).toEqual(oldRun.checkpoint);
@@ -144,16 +145,16 @@ test('PH2 fallback replacement and cost-only UI edit retain exact physical check
   await install(page, 'pump-efficient');
   await step(page);
   const before = await project(page), reportBefore = await artifact(page, 'report');
-  await button(page, 'Data & replay').click();
+  await withVisibleControl(page, button(page, 'Data & replay'), control => control.click());
   const observationHistory = page.getByText(/retained replay window:/);
   await expect(observationHistory).toBeVisible();
   const retainedBefore = await observationHistory.innerText();
   const recordCount = Number(retainedBefore.match(/retained replay window: (\d+)/)?.[1]);
   expect(recordCount).toBeGreaterThanOrEqual(16);
   await button(page, 'Compare').click();
-  await page.getByText('Cost scope and assumption sensitivity', { exact: true }).click();
-  const cost = page.getByRole('spinbutton', { name: 'Equipment cost multiplier', exact: true });
-  await cost.fill('1.5'); await cost.press('Enter');
+  await withVisibleControl(page, page.getByText('Cost scope and assumption sensitivity', { exact: true }), control => control.click());
+  const cost = page.getByRole('spinbutton', { includeHidden: true, name: 'Equipment cost multiplier', exact: true });
+  await withVisibleControl(page, cost, control => control.fill('1.5')); await withVisibleControl(page, cost, control => control.press('Enter'));
   await expect(cost).toHaveValue('1.5');
   const priced = await project(page);
   expect(priced.checkpoint).toEqual(before.checkpoint);
@@ -207,7 +208,7 @@ test('PH2 mobile recovery waits for actual initialization before activation and 
   await page.evaluate(() => (window as unknown as { phase2RecoveryProbe: { release: () => void } }).phase2RecoveryProbe.release());
   await ready(page);
   await expect(button(page, 'Recover saved checkpoint')).toBeEnabled();
-  await button(page, 'Recover saved checkpoint').click();
+  await withVisibleControl(page, button(page, 'Recover saved checkpoint'), control => control.click());
   await expect(main(page)).toHaveAttribute('data-time', '10'); await ready(page);
   expect((await project(page)).checkpoint).toEqual(saved.checkpoint);
   await step(page); await expect(main(page)).toHaveAttribute('data-time', '20');

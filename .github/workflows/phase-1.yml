@@ -98,7 +98,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   browsers:
-    name: Production browser acceptance (${{ matrix.browser }})
+    name: Production browser acceptance (${{ matrix.group.name }} / ${{ matrix.browser }})
     needs: core
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -106,11 +106,35 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
+        group:
+          - name: engineering-early
+            files: >-
+              tests/browser/prototype.spec.ts
+              tests/browser/phase2.spec.ts
+              tests/browser/phase3.spec.ts
+              tests/browser/phase4.spec.ts
+              tests/browser/phase5.spec.ts
+              tests/browser/phase6.spec.ts
+          - name: engineering-late
+            files: >-
+              tests/browser/phase7.spec.ts
+              tests/browser/phase8.spec.ts
+              tests/browser/visual-v1.spec.ts
+          - name: authored-equipment
+            files: >-
+              tests/browser/visual-v2.spec.ts
+              tests/browser/visual-v3.spec.ts
+          - name: interface-visual
+            files: >-
+              tests/browser/visual-v3-clarity.spec.ts
+              tests/browser/visual-v4.spec.ts
     env:
       TESTED_SOURCE_SHA: ${{ needs.core.outputs.source-sha }}
       TESTED_SOURCE_TREE: ${{ needs.core.outputs.source-tree }}
       TESTED_TAR_SHA256: ${{ needs.core.outputs.tar-sha256 }}
       TESTED_BROWSER: ${{ matrix.browser }}
+      TESTED_GROUP: ${{ matrix.group.name }}
+      TESTED_GROUP_FILES: ${{ matrix.group.files }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -125,6 +149,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Record full-file browser group
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          const receipt = {browser:process.env.TESTED_BROWSER, group:process.env.TESTED_GROUP, testFiles:process.env.TESTED_GROUP_FILES.trim().split(/\s+/), workers:1, retries:0};
+          await fs.writeFile('artifacts/prototype/browser-group.json', JSON.stringify(receipt, null, 2) + '\n');
+          console.log(JSON.stringify(receipt));
+          NODE
       - run: npm ci
       - run: npx playwright install --with-deps "${TESTED_BROWSER}"
       - run: sudo apt-get install -y --no-install-recommends --no-upgrade xvfb xauth libglx-mesa0 libgl1-mesa-dri libegl-mesa0 mesa-utils
@@ -176,11 +208,11 @@ jobs:
           }
           await visit('dist');
           assert.deepEqual(inventory.sort(), [...paths, 'build-manifest.json', 'release.json'].sort());
-          const receipt = {browser:process.env.TESTED_BROWSER, sourceSha:release.sourceSha, sourceTree:release.sourceTree, lockSha256:release.lockSha256, tarSha256:process.env.TESTED_TAR_SHA256, artifactSha256:release.artifactSha256, files:paths.length, status:'verified'};
+          const receipt = {browser:process.env.TESTED_BROWSER, group:process.env.TESTED_GROUP, testFiles:process.env.TESTED_GROUP_FILES.trim().split(/\s+/), sourceSha:release.sourceSha, sourceTree:release.sourceTree, lockSha256:release.lockSha256, tarSha256:process.env.TESTED_TAR_SHA256, artifactSha256:release.artifactSha256, files:paths.length, status:'verified'};
           await fs.writeFile('artifacts/prototype/payload-verification.json', JSON.stringify(receipt, null, 2) + '\n');
           console.log(JSON.stringify(receipt));
           NODE
-      - name: Production prototype smoke for the selected browser
+      - name: Production prototype smoke for the selected browser and full-file group
         run: |
           npm run start -- --port 4173 --strictPort --base=/neptune-2035/ > artifacts/prototype/server.log 2>&1 &
           server_pid=$!
@@ -190,12 +222,13 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4173/neptune-2035/ > /dev/null
-          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/neptune-2035/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test tests/browser/prototype.spec.ts tests/browser/phase2.spec.ts tests/browser/phase3.spec.ts tests/browser/phase4.spec.ts tests/browser/phase5.spec.ts tests/browser/phase6.spec.ts tests/browser/phase7.spec.ts tests/browser/phase8.spec.ts tests/browser/visual-v1.spec.ts tests/browser/visual-v2.spec.ts tests/browser/visual-v3.spec.ts tests/browser/visual-v3-clarity.spec.ts --project="$TESTED_BROWSER" --workers=1 --retries=0
+          read -r -a browser_test_files <<< "$TESTED_GROUP_FILES"
+          env -u MOZ_HEADLESS NEPTUNE_BASE_URL=http://127.0.0.1:4173/neptune-2035/ NEPTUNE_BROWSER_REPORT=artifacts/prototype/browser.json xvfb-run -a -s '-screen 0 1920x1200x24' npx playwright test "${browser_test_files[@]}" --project="$TESTED_BROWSER" --workers=1 --retries=0
       - name: Retain native browser results and traces even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: prototype-browser-${{ matrix.browser }}-${{ github.sha }}-${{ github.run_attempt }}
+          name: prototype-browser-${{ matrix.group.name }}-${{ matrix.browser }}-${{ github.sha }}-${{ github.run_attempt }}
           path: |
             artifacts/prototype
             test-results
@@ -209,7 +242,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Require core and all three browser jobs to succeed
+      - name: Require core and all twelve browser group jobs to succeed
         env:
           CORE_RESULT: ${{ needs.core.result }}
           BROWSER_RESULTS: ${{ needs.browsers.result }}

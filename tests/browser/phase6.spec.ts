@@ -1,9 +1,10 @@
+import { withVisibleControl } from './visible-controls';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 import type { DecisionExport } from '../../src/twin/decision/types';
 
-const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
-const panel = (page: Page) => page.getByRole('region', { name: 'Phase 6 decision support', exact: true });
+const button = (page: Page, name: string) => page.getByRole('button', { includeHidden: true, name, exact: true });
+const panel = (page: Page) => page.getByRole('region', { includeHidden: true, name: 'Phase 6 decision support', exact: true });
 async function setup(page: Page, fallback = true) {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(fallback ? './?fallback=1' : './');
@@ -19,11 +20,11 @@ async function download(page: Page, trigger: () => Promise<unknown>) {
   if (!path) throw Error('Actual native export missing.');
   return JSON.parse(await fs.readFile(path, 'utf8'));
 }
-async function exported(page: Page): Promise<DecisionExport> { return download(page, () => button(page, 'Export decision campaign').click()); }
+async function exported(page: Page): Promise<DecisionExport> { return download(page, () => withVisibleControl(page, button(page, 'Export decision campaign'), control => control.click())); }
 const metricsByRunId = (campaign: DecisionExport) => campaign.result.runs.map(run => ({ id: run.id, metrics: run.state?.experiment?.metrics })).sort((a, b) => a.id.localeCompare(b.id));
 async function run(page: Page, fixture: string) {
-  await page.getByLabel('Decision fixture', { exact: true }).selectOption(fixture);
-  await button(page, 'Start decision campaign').click();
+  await withVisibleControl(page, page.getByLabel('Decision fixture', { exact: true }), control => control.selectOption(fixture));
+  await withVisibleControl(page, button(page, 'Start decision campaign'), control => control.click());
   await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
   await expect(button(page, 'Export decision campaign')).toBeEnabled();
   return exported(page);
@@ -44,7 +45,7 @@ async function evidence(info: TestInfo, name: string, payload: unknown, observed
 
 test('PH6 A real worker recommendation exports complete evidence and explicitly loads the selected experiment', async ({ page }, info) => {
   const observed = observe(page); await setup(page);
-  const before = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const before = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   const campaign = await run(page, 'transfer');
   expect(campaign).toMatchObject({ kind: 'neptune-decision-evidence', version: 'decision-campaign-1', result: { provenance: 'executed', status: 'completed', ranking: { status: 'recommended', winnerIds: ['iii-24'], scopeComplete: true }, coverage: { completed: 6, planned: 6, fullyEvaluatedCandidates: 3 } } });
   expect(campaign.result.runs).toHaveLength(6);
@@ -52,18 +53,18 @@ test('PH6 A real worker recommendation exports complete evidence and explicitly 
   const iii = campaign.result.runs.find(r => r.candidateId === 'iii-24' && r.scenarioId === 'eligible-feeder')!;
   expect(ii.state!.experiment!.metrics.shortfallAcceleratorS).toBe(80);
   expect(iii.state!.experiment).toMatchObject({ evaluation: { outcome: 'FAIL' }, metrics: { shortfallAcceleratorS: 19, serviceViolationS: 2.375, pendingRecovery: { onsetTimeS: 4.375, confirmationTimeS: 9.375 } } });
-  const untouched = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const untouched = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   expect(untouched.checkpoint).toEqual(before.checkpoint);
-  await page.getByTestId('decision-row-iii-24').getByRole('button', { name: 'Inspect candidate', exact: true }).click();
-  await page.getByLabel('Decision scenario', { exact: true }).selectOption('nominal');
-  await button(page, 'Load selected candidate').click();
+  await withVisibleControl(page, page.getByTestId('decision-row-iii-24').getByRole('button', { includeHidden: true, name: 'Inspect candidate', exact: true }), control => control.click());
+  await withVisibleControl(page, page.getByLabel('Decision scenario', { exact: true }), control => control.selectOption('nominal'));
+  await withVisibleControl(page, button(page, 'Load selected candidate'), control => control.click());
   await expect(button(page, 'Run selected experiment')).toBeEnabled();
   await button(page, 'Operate').click(); await button(page, 'Compare').click();
   await expect(page.getByLabel('Decision scenario', { exact: true })).toHaveValue('nominal');
-  await button(page, 'Run selected experiment').click();
+  await withVisibleControl(page, button(page, 'Run selected experiment'), control => control.click());
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '12');
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  const loaded = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const loaded = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   const expected = campaign.result.plan.runs.find(r => r.candidateId === 'iii-24' && r.scenarioId === 'nominal')!;
   expect(loaded.checkpoint.state.experiment.definition).toEqual(expected.definition);
   expect(loaded.checkpoint.state.experiment.initialState).toEqual(expected.initialState);
@@ -91,7 +92,7 @@ test('PH6 B no-benefit suites remain infeasible while C nominal-only selects low
 test('PH6 F native import marks supplied evidence and recomputes through new workers after refresh', async ({ page }, info) => {
   const observed = observe(page); await setup(page);
   const source = await run(page, 'transfer');
-  await page.getByLabel('Import decision campaign', { exact: true }).setInputFiles({ name: 'phase6-export.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(source)) });
+  await withVisibleControl(page, page.getByLabel('Import decision campaign', { exact: true }), control => control.setInputFiles({ name: 'phase6-export.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(source)) }));
   await expect(page.getByTestId('decision-recommendation')).toContainText('Imported supplied evidence');
   expect((await exported(page)).result.provenance).toBe('imported-supplied-evidence');
   await expect(panel(page)).toContainText('Decision draft and bounded evidence stored on this device.');
@@ -99,7 +100,7 @@ test('PH6 F native import marks supplied evidence and recomputes through new wor
   await button(page, 'Compare').click();
   await expect(button(page, 'Recompute imported campaign')).toBeEnabled();
   const priorWorkers = observed.workers.length;
-  await button(page, 'Recompute imported campaign').click();
+  await withVisibleControl(page, button(page, 'Recompute imported campaign'), control => control.click());
   await expect(page.getByTestId('decision-reproduction')).toContainText('Reproduction matched');
   const reproduced = await exported(page);
   expect(reproduced.result.provenance).toBe('executed');
@@ -112,19 +113,19 @@ test('PH6 F native import marks supplied evidence and recomputes through new wor
 test('PH6 cancellation remains incomplete and edits stale prior results on keyboard mobile fallback', async ({ page }, info) => {
   const observed = observe(page); await setup(page); await expect(page.locator('canvas')).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByLabel('Decision fixture', { exact: true }).selectOption('sensitivity');
-  await button(page, 'Start decision campaign').focus(); await page.keyboard.press('Enter');
-  await button(page, 'Cancel decision campaign').click();
+  await withVisibleControl(page, page.getByLabel('Decision fixture', { exact: true }), control => control.selectOption('sensitivity'));
+  await withVisibleControl(page, button(page, 'Start decision campaign'), control => control.focus()); await page.keyboard.press('Enter');
+  await withVisibleControl(page, button(page, 'Cancel decision campaign'), control => control.click());
   await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'cancelled');
   const cancelled = await exported(page);
   expect(cancelled.result.status).toBe('cancelled'); expect(cancelled.result.ranking.scopeComplete).toBe(false);
   expect(cancelled.result.ranking.status).not.toBe('recommended');
   expect(cancelled.result.coverage.completed).toBeLessThan(cancelled.result.coverage.planned);
   const completed = await run(page, 'transfer'); expect(completed.result.ranking.winnerIds).toEqual(['iii-24']);
-  await page.getByLabel('Decision interruption seconds', { exact: true }).fill('2');
+  await withVisibleControl(page, page.getByLabel('Decision interruption seconds', { exact: true }), control => control.fill('2'));
   await expect(page.getByTestId('decision-stale')).toBeVisible();
   await expect(page.getByTestId('decision-recommendation')).toContainText('Historical result');
-  await button(page, 'Start decision campaign').click();
+  await withVisibleControl(page, button(page, 'Start decision campaign'), control => control.click());
   await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
   const tightened = await exported(page); expect(tightened.result.ranking.winnerIds).toEqual([]);
   expect(tightened.result.ranking.status).toBe('no-feasible-evaluated-candidate');
@@ -148,8 +149,8 @@ test('PH6 D actual whole-run supply ceiling chooses the largest passing discrete
 
 test('PH6 E all81 paired assumption cells execute through the bounded native workers', async ({ page }, info) => {
   const observed = observe(page); await setup(page);
-  await page.getByLabel('Decision fixture', { exact: true }).selectOption('sensitivity');
-  await button(page, 'Start decision campaign').click();
+  await withVisibleControl(page, page.getByLabel('Decision fixture', { exact: true }), control => control.selectOption('sensitivity'));
+  await withVisibleControl(page, button(page, 'Start decision campaign'), control => control.click());
   // Condition-based worker completion within the unchanged 60-second browser test budget.
   await page.waitForFunction(() => document.querySelector('[data-testid="decision-coverage"]')?.getAttribute('data-status') === 'completed');
   const campaign = await exported(page);
@@ -171,14 +172,14 @@ test('PH6 E all81 paired assumption cells execute through the bounded native wor
 
 test('PH6 E frozen50millionUSD budget passes central and rejects the upper included-cost bound in the UI', async ({ page }, info) => {
   const observed = observe(page); await setup(page);
-  await page.getByLabel('Decision fixture', { exact: true }).selectOption('nominal');
-  await page.getByLabel('Decision budget USD', { exact: true }).fill('50000000');
-  await button(page, 'Start decision campaign').click();
+  await withVisibleControl(page, page.getByLabel('Decision fixture', { exact: true }), control => control.selectOption('nominal'));
+  await withVisibleControl(page, page.getByLabel('Decision budget USD', { exact: true }), control => control.fill('50000000'));
+  await withVisibleControl(page, button(page, 'Start decision campaign'), control => control.click());
   await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
   const central = await exported(page); expect(central.result.ranking.winnerIds).toEqual(['ii-24']);
-  await page.getByLabel('Decision budget basis', { exact: true }).selectOption('upper-bound');
+  await withVisibleControl(page, page.getByLabel('Decision budget basis', { exact: true }), control => control.selectOption('upper-bound'));
   await expect(page.getByTestId('decision-stale')).toBeVisible();
-  await button(page, 'Start decision campaign').click();
+  await withVisibleControl(page, button(page, 'Start decision campaign'), control => control.click());
   await expect(page.getByTestId('decision-coverage')).toHaveAttribute('data-status', 'completed');
   const upper = await exported(page);
   expect(upper.result.ranking).toMatchObject({ status: 'no-feasible-evaluated-candidate', winnerIds: [], scopeComplete: true });
@@ -193,18 +194,18 @@ test('PH6 E frozen50millionUSD budget passes central and rejects the upper inclu
 
 test('PH6 selected experiment binding requires explicit reload after recovery policy changes', async ({ page }, info) => {
   const observed = observe(page); await setup(page);
-  await button(page, 'Inspect candidate · Generation III enabled · 24 accelerators').click();
+  await withVisibleControl(page, button(page, 'Inspect candidate · Generation III enabled · 24 accelerators'), control => control.click());
   await expect(page.getByLabel('Decision scenario', { exact: true })).toHaveValue('eligible-feeder');
-  await button(page, 'Load selected candidate').click();
+  await withVisibleControl(page, button(page, 'Load selected candidate'), control => control.click());
   await expect(button(page, 'Run selected experiment')).toBeEnabled();
-  await page.getByLabel('Decision recovery dwell seconds', { exact: true }).fill('8');
+  await withVisibleControl(page, page.getByLabel('Decision recovery dwell seconds', { exact: true }), control => control.fill('8'));
   await expect(button(page, 'Run selected experiment')).toBeDisabled();
-  await button(page, 'Load selected candidate').click();
+  await withVisibleControl(page, button(page, 'Load selected candidate'), control => control.click());
   await expect(button(page, 'Run selected experiment')).toBeEnabled();
-  await button(page, 'Run selected experiment').click();
+  await withVisibleControl(page, button(page, 'Run selected experiment'), control => control.click());
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '12');
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  const project = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const project = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   expect(project.checkpoint.state.experiment.definition.recovery.dwellS).toBe(8);
   expect(project.checkpoint.state.experiment.metrics).toMatchObject({ shortfallAcceleratorS: 19, pendingRecovery: { onsetTimeS: 4.375, confirmationTimeS: null } });
   await evidence(info, 'phase6-native-exact-loaded-recovery-binding', project, observed);
@@ -212,28 +213,28 @@ test('PH6 selected experiment binding requires explicit reload after recovery po
 
 test('PH6 selected run isolates prior interactive inputs while generic Replay and previous project recovery remain available', async ({ page }, info) => {
   const observed = observe(page); await setup(page);
-  const before = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const before = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   const campaign = await run(page, 'transfer');
-  await page.getByTestId('decision-row-iii-24').getByRole('button', { name: 'Inspect candidate', exact: true }).click();
-  await button(page, 'Load selected candidate').click(); await expect(button(page, 'Run selected experiment')).toBeEnabled();
+  await withVisibleControl(page, page.getByTestId('decision-row-iii-24').getByRole('button', { includeHidden: true, name: 'Inspect candidate', exact: true }), control => control.click());
+  await withVisibleControl(page, button(page, 'Load selected candidate'), control => control.click()); await expect(button(page, 'Run selected experiment')).toBeEnabled();
   await button(page, 'Operate').click();
-  await button(page, 'Seawater 32°C').click(); await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
+  await withVisibleControl(page, button(page, 'Seawater 32°C'), control => control.click()); await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
   await button(page, 'Step 10s').click(); await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '10');
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  const interactive = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const interactive = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   expect(interactive.checkpoint.state.events.some((event: { kind: string; value?: number }) => event.kind === 'seawater' && event.value === 305.15)).toBe(true);
-  await button(page, 'Replay').click(); await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  const replayed = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  await withVisibleControl(page, button(page, 'Replay'), control => control.click()); await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
+  const replayed = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   expect(replayed.checkpoint.state.events).toEqual(interactive.checkpoint.state.events);
   expect(replayed.checkpoint.state.experiment.metrics).toEqual(interactive.checkpoint.state.experiment.metrics);
-  await button(page, 'Compare').click(); await button(page, 'Load selected candidate').click();
+  await button(page, 'Compare').click(); await withVisibleControl(page, button(page, 'Load selected candidate'), control => control.click());
   await expect(button(page, 'Run selected experiment')).toBeEnabled();
-  await button(page, 'Operate').click(); await button(page, 'Seawater 32°C').click();
+  await button(page, 'Operate').click(); await withVisibleControl(page, button(page, 'Seawater 32°C'), control => control.click());
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  await button(page, 'Compare').click(); await button(page, 'Run selected experiment').click();
+  await button(page, 'Compare').click(); await withVisibleControl(page, button(page, 'Run selected experiment'), control => control.click());
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-time', '12');
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  const selected = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const selected = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   const planned = campaign.result.plan.runs.find(run => run.candidateId === 'iii-24' && run.scenarioId === 'eligible-feeder')!;
   expect(selected.checkpoint.state.experiment.definition).toEqual(planned.definition);
   expect(selected.checkpoint.state.experiment.initialState).toEqual(planned.initialState);
@@ -241,9 +242,9 @@ test('PH6 selected run isolates prior interactive inputs while generic Replay an
   expect(selected.checkpoint.state.seawaterK).toBe(291.15);
   expect(selected.checkpoint.state.experiment.metrics.shortfallAcceleratorS).toBe(19);
   await button(page, 'Compare').click();
-  await page.getByRole('button', { name: 'Before Phase 6 candidate · 0s', exact: true }).first().click();
+  await withVisibleControl(page, page.getByRole('button', { includeHidden: true, name: 'Before Phase 6 candidate · 0s', exact: true }).first(), control => control.click());
   await expect(page.locator('main.twin-app')).toHaveAttribute('data-ready', 'true');
-  const recovered = await download(page, () => page.getByLabel('Export artifact', { exact: true }).selectOption('project'));
+  const recovered = await download(page, () => withVisibleControl(page, page.getByLabel('Export artifact', { exact: true }), control => control.selectOption('project')));
   expect(recovered.checkpoint).toEqual(before.checkpoint);
   await evidence(info, 'phase6-native-selected-history-isolation-and-recovery', { interactive, replayed, selected, recovered }, observed);
 });

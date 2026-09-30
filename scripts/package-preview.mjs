@@ -68,8 +68,8 @@ const artifactSha256 = createHash('sha256').update(manifestText).digest('hex');
 await fs.writeFile('dist/build-manifest.json', manifestText);
 const release = {
   product: 'NEPTUNE',
-  description: 'NEPTUNE Visual V3 — authored CDU and clearer cooling-bay inspection on the Blue Hour design-stage twin.',
-  visualRelease: 'systems-reveal-v3',
+  description: 'NEPTUNE Visual V4 — scene-first interface and presentation focus on the Blue Hour design-stage twin.',
+  visualRelease: 'scene-first-v4',
   version: pkg.version,
   channel: production ? 'production' : 'separate-preview',
   sourceSha,
@@ -85,7 +85,7 @@ const release = {
   ...(production ? {
     ...releaseEvidence,
     publicURL: 'https://arhaan2.github.io/neptune-2035/',
-    releaseScope: 'Visual V3 / CDU and cooling-bay clarity: one original Blender-authored compatible CDU exterior beside the unchanged V2 pumps/exchanger, selected-module framing and readable desktop/mobile legend; unchanged solver, schemas and engineering contracts. Retains Phase 8 numerical and whole-experiment acceptance, Phase 7 workspaces/history/walkthrough and Phase 4–6 contracts. Simulated, design-stage prototype; physical validation pending. Manufacturer CAD, certified internals, the broader visual library, physical equipment validation, marine stability/mooring/environment/permitting and previously deferred stress gates remain outside scope',
+    releaseScope: 'Visual V4 / scene-first interface: stable responsive application shell, equipment inspector, compact operation and canonical history controls, results-first comparison, session-local presentation focus and supported-view cooling composition. Authored pump/exchanger/CDU assets, solver, schemas and engineering contracts unchanged. Retains Phase 8 numerical and whole-experiment acceptance and V1–V3 visual coverage. Simulated, design-stage prototype; physical validation pending. Broader authored library and native Safari visible-session evidence remain unfinished',
     modelId: 'neptune-reference-3',
     transferModelId: 'neptune-transfer-1',
     transferPolicy: 'platform-transfer-1',

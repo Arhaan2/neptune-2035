@@ -18,17 +18,23 @@ function fixtureCalibration(design: Design): UACalibrationSample[] {
   });
 }
 
-export function DataPanel({ design, state }: { design: Design; state: SimulationState }) {
+type DataPanelProps = { design: Design; state: SimulationState; onStreamSummary?: (summary: string) => void };
+export function DataPanel({ design, state, onStreamSummary }: DataPanelProps) {
   const physicsIdentity = useMemo(() => engineeringIdentity(design), [design]);
-  return <ObservationSession key={`${design.revision}:${physicsIdentity}`} design={design} state={state} />;
+  return <ObservationSession key={`${design.revision}:${physicsIdentity}`} design={design} state={state} onStreamSummary={onStreamSummary} />;
 }
 
 /** Observation history and connections belong to the physical revision, independently of prices. */
-function ObservationSession({ design, state }: { design: Design; state: SimulationState }) {
+function ObservationSession({ design, state, onStreamSummary }: DataPanelProps) {
   const [store] = useState(() => new TelemetryStore(design, { maxStreams: Math.min(20_000, Math.max(2_000, design.modules.length * 8 + 32)) }));
   useSyncExternalStore(store.subscribe, store.snapshot, store.snapshot);
   const [status, setStatus] = useState<StreamStatus | null>(null);
   const [message, setMessage] = useState('');
+  // Report transport transitions only. Observation/sequence data stays in its
+  // existing owner; density changes never recreate the connection or store.
+  const streamSummary = status ? `Read-only observations · ${status.state} · ${status.reconnects} reconnects${status.state === 'connected' ? '' : ` · ${status.message}`}` : '';
+  useEffect(() => { onStreamSummary?.(streamSummary); }, [onStreamSummary, streamSummary]);
+  useEffect(() => () => onStreamSummary?.(''), [onStreamSummary]);
   const [url, setURL] = useState('http://127.0.0.1:8787/events');
   const [remap, setRemap] = useState(false), [dropout, setDropout] = useState(false);
   const [mappingText, setMappingText] = useState('{"fields":{},"assetIds":{},"metrics":{}}');
@@ -88,7 +94,7 @@ function ObservationSession({ design, state }: { design: Design; state: Simulati
         setMessage(result.accepted ? `Accepted stream sample. ${result.warnings.join('; ')}` : `${result.reason}: ${result.warnings.join('; ')}`);
         if (result.observation && !selected) { selected = true; setSelectedSource(result.observation.sourceId); setHistoricalMs(null); }
       }, setStatus);
-    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
+    } catch (error) { const message = error instanceof Error ? error.message : String(error); setMessage(message); setStatus({ state: 'error', message, reconnects: 0, lastEventId: null }); }
   };
   const fit = (input: readonly UACalibrationSample[]) => {
     try { setCalibration(calibrateUA(design, input, { minUAWPerK: uaMin, maxUAWPerK: uaMax })); setMessage('Calibration proposal evaluated against chronological held-out observations. Design unchanged.'); }
