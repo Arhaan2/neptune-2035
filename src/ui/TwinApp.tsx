@@ -845,7 +845,7 @@ export default function TwinApp() {
         if (overlay?.matches('details[data-ui-overlay]')) activeOverlay.current = overlay as HTMLDetailsElement;
       }}
       onKeyDownCapture={(event) => {
-        if (event.key !== 'Escape' || (event.target as HTMLElement).closest('input, select, textarea, [contenteditable="true"]')) return;
+        if (event.key !== 'Escape') return;
         const visible = (element: HTMLDetailsElement | null) => element?.open && element.getClientRects().length > 0 ? element : null;
         const overlay = visible((event.target as HTMLElement).closest<HTMLDetailsElement>('details[data-ui-overlay][open]'))
           ?? visible(activeOverlay.current)
@@ -853,7 +853,7 @@ export default function TwinApp() {
         if (overlay) {
           event.preventDefault(); event.stopPropagation(); overlay.open = false;
           overlay.querySelector<HTMLElement>('summary')?.focus();
-        } else if (walkthrough) { event.preventDefault(); event.stopPropagation(); exitWalkthrough(); }
+        } else if (!(event.target as HTMLElement).closest('input, select, textarea, [contenteditable="true"]') && walkthrough) { event.preventDefault(); event.stopPropagation(); exitWalkthrough(); }
       }}
       onPointerDownCapture={(event) => {if (walkthrough && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"], [data-layout-control]')) pauseWalkthrough('Paused for inspection.');}}
       onFocusCapture={(event) => { if (walkthrough && playback.phase === 'playing' && !(event.target as HTMLElement).closest('[data-testid="operator-walkthrough"], [data-layout-control]')) pauseWalkthrough('Paused while reading or using a control.'); }}
