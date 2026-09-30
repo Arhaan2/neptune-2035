@@ -1,0 +1,9 @@
+# V5 CI provisioning budget
+
+The authored-equipment WebKit job in [run 36766940204](https://github.com/Arhaan2/neptune-2035/actions/runs/36766940204) was canceled at its 15-minute outer job limit twice. Dependency installation took 753 seconds in the first attempt and 469 seconds in the second; the retained logs show slow Linux OS-package transfers. Three and eleven tests completed respectively. Interrupted and unstarted cases remain unknown, and the partial reports are not combined into a pass.
+
+The authorized correction changes only the browser job allowance from 15 to 30 minutes and adds a 15-minute cap to its existing production smoke execution step. The job allowance includes provisioning, artifact verification, execution and upload; the execution-step cap begins after provisioning. Thirty minutes is a finite infrastructure budget, not a completion guarantee. [GitHub documents job and step timeouts separately](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
+
+The execution command, server checks, Ubuntu runner, browser versions, Xvfb/Mesa configuration, twelve full-file groups, single worker, zero retries, existing fail-fast behavior and required aggregate remain unchanged. Application readiness, Playwright test/assertion deadlines, numerical tolerances and the two original exclusions are unchanged. Core and aggregate job limits stay at 15 minutes.
+
+The correction requires a fresh complete PR workflow and a newly identified single core artifact consumed by every browser group. Prior local evidence can support byte-identical runtime content only through an explicit source, test/configuration, dependency, static-file and documented packaging-metadata reconciliation. It is prior-artifact evidence, not a new execution. Historical records and both cancellations remain retained. A genuine test failure still blocks acceptance; this budget change does not explain the earlier lost local readiness incident.

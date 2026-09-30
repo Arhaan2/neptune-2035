@@ -101,7 +101,8 @@ jobs:
     name: Production browser acceptance (${{ matrix.group.name }} / ${{ matrix.browser }})
     needs: core
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # Includes variable OS/browser provisioning, verification and result upload.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -128,6 +129,7 @@ jobs:
             files: >-
               tests/browser/visual-v3-clarity.spec.ts
               tests/browser/visual-v4.spec.ts
+              tests/browser/visual-v5.spec.ts
     env:
       TESTED_SOURCE_SHA: ${{ needs.core.outputs.source-sha }}
       TESTED_SOURCE_TREE: ${{ needs.core.outputs.source-tree }}
@@ -213,6 +215,7 @@ jobs:
           console.log(JSON.stringify(receipt));
           NODE
       - name: Production prototype smoke for the selected browser and full-file group
+        timeout-minutes: 15
         run: |
           npm run start -- --port 4173 --strictPort --base=/neptune-2035/ > artifacts/prototype/server.log 2>&1 &
           server_pid=$!
