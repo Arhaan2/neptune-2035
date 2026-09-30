@@ -67,3 +67,43 @@
   .walkthrough-result dl { gap: 8px; }
   .walkthrough-result dd { font-size: .8125rem; }
 }
+
+/* Every mobile chapter reserves space for scene information, including wide
+   fault/path views. Overlaying the LOD caption can hide the initiating asset.
+   Keep this layout through Pause; camera ownership does not control UI space. */
+@media (max-width: 700px) {
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-canvas-viewport {
+    height: auto;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scene-information {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 4px 10px;
+    padding: 6px 12px;
+    background: #142330;
+    border-top: 1px solid #83d5e826;
+    flex: none;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scene-information :is(.twin-scale-caption, .twin-route-legend, .twin-kit-status, .twin-presentation-note) {
+    position: static;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    max-width: none;
+    background: transparent;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scale-caption { grid-column: 2; grid-row: 1; text-align: right; }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-route-legend { grid-column: 1; grid-row: 1; }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-route-legend summary { min-height: 44px; font-size: 12px; padding: 7px 0; color: #edf3f6; align-content: center; }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scene-information :is(.twin-kit-status, .twin-presentation-note) { grid-column: 1 / -1; }
+}

@@ -275,6 +275,36 @@ test('VIS5 390px reduced-motion manual chapters retain keyboard access, actual b
     await expect(main(page)).toHaveAttribute('data-inspection-status', 'resolved');
     await expectNoHorizontalOverflow(page, 390);
     await expect(button(page, 'Exit walkthrough')).toBeVisible();
+    const sceneSurfaces = await page.evaluate(() => {
+      const canvas = document.querySelector('canvas');
+      const scene = canvas?.closest('.twin-scene');
+      const scale = scene?.querySelector('.twin-scale-caption');
+      const legend = scene?.querySelector('.twin-route-legend');
+      if (!canvas || !scale || !legend) throw Error('The actual canvas, scale caption and circuit legend must be present.');
+      const rectangle = (element: Element) => {
+        const { x, y, width, height, right, bottom } = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return { x, y, width, height, right, bottom, display: style.display, visibility: style.visibility };
+      };
+      const canvasRect = rectangle(canvas);
+      const surfaces = [{ name: 'scale caption', element: scale }, { name: 'circuit legend', element: legend }].map(({ name, element }) => {
+        const rect = rectangle(element);
+        const overlapWidth = Math.max(0, Math.min(canvasRect.right, rect.right) - Math.max(canvasRect.x, rect.x));
+        const overlapHeight = Math.max(0, Math.min(canvasRect.bottom, rect.bottom) - Math.max(canvasRect.y, rect.y));
+        return { name, rect, intersectionAreaCssPx2: overlapWidth * overlapHeight };
+      });
+      return { chapter: document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-step-id'), selectedId: window.__NEPTUNE_TWIN_SCENE__?.selectedId, canvas: canvasRect, surfaces };
+    });
+    await info.attach(`V5-mobile-chapter-${index}-scene-HUD-rects`, { body: JSON.stringify(sceneSurfaces), contentType: 'application/json' });
+    expect(sceneSurfaces.canvas.width).toBeGreaterThan(0);
+    expect(sceneSurfaces.canvas.height).toBeGreaterThan(0);
+    for (const surface of sceneSurfaces.surfaces) {
+      expect(surface.rect.display).not.toBe('none');
+      expect(surface.rect.visibility).toBe('visible');
+      expect(surface.rect.width).toBeGreaterThan(0);
+      expect(surface.rect.height).toBeGreaterThan(0);
+      expect(surface.intersectionAreaCssPx2, `${surface.name} covers the canvas during ${sceneSurfaces.chapter}`).toBe(0);
+    }
     visited.push(await observation(page));
     if (index < count - 1) {
       await button(page, 'Next walkthrough step').focus();

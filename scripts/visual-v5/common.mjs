@@ -63,11 +63,26 @@ export async function observe(page) {
     const source = panel?.getAttribute('data-presentation-record');
     const captionRect = panel?.querySelector('[data-testid="presentation-caption"]')?.getBoundingClientRect();
     const headingRect = panel?.querySelector('h2')?.getBoundingClientRect();
+    const canvas = innerWidth <= 700 ? document.querySelector('canvas') : null;
+    const canvasRect = canvas?.getBoundingClientRect();
+    const mobileSceneSurfaces = canvasRect ? {
+      canvas: { x: canvasRect.x, y: canvasRect.y, width: canvasRect.width, height: canvasRect.height },
+      surfaces: ['.twin-scale-caption', '.twin-route-legend'].map(selector => {
+        const element = canvas.closest('.twin-scene')?.querySelector(selector);
+        const rect = element?.getBoundingClientRect();
+        const style = element ? getComputedStyle(element) : null;
+        return { selector, visible: !!rect && rect.width > 0 && rect.height > 0 && style?.display !== 'none' && style?.visibility === 'visible',
+          rect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
+          canvasIntersectionArea: rect ? Math.max(0, Math.min(canvasRect.right, rect.right) - Math.max(canvasRect.x, rect.x)) *
+            Math.max(0, Math.min(canvasRect.bottom, rect.bottom) - Math.max(canvasRect.y, rect.y)) : null };
+      }),
+    } : null;
     return {
       browserTimeMs: performance.now(), timeOriginMs: performance.timeOrigin,
       visibilityState: document.visibilityState, focused: document.hasFocus(),
       reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
       viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+      mobileSceneSurfaces,
       panel: panel ? { ...panel.dataset } : null,
       record: source ? JSON.parse(source) : null,
       displayedCaption: panel?.querySelector('[data-testid="presentation-caption"]')?.textContent
@@ -97,6 +112,12 @@ export function assertReadable(sample) {
   assert.equal(sample.scene.simulationTimeS, Number(sample.displayedTimeS));
   assert(sample.scene.renderEpoch > 0);
   assert(sample.record.authoredKind ? sample.panel.readiness === 'authored' : ['authored', 'plan', 'procedural'].includes(sample.panel.readiness), 'Required authored detail must be authored; procedural campus/structural geometry is expected.');
+  if (sample.viewport.width <= 700) {
+    assert(sample.mobileSceneSurfaces?.canvas.width > 0 && sample.mobileSceneSurfaces?.canvas.height > 0, 'Mobile presentation needs a visible canvas.');
+    for (const surface of sample.mobileSceneSurfaces.surfaces) {
+      assert(surface.visible && surface.canvasIntersectionArea === 0, `${surface.selector} must remain readable without covering the mobile canvas.`);
+    }
+  }
 }
 export async function savedProjects(page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem('neptune-v2-scenarios') ?? '[]'));
