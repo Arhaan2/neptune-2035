@@ -7,34 +7,34 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "assets/GLTFLoader-DW8b0Rtu.js",
+      "path": "assets/GLTFLoader-BlnYNpMe.js",
       "bytes": 45225,
-      "sha256": "673f99b03d27a131f5294c1bfcc494a9f453c1308fbc43a7ed80d6d499489082"
+      "sha256": "cd175044028261a3c7b4713a6055729ffa750da66fa9b97013e2f1c6b4169b8e"
     },
     {
-      "path": "assets/index-aA_fkqza.css",
-      "bytes": 223350,
-      "sha256": "1a4db02c7b9c109a14c544247801ce2d0124da74cfd9ea388a8103fee8508876"
+      "path": "assets/index-0K11ttJa.js",
+      "bytes": 790087,
+      "sha256": "7b5a418e8749a94a47e0f18a0010507dc63c35dd2cc2192143cdbd8539b302e5"
     },
     {
-      "path": "assets/index-kjW04Not.js",
-      "bytes": 781379,
-      "sha256": "dae95cd297036f927813e6c663baca99a89ee466f15e311d6f15d4aff8037e1c"
+      "path": "assets/index-BTYrFe-r.css",
+      "bytes": 245060,
+      "sha256": "209972bdf6368dd5631c227acef7d28e1956d408b7c0c505d495412f2b892cd4"
     },
     {
-      "path": "assets/OrbitControls-FHqcZVZU.js",
+      "path": "assets/OrbitControls-CazOyZX_.js",
       "bytes": 934646,
-      "sha256": "6019463ece89e63c0ff764d7f3a26db969849be67f93b242e440c22ba93744d0"
+      "sha256": "9028289878777c2d0bd0da45bc44920c4bdf14f820b7d8c6e4ba6d49133121cf"
     },
     {
-      "path": "assets/Scene-D1OgHBQ2.js",
+      "path": "assets/Scene-DJwahkTc.js",
       "bytes": 16456,
-      "sha256": "464ec70d1a7d9e83e7b647edaa9f316ebc25e70b45f7fcd35aa922c073eb1034"
+      "sha256": "cf76641e58d657f470c6fb64ce256ab54cec746035f4b201b5e0469368b2079e"
     },
     {
-      "path": "assets/TwinScene-DhN2gOV9.js",
-      "bytes": 89685,
-      "sha256": "3eedcf94867e2a601c185f6be54b37da5501b6b54f65c14cf3b93797ecc84f8f"
+      "path": "assets/TwinScene-F5GVULz1.js",
+      "bytes": 90772,
+      "sha256": "0d27548d99fb0f1b7a20966d4b54b8039cd4479dec0bf40dcf858aecd6d67496"
     },
     {
       "path": "assets/TwinScene-TT1jYu4C.css",
@@ -204,7 +204,7 @@
     {
       "path": "index.html",
       "bytes": 1234,
-      "sha256": "d467c66687ab975dc56026fd34cb084e6b58cc1d20761c31017bd35481f9a42d"
+      "sha256": "739d42accba61161d3c2e4c12288a93a9e4162ea4d94ff7f6dbe213378b9d5ac"
     },
     {
       "path": "samples/calibration-generated.json",
