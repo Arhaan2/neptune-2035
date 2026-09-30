@@ -72,7 +72,7 @@ The authored files are unchanged and must be rehashed against the accepted candi
 
 ## Reproduce acceptance and media
 
-Follow the current [Phase 8 release procedure](../phase-8/RELEASE.md) for clean install, full units with both real telemetry integrations, numerical/historical campaigns, exact compiled packaging and normal promotion. V5 browser coverage is part of both the retained PH7 full file list and the CI `interface-visual` group; every group consumes the single core artifact. The only permitted exclusions remain the original Chromium/WebKit large-campus Step 10s cases; Firefox stays active. No retries, new skips, numerical-tolerance changes or acceptance-deadline extensions are admitted.
+Follow the current [Phase 8 release procedure](../phase-8/RELEASE.md) for clean install, full units with both real telemetry integrations, numerical/historical campaigns, exact compiled packaging and normal promotion. V5 browser coverage is part of both the retained PH7 full file list and the CI `interface-visual` group; every group consumes the single core artifact. The only permitted exclusions remain the original Chromium/WebKit large-campus Step 10s cases; Firefox stays active. No retries, new skips, numerical-tolerance changes or application/test deadline extensions are admitted. The separately authorized [CI provisioning budget](V5-CI-BUDGET.md) allows 30 minutes for each complete browser job and caps its execution step at 15 minutes.
 
 From a frozen source checkout serving its packaged production candidate:
 
