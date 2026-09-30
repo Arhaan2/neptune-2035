@@ -1,3 +1,4 @@
+import { deliverPresentationReport, initialPresentationDelivery } from './presentationDelivery';
 import { presentationDiagnostic, presentationDiagnosticChange, presentationDiagnosticIdentity, presentationDiagnosticsEnabled } from '../twin/presentation/diagnostics';
 import { visualAssetStates } from '../twin/presentation/assets';
 import { activePowerDesign } from '../twin/transfer/topology';
@@ -69,7 +70,7 @@ import {
   selectedModule,
   upstreamConnections,
 } from './twinGeometry';
-import { createCameraFlight, presentationFrame, presentationRequestKey, PresentationSettling, sampleCameraFlight, type CameraFlight, type CameraPose, type PresentationCameraRequest, type PresentationSceneReadiness } from './presentationCamera';
+import { updatePresentationFlight, presentationFrame, presentationRequestKey, PresentationSettling, sampleCameraFlight, type CameraFlight, type CameraPose, type PresentationCameraRequest, type PresentationSceneReadiness } from './presentationCamera';
 import './twinScene.css';
 
 export interface TwinSceneProps {
@@ -96,7 +97,7 @@ export interface TwinSceneProps {
   onReady?: () => void;
   presentation?: PresentationCameraRequest;
   presentationPending?: boolean;
-  onPresentationReadiness?: (report: PresentationSceneReadiness) => void;
+  onPresentationReadiness?: (report: PresentationSceneReadiness) => boolean;
   onPresentationTakeover?: (reason: 'pointer' | 'keyboard' | 'context-loss') => void;
 }
 const COLORS = Object.fromEntries(
@@ -865,7 +866,7 @@ function CameraRig({
   const cancelledGuidance = useRef('');
   const guidanceLayout = useRef('');
   const settled = useRef(new PresentationSettling());
-  const lastGuidanceReport = useRef('');
+  const guidanceDelivery = useRef(initialPresentationDelivery);
   const keys = useRef(new Set<string>()),
     yaw = useRef(Math.PI / 2),
     pitch = useRef(0);
@@ -969,11 +970,11 @@ function CameraRig({
       };
       window.__NEPTUNE_TWIN_SCENE__!.presentation = report;
       const reportKey = `${guidanceOwner.current}:${guidanceLayout.current}:${report.status}:${report.representation}`;
-      if (lastGuidanceReport.current !== reportKey) {
+      const delivery = deliverPresentationReport(guidanceDelivery.current, reportKey, performance.now(), () => {
         if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: report.token, source: presentationDiagnosticIdentity(report.sourceKey), step: report.stepId, shot: report.shot, status: report.status, representation: report.representation, renderEpoch: report.renderEpoch, layoutRevision: layoutRevision.current });
-        lastGuidanceReport.current = reportKey;
-        current.current.props.onPresentationReadiness?.(report);
-      }
+        return current.current.props.onPresentationReadiness?.(report) ?? false;
+      });
+      guidanceDelivery.current = delivery.state;
     }
     if (!ready.current && !observed.cameraTransitioning) {
       ready.current = true;
@@ -1039,13 +1040,13 @@ function CameraRig({
       c.enableDamping = false;
       c.update();
       c.enabled = false;
-      const diagnosticPreviousOwner = guidanceOwner.current;
+      const sameOwner = guidanceOwner.current === key;
       guidanceOwner.current = key;
       guidanceLayout.current = context;
       layoutRevision.current++;
       cancelledGuidance.current = '';
       settled.current.reset();
-      lastGuidanceReport.current = '';
+      guidanceDelivery.current = initialPresentationDelivery;
       manual.current = false;
       goal.current = presentationFrame(props.design, guidance, props.exploded, size.width / size.height);
       if (presentationDiagnosticsEnabled()) {
@@ -1053,8 +1054,10 @@ function CameraRig({
         if (!diagnosticLayout.current.length || nextLayout.some((value, index) => Math.abs(value - diagnosticLayout.current[index]) > (index < 2 ? 1 : 1e-5))) meaningfulLayoutRevision.current++;
         diagnosticLayout.current = nextLayout;
       }
-      flight.current = createCameraFlight({ position: camera.position, target: c.target }, goal.current, guidance.transitionMs);
-      const immediate = props.reducedMotion || flight.current.durationS === 0;
+      // Reflow belongs to this navigation: it may retarget the destination,
+      // but cannot buy another full flight or revive a cancelled owner.
+      flight.current = updatePresentationFlight(flight.current, sameOwner, { position: camera.position, target: c.target }, goal.current, guidance.transitionMs);
+      const immediate = props.reducedMotion || !flight.current || flight.current.durationS === 0;
       transitioning.current = !immediate;
       if (immediate) {
         camera.position.copy(goal.current.position);
@@ -1064,7 +1067,7 @@ function CameraRig({
         flight.current = null;
         c.enabled = true;
       }
-      diagnoseRef.current(diagnosticPreviousOwner === key ? 'same-owner-layout-refit' : 'new-owner-flight', 'layout');
+      diagnoseRef.current(sameOwner ? 'same-owner-layout-refit' : 'new-owner-flight', 'layout');
       lastRequest.current = request;
       lastContext.current = context;
       if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: guidance.token, source: presentationDiagnosticIdentity(guidance.sourceKey), status: 'settling', renderEpoch: renderEpoch.current, layoutRevision: layoutRevision.current });
@@ -1561,30 +1564,38 @@ export function TwinFallback(props: TwinSceneProps) {
     if (!element || !fallbackRequestKey) return;
     let frame = 0;
     const stability = new PresentationSettling();
-    let lastStatus = '';
+    let deliveryState = initialPresentationDelivery;
     const publish = (status: 'settling' | 'fallback') => {
       const currentProps = fallbackCurrent.current, request = currentProps.presentation;
-      if (!request || presentationRequestKey(request) !== fallbackRequestKey || lastStatus === status) return;
-      if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: request.token, source: presentationDiagnosticIdentity(request.sourceKey), step: request.stepId, shot: request.shot, status, representation: 'plan', settledFrames: stability.frames, canvasWidth: element.clientWidth, canvasHeight: element.clientHeight, visible: !document.hidden });
-      lastStatus = status;
-      currentProps.onPresentationReadiness?.({
+      if (!request || presentationRequestKey(request) !== fallbackRequestKey) return false;
+      const report: PresentationSceneReadiness = {
         token: request.token, sourceKey: request.sourceKey, stepId: request.stepId, shot: request.shot,
         selectedId: currentProps.selectedId, timeS: currentProps.state.timeS,
         status, representation: 'plan', settledFrames: stability.frames,
         camera: [], target: [], canvasSize: { width: element.clientWidth, height: element.clientHeight }, renderEpoch: 0,
+      };
+      const delivery = deliverPresentationReport(deliveryState, status, performance.now(), () => {
+        if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: 'sent', token: request.token, source: presentationDiagnosticIdentity(request.sourceKey), step: request.stepId, shot: request.shot, status, representation: 'plan', settledFrames: stability.frames, canvasWidth: element.clientWidth, canvasHeight: element.clientHeight, visible: !document.hidden });
+        return currentProps.onPresentationReadiness?.(report) ?? false;
       });
+      deliveryState = delivery.state;
+      return delivery.accepted;
     };
     const sample = () => {
       const currentProps = fallbackCurrent.current, request = currentProps.presentation;
       if (!request || presentationRequestKey(request) !== fallbackRequestKey) return;
       const valid = !document.hidden && element.clientWidth > 0 && element.clientHeight > 0 && currentProps.selectedId === request.selectedId && currentProps.state.timeS === request.timeS;
-      if (stability.observe([element.clientWidth, element.clientHeight], valid)) publish('fallback');
-      else frame = requestAnimationFrame(sample);
+      // A rejected stable report is sampled again while this request still
+      // owns the visible plan. Delivery is throttled; the existing playback
+      // watchdog removes unresolved requests, and cleanup cancels this sampler.
+      if (stability.observe([element.clientWidth, element.clientHeight], valid) && publish('fallback')) return;
+      frame = requestAnimationFrame(sample);
     };
     const resize = () => {
       cancelAnimationFrame(frame);
       if (presentationDiagnosticsEnabled()) presentationDiagnostic('settling', { reason: 'fallback-layout', token: fallbackCurrent.current.presentation?.token ?? '', canvasWidth: element.clientWidth, canvasHeight: element.clientHeight, visible: !document.hidden });
       stability.reset();
+      deliveryState = initialPresentationDelivery;
       publish('settling');
       frame = requestAnimationFrame(sample);
     };

@@ -422,9 +422,10 @@ export default function TwinApp() {
     // A late frame can neither authorize a new chapter nor replace its record.
     const rejection = !guided ? 'unguided' : report.token !== String(playback.token) ? 'token' : report.sourceKey !== playback.sourceKey ? 'source' : !historyMatches ? 'history' : report.selectedId !== shot?.assetId ? 'selection' : report.timeS !== displayState?.timeS ? 'time' : '';
     if (presentationDiagnosticsEnabled()) presentationDiagnostic('readiness', { outcome: rejection ? 'rejected' : 'accepted', reason: rejection, token: report.token, currentToken: playback.token, source: presentationDiagnosticIdentity(report.sourceKey), step: report.stepId, shot: report.shot, phase: playback.phase, status: report.status, renderEpoch: report.renderEpoch, displayedTimeS: displayState?.timeS ?? -1, reportTimeS: report.timeS });
-    if (rejection) return;
+    if (rejection) return false;
     setPresentationScene(report);
     dispatchPlayback({ type: 'scene', token: playback.token, sourceKey: playback.sourceKey, ready: report.status !== 'settling', last: playback.shotIndex === shots.length - 1 });
+    return true;
   }, [guided, playback.token, playback.sourceKey, playback.shotIndex, playback.phase, historyMatches, shot?.assetId, displayState?.timeS, shots.length]);
   useEffect(() => {
     if (guided && appliedPresentationToken === playback.token && inspection.status === 'unavailable-history') dispatchPlayback({ type: 'error', token: playback.token, reason: inspection.resolution?.reason ?? 'The requested history is unavailable.' });

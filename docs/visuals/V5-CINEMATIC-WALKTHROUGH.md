@@ -54,6 +54,12 @@ No scene is cached per chapter, no additional WebGL context is created for a tra
 
 If a native resize notification is missed, the post-render size guard requests the actual nonzero viewport dimensions through the existing R3F store. It discards that mismatched frame and resets settling; readiness still requires subsequent correctly sized rendered frames. This recovery retains manual camera ownership and does not remount the canvas.
 
+A layout update within the same navigation retargets the active flight while retaining its original elapsed-time budget. After that flight completes, a resize places the revised composition directly and requires three fresh stable rendered observations. A resize cannot revive a manually canceled owner. This prevents repeated size publications from starting the same flight indefinitely without relaxing history, visible size, authored-surface or settling checks.
+
+Readiness delivery is acknowledged by the current walkthrough receiver. Only accepted report identities are deduplicated; a rejected current report can be sent again from a later valid observation, at most once per 250 ms for the unchanged report. Stale token/source/history/selection/time checks and the 15-second failure watchdog remain. The accessible plan uses the same acknowledgment rule and stops sampling after acceptance or request cleanup.
+
+Optional diagnostics install `window.__NEPTUNE_V5_DIAGNOSTIC_EMIT__` through the external `scripts/visual-v5/stabilization-diagnostics.mjs` runner. They record changed boundary conditions and compact poses/dimensions; raw source/evidence identities are replaced by opaque IDs and asynchronous SHA-256 registrations. The collector appends and flushes bounded JSONL batches during execution. It does not own playback or certify readiness. With no observer installed, no identity hashing or event serialization occurs. Controlled contract witnesses demonstrate missed acknowledgment and repeated same-owner flight restart; they do not establish the precise cause of the earlier lost WebKit failure. Native attempts, independent review and release acceptance remain external receipts.
+
 The authored files are unchanged and must be rehashed against the accepted candidate and served release:
 
 | Asset | SHA-256 |
