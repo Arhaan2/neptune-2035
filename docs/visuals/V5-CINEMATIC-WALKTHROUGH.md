@@ -30,7 +30,7 @@ Every navigation binds source/run generation, captured evidence, semantic step a
 
 ## Chapters and shots
 
-The eligible sequence's authored transition/reading target is 53.8 seconds before additional loading, history resolution or settling. Actual video/foreground timing belongs to the receipt. Alternate evidence can shorten the sequence. No timer promises campaign computation or asset-loading duration.
+The eligible sequence uses four-second reading holds and 1.5-second camera moves, totaling 59 seconds before additional loading, history resolution or settling. Confirmation keeps the onset composition and cuts to its newly resolved boundary, still requiring fresh post-render readiness. Actual video/foreground timing belongs to the receipt. Alternate evidence can shorten the sequence. No timer promises campaign computation or asset-loading duration.
 
 | Semantic step | Presentation and evidence |
 | --- | --- |

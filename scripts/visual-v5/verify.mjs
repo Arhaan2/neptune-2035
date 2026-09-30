@@ -41,7 +41,7 @@ const receipt = {
   artifact: recording.artifact, recordingSha256: hash(await fs.readFile(path.join(recordingDir, 'recording.json'))),
   video: { file: recording.media.file, bytes: bytes.length, sha256: hash(bytes), encoderCreationTime: stamp },
   timingMethod: 'Encoder creation_time and observed browser timeOrigin/performance.now seed searches in the raw video. Actual decoded caption crops then bracket each readable interval; metadata-mapped navigation times are separately labeled estimates. No storyboard dwell substitutes for observation.',
-  timingLimit: 'Video is 25 fps and recorder observation is sampled. Encoder metadata is not sufficient alone: decoded title/caption agreement and manual scene/time review are also required. Final stop-frame padding is not used as a timing anchor.',
+  timingLimit: 'Video is 25 fps and recorder observation is sampled. Encoder metadata is not sufficient alone: decoded title/caption agreement and manual scene/time review are also required. Final stop-frame padding is not used as a timing anchor. A single bounded spatial registration accounts for different still/video raster sample origins; it never changes the source media or varies by shot.',
   cuts: [], frames: [], failures: [],
 };
 const server = createServer((request, response) => {
@@ -79,13 +79,47 @@ try {
     return page.locator('video').screenshot();
   };
   const crop = rect => ({ left: Math.max(0, Math.floor(rect.x)), top: Math.max(0, Math.floor(rect.y)), width: Math.min(recording.viewport.width - Math.max(0, Math.floor(rect.x)), Math.floor(rect.width)), height: Math.min(recording.viewport.height - Math.max(0, Math.floor(rect.y)), Math.floor(rect.height)) });
-  const references = new Map();
+  assert.equal(receipt.playback.width, recording.viewport.width, 'Video and CSS viewport must agree; no implicit letterbox correction.');
+  assert.equal(receipt.playback.height, recording.viewport.height, 'Video and CSS viewport must agree; no implicit letterbox correction.');
+  const originals = new Map();
+  let stillScale = null;
   for (const shot of recording.shots) {
     assert(shot.captionRect && shot.captionRect.y >= 0 && shot.captionRect.y + shot.captionRect.height <= recording.viewport.height, `Caption was not wholly visible for ${shot.id}`);
-    references.set(shot.id, await sharp(path.join(recordingDir, shot.still)).resize(recording.viewport.width, recording.viewport.height).extract(crop(shot.captionRect)).removeAlpha().raw().toBuffer());
+    const original = await sharp(path.join(recordingDir, shot.still)).removeAlpha().toColourspace('srgb').raw().toBuffer({ resolveWithObject: true });
+    const scale = { x: original.info.width / recording.viewport.width, y: original.info.height / recording.viewport.height };
+    assert.equal(original.info.channels, 3);
+    assert(scale.x >= 1 && scale.y >= 1);
+    if (stillScale) assert.deepEqual(scale, stillScale, 'One raster transform must apply to every still.');
+    else stillScale = scale;
+    originals.set(shot.id, original);
   }
-  const compare = async (frame, shot) => {
-    const reference = references.get(shot.id), actual = await sharp(frame).extract(crop(shot.captionRect)).removeAlpha().raw().toBuffer();
+  const references = new Map();
+  const referenceFor = (shot, spatialOffset) => {
+    const key = `${shot.id}:${spatialOffset.x}:${spatialOffset.y}`;
+    if (references.has(key)) return references.get(key);
+    const { data, info } = originals.get(shot.id), rect = crop(shot.captionRect);
+    const reference = Buffer.alloc(rect.width * rect.height * 3);
+    // Map CSS pixel centers into the original still. Bilinear sampling has an
+    // explicit origin, unlike assuming a library resize matches CDP's raster.
+    // The one selected translation is fixed for all shots and boundary seeks.
+    for (let y = 0; y < rect.height; y++) for (let x = 0; x < rect.width; x++) {
+      const sx = Math.max(0, Math.min(info.width - 1, (rect.left + x + .5 + spatialOffset.x) * stillScale.x - .5));
+      const sy = Math.max(0, Math.min(info.height - 1, (rect.top + y + .5 + spatialOffset.y) * stillScale.y - .5));
+      const x0 = Math.floor(sx), y0 = Math.floor(sy), x1 = Math.min(x0 + 1, info.width - 1), y1 = Math.min(y0 + 1, info.height - 1);
+      const ax = sx - x0, ay = sy - y0;
+      for (let channel = 0; channel < 3; channel++) {
+        const top = data[(y0 * info.width + x0) * 3 + channel] * (1 - ax) + data[(y0 * info.width + x1) * 3 + channel] * ax;
+        const bottom = data[(y1 * info.width + x0) * 3 + channel] * (1 - ax) + data[(y1 * info.width + x1) * 3 + channel] * ax;
+        reference[(y * rect.width + x) * 3 + channel] = Math.round(top * (1 - ay) + bottom * ay);
+      }
+    }
+    references.set(key, reference);
+    return reference;
+  };
+  let chosenSpatialOffset = null;
+  const compare = async (frame, shot, spatialOffset = chosenSpatialOffset) => {
+    assert(spatialOffset, 'Spatial registration must be explicit.');
+    const reference = referenceFor(shot, spatialOffset), actual = await sharp(frame).extract(crop(shot.captionRect)).removeAlpha().raw().toBuffer();
     assert.equal(reference.length, actual.length);
     let total = 0, count = 0, close = 0;
     // Evaluate bright caption glyphs, not a mostly identical dark background.
@@ -99,20 +133,33 @@ try {
   };
   const probes = [recording.shots[0], recording.shots[Math.floor(recording.shots.length / 2)], recording.shots.at(-1)];
   const offsets = [0, -.12, .12, -.25, .25, -.5, .5, -1, 1];
+  const axes = scale => [...new Set([0, Math.min(.5, .5 / scale), -Math.min(.5, .5 / scale), .5, -.5])];
+  const spatialOffsets = axes(stillScale.x).flatMap(x => axes(stillScale.y).map(y => ({ x, y })));
+  receipt.spatialRegistration = {
+    method: 'One global translation of the reference sampling origin, calibrated on first/middle/final decoded captions; bilinear CSS-pixel-center sampling of the unmodified native-resolution stills.',
+    stillScale, maxAbsoluteOffsetCssPx: .5, candidatesCssPx: spatialOffsets,
+    thresholds: { minimumBrightTextPixels: 81, brightPixelMeanMinimum: 145, maximumMeanAbsoluteChannelDifference: 40, closePixelDifferenceMaximum: 60, minimumClosePixelFraction: .85 },
+  };
   let chosen = null;
   receipt.alignmentAttempts = [];
   for (const offsetS of offsets) {
-    const results = [];
+    const decodedProbes = [];
     for (const shot of probes) {
       const timeS = predictedVideoTime((shot.readableBrowserTimeMs + shot.endBrowserTimeMs) / 2) + offsetS;
-      if (timeS <= 0 || timeS >= receipt.playback.durationS) { results.push({ matches: false }); continue; }
-      results.push({ id: shot.id, timeS, ...await compare(await seek(timeS), shot) });
+      decodedProbes.push({ shot, timeS, frame: timeS > 0 && timeS < receipt.playback.durationS ? await seek(timeS) : null });
     }
-    receipt.alignmentAttempts.push({ offsetS, results });
-    if (results.every(result => result.matches)) { chosen = offsetS; break; }
+    for (const spatialOffset of spatialOffsets) {
+      const results = [];
+      for (const { shot, timeS, frame } of decodedProbes) results.push({ id: shot.id, timeS, ...(frame ? await compare(frame, shot, spatialOffset) : { matches: false }) });
+      receipt.alignmentAttempts.push({ offsetS, spatialOffsetCssPx: spatialOffset, results });
+      if (results.every(result => result.matches)) { chosen = offsetS; chosenSpatialOffset = spatialOffset; break; }
+    }
+    if (chosen !== null) break;
   }
   assert(chosen !== null, 'Decoded title/caption crops did not match metadata-mapped observed intervals. Retain failure; inspect media before changing alignment.');
   receipt.alignmentOffsetS = chosen;
+  receipt.spatialRegistration.selectedOffsetCssPx = chosenSpatialOffset;
+  receipt.spatialRegistration.selectedOffsetNativePixels = { x: chosenSpatialOffset.x * stillScale.x, y: chosenSpatialOffset.y * stillScale.y };
   receipt.encodedFPS = Number(metadata.match(/(\d+(?:\.\d+)?) fps/)?.[1]);
   assert(Number.isFinite(receipt.encodedFPS) && receipt.encodedFPS > 0);
   const frameIntervalS = 1 / receipt.encodedFPS;
@@ -134,11 +181,13 @@ try {
     return { matchedS: matched, unmatchedS: null, mediaEdgeS: edge, bracketWidthS: null, boundedByMediaEdge: true };
   };
   const mappedShots = [];
+  const representativeFrames = new Map();
   for (const shot of recording.shots) {
     const startS = predictedVideoTime(shot.startedBrowserTimeMs) + chosen, readableStartS = predictedVideoTime(shot.readableBrowserTimeMs) + chosen, endS = predictedVideoTime(shot.endBrowserTimeMs) + chosen;
     const timeS = (readableStartS + endS) / 2, frame = await seek(timeS), comparison = await compare(frame, shot);
     const name = `decoded-${String(shot.index + 1).padStart(2, '0')}-${shot.id.replace(/[^a-z0-9-]/gi, '-')}.png`;
     await fs.writeFile(path.join(out, name), frame);
+    representativeFrames.set(shot.id, frame);
     receipt.frames.push({ shotId: shot.id, timeS, frame: name, sha256: hash(frame), comparison });
     assert(comparison.matches, `Actual decoded caption differs for ${shot.id}; preserve and review.`);
     const readableStart = await boundary(shot, timeS, -1), readableEnd = await boundary(shot, timeS, 1);
@@ -147,6 +196,13 @@ try {
       decodedCaptionStart: readableStart, decodedCaptionEnd: readableEnd, representativeFrameS: timeS,
       timingQualifier: 'Caption appearance brackets are observed by seeking the unchanged raw video. Navigation estimates retain unmeasured encoder first-packet offset and are not frame-exact event times.'
     } });
+  }
+  receipt.negativeControls = [];
+  for (const expected of recording.shots) for (const other of recording.shots) {
+    if (expected.id === other.id) continue;
+    const comparison = await compare(representativeFrames.get(other.id), expected);
+    receipt.negativeControls.push({ expectedShotId: expected.id, actualShotId: other.id, ...comparison });
+    assert(!comparison.matches, `Wrong-chapter caption matched ${expected.id} against ${other.id}; reject ambiguous registration.`);
   }
   await fs.writeFile(path.join(out, 'shots-video.json'), JSON.stringify({ artifact: recording.artifact, source: recording.localSource, video: receipt.video, timingMethod: receipt.timingMethod, cuts: [], shots: mappedShots }, null, 2) + '\n');
   receipt.status = 'PASS';
