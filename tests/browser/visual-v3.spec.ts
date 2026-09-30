@@ -1,4 +1,5 @@
-import { withVisibleControl } from './visible-controls';
+import { openPanel, withVisibleControl } from './visible-controls';
+import { activateLifecycleButton } from './lifecycle-keyboard';
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { Box3, PerspectiveCamera, Ray, Vector3 } from 'three';
@@ -35,13 +36,18 @@ async function completed(page: Page) {
     requestAnimationFrame(observe);
   }));
 }
-async function select(page: Page, id: string) {
+async function select(page: Page, id: string, activate?: (name: string) => Promise<void>) {
   const finder = page.getByLabel('Find asset ID', { exact: true });
-  await withVisibleControl(page, finder, control => control.fill(id)); await withVisibleControl(page, finder, control => control.focus()); await page.keyboard.press('Enter');
+  if (activate) {
+    await openPanel(page, 'Assets', activate);
+    await finder.fill(id); await finder.focus(); await page.keyboard.press('Enter');
+  } else {
+    await withVisibleControl(page, finder, control => control.fill(id)); await withVisibleControl(page, finder, control => control.focus()); await page.keyboard.press('Enter');
+  }
   await expect(main(page)).toHaveAttribute('data-selected', id);
 }
-async function reveal(page: Page, id = cdu) {
-  await select(page, id); await button(page, 'Cooling close-up').click();
+async function reveal(page: Page, id = cdu, activate?: (name: string) => Promise<void>) {
+  await select(page, id, activate); await (activate ? activate('Cooling close-up') : button(page, 'Cooling close-up').click());
   await expect.poll(() => kit(page)).toMatchObject({ version: 'systems-reveal-v3', status: 'ready', moduleId: id.slice(0, id.lastIndexOf('/')) });
   await expect.poll(async () => (await kit(page))?.assets.every(asset => asset.meshCount === 4 && asset.renderedMeshes > 0)).toBe(true);
   return completed(page);
@@ -55,13 +61,13 @@ async function project(page: Page): Promise<CurrentProject> {
   if (value.schemaVersion !== 3 || !value.checkpoint) throw Error('Expected current checkpoint export.');
   return value;
 }
-async function clickProceduralCdu(page: Page, id = cdu) {
+async function clickProceduralCdu(page: Page, id = cdu, activate?: (name: string) => Promise<void>) {
   // Derive a point on the canonical procedural box, without adding a production
   // diagnostic or relying on an inspector selection as the interaction witness.
   const installed = resolveAsset((await project(page)).designSnapshot, id);
   if (!installed) throw Error('No installed CDU.');
-  await select(page, id.replace(/cdu$/, 'pump-duty'));
-  await button(page, 'Cooling close-up').click();
+  await select(page, id.replace(/cdu$/, 'pump-duty'), activate);
+  await (activate ? activate('Cooling close-up') : button(page, 'Cooling close-up').click());
   const observation = await completed(page), canvas = await page.locator('canvas').boundingBox();
   if (!canvas) throw Error('No canvas.');
   const camera = new PerspectiveCamera(46, canvas.width / canvas.height, 0.1, 10000);
@@ -124,21 +130,22 @@ test('VIS3 three lazy templates render authored surfaces with canonical placemen
 });
 
 test('VIS3 delayed CDU remains interactive beside healthy older templates and cannot attach after module/design supersession', async ({ page }, info) => {
+  const activate = (name: string) => activateLifecycleButton(page, name);
   const failures = errors(page); let release!: () => void;
   const barrier = new Promise<void>(resolve => { release = resolve; });
   await page.route('**/visuals/v3/cdu.glb', async route => { await barrier; await route.continue(); });
   await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto('./'); await ready(page);
   try {
-    await select(page, cdu); await button(page, 'Cooling close-up').click();
+    await select(page, cdu, activate); await activate('Cooling close-up');
     await expect.poll(async () => (await kit(page))?.assets.find(asset => asset.kind === 'cdu')).toMatchObject({ status: 'loading', meshCount: 0 });
     await expect.poll(async () => (await kit(page))?.assets.filter(asset => asset.kind !== 'cdu').every(asset => asset.status === 'ready' && asset.renderedMeshes > 0)).toBe(true);
     await expect(button(page, 'Step 10s')).toBeEnabled();
-    await clickProceduralCdu(page);
-    await select(page, secondCdu); await button(page, 'Cooling close-up').click();
-    await withVisibleControl(page, button(page, 'Design family II'), control => control.click()); await ready(page);
-    await select(page, secondCdu); await button(page, 'Cooling close-up').click();
+    await clickProceduralCdu(page, cdu, activate);
+    await select(page, secondCdu, activate); await activate('Cooling close-up');
+    await openPanel(page, 'Design', activate); await activate('Design family II'); await ready(page);
+    await select(page, secondCdu, activate); await activate('Cooling close-up');
     const before = await project(page); await capture(page, info, 'visual-v3-delayed-cdu');
-    release(); const loaded = await reveal(page, secondCdu);
+    release(); const loaded = await reveal(page, secondCdu, activate);
     expect(loaded.visualKit.assets.every(asset => asset.assetId.startsWith('platform-001/module-02/'))).toBe(true);
     expect(loaded.visualKit.assets.find(asset => asset.kind === 'cdu')).toMatchObject({ assetId: secondCdu, selected: true, renderedMeshes: 4 });
     expect(normalizeProject(await project(page))).toEqual(normalizeProject(before)); expect(failures).toEqual([]);

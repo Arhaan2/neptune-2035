@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
-/** For the two resource-cycle cases, PH7 real-canvas arrangements and V4 CDU compositions only.
+/** For the two resource-cycle cases, PH7 real-canvas arrangements, V4 CDU
+ * compositions, V2 compatible replacement and V3 delayed CDU supersession only.
  * Other acceptance keeps pointer input.
  * One retried browser observation retains native-button visibility, effective
  * enabled state and actual focus, then Enter travels through browser keyboard

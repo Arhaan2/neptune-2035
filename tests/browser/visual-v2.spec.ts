@@ -327,24 +327,28 @@ test('VIS2 390px reduced-motion authored reveal and real context loss preserve p
 
 
 test('VIS2 compatible efficiency replacement reuses authored kit and different physical pump stays procedural', async ({ page }, info) => {
+  const activate = (name: string) => activateLifecycleButton(page, name);
+  const selectAsset = (id: string) => select(page, id, activate);
   const failures = errors(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./'); await ready(page); await reveal(page);
+  await page.goto('./'); await ready(page); await reveal(page, duty, activate, selectAsset);
+  await openPanel(page, 'Inspector', activate);
   await withVisibleControl(page, page.getByLabel('Replacement specification', { exact: true }), control => control.selectOption('pump-efficient'));
-  await withVisibleControl(page, button(page, 'Apply and reset'), control => control.click()); await ready(page);
+  await activate('Apply and reset'); await ready(page);
   await expect(page.getByTestId('installed-spec')).toContainText('pump-efficient');
-  await reveal(page);
+  await reveal(page, duty, activate, selectAsset);
+  await openPanel(page, 'Inspector', activate);
   await withVisibleControl(page, page.getByLabel('Replacement specification', { exact: true }), control => control.selectOption('pump-physical'));
-  await withVisibleControl(page, button(page, 'Apply and reset'), control => control.click()); await ready(page);
+  await activate('Apply and reset'); await ready(page);
   await expect(page.getByTestId('installed-spec')).toContainText('pump-physical');
-  await button(page, 'Cooling close-up').click();
+  await activate('Cooling close-up');
   await expect.poll(() => kit(page)).toMatchObject({ status: 'fallback' });
   const observed = await completed(page);
   expect(observed.visualKit.assets.find(asset => asset.assetId === duty)).toMatchObject({ status: 'fallback', meshCount: 0 });
   expect(observed.visualKit.assets.find(asset => asset.assetId === standby)).toMatchObject({ status: 'ready' });
   const replaced = await project(page);
-  await toggle(page, 'Explode', true); await completed(page);
-  await select(page, standby); await button(page, 'Cooling close-up').click(); await completed(page);
+  await toggle(page, 'Explode', true, activate); await completed(page);
+  await selectAsset(standby); await activate('Cooling close-up'); await completed(page);
   expect(normalizeProject(await project(page))).toEqual(normalizeProject(replaced));
   await capture(page, info, 'visual-v2-incompatible-physical-replacement');
   expect(failures).toEqual([]);

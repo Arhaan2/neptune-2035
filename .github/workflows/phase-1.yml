@@ -120,10 +120,12 @@ jobs:
               tests/browser/phase7.spec.ts
               tests/browser/phase8.spec.ts
               tests/browser/visual-v1.spec.ts
-          - name: authored-visual
+          - name: authored-equipment
             files: >-
               tests/browser/visual-v2.spec.ts
               tests/browser/visual-v3.spec.ts
+          - name: interface-visual
+            files: >-
               tests/browser/visual-v3-clarity.spec.ts
               tests/browser/visual-v4.spec.ts
     env:
@@ -240,7 +242,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Require core and all nine browser group jobs to succeed
+      - name: Require core and all twelve browser group jobs to succeed
         env:
           CORE_RESULT: ${{ needs.core.result }}
           BROWSER_RESULTS: ${{ needs.browsers.result }}
