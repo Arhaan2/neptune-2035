@@ -2,6 +2,8 @@
 
 **Simulated, design-stage prototype; physical validation pending.** This extends the shipped result walkthrough in the real Blue Hour application. It does not add an execution algorithm, hardware validation, equipment family, renderer or global store. The final external Visual V5 receipt identifies the accepted source, exact compiled payload, retained attempts, CI, production verification and media; this implementation document alone does not certify a release.
 
+Final test results, measurements, hosted media and the acceptance receipt belong to the [Visual V5 release](https://github.com/Arhaan2/neptune-2035/releases/tag/visual-v5-2026-09-30), published only after its required gates pass. Historical releases remain separate.
+
 ## Prepare, load, present, inspect
 
 Open **Compare**, choose/configure the campaign, and explicitly **Start decision campaign**. Completed coverage exposes the evaluated candidate, scenario and run beside **Start result walkthrough**. That explicit action first saves the active project in Compare, then loads one completed run's final checkpoint. Busy, incomplete, stale and storage-failure guards remain. Default project saves exclude private observations and stream URLs; loading an incompatible design revision resets observation mappings. This is not a promise to restore private sessions.

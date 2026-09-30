@@ -406,11 +406,43 @@ describe('running DataPanel acceptance', () => {
       stage('capture completed data panel');
       await page.locator('.twin-data').screenshot({ path: 'artifacts/v2/telemetry-panel.png' });
 
+      expect(errors).toEqual([]);
+    } finally { await publisher?.close(); await browser.close(); }
+  }, 40_000);
+  it.runIf(process.env.NEPTUNE_TELEMETRY_APP === '1')('preserves a compatible native SSE session through V5 Play Pause Next Restart and Exit after explicit result loading', async () => {
+    const startedAt = performance.now();
+    const stage = (action: string) => console.info(JSON.stringify({ evidence: 'v5-compatible-session-stage', action, elapsedMs: performance.now() - startedAt }));
+    stage('launch browser');
+    // Match the rendered Chromium acceptance project and its existing CI Mesa/Xvfb setup.
+    const browser = await chromium.launch({
+      headless: process.platform !== 'linux',
+      args: process.platform === 'darwin' ? ['--use-angle=metal']
+        : process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl', '--ignore-gpu-blocklist'] : [],
+    });
+    let publisher: Publisher | undefined;
+    try {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
+      const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+      await page.addInitScript(() => {
+        const NativeEventSource = window.EventSource;
+        const lifecycle = { created: 0, closed: 0, samples: [] as { sequence: number; sourceId: string; evidence: string; value: number }[] };
+        (window as unknown as { __V4_STREAM_LIFECYCLE__: typeof lifecycle }).__V4_STREAM_LIFECYCLE__ = lifecycle;
+        window.EventSource = class extends NativeEventSource {
+          constructor(url: string | URL, configuration?: EventSourceInit) {
+            super(url, configuration); lifecycle.created++;
+            this.addEventListener('message', event => lifecycle.samples.push(JSON.parse(event.data)));
+          }
+          close() { lifecycle.closed++; super.close(); }
+        };
+      });
+      stage('open app');
+      await page.goto('http://127.0.0.1:5173');
+      const lifecycle = () => page.evaluate(() => (window as unknown as { __V4_STREAM_LIFECYCLE__: { created: number; closed: number; samples: { sequence: number; sourceId: string; evidence: string; value: number }[] } }).__V4_STREAM_LIFECYCLE__);
+      const retainedCount = async () => Number((await page.getByText(/retained replay window:/).innerText()).match(/retained replay window: (\d+)/)?.[1]);
       stage('load completed V5 result before opening its compatible observation session');
       // The explicit result load intentionally replaces the physical design and
       // its observation mapping. Continuity assertions begin only AFTER that
-      // boundary; the preceding V4 mapping/reconnect assertions remain intact.
-      await publisher.close(); publisher = undefined;
+      // boundary. The preceding real-app test retains the V4 mapping/reconnect checks.
       await page.getByRole('button', { name: 'Compare', exact: true }).click();
       await (await visibleControl(page, page.getByRole('button', { name: 'Start decision campaign', exact: true }))).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="decision-coverage"]')?.getAttribute('data-status') === 'completed');
@@ -438,6 +470,8 @@ describe('running DataPanel acceptance', () => {
       const v5Raw = await page.locator('.twin-data pre').innerText();
       const v5Boundaries = await page.locator('.twin-data details').filter({ has: page.locator('summary').filter({ hasText: /^Raw imports and reset boundaries$/ }) }).innerText();
       expect(v5Raw).toContain('generated:v5-retained-import');
+      stage('connect compatible native SSE');
+      const beforeSession = await lifecycle();
       publisher = createTelemetryPublisher({ mappingVersion: loaded.designSnapshot.revision, assetId: v5Module, intervalMs: 100, allowedOrigins: ['http://127.0.0.1:5173'] }) as Publisher;
       const v5Port = await listen(publisher.server);
       await page.getByLabel('Stream URL', { exact: true }).fill(`http://127.0.0.1:${v5Port}/events`);
@@ -446,28 +480,35 @@ describe('running DataPanel acceptance', () => {
       const v5Before = await lifecycle(), v5Retained = await retainedCount();
       const v5DataOwner = await page.locator('.twin-data').elementHandle();
       expect(publisher.diagnostics.connections).toBe(1);
-      expect(v5Before.created).toBe(stopped.created + 1);
-      const v5SamplesStart = stopped.samples.length;
+      expect(v5Before.created).toBe(beforeSession.created + 1);
+      const v5SamplesStart = beforeSession.samples.length;
       const v5Checkpoint = await page.locator('main.twin-app').getAttribute('data-time');
       stage('V5 Play Pause Next Restart Exit with native SSE retained');
       // Reading/importing Data intentionally pauses guidance. Explicit Resume
       // returns this manually loaded chapter to ready before choosing autoplay.
       expect(await walkthrough.getAttribute('data-presentation-status')).toBe('paused');
+      stage('Resume manually loaded chapter');
       await page.getByRole('button', { name: 'Resume walkthrough', exact: true }).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
+      stage('manual chapter ready; Play presentation');
       await page.getByRole('button', { name: 'Play presentation', exact: true }).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-presentation-status') === 'playing');
+      stage('automatic chapter ready; Pause');
       await page.getByRole('button', { name: 'Pause walkthrough', exact: true }).click();
       expect(await walkthrough.getAttribute('data-presentation-status')).toBe('paused');
+      stage('paused; Next semantic step');
       await page.getByRole('button', { name: 'Next walkthrough step', exact: true }).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
       expect(await walkthrough.getAttribute('data-step-index')).toBe('1');
+      stage('next step ready; open Details and Restart');
       await walkthrough.locator('summary').filter({ hasText: /^Details$/ }).click();
       await page.getByRole('button', { name: 'Restart presentation', exact: true }).click();
       await page.waitForFunction(() => document.querySelector('[data-testid="operator-walkthrough"]')?.getAttribute('data-status') === 'ready');
       expect(await walkthrough.getAttribute('data-shot-index')).toBe('0');
+      stage('restart ready; verify source identity');
       const sourceAfter = JSON.parse((await walkthrough.getAttribute('data-presentation-record'))!) as typeof sourceBefore;
       for (const key of ['runId', 'sourceKey', 'evidenceIdentity'] as const) expect(sourceAfter[key]).toBe(sourceBefore[key]);
+      stage('Exit and inspect retained Data session');
       await page.getByRole('button', { name: 'Exit walkthrough', exact: true }).click();
       await walkthrough.waitFor({ state: 'detached' });
       await page.getByRole('button', { name: 'Data & replay', exact: true }).click();
@@ -484,10 +525,12 @@ describe('running DataPanel acceptance', () => {
       expect(await page.locator('.twin-data pre').innerText()).toBe(v5Raw);
       expect(await page.locator('.twin-data details').filter({ has: page.locator('summary').filter({ hasText: /^Raw imports and reset boundaries$/ }) }).innerText()).toBe(v5Boundaries);
       expect(await page.locator('main.twin-app').getAttribute('data-time')).toBe(v5Checkpoint);
+      stage('continuity assertions complete; Disconnect');
       await page.getByRole('button', { name: 'Disconnect', exact: true }).click();
       expect((await lifecycle()).closed).toBe(v5Before.closed + 1);
       stage('V5 compatible-session continuity verified');
       expect(errors).toEqual([]);
     } finally { await publisher?.close(); await browser.close(); }
   }, 40_000);
+
 });
