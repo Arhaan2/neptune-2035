@@ -403,7 +403,8 @@ export default function TwinApp() {
     setSelectedId(shot.assetId); setFocus(shot.kind === 'campus' || shot.kind === 'summary' ? 'campus' : shot.kind === 'cooling' ? 'cooling' : 'selection');
     setXray(!['campus', 'summary'].includes(shot.kind)); setExploded(false); setInside(false);
     if (temporaryPresentation.current && !temporaryPresentation.current.appearanceOwned) { temporaryPresentation.current.xray = xray; temporaryPresentation.current.exploded = exploded; temporaryPresentation.current.appearanceOwned = true; }
-    setResetId(value => value + 1); setInspectedEventId(shot.eventId); setWorkspace(playback.automatic ? 'Operate' : shot.workspace);
+    // Keep the summary beside its scene; Review evidence explicitly opens Compare.
+    setResetId(value => value + 1); setInspectedEventId(shot.eventId); setWorkspace('Operate');
     inspectionController.current.inspect(shot.timeS, shot.boundary);
   }, [walkthrough, shot, guided, playback.token, playback.sourceKey, playback.automatic, sim.busy, state?.experiment?.definition.id, xray, exploded]);
   const onPresentationReadiness = useCallback((report: PresentationSceneReadiness) => {

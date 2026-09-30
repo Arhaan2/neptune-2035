@@ -30,10 +30,6 @@ export function WalkthroughPanel({ walkthrough, index, shot, shotIndex, shotCoun
     data-presentation-status={playback.phase} data-shot-index={shotIndex} data-shot-count={shotCount} data-shot-id={shot.id} data-source-identity={walkthrough.evidenceIdentity}
     data-request-token={playback.token} data-requested-time={shot.timeS} data-display-time={displayTimeS ?? ''} data-readiness={readiness} data-auto-advance={playback.automatic} data-presentation-record={JSON.stringify(record)}>
     <div className="walkthrough-heading"><span className="twin-eyebrow" aria-live="polite">{step.chapter} · {index + 1}/{walkthrough.steps.length}</span><span className="walkthrough-status">{playback.phase === 'playing' ? 'Playing presentation' : playback.phase}</span></div>
-    <h2>{showing ? shot.title : playback.phase === 'paused' ? 'Paused for inspection' : playback.phase === 'error' ? 'This view needs attention' : 'Preparing the view'}</h2>
-    <p className="walkthrough-caption" data-testid="presentation-caption" role={playback.phase === 'error' ? 'alert' : undefined}>{caption}</p>
-    {showing && step.id === 'downstream' && displayedModule && <p className="walkthrough-operating" data-testid="presentation-service">{displayedModule.id} · {number(displayedModule.availableAccelerators)} useful accelerators available at this boundary</p>}
-    <p className="walkthrough-time">{step.boundary === 'at-or-after' ? 'Metric marker' : 'Requested boundary'} {step.timeS} s · actual displayed scene {displayTimeS === null ? 'unavailable / resolving' : `${displayTimeS} s`}</p>
     <div className="twin-actions walkthrough-controls">
       {step.id === 'decision' && <button onClick={onReview}>Review evidence</button>}
         {playback.phase !== 'completed' && (!playback.automatic && !['paused','error'].includes(playback.phase) && <button onClick={event => guide(event.currentTarget, onPlay)}>Play presentation</button>)}
@@ -42,6 +38,10 @@ export function WalkthroughPanel({ walkthrough, index, shot, shotIndex, shotCoun
       <button disabled={index === walkthrough.steps.length - 1} onClick={event => guide(event.currentTarget, () => onStep(index + 1))}>Next walkthrough step</button>
       <button onClick={onExit}>Exit walkthrough</button>
     </div>
+    <h2>{showing ? shot.title : playback.phase === 'paused' ? 'Paused for inspection' : playback.phase === 'error' ? 'This view needs attention' : 'Preparing the view'}</h2>
+    <p className="walkthrough-caption" data-testid="presentation-caption" role={playback.phase === 'error' ? 'alert' : undefined}>{caption}</p>
+    {showing && step.id === 'downstream' && displayedModule && <p className="walkthrough-operating" data-testid="presentation-service">{displayedModule.id} · {number(displayedModule.availableAccelerators)} useful accelerators available at this boundary</p>}
+    <p className="walkthrough-time">{step.boundary === 'at-or-after' ? 'Metric marker' : 'Requested boundary'} {step.timeS} s · actual displayed scene {displayTimeS === null ? 'unavailable / resolving' : `${displayTimeS} s`}</p>
     {showing && step.id === 'decision' && <div className="walkthrough-result" data-testid="presentation-result" data-ranking-status={walkthrough.summary.decisionStatus}>
       <p><strong>{walkthrough.summary.preferredCandidates.length ? `${walkthrough.summary.tied ? 'Tied preference' : 'Evaluated preference'}: ${walkthrough.summary.preferredCandidates.map(item => item.label).join(' · ')}` : 'No evaluated candidate meets the declared complete suite.'}</strong></p>
       <dl><div><dt>{walkthrough.summary.scenarioLabel} outcome</dt><dd>{walkthrough.summary.scenarioOutcome}</dd></div><div><dt>Whole-run interruption</dt><dd>{number(walkthrough.summary.totalInterruptionS)} s</dd></div><div><dt>Whole-run unmet service</dt><dd>{number(walkthrough.summary.shortfallAcceleratorS)} accelerator-s</dd></div></dl>

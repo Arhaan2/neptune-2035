@@ -66,6 +66,57 @@ async function readable(page: Page) {
   return observation(page);
 }
 
+async function controlPositionsDuring(page: Page, action: () => Promise<void>) {
+  const monitor = await panel(page).evaluateHandle(element => {
+    const names = ['Play presentation', 'Pause walkthrough', 'Exit walkthrough'];
+    const samples: { status: string | null; readiness: string | null; controls: { name: string; x: number; y: number; width: number; height: number }[] }[] = [];
+    let frame = 0;
+    const sample = () => {
+      const origin = element.getBoundingClientRect();
+      const value = {
+        status: element.getAttribute('data-presentation-status'),
+        readiness: element.getAttribute('data-readiness'),
+        controls: Array.from(element.querySelectorAll('.walkthrough-controls button')).flatMap(control => {
+          const name = control.textContent?.trim() ?? '';
+          if (!names.includes(name)) return [];
+          const box = control.getBoundingClientRect();
+          // Relative coordinates exclude native scrolling while retaining any
+          // movement caused by title, caption or service text reflow.
+          return [{ name, x: box.x - origin.x, y: box.y - origin.y, width: box.width, height: box.height }];
+        }),
+      };
+      if (JSON.stringify(value) !== JSON.stringify(samples.at(-1))) samples.push(value);
+    };
+    const render = () => { sample(); frame = requestAnimationFrame(render); };
+    const observer = new MutationObserver(sample);
+    observer.observe(element, { attributes: true, childList: true, subtree: true, characterData: true });
+    sample(); frame = requestAnimationFrame(render);
+    return { finish: () => { observer.disconnect(); cancelAnimationFrame(frame); sample(); return samples; } };
+  });
+  try {
+    await action();
+    return await monitor.evaluate(value => value.finish());
+  } finally {
+    await monitor.evaluate(value => value.finish());
+    await monitor.dispose();
+  }
+}
+
+function expectStableControlPositions(samples: Awaited<ReturnType<typeof controlPositionsDuring>>) {
+  expect(samples.map(sample => sample.status)).toContain('resolving');
+  expect(samples.map(sample => sample.status)).toContain('ready');
+  const baseline = samples[0].controls;
+  expect(baseline.map(control => control.name)).toEqual(['Play presentation', 'Pause walkthrough', 'Exit walkthrough']);
+  for (const sample of samples) {
+    expect(sample.controls.map(control => control.name)).toEqual(baseline.map(control => control.name));
+    for (const [index, control] of sample.controls.entries()) {
+      for (const dimension of ['x', 'y', 'width', 'height'] as const) {
+        expect(Math.abs(control[dimension] - baseline[index][dimension]), `${control.name} ${dimension} moved while ${sample.status}/${sample.readiness}`).toBeLessThanOrEqual(1);
+      }
+    }
+  }
+}
+
 test('VIS5 real Play advances an authored shot, pauses immediately and preserves final evidence on restart and exit', async ({ page }, info) => {
   const errors: string[] = [], fetched: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -104,6 +155,14 @@ test('VIS5 real Play advances an authored shot, pauses immediately and preserves
     await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
     immediateChapters.push(chapter);
   }
+  const desktopControls = await controlPositionsDuring(page, async () => {
+    await button(page, 'Next walkthrough step').click();
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+    await button(page, 'Previous walkthrough step').click();
+    await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+  });
+  await info.attach('V5-desktop-readiness-control-positions', { body: JSON.stringify(desktopControls), contentType: 'application/json' });
+  expectStableControlPositions(desktopControls);
   const loaded = normalizeProject(await project(page));
   const loadedSaved = await saved(page);
   expect(loadedSaved).toHaveLength(beforeSaved.length + 1);
@@ -209,6 +268,7 @@ test('VIS5 390px reduced-motion manual chapters retain keyboard access, actual b
   await expect(panel(page)).toHaveAttribute('data-auto-advance', 'false');
   await expect(button(page, 'Exit walkthrough')).toBeVisible();
   const visited: unknown[] = [], count = Number(await panel(page).getAttribute('data-step-count'));
+  const mobileControls: Awaited<ReturnType<typeof controlPositionsDuring>>[] = [];
   for (let index = 0; index < count; index++) {
     await expect(panel(page)).toHaveAttribute('data-step-index', String(index));
     await expect(panel(page)).toHaveAttribute('data-status', index === count - 1 ? 'completed' : 'ready');
@@ -219,13 +279,23 @@ test('VIS5 390px reduced-motion manual chapters retain keyboard access, actual b
     if (index < count - 1) {
       await button(page, 'Next walkthrough step').focus();
       await expect(button(page, 'Next walkthrough step')).toBeFocused();
-      await page.keyboard.press('Enter');
+      if (index < count - 2) {
+        mobileControls.push(await controlPositionsDuring(page, async () => {
+          await page.keyboard.press('Enter');
+          await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready');
+        }));
+      } else await page.keyboard.press('Enter');
     }
   }
+  await info.attach('V5-mobile-readiness-control-positions', { body: JSON.stringify(mobileControls), contentType: 'application/json' });
+  for (const samples of mobileControls) expectStableControlPositions(samples);
   await expect(button(page, 'Review evidence')).toBeVisible();
   await expect(button(page, 'Review evidence')).toBeInViewport();
   await expect(button(page, 'Exit walkthrough')).toBeInViewport();
   await info.attach('V5-mobile-complete', { body: await page.screenshot(), contentType: 'image/png' });
+  await expect(main(page)).toHaveAttribute('data-workspace', 'Operate');
+  await button(page, 'Review evidence').click();
+  await expect(main(page)).toHaveAttribute('data-workspace', 'Compare');
   await button(page, 'Exit walkthrough').click();
   expect(normalizeProject(await project(page))).toEqual(loaded);
   await info.attach('V5-mobile-manual-source-boundaries', { body: JSON.stringify(visited), contentType: 'application/json' });
