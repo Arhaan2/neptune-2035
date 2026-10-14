@@ -4,7 +4,7 @@ import {
   normalizeProject,
   parseProject,
 } from '../../src/twin/persistence/project';
-import { createResultWalkthrough } from '../../src/twin/presentation/walkthrough';
+import { identity } from '../../src/twin/persistence/structure';
 import type { DecisionExport } from '../../src/twin/decision/types';
 import { projectActions } from './visible-controls';
 
@@ -67,10 +67,10 @@ for (const fixture of [
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     const campaign = await prepare(page, fixture);
-    const expectedPresentation = createResultWalkthrough(
-      campaign.campaign,
-      campaign.result,
-    );
+    const expectedEvidenceIdentity = identity({
+      campaign: campaign.campaign,
+      result: campaign.result,
+    });
     const loaded = normalizeProject(
       parseProject(await exported(page, 'project')),
     );
@@ -178,7 +178,7 @@ for (const fixture of [
         ),
       ).toBe(true);
       expect(sample.record.evidenceIdentity).toBe(
-        expectedPresentation.evidenceIdentity,
+        expectedEvidenceIdentity,
       );
       expect(sample.caption).toBeTruthy();
       expect(sample.caption).not.toMatch(/unavailable|Guidance is paused/);
