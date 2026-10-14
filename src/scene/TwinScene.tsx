@@ -1191,7 +1191,10 @@ function CameraRig({
     if (initial || props.reducedMotion) {
       camera.position.copy(goal.current.position);
       c.target.copy(goal.current.target);
-      c.update();
+      // Interior waypoints look horizontally down the aisle. Exterior orbit
+      // constraints clamp that pose even when controls are disabled.
+      if (inside) camera.lookAt(c.target);
+      else c.update();
     }
     transitioning.current = !initial && !props.reducedMotion;
   }, [
@@ -1389,7 +1392,8 @@ function CameraRig({
         c.target.copy(goal.current.target);
         transitioning.current = false;
       }
-      c.update();
+      if (inside) camera.lookAt(c.target);
+      else c.update();
     } else if (inside && moduleSpec) {
       const pressed = keys.current;
       const forward =
