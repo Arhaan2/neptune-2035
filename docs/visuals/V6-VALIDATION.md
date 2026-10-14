@@ -19,6 +19,7 @@ Freeze source commit/tree, lock SHA-256, Node/npm/Playwright versions and build 
 | Delayed/missing/corrupt/unsupported assets and supersession | VIS2 delayed/missing/corrupt pump and physical replacement; VIS3 independent exchanger/CDU fallback; VIS4 delayed/failed CDU reflow; VIS5 source/history supersession |
 | Graphics lifecycle | VIS1/2 resource and actual supported context-loss tests; VIS6 restores an **active walkthrough**, advancing frames and authored interaction; native loss is injected separately from soak |
 | Normal-motion interior entry | VIS6 two-module entry, real Rack aisle/Cooling bay waypoints, horizontal settled pose, WASD and exit; reproduced V5 defect and scoped interior camera-ownership repair |
+| Pointer camera takeover over selectable geometry | VIS6 real mesh drag preserves selection and manual pose until explicit Resume; genuine zero-drag authored selection still works |
 | Responsive, keyboard, Escape, reduced motion, 320 CSS px and 200% text | VIS3/4/5 retained tests; native desktop and 390×844; visual review also 768×1024 and 844×390 |
 | Scale and numerical/history | Existing prototype/PH8, numerical and historical checks; only named Chromium/WebKit `public prototype large-campus functional Step 10s` exclusions; Firefox stays active |
 | Hidden tab and explicit resume | Retained native visibility helper, installed Chrome variant; Safari real tab/manual-assisted observation when access permits; no synthetic visibility |
@@ -43,9 +44,11 @@ For **each native browser**:
 
 Performance and visual recording use separate runs. Visuals include campus, authored bay/CDU, inspector open/closed, exploded composition, Operate history, completed Compare, playing/paused/final presentation and compact/expanded mobile with legend. Fix fixture/time/pose/motion per browser; no cross-browser pixel-equality claim or masks over correctness. Review composition, state/failure differentiation, caption agreement, wrapping, controls, keyboard/focus/Escape, touch targets, text enlargement and reflow directly. Agent review and human signoff are distinct.
 
-## Demonstrated repair
+## Demonstrated repairs
 
 Visible installed Chrome on unchanged V5 entered a normal-motion module interior but stayed in transition beyond 12 seconds while completed frames continued. The focused bundled-Chromium regression reproduced it. An interior waypoint looks horizontally four meters ahead; the explicit exterior `OrbitControls.update()` call clamps that pose to `maxPolarAngle = π × 0.495`, even with controls disabled. Its approximately 0.0628 m vertical displacement exceeds the unchanged 0.015 m completion threshold, so convergence is impossible. Interior immediate positioning and ordinary transitions now orient the camera with `lookAt`; exterior orbit constraints and updates remain unchanged. No solver, physical model, equipment, schema, asset or numerical expectation is changed. The external attempt ledger distinguishes this app defect from the new measurement runner's earlier five-second assertion-default mistake and test's unconditional Resume mistake.
+
+Visible native Safari also reproduced selection after a camera drag. A passive input ledger recorded a trusted 82.46 CSS pixel drag with the left button held, a moved manual camera at pointer release, and a subsequent click that selected the underlying platform. That selection reset the camera to a named view. The five affected mesh picking handlers were unchanged from accepted V5. They now ignore clicks whose React Three Fiber pointer displacement exceeds two CSS pixels, retaining existing propagation and genuine-click behavior. The regression verifies an intersected-mesh drag, stable manual ownership, genuine authored selection, explicit Resume and checkpoint continuity. Earlier candidate measurements remain separately identified; the repaired candidate requires new artifact bindings and affected acceptance before promotion.
 
 ## Execution and disposition
 

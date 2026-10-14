@@ -76,7 +76,7 @@ export function AuthoredEquipment({ asset, connections, identity, state, selecte
   return (
     <group userData={{ visualKitAsset: diagnostic }}>
       {instance ? (
-        <group position={presentedPosition(asset, exploded)} onClick={event => { event.stopPropagation(); onSelect(asset.id); }}>
+        <group position={presentedPosition(asset, exploded)} onClick={event => { event.stopPropagation(); if (event.delta > 2) return; onSelect(asset.id); }}>
           <primitive object={instance.scene} dispose={null} />
         </group>
       ) : children}

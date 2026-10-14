@@ -172,6 +172,7 @@ function Instances({
       onClick={!interactive || (surface && opacity < 0.5) ? undefined : (event: ThreeEvent<MouseEvent>) => {
         if (event.instanceId === undefined) return;
         event.stopPropagation();
+        if (event.delta > 2) return;
         onSelect(assets[event.instanceId].id);
       }}
     >
@@ -370,6 +371,7 @@ function PumpEnvelope({
       position={presentedPosition(asset, exploded)}
       onClick={(event) => {
         event.stopPropagation();
+        if (event.delta > 2) return;
         onSelect(asset.id);
       }}
     >
@@ -529,6 +531,7 @@ function CanonicalPipes({
         args={[undefined, undefined, segments.length]}
         onClick={(e) => {
           e.stopPropagation();
+          if (e.delta > 2) return;
           if (technical) onSelect(technical.id);
         }}
       >
