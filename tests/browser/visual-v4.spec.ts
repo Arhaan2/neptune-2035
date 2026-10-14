@@ -287,11 +287,15 @@ for (const outcome of ['delayed', 'failed'] as const) {
 }
 
 test('VIS4 exploded cooling leaves the actual CDU surface selectable across inspector and presentation compositions', async ({ page }, info) => {
-  const activate = (name: string) => activateLifecycleButton(page, name);
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  // Eight same-session views and resets exceeded 60s under measured distributed CI
+  // overhead. Keep control/setup responsiveness bounded separately at 12s.
+  test.setTimeout(120_000);
+  page.setDefaultTimeout(12_000);
+  const activate = (name: string) => test.step(`Activate ${name}`, () => activateLifecycleButton(page, name), { timeout: 12_000 });
+  await test.step('Use reduced motion', () => page.emulateMedia({ reducedMotion: 'reduce' }), { timeout: 12_000 });
   await page.goto('./'); await ready(page);
   for (const width of [1440, 390]) {
-    await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+    await test.step(`Set viewport to ${width}px`, () => page.setViewportSize({ width, height: width === 390 ? 844 : 900 }), { timeout: 12_000 });
     for (const moduleId of ['platform-001/module-01', 'platform-001/module-02']) {
       const target = `${moduleId}/cdu`;
       await select(page, `${moduleId}/pump-duty`, activate);
@@ -329,7 +333,7 @@ test('VIS4 exploded cooling leaves the actual CDU surface selectable across insp
         await info.attach(`V4-CDU-pointer-${width}-${moduleId.split('/').at(-1)}-${presentation}`, { body: JSON.stringify({ click, canvas: visible, surface, hit, scene: value }), contentType: 'application/json' });
         await info.attach(`V4-CDU-before-click-${width}-${moduleId.split('/').at(-1)}-${presentation}`, { body: await page.screenshot(), contentType: 'image/png' });
         expect(hit.canvasOwnsPoint, 'The actual CDU surface point must be outside occupied inspector UI.').toBe(true);
-        await page.mouse.click(click.x, click.y);
+        await test.step('Click the actual CDU surface', () => page.mouse.click(click.x, click.y), { timeout: 12_000 });
         await expect(main(page)).toHaveAttribute('data-selected', target);
         await expect(page.getByTestId('scene-selected-identity')).toContainText(target);
         await info.attach(`V4-CDU-${width}-${moduleId.split('/').at(-1)}-${presentation ? 'presentation' : 'inspector'}`, { body: await page.screenshot(), contentType: 'image/png' });
