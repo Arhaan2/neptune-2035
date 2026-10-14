@@ -663,7 +663,7 @@ async function canonicalCampus() {
   await shot('1. The evaluated design');
   await settled();
 }
-async function cycle(index) {
+async function cycle(index, modules) {
   await attempt('cycle-start', { index });
   // Keep the same loaded result and SSE mapping; repeated explicit loads intentionally save prior projects.
   if ((await panel().getAttribute('data-presentation-status')) !== 'paused')
@@ -671,8 +671,8 @@ async function cycle(index) {
   if (await button(page, 'Exit presentation focus').isVisible())
     await click('Exit presentation focus');
   await click('Explore');
-  for (const module of ['01', '02']) {
-    await select(`platform-001/module-${module}/cdu`);
+  for (const module of modules) {
+    await select(`${module.id}/cdu`);
     await click('Cooling close-up');
     await expect
       .poll(async () => (await scene()).visualKit.status)
@@ -778,13 +778,19 @@ async function soak() {
   cdp = await context.newCDPSession(page);
   await warmPose();
   const continuity = await connect();
+  const modules = continuity.loaded.designSnapshot.modules.slice(0, 2);
+  assert.equal(
+    modules.length,
+    2,
+    'The evaluated soak fixture needs two compatible modules',
+  );
   await dock('Inspector');
   await canonicalCampus();
   const owner = await page.locator('canvas').elementHandle();
-  await cycle('warmup');
+  await cycle('warmup', modules);
   receipt.baseline = await checkpoint('baseline');
   if (mode === 'cycle-check') {
-    receipt.cycles.push(await cycle('diagnostic-only'));
+    receipt.cycles.push(await cycle('diagnostic-only', modules));
     receipt.scope =
       'Harness preflight only; does not satisfy twenty cycles or ten-minute soak.';
     return;
@@ -796,7 +802,7 @@ async function soak() {
   const start = Date.now();
   let i = 0;
   while (i < 20 || Date.now() - start < 600000) {
-    const cp = await cycle(++i);
+    const cp = await cycle(++i, modules);
     receipt.cycles.push(cp);
     const b = receipt.baseline;
     fail(
