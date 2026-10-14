@@ -383,64 +383,82 @@ test('VIS6 dragging over a scene mesh preserves manual ownership while genuine a
       caption: element.querySelector('[data-testid="presentation-caption"]')?.textContent,
       visibility: document.visibilityState, focused: document.hasFocus() };
   });
+  type Snapshot = Awaited<ReturnType<typeof snapshot>>;
   const poseDelta = (a: {camera: number[]; target: number[]}, b: {camera: number[]; target: number[]}) =>
     Math.max(...a.camera.map((v, i) => Math.abs(v - b.camera[i])), ...a.target.map((v, i) => Math.abs(v - b.target[i])));
-  const settled = async () => {
-    let previous: Awaited<ReturnType<typeof snapshot>> | undefined, stable = 0;
-    await expect.poll(async () => {
+  const settled = async (timeoutMs = 12_000, observeSample?: (sample: Snapshot) => void) => {
+    const started = Date.now();
+    let anchor: Snapshot | undefined, lastEpoch = -1, stable = 0;
+    while (Date.now() - started < timeoutMs) {
       const next = await snapshot();
-      if (next.scene.cameraTransitioning) stable = 0;
-      else if (previous && next.scene.renderEpoch !== previous.scene.renderEpoch)
-        stable = poseDelta(next.scene, previous.scene) <= 1e-5 ? stable + 1 : 0;
-      previous = next;
-      return stable;
-    }, { timeout: 12_000, intervals: [100] }).toBeGreaterThanOrEqual(3);
-    return previous!;
+      // Invariants are outside expect.poll: one invalid observation fails now.
+      observeSample?.(next);
+      if (next.scene.cameraTransitioning) { anchor = undefined; stable = 0; }
+      else if (next.scene.renderEpoch !== lastEpoch) {
+        if (anchor && poseDelta(next.scene, anchor.scene) <= 1e-5) stable++;
+        else { anchor = next; stable = 0; }
+      }
+      lastEpoch = next.scene.renderEpoch;
+      if (stable >= 3 && Date.now() - started <= timeoutMs) return next;
+      await page.waitForTimeout(100);
+    }
+    throw Error(`Camera did not converge within ${timeoutMs}ms: ${stable}/3 distinct publications within1e-5 of one anchor`);
   };
+  // Play enables this layout. Establish it before computing the drag geometry,
+  // while the manual chapter has no automatic four-second reading deadline.
+  if (await main.getAttribute('data-presentation-focus') !== 'true') await button(page, 'Presentation focus').click();
+  await expect(main).toHaveAttribute('data-presentation-focus', 'true', { timeout: 12_000 });
   const details = panel(page).locator('summary').filter({ hasText: /^Details$/ });
   if (!await details.locator('..').evaluate(e => (e as HTMLDetailsElement).open)) await details.click();
   await page.getByLabel('Presentation view', { exact: true }).selectOption({ label: '2. Reveal the cooling system' });
   await expect(panel(page)).toHaveAttribute('data-presentation-status', 'ready', { timeout: 12_000 });
   await expect(panel(page)).toHaveAttribute('data-readiness', 'authored', { timeout: 12_000 });
-  await button(page, 'Play presentation').click();
-  await expect.poll(async () => {
-    const s = await snapshot();
-    return s.record.status === 'playing' && s.record.shotIndex === 1 && s.record.readiness === 'authored' && !s.scene.cameraTransitioning;
-  }, { timeout: 12_000 }).toBe(true);
-  const before = await settled();
-  expect(before.record.status).toBe('playing');
-  expect(before.record.shotIndex).toBe(1);
-  expect(before.record.automatic).toBe(true);
-  expect(before.selected).toBe(before.record.assetId);
-  expect(before.scene.selectedId).toBe(before.record.assetId);
-  expect(before.scene.simulationTimeS).toBe(before.record.displayedTimeS);
-  expect(before.caption).toBe(before.record.caption);
-  expect(before.visibility).toBe('visible');
-  expect(before.focused).toBe(true);
-
-  type PointerRow = { type: string; trusted: boolean; x: number; y: number; buttons: number; delta: number; targetIsCanvas: boolean };
+  await page.locator('canvas').scrollIntoViewIfNeeded();
+  const prepared = await settled();
+  expect(prepared.record.shotIndex).toBe(1);
+  expect(prepared.record.assetId).toMatch(/\/pump-duty$/);
+  const box = await page.locator('canvas').boundingBox();
+  if (!box) throw Error('Expected actual canvas bounds');
+  // Intersected pump/platform route from native Safari069, not empty ocean.
+  const start = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+  expect(await page.evaluate(p => document.elementFromPoint(p.x,p.y)?.tagName, start)).toBe('CANVAS');
+  type PointerRow = { type: string; trusted: boolean; x: number; y: number; buttons: number; delta: number; targetIsCanvas: boolean; atMs: number; downState: Snapshot | null };
   await page.evaluate(() => {
     const canvas = document.querySelector('canvas')!;
-    const rows: {type: string; trusted: boolean; x: number; y: number; buttons: number; delta: number; targetIsCanvas: boolean}[] = [];
+    const rows: PointerRow[] = [];
     let down = { x: 0, y: 0 };
     const read = (e: PointerEvent | MouseEvent) => {
+      if (e.target !== canvas) return;
       if (e.type === 'pointerdown') down = { x: e.clientX, y: e.clientY };
-      rows.push({type:e.type,trusted:e.isTrusted,x:e.clientX,y:e.clientY,buttons:e.buttons,delta:Math.hypot(e.clientX-down.x,e.clientY-down.y),targetIsCanvas:e.target===canvas});
+      const scene = window.__NEPTUNE_TWIN_SCENE__;
+      const element = document.querySelector('[data-testid="operator-walkthrough"]');
+      const downState = e.type === 'pointerdown' && scene && element ? {
+        scene: structuredClone(scene), record: JSON.parse(element.getAttribute('data-presentation-record')!) as Snapshot['record'],
+        selected: document.querySelector('main')!.getAttribute('data-selected'),
+        currentTime: document.querySelector('main')!.getAttribute('data-time'),
+        displayTime: document.querySelector('main')!.getAttribute('data-display-time'),
+        caption: element.querySelector('[data-testid="presentation-caption"]')?.textContent,
+        visibility: document.visibilityState, focused: document.hasFocus(),
+      } : null;
+      rows.push({type:e.type,trusted:e.isTrusted,x:e.clientX,y:e.clientY,buttons:e.buttons,delta:Math.hypot(e.clientX-down.x,e.clientY-down.y),targetIsCanvas:e.target===canvas,atMs:performance.now(),downState});
     };
     const types = ['pointerdown','pointermove','pointerup','click'] as const;
-    for (const type of types) canvas.addEventListener(type,read,{capture:true,passive:true});
-    (window as unknown as {__V6_DRAG_INPUT__: {rows: typeof rows; stop: () => void}}).__V6_DRAG_INPUT__ = {
-      rows, stop: () => { for (const type of types) canvas.removeEventListener(type,read,true); },
+    for (const type of types) window.addEventListener(type,read,{capture:true,passive:true});
+    (window as unknown as {__V6_DRAG_INPUT__: {rows: PointerRow[]; stop: () => void}}).__V6_DRAG_INPUT__ = {
+      rows, stop: () => { for (const type of types) window.removeEventListener(type,read,true); },
     };
   });
-  const trace: Record<string, unknown> = { before };
+  const trace: Record<string, unknown> = { prepared, canvas: box, start, budgets: { responseMs: 12_000, convergenceMs: 60_000, wholeTestMs: 120_000 } };
   try {
-    const box = await page.locator('canvas').boundingBox();
-    if (!box) throw Error('Expected actual canvas bounds');
-    // This is the intersected pump/platform route from native Safari069, not an
-    // empty-ocean drag. Its before-fix run must reproduce the selection override.
-    const start = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
-    expect(await page.evaluate(p => document.elementFromPoint(p.x,p.y)?.tagName, start)).toBe('CANVAS');
+    await button(page, 'Play presentation').click();
+    let before = prepared;
+    await expect.poll(async () => {
+      const s = await snapshot();
+      const ready = s.record.status === 'playing' && s.record.shotIndex === 1 && s.record.readiness === 'authored' && !s.scene.cameraTransitioning;
+      if (ready) before = s;
+      return ready;
+    }, { timeout: 12_000 }).toBe(true);
+    // No geometry queries, observer installation or settling wait after Play.
     await page.mouse.move(start.x,start.y);
     await page.mouse.down();
     try {
@@ -449,27 +467,60 @@ test('VIS6 dragging over a scene mesh preserves manual ownership while genuine a
         await page.waitForTimeout(31); // A single approximately250ms held drag.
       }
     } finally { await page.mouse.up(); }
-    await expect(panel(page)).toHaveAttribute('data-presentation-status','paused',{timeout:12_000});
-    await expect.poll(async () => (await snapshot()).scene.cameraControl,{timeout:12_000}).toBe('manual');
-    const manual = await settled();trace.manual=manual;
-    expect(manual.selected).toBe(before.selected);
-    expect(manual.scene.selectedId).toBe(before.selected);
-    expect(poseDelta(manual.scene,before.scene)).toBeGreaterThan(1e-5);
-    await page.waitForTimeout(700);
-    const held=await snapshot();trace.held=held;
-    expect(held.scene.cameraControl).toBe('manual');
-    expect(held.scene.cameraTransitioning).toBe(false);
-    expect(poseDelta(held.scene,manual.scene)).toBeLessThanOrEqual(1e-5);
-    expect(held.selected).toBe(before.selected);
-    expect(held.record.shotIndex).toBe(before.record.shotIndex);
-    expect(held.record.sourceKey).toBe(before.record.sourceKey);
-    expect(held.currentTime).toBe(before.currentTime);
-    const input=await page.evaluate(() => (window as unknown as {__V6_DRAG_INPUT__: {rows: PointerRow[]}}).__V6_DRAG_INPUT__.rows);
-    trace.dragInput=input;
-    expect(input.some(e=>e.type==='pointerdown'&&e.trusted&&e.buttons===1&&e.targetIsCanvas)).toBe(true);
+    const responseDeadline = Date.now() + 12_000;
+    trace.before = before;
+    const input = await page.evaluate(() => (window as unknown as {__V6_DRAG_INPUT__: {rows: PointerRow[]}}).__V6_DRAG_INPUT__.rows);
+    trace.dragInput = input;
+    const down = input.find(e => e.type === 'pointerdown' && e.trusted && e.buttons === 1 && e.targetIsCanvas);
+    if (!down?.downState) throw Error('Expected actual trusted pointerdown state');
+    const origin = down.downState;
+    trace.pointerDown = origin;
+    expect(origin.record.status).toBe('playing');
+    expect(origin.record.automatic).toBe(true);
+    expect(origin.record.shotIndex).toBe(1);
+    expect(origin.record.readiness).toBe('authored');
+    expect(origin.record.sourceKey).toBe(before.record.sourceKey);
+    expect(origin.record.assetId).toBe(prepared.record.assetId);
+    expect(origin.selected).toBe(prepared.record.assetId);
+    expect(origin.scene.selectedId).toBe(prepared.record.assetId);
+    expect(origin.scene.cameraTransitioning).toBe(false);
+    expect(origin.scene.simulationTimeS).toBe(origin.record.displayedTimeS);
+    expect(origin.caption).toBe(origin.record.caption);
+    expect(origin.currentTime).toBe(before.currentTime);
+    expect(origin.displayTime).toBe(before.displayTime);
+    expect(origin.visibility).toBe('visible');expect(origin.focused).toBe(true);
     expect(input.some(e=>e.type==='pointermove'&&e.trusted&&e.buttons===1&&e.delta>2&&e.targetIsCanvas)).toBe(true);
     expect(input.some(e=>e.type==='pointerup'&&e.trusted&&e.buttons===0&&e.delta>2)).toBe(true);
     expect(input.some(e=>e.type==='click'&&e.trusted&&e.delta>2)).toBe(true);
+    await expect.poll(async () => { const s = await snapshot(); return { status: s.record.status, ownership: s.scene.cameraControl }; }, { timeout: Math.max(1, responseDeadline - Date.now()) }).toEqual({ status: 'paused', ownership: 'manual' });
+    expect(Date.now()).toBeLessThanOrEqual(responseDeadline);
+    const invariant = (s: Snapshot) => {
+      expect(s.record.status).toBe('paused');expect(s.scene.cameraControl).toBe('manual');
+      expect(s.scene.cameraTransitioning).toBe(false);
+      expect(s.selected).toBe(origin.selected);expect(s.scene.selectedId).toBe(origin.selected);
+      expect(s.record.assetId).toBe(origin.record.assetId);expect(s.record.shotIndex).toBe(origin.record.shotIndex);
+      expect(s.record.sourceKey).toBe(origin.record.sourceKey);expect(s.currentTime).toBe(origin.currentTime);
+      expect(s.displayTime).toBe(origin.displayTime);expect(s.record.displayedTimeS).toBe(origin.record.displayedTimeS);
+      expect(s.scene.simulationTimeS).toBe(origin.scene.simulationTimeS);
+      expect(s.visibility).toBe('visible');expect(s.focused).toBe(true);
+    };
+    const convergence = { startedAt: Date.now(), durationMs: 0, samples: [] as { elapsedMs: number; renderEpoch: number; camera: number[]; target: number[]; status: string; ownership: string; selected: string | null; sourceKey: string; shotIndex: number; currentTime: string | null; displayTime: string | null }[] };
+    trace.convergence = convergence;
+    let manual: Snapshot;
+    try {
+      // Software CI advances normal damping per render. This is a bounded
+      // convergence observation, separate from the unchanged12s response gate.
+      manual = await settled(60_000, s => {
+        convergence.samples.push({elapsedMs:Date.now()-convergence.startedAt,renderEpoch:s.scene.renderEpoch,camera:s.scene.camera,target:s.scene.target,status:s.record.status,ownership:s.scene.cameraControl,selected:s.selected,sourceKey:s.record.sourceKey,shotIndex:s.record.shotIndex,currentTime:s.currentTime,displayTime:s.displayTime});
+        invariant(s);
+      });
+    } finally { convergence.durationMs = Date.now() - convergence.startedAt; }
+    trace.manual=manual;
+    expect(poseDelta(manual.scene,origin.scene)).toBeGreaterThan(1e-5);
+    await page.waitForTimeout(700);
+    const held=await snapshot();trace.held=held;invariant(held);
+    expect(held.scene.cameraTransitioning).toBe(false);
+    expect(poseDelta(held.scene,manual.scene)).toBeLessThanOrEqual(1e-5);
 
     // A different real authored child remains pickable after the drag guard.
     const asset=held.scene.visualKit.assets.find(a=>a.kind==='cdu'&&a.assetId!==held.selected&&a.childWorldPoint&&a.renderedMeshes>0);
