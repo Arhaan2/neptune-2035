@@ -54,6 +54,7 @@ const receipt = {
     minimumPathMs: 60000,
     cycles: 20,
     soakMs: 600000,
+    soakMaximumMs: 1800000,
   },
   browser: {
     product: 'Installed Google Chrome',
@@ -677,12 +678,41 @@ async function cycle(index, modules) {
     await expect
       .poll(async () => (await scene()).visualKit.status)
       .toBe('ready');
-    await click('Explode');
-    await click('Explode');
+    await settled();
+    assert.equal((await scene()).visualKit.moduleId, module.id);
+    for (const exploded of [true, false]) {
+      const epoch = (await scene()).renderEpoch;
+      await click('Explode');
+      await expect
+        .poll(async () => {
+          const s = await scene();
+          return s.renderEpoch > epoch && s.exploded === exploded;
+        })
+        .toBe(true);
+      await settled();
+    }
   }
-  for (const name of ['Data & replay', 'Inspector']) await dock(name);
-  await click('Presentation focus');
-  await click('Exit presentation focus');
+  for (const name of ['Data & replay', 'Inspector']) {
+    await dock(name);
+    await expect(
+      page.getByRole('complementary', { name, exact: true }),
+    ).toBeVisible();
+  }
+  const dockedWidth = (await page.locator('canvas').boundingBox()).width;
+  for (const focused of [true, false]) {
+    const epoch = (await scene()).renderEpoch;
+    await click(focused ? 'Presentation focus' : 'Exit presentation focus');
+    await expect(page.locator('main')).toHaveAttribute(
+      'data-presentation-focus',
+      String(focused),
+    );
+    await expect
+      .poll(async () => (await scene()).renderEpoch)
+      .toBeGreaterThan(epoch);
+    await settled();
+    const width = (await page.locator('canvas').boundingBox()).width;
+    assert(focused ? width > dockedWidth : Math.abs(width - dockedWidth) < 1);
+  }
   await canonicalCampus();
   await click('Play presentation');
   await expect(panel()).toHaveAttribute('data-presentation-status', 'playing');
@@ -690,13 +720,24 @@ async function cycle(index, modules) {
   await click('Resume walkthrough');
   await expect(panel()).toHaveAttribute('data-presentation-status', 'playing');
   await click('Pause walkthrough');
-  await click('Next walkthrough step');
-  await expect(panel()).toHaveAttribute('data-status', 'ready');
-  await click('Previous walkthrough step');
-  await expect(panel()).toHaveAttribute('data-status', 'ready');
+  for (const [action, step] of [
+    ['Next walkthrough step', 1],
+    ['Previous walkthrough step', 0],
+    ['Next walkthrough step', 1],
+  ]) {
+    const epoch = (await scene()).renderEpoch;
+    await click(action);
+    await expect(panel()).toHaveAttribute('data-step-index', String(step));
+    await expect(panel()).toHaveAttribute('data-status', 'ready');
+    await settled();
+    assert((await scene()).renderEpoch > epoch);
+  }
   const saved = await savedProjects(page);
   await details();
   await click('Restart presentation');
+  await expect(panel()).toHaveAttribute('data-step-index', '0');
+  await expect(panel()).toHaveAttribute('data-shot-index', '0');
+  await expect(panel()).toHaveAttribute('data-status', 'ready');
   assert.deepEqual(await savedProjects(page), saved);
   await canonicalCampus();
   await attempt('cycle-complete', { index });
@@ -802,6 +843,10 @@ async function soak() {
   const start = Date.now();
   let i = 0;
   while (i < 20 || Date.now() - start < 600000) {
+    assert(
+      Date.now() - start < receipt.budgets.soakMaximumMs,
+      'Native soak exceeded its declared 30-minute aggregate budget',
+    );
     const cp = await cycle(++i, modules);
     receipt.cycles.push(cp);
     const b = receipt.baseline;

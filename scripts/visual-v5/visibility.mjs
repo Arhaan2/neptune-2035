@@ -10,16 +10,18 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
-import { argument, externalDirectory, hash } from './common.mjs';
+import { argument, browserProduct, externalDirectory, hash, nativeChrome } from './common.mjs';
 
 const url = argument('url'); assert(url && /^https?:/.test(url), 'Pass a packaged --url.');
 const out = await externalDirectory(argument('out'));
 const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'neptune-v5-visibility-profile-'));
 const args = ['--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--window-size=1440,1000', 'about:blank'];
-const receipt = { kind: 'actual-native-chromium-hidden-session', startedAt: new Date().toISOString(), url,
+const receipt = { kind: 'actual-native-browser-hidden-session', product: browserProduct, startedAt: new Date().toISOString(), url,
   route: 'Fresh native Chromium profile, direct CDP WebSocket, native Input.dispatchMouseEvent controls, Target.activateTarget switches real tabs. No Playwright attach, focus/visibility overrides, tracing or capture during hidden intervals.',
   browserArguments: args.map(value => value.startsWith('--user-data-dir=') ? '--user-data-dir=<disposable-profile>' : value), samples: [], errors: [] };
-const child = spawn(chromium.executablePath(), args, { stdio: ['ignore', 'pipe', 'pipe'] });
+assert(!nativeChrome || process.platform === 'darwin', 'The installed Chrome visibility route targets the observed macOS host.');
+const executable = nativeChrome ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : chromium.executablePath();
+const child = spawn(executable, args, { stdio: ['ignore', 'pipe', 'pipe'] });
 let socket, send, sessionId;
 try {
   const endpoint = await new Promise((resolve, reject) => {
