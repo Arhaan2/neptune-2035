@@ -1,0 +1,109 @@
+/* One caption surface sits beside the real, persistent scene. No overlay masks
+   the equipment; camera fitting uses the remaining actual canvas dimensions. */
+.twin-story-stage { min-width: 0; }
+.operator-walkthrough { padding: 16px 20px; background: var(--blue-hour-panel); border-color: var(--blue-hour-border-strong); }
+.walkthrough-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.walkthrough-heading .twin-eyebrow { color: var(--blue-hour-focus); margin: 0; }
+.walkthrough-status { font-size: .75rem; text-transform: capitalize; color: var(--muted); }
+.operator-walkthrough h2 { font-size: 1.3rem; margin: 6px 0; }
+.operator-walkthrough .walkthrough-caption { font-size: .9375rem; line-height: 1.5; max-width: 88ch; margin: 0 0 6px; }
+.operator-walkthrough .walkthrough-time { font-size: .75rem; color: var(--muted); margin: 0 0 10px; }
+.walkthrough-controls { gap: 6px; margin: 0; }
+.walkthrough-controls button { min-height: 44px; padding: 6px 12px; font-size: .8125rem; }
+.walkthrough-controls button:first-child { border-color: var(--blue-hour-focus); }
+.walkthrough-secondary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: .75rem; color: var(--muted); }
+.walkthrough-secondary > details { flex: 0 1 auto; max-width: 100%; }
+.walkthrough-secondary > details[open] { flex: 1 1 100%; color: var(--fg); }
+.walkthrough-secondary summary { min-height: 36px; }
+.walkthrough-secondary label { display: grid; gap: 6px; max-width: 100%; }
+.walkthrough-secondary select { width: min(100%, 420px); min-height: 44px; }
+.operator-walkthrough small { font-size: .6875rem; margin-top: 0; color: var(--muted); }
+.walkthrough-result { border-left: 2px solid var(--blue-hour-focus); padding-left: 12px; margin-bottom: 12px; }
+.walkthrough-result[data-ranking-status='no-feasible-evaluated-candidate'] { border-color: var(--blue-hour-warning); }
+.walkthrough-result p { margin: 6px 0; font-size: .8125rem; }
+.walkthrough-result dl { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 10px 0; }
+.walkthrough-result dt { font-size: .6875rem; color: var(--muted); }
+.walkthrough-result dd { margin: 3px 0 0; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage { display: grid; grid-template-rows: minmax(280px, 1fr) auto; height: calc(100svh - 24px); min-height: 680px; scroll-margin-top: 12px; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage > .twin-scene-shell { grid-row: 1; height: auto; min-height: 280px; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .operator-walkthrough { grid-row: 2; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-scene-toolbar { display: none; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-scene-shell > .twin-scene-caption { padding-block: 6px; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-scene-caption > span { display: none; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has(details[open]) { height: auto; }
+@media (max-width: 620px) {
+  .operator-walkthrough { padding: 12px; }
+  .operator-walkthrough h2 { font-size: 1.125rem; }
+  .operator-walkthrough .walkthrough-caption { font-size: .875rem; }
+  .walkthrough-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .operator-walkthrough .walkthrough-controls button { font-size: .75rem; padding: 5px 8px; }
+  .walkthrough-controls button:last-child { grid-column: 2; grid-row: 1; }
+  .walkthrough-secondary { gap: 8px; }
+  .twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage { min-height: 740px; grid-template-rows: minmax(270px, 1fr) auto; }
+  .walkthrough-result dl { gap: 8px 16px; }
+  .walkthrough-result dd { font-size: .875rem; }
+}
+/* A fixed reading area prevents a readiness/layout feedback loop when the
+   resolving copy and its resolved caption wrap to different line counts. */
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage { grid-template-rows: minmax(280px, 1fr) 270px; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has([data-step-id='decision']) { grid-template-rows: minmax(280px, 1fr) 390px; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has(details[open]) { grid-template-rows: 400px auto; }
+@media (max-width: 620px) {
+  .twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage { grid-template-rows: minmax(270px, 1fr) 386px; }
+  .twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has([data-step-id='decision']) { grid-template-rows: minmax(270px, 1fr) 490px; min-height: 790px; }
+}
+/* The final card can grow in document flow while its wide shot keeps a fixed
+   canvas. This prevents long honest outcomes from overlapping controls below. */
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage { height: calc(100svh - 64px); min-height: 640px; scroll-margin-top: 48px; }
+.twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has([data-step-id='decision']) { height: auto; min-height: 0; grid-template-rows: 300px auto; }
+.walkthrough-result dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.walkthrough-result dl > div { min-width: 0; }
+.walkthrough-result { margin-top: 12px; }
+@media (max-width: 620px) {
+  .twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage { height: calc(100svh - 100px); min-height: 710px; scroll-margin-top: 84px; }
+  .twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has([data-step-id='decision']) { grid-template-rows: 240px auto; height: auto; min-height: 0; }
+  .twin-app[data-walkthrough-active='true'][data-presentation-focus='true'] .twin-story-stage:has([data-step-id='decision']) > .twin-scene-shell { min-height: 240px; }
+  .twin-story-stage:has([data-step-id='decision']) .walkthrough-controls button:last-child { grid-row: 1; }
+  .walkthrough-result dl { gap: 8px; }
+  .walkthrough-result dd { font-size: .8125rem; }
+}
+
+/* Every mobile chapter reserves space for scene information, including wide
+   fault/path views. Overlaying the LOD caption can hide the initiating asset.
+   Keep this layout through Pause; camera ownership does not control UI space. */
+@media (max-width: 700px) {
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-canvas-viewport {
+    height: auto;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scene-information {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 4px 10px;
+    padding: 6px 12px;
+    background: #142330;
+    border-top: 1px solid #83d5e826;
+    flex: none;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scene-information :is(.twin-scale-caption, .twin-route-legend, .twin-kit-status, .twin-presentation-note) {
+    position: static;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    max-width: none;
+    background: transparent;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scale-caption { grid-column: 2; grid-row: 1; text-align: right; }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-route-legend { grid-column: 1; grid-row: 1; }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-route-legend summary { min-height: 44px; font-size: 12px; padding: 7px 0; color: #edf3f6; align-content: center; }
+  .twin-app[data-walkthrough-active='true'] .twin-story-stage .twin-scene:not([data-inside='true']) .twin-scene-information :is(.twin-kit-status, .twin-presentation-note) { grid-column: 1 / -1; }
+}

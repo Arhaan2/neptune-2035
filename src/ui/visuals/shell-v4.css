@@ -67,7 +67,7 @@
 .twin-app .twin-scene-shell > .twin-loading { min-height: 180px; padding: 24px; }
 /* The accessible plan and restore action need ordinary flow, independent of the
    fixed camera viewport. A lost context must never put Restore under a toolbar. */
-.twin-app .twin-center > .twin-scene-shell:has(> .twin-fallback) { height: auto; grid-template-rows: auto auto auto; }
+.twin-app .twin-center .twin-scene-shell:has(> .twin-fallback) { height: auto; grid-template-rows: auto auto auto; }
 .twin-app .twin-scene-shell > .twin-fallback { height: auto; min-height: 340px; padding: 18px; }
 .twin-app .twin-scene-shell > .twin-fallback svg { min-height: 180px; }
 .twin-app .twin-scene-shell > .twin-restore { position: static; justify-self: start; margin: 8px 18px; min-height: 44px; font-size: .875rem; }
