@@ -1,6 +1,6 @@
 # Visual V6 validation and V7 handoff protocol
 
-**Simulated, design-stage prototype; physical validation pending.** V6 validates the accepted V1–V5 product. It does not promote Pages, merge a PR, change engineering inputs or certify hardware. Final results and candidate identities live outside the frozen source tree; this document declares the method, not a pass.
+**Simulated, design-stage prototype; physical validation pending.** This is the historical V6 validation protocol, including its original stop-before-promotion boundary. The subsequent authorized continuation merged PR #27 and deployed the accepted V6 artifact. Current results, recordings and device-specific Chrome/Safari evidence are in the [Visual V6 production release](https://github.com/Arhaan2/neptune-2035/releases/tag/visual-v6-2026-10-15); the [served release identity](https://arhaan2.github.io/neptune-2035/release.json) identifies production. The protocol below records the original method and does not replace those external receipts or certify hardware.
 
 ## Source and evidence
 
@@ -84,4 +84,4 @@ V6 tools under `scripts/visual-v6/` retain JSON/JSONL, images and raw video exte
 - **DEVICE VALIDATION PENDING** means independent work is complete but named native permission/session/measurements are unavailable; provide exact continuation commands/checklist.
 - **BLOCKED BY REPRODUCED DEFECT** identifies failure, evidence, attempted correction and remaining work while preserving the coherent branch.
 
-V7 rechecks concurrent main and required approvals, merges normally, promotes the exact accepted core artifact using the existing release procedure, preserves latest Pages/preview content and runs hosted acceptance. **Do not execute these promotion commands in V6.** Production remains the accepted V5 release (historical tag `visual-v5-2026-09-30`, deployment recorded October 14, 2026 UTC); tag spelling is not deployment date.
+The original handoff assigned V7 the concurrent-main/approval recheck, normal merge, exact-artifact promotion, preview preservation and hosted acceptance, and prohibited promotion during the validation-only phase. At that checkpoint production was V5 (historical tag `visual-v5-2026-09-30`, deployment recorded October 14, 2026 UTC); tag spelling is not deployment date. That historical boundary was superseded by the authorized V6 production continuation recorded in the release linked above. Later showcase work must inspect current identities and reuse valid acceptance rather than repeat a completed merge or deployment for a marketing label.
