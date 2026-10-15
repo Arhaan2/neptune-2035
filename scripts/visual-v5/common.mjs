@@ -8,8 +8,12 @@ import { expect } from '@playwright/test';
 export const argument = name => process.argv.find(item => item.startsWith(`--${name}=`))?.slice(name.length + 3);
 export const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 export const button = (page, name) => page.getByRole('button', { name, exact: true });
+// Opt-in device validation only. Historical/default captures keep bundled Chromium.
+export const nativeChrome = process.env.NEPTUNE_BROWSER_CHANNEL === 'chrome';
+export const browserProduct = nativeChrome ? 'Installed Google Chrome (headed)' : 'Playwright bundled Chromium';
 export const launchOptions = {
-  headless: process.env.NEPTUNE_HEADED !== '1' && process.platform !== 'linux',
+  ...(nativeChrome ? { channel: 'chrome' } : {}),
+  headless: !nativeChrome && process.env.NEPTUNE_HEADED !== '1' && process.platform !== 'linux',
   args: process.platform === 'darwin' ? ['--use-angle=metal'] : process.platform === 'linux' ? ['--use-gl=angle', '--use-angle=gl', '--ignore-gpu-blocklist'] : [],
 };
 export async function externalDirectory(destination) {

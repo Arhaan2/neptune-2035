@@ -205,6 +205,7 @@ function Batch({
   if (!parts.length || (layer === 'shell' && cutaway)) return null;
   const pick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+    if (e.delta > 2) return;
     onSelect(
       layer === 'shell' || layer === 'lights'
         ? 'compute'

@@ -10,7 +10,7 @@ import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { argument, artifactIdentity, assertReadable, button, externalDirectory, hash, launchOptions, observe, prepare, savedProjects } from './common.mjs';
+import { argument, artifactIdentity, assertReadable, browserProduct, button, externalDirectory, hash, launchOptions, observe, prepare, savedProjects } from './common.mjs';
 
 const url = argument('url'), fixture = argument('fixture') ?? 'transfer';
 assert(url && /^https?:/.test(url), 'Pass --url=http(s)://packaged-app/');
@@ -22,14 +22,14 @@ const receipt = {
   qualifier: 'Simulated, design-stage prototype; physical validation pending.',
   advancement: 'One visible Play presentation action; application owns every following chapter and subshot.',
   rawMediaPolicy: 'Complete preparation, loading, transitions, reading and final card retained. No cuts, replacement frames, soundtrack, speeding or retiming.',
-  scope: 'Playwright bundled Chromium; mobile is viewport emulation, not a real device. Native Safari is not exercised.',
+  scope: `${browserProduct}; mobile is viewport emulation, not a real device. Native Safari is not exercised.`,
   machine: { cpu: os.cpus()[0]?.model, logicalCPUs: os.cpus().length, memoryBytes: os.totalmem(), platform: os.platform(), release: os.release(), architecture: os.arch(), node: process.version },
   localSource: { commit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim(), trackedClean: !execFileSync('git', ['status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim() },
   samples: [], shots: [], errors: [], failures: [], requests: [],
 };
 const persist = () => fs.writeFile(path.join(out, 'recording.json'), JSON.stringify(receipt, null, 2) + '\n');
 const browser = await chromium.launch(launchOptions);
-receipt.browser = { name: 'Playwright Chromium', version: browser.version(), ...launchOptions };
+receipt.browser = { name: browserProduct, version: browser.version(), ...launchOptions };
 const context = await browser.newContext({ viewport, deviceScaleFactor: 1.5, reducedMotion: 'no-preference', recordVideo: { dir: path.join(out, 'raw'), size: viewport } });
 let page, video, lastKey = '', shot;
 try {

@@ -172,6 +172,7 @@ function Instances({
       onClick={!interactive || (surface && opacity < 0.5) ? undefined : (event: ThreeEvent<MouseEvent>) => {
         if (event.instanceId === undefined) return;
         event.stopPropagation();
+        if (event.delta > 2) return;
         onSelect(assets[event.instanceId].id);
       }}
     >
@@ -370,6 +371,7 @@ function PumpEnvelope({
       position={presentedPosition(asset, exploded)}
       onClick={(event) => {
         event.stopPropagation();
+        if (event.delta > 2) return;
         onSelect(asset.id);
       }}
     >
@@ -529,6 +531,7 @@ function CanonicalPipes({
         args={[undefined, undefined, segments.length]}
         onClick={(e) => {
           e.stopPropagation();
+          if (e.delta > 2) return;
           if (technical) onSelect(technical.id);
         }}
       >
@@ -1191,7 +1194,10 @@ function CameraRig({
     if (initial || props.reducedMotion) {
       camera.position.copy(goal.current.position);
       c.target.copy(goal.current.target);
-      c.update();
+      // Interior waypoints look horizontally down the aisle. Exterior orbit
+      // constraints clamp that pose even when controls are disabled.
+      if (inside) camera.lookAt(c.target);
+      else c.update();
     }
     transitioning.current = !initial && !props.reducedMotion;
   }, [
@@ -1389,7 +1395,8 @@ function CameraRig({
         c.target.copy(goal.current.target);
         transitioning.current = false;
       }
-      c.update();
+      if (inside) camera.lookAt(c.target);
+      else c.update();
     } else if (inside && moduleSpec) {
       const pressed = keys.current;
       const forward =
