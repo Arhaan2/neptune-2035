@@ -2,11 +2,21 @@
 
 ## Current product
 
-[Open NEPTUNE](https://arhaan2.github.io/neptune-2035/) · [Preserved v2 preview](https://arhaan2.github.io/neptune-2035/v2-preview/) · [Phase 7 historical release evidence](https://github.com/Arhaan2/neptune-2035/releases/tag/phase-7-2026-09-11)
+[Open NEPTUNE](https://arhaan2.github.io/neptune-2035/) · [Current release, evidence and actual-app media](https://github.com/Arhaan2/neptune-2035/releases/tag/visual-v6-2026-10-15) · [Preserved v2 preview](https://arhaan2.github.io/neptune-2035/v2-preview/)
 
-**Asset-linked design-stage offshore infrastructure twin with coupled operation and failure simulation.**
+**An interactive, design-stage offshore AI infrastructure simulation.** Explore the Blue Hour campus, inspect installed equipment and follow modeled power, cooling and failure responses.
 
 **Simulated, design-stage prototype; physical validation pending.** NEPTUNE includes installed equipment, coupled simulation, whole-experiment metrics, bounded radial transfer, constrained decision campaigns, read-only observations and reproducible exports. The `/v2-preview/` deployment is preserved separately; it does not describe the current production root. The published [release identity](https://arhaan2.github.io/neptune-2035/release.json) names the actual deployed source and artifact.
+
+The accepted Visual V6 release was merged and deployed on October 15, 2026 UTC. Its [release report, recordings and inspected images](https://github.com/Arhaan2/neptune-2035/releases/tag/visual-v6-2026-10-15) record complete hosted acceptance and the exact source/artifact identity. Native testing included visible installed Chrome 155.0.8059.40 and Safari 26.6.2 on an Apple M4 Pro; those device-specific observations are separate from bundled Chromium/Firefox/WebKit coverage. They do not establish universal browser performance or physical-phone support.
+
+To explore the current application:
+
+- Use **Explore** to orbit the campus and select equipment. **Cooling close-up** reveals the selected module's authored pump, plate exchanger and CDU.
+- Open **Compare**, choose a reference campaign and select **Start decision campaign**. Wait for completed coverage, then select **Start result walkthrough** to explicitly load its evaluated design and result.
+- Select **Play presentation** once for automatic chapter progression. **Presentation focus** reduces surrounding controls; Pause, Resume, Restart and Exit remain available. The displayed outcome comes from that completed experiment, including failure or no-feasible outcomes.
+
+The walkthrough requires campaign preparation and explicit result loading; the ordinary live URL does not bypass those steps. Equipment and scene states follow the simulated model. Physical validation, broader equipment authoring and complete accessibility certification remain outside the accepted scope. The two inherited Chromium/WebKit large-campus functional Step 10s exclusions remain documented in the release evidence; Firefox coverage remains active.
 
 Visual V1 — **Blue Hour** adds cool-dusk lighting, pearl/silver material families and a consistent dark interface to the same application. See the [visual treatment and bounded V2 handoff](docs/visuals/V1-BLUE-HOUR.md). This is a presentation release, with unchanged solver/schema versions and no new physical-validation claim.
 
@@ -16,7 +26,7 @@ Visual V4 makes the existing app scene-first: a single responsive Assets / Inspe
 
 Visual V5 extends the completed-result walkthrough with explicit **Play presentation**, directed equipment views, concise evidence-bound captions, pause/resume and honest final outcomes. Prepare a campaign in Compare, wait for completed coverage, then explicitly load its result. See the [cinematic walkthrough contract and recording commands](docs/visuals/V5-CINEMATIC-WALKTHROUGH.md). Acceptance and deployed identity are recorded in the external release receipt.
 
-Phase 7 adds Explore, Operate and Compare guidance, connected asset inspection, exact event-boundary history, whole-run decision explanations and an evidence-derived fault-and-recovery walkthrough. Read the [walkthrough instructions](docs/phase-7/WALKTHROUGH.md) and [acceptance matrix](docs/phase-7/REQUIREMENT-MATRIX.md). Acceptance, recordings and deployment are recorded in the corresponding release receipt; this source document alone is not evidence that Phase 7 is live.
+Phase 7 adds Explore, Operate and Compare guidance, connected asset inspection, exact event-boundary history, whole-run decision explanations and an evidence-derived fault-and-recovery walkthrough. Read the [walkthrough instructions](docs/phase-7/WALKTHROUGH.md) and [acceptance matrix](docs/phase-7/REQUIREMENT-MATRIX.md). The [Phase 7 release evidence](https://github.com/Arhaan2/neptune-2035/releases/tag/phase-7-2026-09-11) is historical; the current release and served identity above determine production status.
 
 Phase 8 defines independent software, numerical and integrated behavioral verification in the [contract](docs/phase-8/CONTRACT.md), [requirement matrix](docs/phase-8/REQUIREMENT-MATRIX.md) and [reproduction/release procedure](docs/phase-8/RELEASE.md). Final acceptance and deployed identities are external release receipts, not inferred from this document. The Phase 8 exchanger correction uses solver 2.3.1: prior 2.3.0 projects remain available for inspection/export and explicit separate recalculation; old numerical checkpoints are not silently resumed with the corrected solver. The bounded reproduction runner preserves original campaign evidence and records cross-version comparisons separately.
 
